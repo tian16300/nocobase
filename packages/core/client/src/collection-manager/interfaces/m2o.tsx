@@ -1,9 +1,5 @@
 import { ISchema } from '@formily/react';
-import {
-  constraintsProps,
-  relationshipType,
-  reverseFieldProperties
-} from './properties';
+import { constraintsProps, relationshipType, reverseFieldProperties } from './properties';
 import { IField } from './types';
 
 export const m2o: IField = {
@@ -78,6 +74,13 @@ export const m2o: IField = {
       'x-component': 'Input',
       description:
         "{{t('Randomly generated and can be modified. Support letters, numbers and underscores, must start with an letter.')}}",
+    },
+    'uiSchema.icon': {
+      type: 'string',
+      title: '{{t("Field icon")}}',
+      // required: true,
+      'x-decorator': 'FormItem',
+      'x-component': 'IconPicker',
     },
     type: relationshipType,
     grid: {

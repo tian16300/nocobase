@@ -97,20 +97,20 @@ export const useResourceAction = (props, opts = {}) => {
   /**
    * fieldName: 来自 TableFieldProvider
    */
-  const { resource, action, fieldName: tableFieldName, runWhenParamsChanged = false } = props;
+  const { resource, action, fieldName: tableFieldName, runWhenParamsChanged = false, collection, association } = props;
   const { fields } = useCollection();
   const params = useActionParams(props);
   const api = useAPIClient();
   const fieldSchema = useFieldSchema();
   const { snapshot } = useActionContext();
   const record = useRecord();
-
   if (!Reflect.has(params, 'appends')) {
     const appends = fields?.filter((field) => field.target).map((field) => field.name);
     if (appends?.length) {
       params['appends'] = appends;
     }
   }
+
   const result = useRequest(
     snapshot
       ? async () => ({
@@ -123,6 +123,20 @@ export const useResourceAction = (props, opts = {}) => {
           const actionParams = { ...params, ...opts };
           if (params?.appends) {
             actionParams.appends = params.appends;
+          }
+          /**
+           * 过滤自己
+           */
+          if (Reflect.has(actionParams, 'appends')) {
+            const resourceName = association || collection;
+            const appends = actionParams.appends.filter((key) => {
+              return key !== resourceName;
+            });
+            if (appends.length == 0) {
+              Reflect.deleteProperty(actionParams, 'appends');
+            } else {
+              Reflect.set(actionParams, 'appends', appends);
+            }
           }
           return resource[action](actionParams).then((res) => res.data);
         },
@@ -278,7 +292,6 @@ export const BlockProvider = (props) => {
   if (!Object.keys(params).includes('appends')) {
     params['appends'] = appends;
   }
-
   return (
     <MaybeCollectionProvider collection={collection}>
       <BlockAssociationContext.Provider value={association}>

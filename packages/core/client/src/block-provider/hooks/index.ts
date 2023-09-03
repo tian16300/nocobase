@@ -82,7 +82,7 @@ function getFormValues(filterByTk, field, form, fieldNames, getField, resource) 
         if (field.added && !field.added.has(key)) {
           continue;
         }
-        if (['subTable', 'o2m', 'o2o', 'oho', 'obo', 'm2o'].includes(collectionField.interface)) {
+        if (['subTable', 'o2m', 'o2o', 'oho', 'obo', 'm2o', 'dic'].includes(collectionField.interface)) {
           values[key] = form.values[key];
           continue;
         }
@@ -219,8 +219,12 @@ export const useAssociationCreateActionProps = () => {
   return {
     async onClick() {
       const fieldNames = fields.map((field) => field.name);
-      const { assignedValues: originalAssignedValues = {}, onSuccess, overwriteValues, skipValidator } =
-        actionSchema?.['x-action-settings'] ?? {};
+      const {
+        assignedValues: originalAssignedValues = {},
+        onSuccess,
+        overwriteValues,
+        skipValidator,
+      } = actionSchema?.['x-action-settings'] ?? {};
       const addChild = fieldSchema?.['x-component-props']?.addChild;
       const assignedValues = parse(originalAssignedValues)({ currentTime: new Date(), currentRecord, currentUser });
       if (!skipValidator) {
@@ -404,8 +408,11 @@ export const useCustomizeUpdateActionProps = () => {
 
   return {
     async onClick() {
-      const { assignedValues: originalAssignedValues = {}, onSuccess, skipValidator } =
-        actionSchema?.['x-action-settings'] ?? {};
+      const {
+        assignedValues: originalAssignedValues = {},
+        onSuccess,
+        skipValidator,
+      } = actionSchema?.['x-action-settings'] ?? {};
       const assignedValues = parse(originalAssignedValues)({ currentTime: new Date(), currentRecord, currentUser });
       if (skipValidator === false) {
         await form.submit();
@@ -459,8 +466,11 @@ export const useCustomizeBulkUpdateActionProps = () => {
 
   return {
     async onClick() {
-      const { assignedValues: originalAssignedValues = {}, onSuccess, updateMode } =
-        actionSchema?.['x-action-settings'] ?? {};
+      const {
+        assignedValues: originalAssignedValues = {},
+        onSuccess,
+        updateMode,
+      } = actionSchema?.['x-action-settings'] ?? {};
       actionField.data = field.data || {};
       actionField.data.loading = true;
       const assignedValues = parse(originalAssignedValues)({ currentTime: new Date(), currentUser });
@@ -1101,8 +1111,9 @@ export const useAssociationNames = () => {
   const fieldSchema = useFieldSchema();
   const updateAssociationValues = new Set([]);
   const appends = new Set([]);
+  console.log('useAssociationNames appends');
   const getAssociationAppends = (schema, str) => {
-    schema.reduceProperties((pre, s) => {
+    schema?.reduceProperties((pre, s) => {
       const prefix = pre || str;
       const collectionfield = s['x-collection-field'] && getCollectionJoinField(s['x-collection-field']);
       const isAssociationSubfield = s.name.includes('.');

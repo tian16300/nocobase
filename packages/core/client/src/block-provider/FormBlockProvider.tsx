@@ -7,7 +7,7 @@ import { useCollection } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
 import { useActionContext, useDesignable } from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
-import { BlockProvider, useBlockRequestContext } from './BlockProvider';
+import { BlockProvider, useBlockRequestContext, useFilterByTk } from './BlockProvider';
 
 export const FormBlockContext = createContext<any>({});
 
@@ -80,9 +80,15 @@ export const FormBlockProvider = (props) => {
   }
   const createFlag =
     (currentCollection.name === (collection?.name || collection) && !isEmptyRecord) || !currentCollection.name;
+  /* */
+  const params = { ...props.params };
+  if (detailFlag) {
+    const filterTk = useFilterByTk();
+    params.filterTk = filterTk;
+  }
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
-      <BlockProvider {...props} block={'form'}>
+      <BlockProvider {...props} block={'form'} params={params} runWhenParamsChanged>
         <InternalFormBlockProvider {...props} />
       </BlockProvider>
     )

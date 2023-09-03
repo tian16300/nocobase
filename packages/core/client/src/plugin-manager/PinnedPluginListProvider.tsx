@@ -4,6 +4,7 @@ import { get } from 'lodash';
 import React, { useContext } from 'react';
 import { useACLRoleContext } from '../acl/ACLProvider';
 import { PinnedPluginListContext } from './context';
+import { Space } from 'antd';
 
 export const PinnedPluginListProvider: React.FC<{ items: any }> = (props) => {
   const { children, items } = props;
@@ -27,25 +28,27 @@ export const PinnedPluginList = () => {
       className={css`
         .ant-btn {
           border: 0;
-          height: 46px;
-          width: 46px;
-          border-radius: 0;
-          background: none;
-          color: rgba(255, 255, 255, 0.65) !important;
-          &:hover {
-            background: rgba(255, 255, 255, 0.1);
-          }
+          // height: 46px;
+          // width: 46px;
+          // border-radius: 0;
+          // background: none;
+          // color: rgba(255, 255, 255, 0.65) !important;
+          // &:hover {
+          //   background: rgba(255, 255, 255, 0.1);
+          // }
         }
       `}
       style={{ display: 'inline-block' }}
     >
-      {Object.keys(ctx.items)
-        .sort((a, b) => ctx.items[a].order - ctx.items[b].order)
-        .filter((key) => getSnippetsAllow(ctx.items[key].snippet))
-        .map((key) => {
-          const Action = get(components, ctx.items[key].component);
-          return Action ? <Action key={key} /> : null;
-        })}
+      <Space>
+        {Object.keys(ctx.items)
+          .sort((a, b) => ctx.items[a].order - ctx.items[b].order)
+          .filter((key) => getSnippetsAllow(ctx.items[key].snippet))
+          .map((key) => {
+            const Action = get(components, ctx.items[key].component);
+            return Action ? <Action key={key} /> : null;
+          })}
+      </Space>
     </div>
   );
 };

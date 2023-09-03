@@ -131,6 +131,7 @@ export const SigninPage = () => {
         direction="vertical"
         className={css`
           display: flex;
+          height: 100%;
         `}
       >
         {tabs.length > 1 ? (
