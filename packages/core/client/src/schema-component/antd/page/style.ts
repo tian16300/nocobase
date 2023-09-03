@@ -104,12 +104,16 @@ export const useStyles = genStyleHook('nb-page', (token) => {
         height: '100%',
         '> .nb-grid:not(:last-child)': {
           '> .nb-schema-initializer-button': { display: 'none' },
-        },
+        }
+
       },
 
       '.nb-page-wrapper': {
-        margin: token.marginLG,
-        flex: 1,
+        padding: token.marginLG,
+        // flex: 1,
+        height: 'calc(100vh - 50px - 52px)',
+        overflowY:' scroll'
+        
       },
     },
   };

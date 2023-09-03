@@ -1690,6 +1690,7 @@ export const isShowDefaultValue = (collectionField: CollectionFieldOptions, getI
       'circle',
       'polygon',
       'sequence',
+      'dic'
     ].includes(collectionField?.interface) && !isSystemField(collectionField, getInterface)
   );
 };

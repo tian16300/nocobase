@@ -9,7 +9,7 @@ import { ComposedActionDrawer } from './types';
 const openSizeWidthMap = new Map<OpenSize, string>([
   ['small', '40%'],
   ['middle', '60%'],
-  ['large', '80%'],
+  ['large', '90%'],
 ]);
 export const ActionModal: ComposedActionDrawer<ModalProps> = observer(
   (props) => {

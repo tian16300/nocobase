@@ -27,7 +27,7 @@ export const KanbanBlockInitializer = (props) => {
       onCreateBlockSchema={async ({ item }) => {
         const collectionFields = getCollectionFields(item.name);
         const fields = collectionFields
-          ?.filter((field) => ['select', 'radioGroup'].includes(field.interface))
+          ?.filter((field) => ['select', 'radioGroup','dic'].includes(field.interface))
           ?.map((field) => {
             return {
               label: field?.uiSchema?.title,
@@ -36,6 +36,7 @@ export const KanbanBlockInitializer = (props) => {
                 ...field.uiSchema,
                 name: field.name,
               },
+              interface:field.interface
             };
           });
         const values = await FormDialog(
@@ -57,7 +58,7 @@ export const KanbanBlockInitializer = (props) => {
                             objectValue: true,
                             fieldNames: { label: 'label', value: 'value' },
                           },
-                          'x-decorator': 'FormItem',
+                          'x-decorator': 'FormItem',                          
                         },
                       },
                     }}
@@ -70,8 +71,20 @@ export const KanbanBlockInitializer = (props) => {
         ).open({
           initialValues: {},
         });
-        const sortName = `${values.groupField.value}_sort`;
-        const exists = collectionFields?.find((field) => field.name === sortName);
+        // const sortName = `${values.groupField.value}_sort`;
+        let sortName = `${values.groupField.value}`;
+        const field = collectionFields?.filter((field) => field.name === sortName)[0];
+        let exists = field;
+        let reqSort = [];
+        let appends = [];
+        if(['select','radioGroup'].includes(field.interface)){
+           sortName = `${values.groupField.value}_sort`;
+           exists = collectionFields?.find((field) => field.name === sortName);
+           reqSort.push(sortName);
+        }
+        else if(['dic'].includes(field.interface)){
+          appends.push(sortName);
+        }
         if (!exists) {
           await api.resource('collections.fields', item.name).create({
             values: {
@@ -87,8 +100,9 @@ export const KanbanBlockInitializer = (props) => {
             groupField: values.groupField.value,
             collection: item.name,
             params: {
-              sort: [sortName],
+              sort: reqSort,
               paginate: false,
+              appends:appends
             },
           }),
         );

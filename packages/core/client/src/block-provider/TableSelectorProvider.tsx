@@ -189,7 +189,7 @@ export const TableSelectorProvider = (props: TableSelectorProviderProps) => {
         };
       }
     }
-    if (['obo'].includes(collectionField.interface) && !isInFilterFormBlock(fieldSchema)) {
+    if (['obo', 'dic'].includes(collectionField.interface) && !isInFilterFormBlock(fieldSchema)) {
       const fields = getCollectionFields(collectionField.target);
       const targetField = fields.find((f) => f.foreignKey && f.foreignKey === collectionField.foreignKey);
       if (targetField) {

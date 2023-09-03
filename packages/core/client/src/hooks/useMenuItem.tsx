@@ -63,8 +63,8 @@ export const useMenuItem = () => {
     shouldRerender.current = true;
     renderItems.current = () => {
       const notDeleteItems = items.filter((item) => item.notdelete).map((item) => _.omit(item, 'notdelete') as Item);
-      items.length = 0;
-      items.push(...notDeleteItems);
+      // items.length = 0;
+      // items.push(...notDeleteItems);
       return (
         <GetMenuItemsContext.Provider
           value={{

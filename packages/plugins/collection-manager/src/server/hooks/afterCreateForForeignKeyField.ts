@@ -131,7 +131,7 @@ export function afterCreateForForeignKeyField(db: Database) {
     }
 
     // foreign key in source collection
-    else if (['obo', 'm2o'].includes(interfaceType)) {
+    else if (['obo', 'm2o', 'dic'].includes(interfaceType)) {
       const values = generateFkOptions(collectionName, foreignKey);
       await createFieldIfNotExists({
         values: { collectionName, ...values },

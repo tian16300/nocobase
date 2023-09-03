@@ -1,0 +1,19 @@
+{
+  "name": "@nocobase/plugin-dic-manager",
+  "version": "0.13.0-alpha.4",
+  "main": "dist/server/index.js",
+  "devDependencies": {
+    "@formily/antd-v5": "1.x",
+    "@formily/core": "2.x",
+    "@formily/react": "2.x",
+    "antd": "5.x",
+    "react": "18.x",
+    "react-i18next": "^11.15.1",
+    "react-js-cron": "^3.1.0"
+  },
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}

@@ -7,7 +7,8 @@ export const general: ICollectionTemplate = {
   order: 1,
   color: 'blue',
   default: {
-    fields: [],
+    fields: [
+    ],
   },
   configurableProperties: getConfigurableProperties(
     'title',

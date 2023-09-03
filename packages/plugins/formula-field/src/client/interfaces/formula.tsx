@@ -143,27 +143,23 @@ export default {
       'x-component-props': {
         supports: [
           'checkbox',
-
           'number',
           'percent',
           'integer',
           'number',
           'percent',
-
           'input',
           'textarea',
           'email',
           'phone',
-
           'datetime',
           'createdAt',
           'updatedAt',
-
           'radioGroup',
           'checkboxGroup',
           'select',
           'multipleSelect',
-
+          'sequence'
           // 'json'
         ],
         useCurrentFields: '{{ useCurrentFields }}',

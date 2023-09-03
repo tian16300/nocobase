@@ -97,7 +97,7 @@ export const useCreateAction = (collectionName, targetId?) => {
         'reverseField.key',
         'reverseField.uiSchemaUid',
       ]);
-      const isOpenPorts = !['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo', 'id'].includes(values.interface);
+      const isOpenPorts = !['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo', 'id', 'dic'].includes(values.interface);
       const {
         data: { data },
       } = await api.resource('collections.fields', collectionName).create({

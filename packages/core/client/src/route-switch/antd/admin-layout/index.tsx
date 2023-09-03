@@ -394,10 +394,24 @@ export const InternalAdminLayout = (props: any) => {
         </Header>
         <Content
           className={css`
-            position: relative;
-            z-index: 1;
-            padding: 0;
-            height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    z-index: 1;
+                    overflow-y: auto;
+                    height: 100vh;
+                    max-height: 100vh;
+                    > div {
+                      position: relative;
+                    }
+                    .ant-layout-footer {
+                      position: absolute;
+                      bottom: 0;
+                      text-align: center;
+                      width: 100%;
+                      z-index: 0;
+                      padding: 0px 50px;
+                    }
           `}
         >
           {service.contentLoading ? render() : <Outlet />}

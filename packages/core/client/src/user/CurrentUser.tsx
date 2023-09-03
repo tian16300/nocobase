@@ -160,7 +160,7 @@ export const CurrentUser = () => {
   const { data } = useCurrentUserContext();
 
   return (
-    <div style={{ display: 'inline-flex', verticalAlign: 'top' }}>
+    // <div style={{ display: 'inline-block', verticalAlign: 'top' }}>
       <DropdownVisibleContext.Provider value={{ visible, setVisible }}>
         <Dropdown
           open={visible}
@@ -174,18 +174,18 @@ export const CurrentUser = () => {
           <span
             className={css`
               max-width: 160px;
-              overflow: hidden;
+              // overflow: hidden;
               display: inline-block;
               line-height: 12px;
               white-space: nowrap;
               text-overflow: ellipsis;
             `}
-            style={{ cursor: 'pointer', border: 0, padding: '16px', color: 'rgba(255, 255, 255, 0.65)' }}
+            style={{ cursor: 'pointer', border: 0, padding: '16px' }}
           >
             {data?.data?.nickname || data?.data?.username || data?.data?.email}
           </span>
         </Dropdown>
       </DropdownVisibleContext.Provider>
-    </div>
+    // </div>
   );
 };

@@ -36,6 +36,7 @@ export async function o2o({ value, column, field, ctx }) {
 }
 export const oho = o2o;
 export const obo = o2o;
+export const dic = o2o;
 
 export async function o2m({ value, column, field, ctx }) {
   let results = [];

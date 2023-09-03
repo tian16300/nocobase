@@ -9,19 +9,24 @@ export const AssociationFieldProvider = observer(
     const field = useField<Field>();
     const { getCollectionJoinField, getCollection } = useCollectionManager();
     const fieldSchema = useFieldSchema();
-    const allowMultiple = fieldSchema['x-component-props']?.multiple !== false;
-    const allowDissociate = fieldSchema['x-component-props']?.allowDissociate !== false;
-
     const collectionField = useMemo(
       () => getCollectionJoinField(fieldSchema['x-collection-field']),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [fieldSchema['x-collection-field'], fieldSchema.name],
     );
+    const allowMultiple =
+      (fieldSchema['x-component-props']?.multiple || collectionField?.uiSchema['x-component-props']?.multiple) !==
+      false;
+    const allowDissociate =
+      (fieldSchema['x-component-props']?.allowDissociate ||
+        collectionField?.uiSchema['x-component-props']?.allowDissociate) !== false;
+
     const isFileCollection = useMemo(
       () => getCollection(collectionField?.target)?.template === 'file',
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [fieldSchema['x-collection-field']],
     );
+
     const currentMode = useMemo(
       () => fieldSchema['x-component-props']?.mode || (isFileCollection ? 'FileManager' : 'Select'),
       // eslint-disable-next-line react-hooks/exhaustive-deps

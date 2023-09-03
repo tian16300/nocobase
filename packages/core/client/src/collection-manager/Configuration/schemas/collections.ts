@@ -99,7 +99,7 @@ export const collectionSchema: ISchema = {
           resource: 'collections',
           action: 'list',
           params: {
-            pageSize: 50,
+            pageSize: 10,
             sort: 'sort',
             filter: {
               'hidden.$isFalsy': true,
@@ -277,7 +277,7 @@ export const collectionTableSchema: ISchema = {
                       'x-component': 'Action.Drawer',
                       'x-component-props': {
                         destroyOnClose: true,
-                        width: '70%',
+                        width: '80%',
                       },
                       'x-reactions': (field) => {
                         const i = field.path.segments[1];

@@ -322,6 +322,12 @@ export const defaultProps = {
     'x-decorator': 'FormItem',
     'x-component': 'Input',
   },
+  'uiSchema.icon': {
+    type: 'string',
+    title: '{{t("Field icon")}}',
+    'x-decorator': 'FormItem',
+    'x-component': 'IconPicker',
+  },
   name: {
     type: 'string',
     title: '{{t("Field name")}}',

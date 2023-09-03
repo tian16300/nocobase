@@ -114,32 +114,32 @@ export const useResourceAction = (props, opts = {}) => {
   const result = useRequest(
     snapshot
       ? async () => ({
-          data: record[tableFieldName] ?? [],
-        })
+        data: record[tableFieldName] ?? [],
+      })
       : (opts) => {
-          if (!action) {
-            return Promise.resolve({});
+        if (!action) {
+          return Promise.resolve({});
+        }
+        const actionParams = { ...params, ...opts };
+        if (params?.appends) {
+          actionParams.appends = params.appends;
+        }
+        /**
+         * 过滤自己
+         */
+        if (Reflect.has(actionParams, 'appends')) {
+          const resourceName = association || collection;
+          const appends = actionParams.appends.filter((key) => {
+            return key !== resourceName
+          });
+          if (appends.length == 0) {
+            Reflect.deleteProperty(actionParams, 'appends');
+          } else {
+            Reflect.set(actionParams, 'appends', appends);
           }
-          const actionParams = { ...params, ...opts };
-          if (params?.appends) {
-            actionParams.appends = params.appends;
-          }
-          /**
-           * 过滤自己
-           */
-          if (Reflect.has(actionParams, 'appends')) {
-            const resourceName = association || collection;
-            const appends = actionParams.appends.filter((key) => {
-              return key !== resourceName;
-            });
-            if (appends.length == 0) {
-              Reflect.deleteProperty(actionParams, 'appends');
-            } else {
-              Reflect.set(actionParams, 'appends', appends);
-            }
-          }
-          return resource[action](actionParams).then((res) => res.data);
-        },
+        }
+        return resource[action](actionParams).then((res) => res.data);
+      },
     {
       ...opts,
       onSuccess(data, params) {

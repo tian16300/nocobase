@@ -53,7 +53,7 @@ const toMoment = (val: any, options?: Str2momentOptions) => {
   if (!val) {
     return;
   }
-  const offset = options.utcOffset || -1 * new Date().getTimezoneOffset();
+  const offset = typeof options.utcOffset == 'number' ? options.utcOffset : -1 * new Date().getTimezoneOffset();
   const { gmt, picker, utc = true } = options;
 
   if (!utc) {
@@ -67,6 +67,9 @@ const toMoment = (val: any, options?: Str2momentOptions) => {
     return dayjs(val).utcOffset(0);
   }
   return dayjs(val).utcOffset(offsetFromString(offset));
+};
+export const toDayjs = (val: any, options?: Str2momentOptions) => {
+  return toMoment(val, options);
 };
 
 export const str2moment = (value?: string | string[], options: Str2momentOptions = {}): any => {

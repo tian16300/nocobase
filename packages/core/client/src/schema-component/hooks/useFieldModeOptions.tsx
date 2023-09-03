@@ -18,7 +18,7 @@ export const useFieldModeOptions = (props?) => {
     if (!collectionField || !collectionField?.interface) {
       return;
     }
-    if (!['o2o', 'oho', 'obo', 'o2m', 'linkTo', 'm2o', 'm2m'].includes(collectionField.interface)) return;
+    if (!['o2o', 'oho', 'obo', 'o2m', 'linkTo', 'm2o', 'm2m', 'dic'].includes(collectionField.interface)) return;
     const collection = getCollection(collectionField.target);
     if (collection?.template === 'file') {
       return isReadPretty
@@ -66,6 +66,7 @@ export const useFieldModeOptions = (props?) => {
             ];
       case 'm2o':
       case 'linkTo':
+      case 'dic':
         return isReadPretty
           ? [
               { label: t('Title'), value: 'Select' },

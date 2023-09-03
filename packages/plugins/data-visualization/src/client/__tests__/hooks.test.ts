@@ -67,6 +67,7 @@ describe('hooks', () => {
       getInterface: (i: string) => {
         switch (i) {
           case 'm2o':
+          case 'dic':
             return {
               filterable: {
                 nested: true,

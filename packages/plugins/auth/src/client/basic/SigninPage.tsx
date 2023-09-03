@@ -1,3 +1,4 @@
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { ISchema } from '@formily/react';
 import { Authenticator, SchemaComponent, SignupPageContext, useSignIn } from '@nocobase/client';
 import React, { useContext } from 'react';
@@ -30,8 +31,14 @@ const passwordForm: ISchema = {
       type: 'string',
       'x-component': 'Password',
       required: true,
-      'x-decorator': 'FormItem',
-      'x-component-props': { placeholder: '{{t("Password")}}', style: {} },
+      'x-decorator': 'FormItem',     
+      'x-decorator-props': {
+        label:'密码',
+      },
+      'x-component-props': { 
+        size: "large",
+        prefix: <LockOutlined  />,
+        placeholder: '{{t("Password")}}', style: {} },
     },
     actions: {
       type: 'void',
@@ -42,11 +49,12 @@ const passwordForm: ISchema = {
           type: 'void',
           'x-component': 'Action',
           'x-component-props': {
+            size: "large",
             htmlType: 'submit',
             block: true,
             type: 'primary',
             useAction: `{{ useBasicSignIn }}`,
-            style: { width: '100%' },
+            style: { width: '100%', marginTop: '10px' },
           },
         },
       },

@@ -7,7 +7,7 @@ import { STORAGE_TYPE_LOCAL } from '../constants';
 import { getFilename } from '../utils';
 
 function getDocumentRoot(storage): string {
-  const { documentRoot = process.env.LOCAL_STORAGE_DEST || 'storage/uploads' } = storage.options || {};
+  const { documentRoot = process.env.LOCAL_STORAGE_DEST || 'storage/uploads/sys' } = storage.options || {};
   // TODO(feature): 后面考虑以字符串模板的方式使用，可注入 req/action 相关变量，以便于区分文件夹
   return path.resolve(path.isAbsolute(documentRoot) ? documentRoot : path.join(process.cwd(), documentRoot));
 }
@@ -24,7 +24,7 @@ export default {
   },
   defaults() {
     const { LOCAL_STORAGE_DEST, LOCAL_STORAGE_BASE_URL, APP_PORT } = process.env;
-    const documentRoot = LOCAL_STORAGE_DEST || 'storage/uploads';
+    const documentRoot = LOCAL_STORAGE_DEST || 'storage/uploads/sys';
     return {
       title: 'Local storage',
       type: STORAGE_TYPE_LOCAL,

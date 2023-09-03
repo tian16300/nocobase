@@ -188,7 +188,7 @@ FormItem.Designer = function Designer() {
     ? getCollectionFields(collectionField?.target)
     : getCollectionFields(collectionField?.targetCollection) ?? [];
   const fieldModeOptions = useFieldModeOptions();
-  const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o'].includes(collectionField?.interface);
+  const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'dic'].includes(collectionField?.interface);
   const isTableField = fieldSchema['x-component'] === 'TableField';
   const isFileField = isFileCollection(targetCollection);
   const initialValue = {
@@ -625,6 +625,7 @@ FormItem.Designer = function Designer() {
           }}
         />
       ) : null}
+
       {field.readPretty && options.length > 0 && fieldSchema['x-component'] === 'CollectionField' && !isFileField && (
         <SchemaSettings.SwitchItem
           title={t('Enable link')}

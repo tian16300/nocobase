@@ -16,7 +16,7 @@ export default class DropForeignKeysMigration extends Migration {
       const fields = await this.app.db.getCollection('fields').repository.find({
         filter: {
           interface: {
-            $in: ['oho', 'o2m', 'obo', 'm2o', 'linkTo', 'm2m'],
+            $in: ['oho', 'o2m', 'obo', 'm2o', 'linkTo', 'm2m', 'dic'],
           },
           collectionName: {
             $not: null,

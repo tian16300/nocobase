@@ -16,7 +16,7 @@ export const useFieldComponentOptions = () => {
       return;
     }
 
-    if (!['o2o', 'oho', 'obo', 'o2m', 'linkTo', 'm2o', 'm2m'].includes(collectionField.interface)) return;
+    if (!['o2o', 'oho', 'obo', 'o2m', 'linkTo', 'm2o', 'm2m', 'dic'].includes(collectionField.interface)) return;
 
     const collection = getCollection(collectionField.target);
     if (collection?.template === 'file') {

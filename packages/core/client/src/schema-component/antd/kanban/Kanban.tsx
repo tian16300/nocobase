@@ -9,6 +9,7 @@ import { Board } from '../../../board';
 import { useProps } from '../../hooks/useProps';
 import { KanbanCardContext, KanbanColumnContext } from './context';
 import { useStyles } from './style';
+import { pick } from 'lodash';
 
 const useCreateActionProps = () => {
   const form = useForm();
@@ -31,22 +32,41 @@ export const toColumns = (groupField: any, dataSource: Array<any> = []) => {
       cards: [],
     },
   };
-  groupField.uiSchema.enum.forEach((item) => {
-    columns[item.value] = {
-      id: item.value,
-      title: item.label,
-      color: item.color,
-      cards: [],
-    };
-  });
-  dataSource.forEach((ds) => {
-    const value = ds[groupField.name];
-    if (value && columns[value]) {
-      columns[value].cards.push(ds);
-    } else {
-      columns.__unknown__.cards.push(ds);
-    }
-  });
+  if (['select', 'radioGroup'].includes(groupField.interface)) {
+    groupField.uiSchema.enum.forEach((item) => {
+      columns[item.value] = {
+        id: item.value,
+        title: item.label,
+        color: item.color,
+        cards: [],
+      };
+    });
+    dataSource.forEach((ds) => {
+      const value = ds[groupField.name];
+      if (value && columns[value]) {
+        columns[value].cards.push(ds);
+      } else {
+        columns.__unknown__.cards.push(ds);
+      }
+    });
+  } else if (['dic'].includes(groupField.interface)) {
+    dataSource.forEach((ds) => {
+      const item = ds[groupField.name];
+      if (item) {
+        const option = pick(item, ['id', 'label', 'value', 'color', 'icon']);
+        columns[option.value] = columns[option.value] || {
+          id: option.value,
+          title: option.label,
+          color: option.color,
+          icon: option.icon,
+          cards: [],
+        }
+        columns[option.value].cards.push(ds);
+      } else {
+        columns.__unknown__.cards.push(ds);
+      }
+    });
+  }
   if (columns.__unknown__.cards.length === 0) {
     delete columns.__unknown__;
   }

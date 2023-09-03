@@ -40,6 +40,7 @@ export default {
   "Unconnected": "未连接",
   "System settings": "系统设置",
   "System title": "系统名称",
+  "System simple title": "系统简称",
   "Setting": "设置",
   "Enable": "启用",
   "Disable": "禁用",
@@ -284,6 +285,7 @@ export default {
   "Field display name": "字段名称",
   "Field type": "字段类型",
   "Field interface": "字段类型",
+  "Field icon": "字段图标",
   "Date format": "日期格式",
   "Year/Month/Day": "年/月/日",
   "Year-Month-Day": "年-月-日",
@@ -496,7 +498,6 @@ export default {
 
   "Yes": "是",
   "No": "否",
-
   "Red": "薄暮",
   "Magenta": "法式洋红",
   "Volcano": "火山",
@@ -509,7 +510,10 @@ export default {
   "Geek blue": "极客蓝",
   "Purple": "酱紫",
   "Default": "默认",
-
+  "Processing": "进行中",
+  "Warning": "预警",
+  "Success": "成功",
+  "Error": "错误",
   "Add card": "添加卡片",
   "edit title": "修改标题",
   "Turn pages": "翻页",
@@ -803,11 +807,14 @@ export default {
   "Date display format":"日期显示格式",
   "Assign  data scope for the template":"为模板指定数据范围",
   "Table selected records":"表格中选中的记录",
-
   "Tag":"标签",
   "Tag color field":"标签颜色字段",
   "Sync successfully":"同步成功",
   "Sync from form fields":"同步表单字段",
   "Select all":"全选",
+  "Dic Name":"字典名称",
+  "Dic Code":"字典编码",
+  "DicItem Name":"名称",
+  "DicItem Value":"数据值",  
   "Determine whether a record exists by the following fields": "通过以下字段判断记录是否存在"
 }

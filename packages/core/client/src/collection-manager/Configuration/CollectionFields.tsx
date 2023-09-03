@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { createForm, Field } from '@formily/core';
 import { FieldContext, FormContext, useField } from '@formily/react';
-import { Space, Switch, Table, TableColumnProps, Tag, Tooltip } from 'antd';
+import { Button, Space, Switch, Table, TableColumnProps, Tag, Tooltip } from 'antd';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrentAppInfo } from '../../appInfo';
@@ -26,6 +26,8 @@ import { collection } from './schemas/collectionFields';
 import { SyncFieldsAction } from './SyncFieldsAction';
 import { ViewCollectionField } from './ViewInheritedField';
 import { Input } from '../../schema-component/antd/input';
+import { Icon } from '../../icon';
+import { useToken } from '../../style';
 
 const indentStyle = css`
   .ant-table {
@@ -63,7 +65,18 @@ const CurrentFields = (props) => {
   const { [targetKey]: filterByTk, titleField } = useRecord();
   const [loadingRecord, setLoadingRecord] = React.useState<any>(null);
   const { refreshCM, isTitleField } = useCollectionManager();
-
+  const { token } = useToken();
+  const iconStyle = css`
+    .anticon {
+      color: ${token.colorTextQuaternary};
+    }
+    &:hover,
+    &:active {
+      .anticon {
+        color: inherit;
+      }
+    }
+  `;
   const columns: TableColumnProps<any>[] = [
     {
       dataIndex: ['uiSchema', 'rawTitle'],
@@ -78,6 +91,18 @@ const CurrentFields = (props) => {
       dataIndex: 'interface',
       title: t('Field interface'),
       render: (value) => <Tag>{compile(getInterface(value)?.title)}</Tag>,
+    },
+
+    {
+      dataIndex: ['uiSchema', 'icon'],
+      title: t('Field icon'),
+      render: (value) => {
+        return value ? (
+          <Button className={iconStyle} size="large" type="dashed" shape="circle">
+            <Icon type={value}></Icon>
+          </Button>
+        ) : null;
+      },
     },
     {
       dataIndex: 'titleField',
@@ -295,6 +320,10 @@ export const CollectionFields = () => {
     {
       dataIndex: 'interface',
       title: t('Field interface'),
+    },
+    {
+      dataIndex: 'icon',
+      title: t('Field icon'),
     },
     {
       dataIndex: 'titleField',

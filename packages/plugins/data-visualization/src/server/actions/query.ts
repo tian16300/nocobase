@@ -187,28 +187,48 @@ export const parseBuilder = (ctx: Context, builder: QueryParams) => {
 export const processData = (ctx: Context, data: any[], fieldMap: { [source: string]: { type?: string } }) => {
   const { sequelize } = ctx.db;
   const dialect = sequelize.getDialect();
-  switch (dialect) {
-    case 'postgres':
-      // https://github.com/sequelize/sequelize/issues/4550
-      return data.map((record) => {
-        const result = {};
-        Object.entries(record).forEach(([key, value]) => {
-          const { type } = fieldMap[key] || {};
-          switch (type) {
-            case 'bigInt':
-            case 'integer':
-            case 'float':
-            case 'double':
-              value = Number(value);
-              break;
-          }
-          result[key] = value;
-        });
-        return result;
-      });
-    default:
-      return data;
-  }
+  const resData = data.map((record) => {
+    const result = {};
+    Object.keys(record).forEach((key) => {
+      const field = fieldMap[key];
+      const value = record[key];
+      if (['double','bigInt','integer','float'].includes(field.type)) {
+        if (typeof value !== 'number' && value) {
+          result[key] = Number(value).valueOf();
+        }else if (typeof value == 'number'){
+          result[key] =value;
+        }else {
+          result[key] = 0;
+        }
+      }else{
+        result[key] =value;
+      }
+    });
+    return result;
+  });
+  return resData;
+  // switch (dialect) {
+  //   case 'postgres':
+  //     // https://github.com/sequelize/sequelize/issues/4550
+  //     return data.map((record) => {
+  //       const result = {};
+  //       Object.entries(record).forEach(([key, value]) => {
+  //         const { type } = fieldMap[key] || {};
+  //         switch (type) {
+  //           case 'bigInt':
+  //           case 'integer':
+  //           case 'float':
+  //           case 'double':
+  //             value = Number(value);
+  //             break;
+  //         }
+  //         result[key] = value;
+  //       });
+  //       return result;
+  //     });
+  //   default:
+  //     return data;
+  // }
 };
 
 export const queryData = async (ctx: Context, builder: QueryParams) => {

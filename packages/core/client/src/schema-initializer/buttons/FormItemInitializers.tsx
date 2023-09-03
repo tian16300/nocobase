@@ -129,26 +129,26 @@ export const FilterFormItemInitializers = (props: any) => {
       },
     );
 
-  fieldItems.push(
-    {
-      type: 'divider',
-    },
-    {
-      type: 'item',
-      title: t('Add text'),
-      component: 'BlockInitializer',
-      schema: {
-        type: 'void',
-        'x-editable': false,
-        'x-decorator': 'FormItem',
-        'x-designer': 'Markdown.Void.Designer',
-        'x-component': 'Markdown.Void',
-        'x-component-props': {
-          content: t('This is a demo text, **supports Markdown syntax**.'),
-        },
-      },
-    },
-  );
+  // fieldItems.push(
+  //   {
+  //     type: 'divider',
+  //   },
+  //   {
+  //     type: 'item',
+  //     title: t('Add text'),
+  //     component: 'BlockInitializer',
+  //     schema: {
+  //       type: 'void',
+  //       'x-editable': false,
+  //       'x-decorator': 'FormItem',
+  //       'x-designer': 'Markdown.Void.Designer',
+  //       'x-component': 'Markdown.Void',
+  //       'x-component-props': {
+  //         content: t('This is a demo text, **supports Markdown syntax**.'),
+  //       },
+  //     },
+  //   },
+  // );
   return (
     <SchemaInitializer.Button
       wrap={gridRowColWrap}
@@ -156,7 +156,7 @@ export const FilterFormItemInitializers = (props: any) => {
       items={fieldItems}
       insertPosition={insertPosition}
       component={component}
-      title={component ? null : t('Configure fields')}
+      title={component ? null : t('Configure fields')+'123' }
     />
   );
 };

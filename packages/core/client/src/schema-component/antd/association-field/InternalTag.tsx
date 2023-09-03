@@ -41,10 +41,13 @@ export const ReadPrettyInternalTag: React.FC = observer(
     const labelUiSchema = useLabelUiSchema(collectionField, fieldNames?.label || 'label');
     const { snapshot } = useActionContext();
     const ellipsisWithTooltipRef = useRef<IEllipsisWithTooltipRef>();
+    const tagColor = flat(recordCtx)[`${fieldSchema.name}.${tagColorField}`];
     const renderRecords = () =>
       toArr(props.value).map((record, index, arr) => {
         const val = toValue(compile(record?.[fieldNames?.label || 'label']), 'N/A');
-        const text = getTabFormatValue(compile(labelUiSchema), val, record[tagColorField]);
+        const color = toValue(compile(record?.[fieldNames?.color || 'color']), tagColor);
+        const icon = toValue(compile(record?.[fieldNames?.icon || 'icon']), '');
+        const text = getTabFormatValue(compile(labelUiSchema), val, color, icon);
         return (
           <Fragment key={`${record.id}_${index}`}>
             <span>

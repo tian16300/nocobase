@@ -55,7 +55,10 @@ function getCollectionFieldOptions(this: CallScope, collection, parentNode?): Tr
   return fields.filter(this.filter).map((field) => {
     const key = parentNode ? `${parentNode.value ? `${parentNode.value}.` : ''}${field.name}` : field.name;
     const fieldTitle = this.compile(field.uiSchema?.title) ?? field.name;
-    const isLeaf = !this.getCollectionFields(field.target).filter(isAssociation).filter(this.filter).length;
+    let isLeaf = !this.getCollectionFields(field.target).filter(isAssociation).filter(this.filter).length;
+    if (collection == 'dicItems' && field.name == 'dic') {
+      isLeaf = true;
+    }
     return {
       pId: parentNode?.key ?? null,
       id: key,
@@ -134,7 +137,6 @@ export const AppendsTreeSelect: React.FC<AppendsTreeSelectProps> = (props) => {
       return;
     }
     const loaded = [];
-
     arr.forEach((v) => {
       const paths = v.split('.');
       let option = optionsMap[paths[0]];

@@ -4,5 +4,6 @@ import { RemoteSchemaComponent } from '../../../';
 
 export function RouteSchemaComponent(props: any) {
   const params = useParams<any>();
-  return <RemoteSchemaComponent onlyRenderProperties uid={params.name} />;
+
+  return <RemoteSchemaComponent onlyRenderProperties uid={params.name}  />;
 }

@@ -26,25 +26,41 @@ export class PresetNocoBase extends Plugin {
     'data-visualization',
     'auth',
     'sms-auth',
+    'theme-editor', 
+    'graph-collection-manager',
+    /* 业务模块 */ 
+    'dic-manager',  
+    'company-info',
+    'prj-manager',
+    'report-manager',
+    'api-doc'
+    
   ];
 
   localPlugins = [
     'audit-logs',
     'sample-hello',
-    'multi-app-manager',
-    'multi-app-share-collection',
     'oidc',
     'saml',
     'cas',
+    'multi-app-manager',
+    'multi-app-share-collection',
     'map',
     'snapshot-field',
-    'graph-collection-manager',
     'mobile-client',
     'api-keys',
-    'localization-management',
-    'theme-editor',
-    'api-doc',
+    // 'theme-editor', 
+    // /* 业务模块 */ 
+    // 'dic-manager',  
+    // 'company-info',
+    // 'prj-manager',
+    // 'report-manager',
+    // 'api-doc'yarn 
   ];
+
+  // localPlugins = [
+  //   'localization-management'
+  // ];
 
   splitNames(name: string) {
     return (name || '').split(',').filter(Boolean);

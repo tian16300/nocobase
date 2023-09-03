@@ -1,11 +1,12 @@
 import { ISchema } from '@formily/react';
 import { isArr } from '@formily/shared';
 import { getDefaultFormat, str2moment } from '@nocobase/utils/client';
-import { Tag } from 'antd';
+import { Space, Tag } from 'antd';
 import { get, isFunction } from 'lodash';
 import dayjs from 'dayjs';
 import React from 'react';
 import { CollectionFieldOptions, useCollectionManager } from '../../../collection-manager';
+import { Icon } from '../../../icon';
 
 export const useLabelUiSchema = (collectionName: string, label: string): ISchema => {
   const { getCollectionJoinField } = useCollectionManager();
@@ -36,7 +37,7 @@ export const getLabelFormatValue = (labelUiSchema: ISchema, value: any, isTag = 
     const values = toArr(value).map((val) => {
       const opt: any = options.find((option: any) => option.value === val);
       if (isTag) {
-        return React.createElement(Tag, { color: opt?.color }, opt?.label);
+        return React.createElement(Tag, { color: opt?.color, icon: opt?.icon }, opt?.label);
       }
       return opt?.label;
     });
@@ -50,12 +51,19 @@ export const getLabelFormatValue = (labelUiSchema: ISchema, value: any, isTag = 
   }
 };
 
-export const getTabFormatValue = (labelUiSchema: ISchema, value: any, tagColor): any => {
+export const getTabFormatValue = (labelUiSchema: ISchema, value: any, tagColor, tagIcon): any => {
   const options = labelUiSchema?.enum;
   if (Array.isArray(options) && value) {
     const values = toArr(value).map((val) => {
       const opt: any = options.find((option: any) => option.value === val);
-      return React.createElement(Tag, { color: tagColor || opt?.color }, opt?.label);
+      return React.createElement(Tag, { color: tagColor || opt?.color },
+        React.createElement(Space, {
+          size: [6, 0],
+          wrap:true
+        }, [
+          tagIcon ? React.createElement(Icon, { type: tagIcon }) : '',
+          opt?.label
+        ]));
     });
     return values;
   }
@@ -64,11 +72,24 @@ export const getTabFormatValue = (labelUiSchema: ISchema, value: any, tagColor):
       return React.createElement(
         Tag,
         { color: tagColor },
-        getDatePickerLabels({ ...labelUiSchema?.['x-component-props'], value }),
+        React.createElement(Space, {
+          size: [6, 0],
+          wrap:true
+        }, [
+          tagIcon ? React.createElement(Icon, { type: tagIcon }) : '',
+          getDatePickerLabels({ ...labelUiSchema?.['x-component-props'], value })
+        ])
       );
 
     default:
-      return React.createElement(Tag, { color: tagColor }, value);
+      return React.createElement(Tag, { color: tagColor },
+        React.createElement(Space, {
+          size: [6, 0],
+          wrap:true
+        }, [
+          tagIcon ? React.createElement(Icon, { type: tagIcon }) : '',
+          value
+        ]));
   }
 };
 

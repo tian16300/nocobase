@@ -13,6 +13,7 @@ import { RoleModel } from './model/RoleModel';
 import { RoleResourceActionModel } from './model/RoleResourceActionModel';
 import { RoleResourceModel } from './model/RoleResourceModel';
 import { Mutex } from 'async-mutex';
+import { aclFilterCondition, roleRecords } from './roles';
 
 export interface AssociationFieldAction {
   associationActions: string[];
@@ -404,14 +405,15 @@ export class PluginACL extends Plugin {
             strategy: { actions: ['create', 'view', 'update', 'destroy'] },
             snippets: ['ui.*', 'pm', 'pm.*'],
           },
-          {
-            name: 'member',
-            title: '{{t("Member")}}',
-            allowNewMenu: true,
-            strategy: { actions: ['view', 'update:own', 'destroy:own', 'create'] },
-            default: true,
-            snippets: ['!ui.*', '!pm', '!pm.*'],
-          },
+          // {
+          //   name: 'member',
+          //   title: '{{t("Member")}}',
+          //   allowNewMenu: true,
+          //   strategy: { actions: ['view', 'update:own', 'destroy:own', 'create'] },
+          //   default: true,
+          //   snippets: ['!ui.*', '!pm', '!pm.*'],
+          // },
+          ...roleRecords
         ],
       });
       const rolesResourcesScopes = this.app.db.getRepository('rolesResourcesScopes');
@@ -469,7 +471,7 @@ export class PluginACL extends Plugin {
     this.app.acl.addFixedParams('roles', 'destroy', () => {
       return {
         filter: {
-          $and: [{ 'name.$ne': 'root' }, { 'name.$ne': 'admin' }, { 'name.$ne': 'member' }],
+          $and: [{ 'name.$ne': 'root' }, { 'name.$ne': 'admin' }, ...aclFilterCondition],
         },
       };
     });

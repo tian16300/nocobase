@@ -12,6 +12,7 @@ import utc from 'dayjs/plugin/utc';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import weekYear from 'dayjs/plugin/weekYear';
 import weekday from 'dayjs/plugin/weekday';
+import 'dayjs/locale/zh-cn';
 
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -26,5 +27,6 @@ dayjs.extend(weekOfYear);
 dayjs.extend(weekYear);
 dayjs.extend(customParseFormat);
 dayjs.extend(advancedFormat);
-
+dayjs.tz.setDefault(process.env.TZ);
+dayjs.locale((process.env.INIT_APP_LANG || 'zh-CN').toLowerCase());
 export { dayjs };

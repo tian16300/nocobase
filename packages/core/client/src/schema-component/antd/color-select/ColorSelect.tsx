@@ -5,18 +5,24 @@ import React from 'react';
 import { useCompile } from '../../hooks/useCompile';
 
 const colors = {
-  red: '{{t("Red")}}',
-  magenta: '{{t("Magenta")}}',
-  volcano: '{{t("Volcano")}}',
-  orange: '{{t("Orange")}}',
-  gold: '{{t("Gold")}}',
-  lime: '{{t("Lime")}}',
-  green: '{{t("Green")}}',
-  cyan: '{{t("Cyan")}}',
-  blue: '{{t("Blue")}}',
-  geekblue: '{{t("Geek blue")}}',
-  purple: '{{t("Purple")}}',
+  // red: '{{t("Red")}}',
+  // magenta: '{{t("Magenta")}}',
+  // volcano: '{{t("Volcano")}}',
+  // orange: '{{t("Orange")}}',
+  // gold: '{{t("Gold")}}',
+  // lime: '{{t("Lime")}}',
+  // green: '{{t("Green")}}',
+  // cyan: '{{t("Cyan")}}',
+  // blue: '{{t("Blue")}}',
+  // geekblue: '{{t("Geek blue")}}',
+  // purple: '{{t("Purple")}}',
+  // default: '{{t("Default")}}',  
   default: '{{t("Default")}}',
+  processing: '{{t("Processing")}}',
+  warning: '{{t("Warning")}}',
+  success: '{{t("Success")}}',
+  error: '{{t("Error")}}',
+
 };
 
 export const ColorSelect = connect(

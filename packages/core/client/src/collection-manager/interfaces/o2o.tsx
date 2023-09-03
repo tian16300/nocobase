@@ -72,6 +72,13 @@ export const o2o: IField = {
       description:
         "{{t('Randomly generated and can be modified. Support letters, numbers and underscores, must start with an letter.')}}",
     },
+    'uiSchema.icon': {
+      type: 'string',
+      title: '{{t("Field icon")}}',
+      // required: true,
+      'x-decorator': 'FormItem',
+      'x-component': 'IconPicker',
+    },
     type: relationshipType,
     grid: {
       type: 'void',

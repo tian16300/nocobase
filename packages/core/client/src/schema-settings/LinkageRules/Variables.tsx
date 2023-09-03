@@ -24,6 +24,7 @@ const supportsType = [
   'm2o',
   'o2m',
   'm2m',
+  'dic'
 ];
 const useVariableTypes = (currentCollection, excludes = []) => {
   const { getCollectionFields, getInterface, getCollection } = useCollectionManager();

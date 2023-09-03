@@ -86,6 +86,13 @@ const schema: ISchema = {
           'x-component': 'Input',
           required: true,
         },
+        simpleTitle: {
+          type: 'string',
+          title: "{{t('System simple title')}}",
+          'x-decorator': 'FormItem',
+          'x-component': 'Input',
+          required: false,
+        },
         logo: {
           type: 'string',
           title: "{{t('Logo')}}",

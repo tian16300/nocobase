@@ -81,8 +81,8 @@ export const FormBlockProvider = (props) => {
   const createFlag =
     (currentCollection.name === (collection?.name || collection) && !isEmptyRecord) || !currentCollection.name;
   /* */
-  const params = { ...props.params };
-  if (detailFlag) {
+  const params = {...props.params};
+  if(detailFlag){
     const filterTk = useFilterByTk();
     params.filterTk = filterTk;
   }

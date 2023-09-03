@@ -1,4 +1,4 @@
-import { ReturnTypeOfUseRequest, useRequest } from '@nocobase/client';
+import { ReturnTypeOfUseRequest, useRequest, useAPIClient } from '@nocobase/client';
 import { error } from '@nocobase/utils/client';
 import React, { createContext, useMemo } from 'react';
 import { ThemeItem } from '../../types';
@@ -15,46 +15,63 @@ export const useThemeListContext = () => {
 };
 
 export const ThemeListProvider = ({ children }) => {
-  const {
-    data,
-    error: err,
-    run,
-    refresh,
-    loading,
-  } = useRequest(
-    {
-      url: 'themeConfig:list',
-      params: {
-        sort: 'id',
-        paginate: false,
+  const api = useAPIClient();
+  const token = api.auth.getToken();
+  if (token && '' !== token) {
+    const {
+      data,
+      error: err,
+      run,
+      refresh,
+      loading,
+    } = useRequest(
+      {
+        url: 'themeConfig:list',
+        params: {
+          sort: 'id',
+          paginate: false,
+        },
       },
-    },
-    {
-      manual: true,
-    },
-  );
+      {
+        manual: true,
+      },
+    );
 
-  const items = useMemo(() => {
-    return ((data as any)?.data as ThemeItem[])?.map((item) => changeAlgorithmFromStringToFunction(item));
-  }, [data]);
+    const items = useMemo(() => {
+      return ((data as any)?.data as ThemeItem[])?.map((item) => changeAlgorithmFromStringToFunction(item));
+    }, [data]);
 
-  if (err) {
-    error(err);
-  }
-
-  return (
-    <ThemeListContext.Provider
+    if (err) {
+      error(err);
+    }
+    return (
+      <ThemeListContext.Provider
+        value={{
+          data: items,
+          error: err,
+          run,
+          refresh,
+          loading,
+        }}
+      >
+        {children}
+      </ThemeListContext.Provider>
+    );
+  } else {
+    return <ThemeListContext.Provider
       value={{
-        data: items,
-        error: err,
-        run,
-        refresh,
-        loading,
+        data: null,
+        error: null,
+        run: ()=> {},
+        refresh: () => {},
+        loading: false
       }}
     >
       {children}
     </ThemeListContext.Provider>
-  );
+
+  }
+
 };
 
 ThemeListProvider.displayName = 'ThemeListProvider';

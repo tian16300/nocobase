@@ -9,18 +9,23 @@ export class SystemSettingsPlugin extends Plugin {
   async install(options?: InstallOptions) {
     await this.db.getRepository('systemSettings').create({
       values: {
-        title: 'NocoBase',
+        title: '中科匠新',
+        simpleTitle: '中科匠新',
         appLang: this.getInitAppLang(options),
         enabledLanguages: [this.getInitAppLang(options)],
         logo: {
-          title: 'nocobase-logo',
-          filename: '682e5ad037dd02a0fe4800a3e91c283b.png',
+          title: 'logo',
+          filename: 'logo.png',
           extname: '.png',
           mimetype: 'image/png',
-          url: 'https://nocobase.oss-cn-beijing.aliyuncs.com/682e5ad037dd02a0fe4800a3e91c283b.png',
+          url: '/storage/uploads/sys/logo.png',
         },
       },
     });
+    const repo = this.db.getRepository<any>('collections');
+    if (repo) {
+      await repo.db2cm('systemSettings');
+    }
   }
 
   beforeLoad() {

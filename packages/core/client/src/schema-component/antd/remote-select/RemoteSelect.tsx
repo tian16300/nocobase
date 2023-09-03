@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ResourceActionOptions, useRequest } from '../../../api-client';
 import { mergeFilter } from '../../../block-provider/SharedFilterProvider';
 import { useCollection, useCollectionManager } from '../../../collection-manager';
-import { useCompile } from '../../hooks';
+import { useCompile, useProps } from '../../hooks';
 import { Select, defaultFieldNames } from '../select';
 import { ReadPretty } from './ReadPretty';
 const EMPTY = 'N/A';
@@ -38,7 +38,7 @@ const InternalRemoteSelect = connect(
       targetField: _targetField,
       CustomDropdownRender,
       ...others
-    } = props;
+    } = useProps(props);
     const [open, setOpen] = useState(false);
     const firstRun = useRef(false);
     const fieldSchema = useFieldSchema();

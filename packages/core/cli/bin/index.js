@@ -14,7 +14,7 @@ const env = {
   DB_STORAGE: 'storage/db/nocobase.sqlite',
   DB_TIMEZONE: '+00:00',
   DEFAULT_STORAGE_TYPE: 'local',
-  LOCAL_STORAGE_DEST: 'storage/uploads',
+  LOCAL_STORAGE_DEST: 'storage/uploads/sys',
   MFSU_AD: 'none',
   PM2_HOME: resolve(process.cwd(), './storage/.pm2'),
   PLUGIN_PACKAGE_PREFIX: '@nocobase/plugin-,@nocobase/plugin-sample-,@nocobase/preset-',

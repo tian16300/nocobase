@@ -27,7 +27,7 @@ export const MapBlockInitializer = (props) => {
       icon={<TableOutlined />}
       onCreateBlockSchema={async ({ item }) => {
         const mapFieldOptions = getCollectionFieldsOptions(item.name, ['point', 'lineString', 'polygon'], {
-          association: ['o2o', 'obo', 'oho', 'o2m', 'm2o', 'm2m'],
+          association: ['o2o', 'obo', 'oho', 'o2m', 'm2o', 'm2m', 'dic'],
         });
         const markerFieldOptions = getCollectionFieldsOptions(item.name, 'string');
         const values = await FormDialog(

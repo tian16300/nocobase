@@ -63,7 +63,7 @@ export const TableColumnDesigner = (props) => {
   const defaultFilter = fieldSchema?.['x-component-props']?.service?.params?.filter || {};
   const dataSource = useCollectionFilterOptions(collectionField?.target);
   const isDateField = ['datetime', 'createdAt', 'updatedAt'].includes(collectionField?.interface);
-  const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'snapshot'].includes(
+  const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'snapshot', 'dic'].includes(
     collectionField?.interface,
   );
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
@@ -199,7 +199,7 @@ export const TableColumnDesigner = (props) => {
           }}
         />
       )}
-      {['linkTo', 'm2m', 'm2o', 'o2m', 'obo', 'oho', 'snapshot', 'createdBy', 'updatedBy'].includes(
+      {['linkTo', 'm2m', 'm2o', 'o2m', 'obo', 'oho', 'snapshot', 'createdBy', 'updatedBy', 'dic'].includes(
         collectionField?.interface,
       ) &&
         !isFileField &&
@@ -228,7 +228,7 @@ export const TableColumnDesigner = (props) => {
             }}
           />
         )}
-      {['linkTo', 'm2m', 'm2o', 'o2m', 'obo', 'oho', 'snapshot'].includes(collectionField?.interface) && (
+      {['linkTo', 'm2m', 'm2o', 'o2m', 'obo', 'oho', 'snapshot', 'dic'].includes(collectionField?.interface) && (
         <SchemaSettings.SelectItem
           title={t('Title field')}
           options={options}
@@ -394,7 +394,7 @@ export const TableColumnDesigner = (props) => {
       {isDateField && <SchemaSettings.DataFormat fieldSchema={fieldSchema} />}
       {isSubTableColumn &&
         !field?.readPretty &&
-        ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o'].includes(collectionField?.interface) && (
+        ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'dic'].includes(collectionField?.interface) && (
           <SchemaSettings.SortingRule
             fieldSchema={fieldSchema}
             onSubmitCallBack={(sortArr) => {

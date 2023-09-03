@@ -74,7 +74,7 @@ export const formatData = (data) => {
           group: 'list',
           ...field,
         });
-      ['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo'].includes(field.interface) && edgeData.push(field);
+      ['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo', 'dic'].includes(field.interface) && edgeData.push(field);
     });
 
     targetTablekeys.push(item.name);
@@ -100,7 +100,7 @@ export const formatPortData = (ports) => {
     if (
       v.isForeignKey ||
       v.primaryKey ||
-      ['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo', 'id'].includes(v.interface)
+      ['obo', 'oho', 'o2o', 'o2m', 'm2o', 'm2m', 'linkTo', 'id', 'dic'].includes(v.interface)
     ) {
       return 'initPorts';
     } else {
@@ -458,6 +458,7 @@ const getRelationship = (relatioship) => {
       return ['N', '1'];
     case 'obo':
     case 'oho':
+    case 'dic':
       return ['1', '1'];
     default:
       return [];

@@ -9,7 +9,7 @@ import {
   useFieldSchema,
 } from '@formily/react';
 import { error } from '@nocobase/utils/client';
-import { Menu as AntdMenu, MenuProps } from 'antd';
+import { Menu as AntdMenu, MenuProps, Space } from 'antd';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +53,7 @@ const subMenuDesignerCss = css`
     pointer-events: none;
     > .general-schema-designer-icons {
       position: absolute;
-      right: 2px;
+      right: 34px;
       top: 2px;
       line-height: 16px;
       pointer-events: all;
@@ -78,6 +78,7 @@ const designerCss = css`
   margin-right: -20px;
   padding: 0 20px;
   width: calc(100% + 40px);
+  // width: 100%;
   &:hover {
     > .general-schema-designer {
       display: block;
@@ -104,7 +105,7 @@ const designerCss = css`
     pointer-events: none;
     > .general-schema-designer-icons {
       position: absolute;
-      right: 2px;
+      right: 24px;
       top: 2px;
       line-height: 16px;
       pointer-events: all;
@@ -121,10 +122,41 @@ const designerCss = css`
 `;
 
 const headerMenuClass = css`
+   .ant-menu-item{
+    > .ant-menu-title-content {
+
+    }
+    .menu-item-label-text{
+      margin-inline-start: 10px;
+    }
+   }
   .ant-menu-item:hover {
-    > .ant-menu-title-content > div {
-      .general-schema-designer {
-        display: block;
+    > .ant-menu-title-content {
+      > div {
+        .general-schema-designer {
+          display: block;
+        }
+      }
+    }
+    
+  }
+  &.ant-menu-inline-collapsed {
+    .ant-menu-item {
+      &[data-menu-id]{
+        padding-left:0;
+        padding-right:0;
+        > .ant-menu-title-content {
+          .nb-schema-initializer-button{
+            >.ant-btn-icon + span{
+              display: none;
+            }
+            >.ant-btn-icon{
+              margin-right:0;
+            }
+            .anticon{
+              line-height: 24px;
+            }
+          }
       }
     }
   }
@@ -160,7 +192,7 @@ const sideMenuClass = css`
         }
       }
     }
-  }
+  }  
 `;
 
 const menuItemClass = css`
@@ -192,22 +224,32 @@ const HeaderMenu = ({
 }) => {
   const { Component, getMenuItems } = useMenuItem();
   const items = useMemo(() => {
-    const designerBtn = {
+    const designerBtn: any = {
       key: 'x-designer-button',
       disabled: true,
-      style: { padding: '0 8px', order: 9999 },
+      style: { padding: '0 8px', textAlign: 'center' },
       label: render({ style: { background: 'none' } }),
       notdelete: true,
+      order:9999
     };
     const result = getMenuItems(() => {
       return children;
     });
-    if (designable) {
+    if(designable){
       result.push(designerBtn);
+      //第一个和最后一个交换
+      // console.log(result);
+      // if(result.length > 1){
+      //    let temp = result.slice(1, result.length);
+      //    temp.push(designerBtn);
+      //    console.log(temp);
+      //    return temp;
+      // }
     }
-
+    
     return result;
   }, [children, designable]);
+
 
   return (
     <>
@@ -276,26 +318,26 @@ const SideMenu = ({
       return <RecursionField schema={sideMenuSchema} onlyRenderProperties />;
     });
 
-    if (designable) {
-      result.push({
-        key: 'x-designer-button',
-        disabled: true,
-        label: render({
-          insert: (s) => {
-            const dn = createDesignable({
-              t,
-              api,
-              refresh,
-              current: sideMenuSchema,
-            });
-            dn.loadAPIClientEvents();
-            dn.insertAdjacent('beforeEnd', s);
-          },
-        }),
-        order: 1,
-        notdelete: true,
-      });
-    }
+    // if (designable) {
+    //   result.push({
+    //     key: 'x-designer-button',
+    //     disabled: true,
+    //     label: render({
+    //       insert: (s) => {
+    //         const dn = createDesignable({
+    //           t,
+    //           api,
+    //           refresh,
+    //           current: sideMenuSchema,
+    //         });
+    //         dn.loadAPIClientEvents();
+    //         dn.insertAdjacent('beforeEnd', s);
+    //       },
+    //     }),
+    //     order: 1,
+    //     notdelete: true,
+    //   });
+    // }
 
     return result;
   }, [render, sideMenuSchema, designable, loading]);
@@ -453,6 +495,7 @@ export const Menu: ComposedMenu = observer(
               refresh={refresh}
               designable={designable}
             />
+          
           </MenuModeContext.Provider>
         </MenuItemDesignerContext.Provider>
       </DndContext>
@@ -480,19 +523,22 @@ Menu.Item = observer(
           <SchemaContext.Provider value={schema}>
             <FieldContext.Provider value={field}>
               <SortableItem className={designerCss} removeParentsIfNoChildren={false}>
-                <Icon type={icon} />
-                <span
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: 'inline-block',
-                    width: '100%',
-                    verticalAlign: 'middle',
-                  }}
-                >
-                  {t(field.title)}
-                </span>
-                <Designer />
+                <div className={designerCss}>
+                  {(icon && '' !== icon && <Icon type={icon} style={{marginRight: 10}} />)}
+                  <span
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: 'inline-block',
+                      width: '100%',
+                      verticalAlign: 'middle',
+                    }}
+                    className='menu-item-label-text'
+                  >
+                    {t(field.title)}
+                  </span>
+                  <Designer />
+                </div>
               </SortableItem>
             </FieldContext.Provider>
           </SchemaContext.Provider>
@@ -585,8 +631,8 @@ Menu.SubMenu = observer(
           <SchemaContext.Provider value={schema}>
             <FieldContext.Provider value={field}>
               <SortableItem className={subMenuDesignerCss} removeParentsIfNoChildren={false}>
-                <Icon type={icon} />
-                {t(field.title)}
+                <Icon type={icon} style={{marginRight: 10}} />
+                <span className='menu-item-label-text'>{t(field.title)}</span>
                 <Designer />
               </SortableItem>
             </FieldContext.Provider>

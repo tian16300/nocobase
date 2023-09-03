@@ -3,7 +3,26 @@ import { ThemeItem } from '../types';
 /** antd 默认主题 */
 export const antd: Omit<ThemeItem, 'id'> = {
   config: {
-    name: 'Default theme of antd',
+    "name": "Default theme of antd",
+    "token": {
+        "colorInfo": "#1677ff",
+        "wireframe": false,
+        "colorBorder": "#e5e5e5",
+        "colorWarning": "#FA8C16",
+        "colorBgHeader": "#001529",
+        "colorBgLayout": "#f2f2f2",
+        "colorSettings": "#4096ff",
+        "colorTextBase": "#000",
+        "colorPrimaryHeader": "#001529",
+        "colorTextHeaderMenu": "#ffffffa6",
+        "colorBgSettingsHover": "#4096ff0f",
+        "colorBorderSecondary": "#e0e0e0",
+        "colorBgHeaderMenuHover": "#ffffff1a",
+        "colorBgHeaderMenuActive": "#ffffff1a",
+        "colorBorderSettingsHover": "#4096ff4d",
+        "colorTextHeaderMenuHover": "#ffffff",
+        "colorTextHeaderMenuActive": "#ffffff"
+    }
   },
   optional: true,
   isBuiltIn: true,

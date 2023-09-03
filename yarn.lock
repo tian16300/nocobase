@@ -20945,7 +20945,7 @@ react-refresh@0.14.0, react-refresh@^0.14.0:
   version "0.14.0"
   resolved "https://registry.npmmirror.com/react-refresh/-/react-refresh-0.14.0.tgz#4e02825378a5f227079554d4284889354e5f553e"
 
-react-router-dom@6.3.0, react-router-dom@^6.11.2:
+react-router-dom@6.3.0, react-router-dom@6.x, react-router-dom@^6.11.2:
   version "6.14.1"
   resolved "https://registry.npmmirror.com/react-router-dom/-/react-router-dom-6.14.1.tgz#0ad7ba7abdf75baa61169d49f096f0494907a36f"
   dependencies:

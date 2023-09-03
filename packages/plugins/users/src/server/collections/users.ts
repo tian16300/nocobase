@@ -84,6 +84,28 @@ export default {
       },
     },
     {
+      "foreignKey": "userId",
+      "onDelete": "SET NULL",
+      "name": "dept",
+      "type": "belongsTo",
+      "uiSchema": {
+        "x-component": "AssociationField",
+        "x-component-props": {
+          "multiple": false,
+          "fieldNames": {
+            "label": "name",
+            "value": "id"
+          }
+        },
+        "title": "部门",
+        "icon": null
+      },
+      "interface": "m2o",
+      "target": "dept"
+    },
+
+
+    {
       type: 'string',
       name: 'appLang',
     },
