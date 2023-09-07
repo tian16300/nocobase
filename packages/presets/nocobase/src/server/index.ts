@@ -26,6 +26,11 @@ export class PresetNocoBase extends Plugin {
     'data-visualization',
     'auth',
     'sms-auth',
+    'theme-editor',
+    'company-info',
+    'dic-manager',
+    'prj-manager',
+    'report-manager',
   ];
 
   localPlugins = [
@@ -42,7 +47,6 @@ export class PresetNocoBase extends Plugin {
     'mobile-client',
     'api-keys',
     'localization-management',
-    'theme-editor',
     'api-doc',
   ];
 
