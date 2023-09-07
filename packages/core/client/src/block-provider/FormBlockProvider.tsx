@@ -23,7 +23,15 @@ const InternalFormBlockProvider = (props) => {
   );
   const { resource, service, updateAssociationValues } = useBlockRequestContext();
   const formBlockRef = useRef();
-  const record = useRecord();
+  let record= useRecord();
+  // if (Reflect.has(props, 'useRecord')) {
+  //   record = props.useRecord();
+
+  // } else {
+  //   record = useRecord();
+  // }
+  console.log('--InternalFormBlockProvider---', record);
+
   if (service.loading && Object.keys(form?.initialValues)?.length === 0 && action) {
     return <Spin />;
   }
@@ -81,11 +89,7 @@ export const FormBlockProvider = (props) => {
   const createFlag =
     (currentCollection.name === (collection?.name || collection) && !isEmptyRecord) || !currentCollection.name;
   /* */
-  const params = {...props.params};
-  if(detailFlag){
-    const filterTk = useFilterByTk();
-    params.filterTk = filterTk;
-  }
+  const params = { ...props.params };
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
       <BlockProvider {...props} block={'form'} params={params} runWhenParamsChanged>

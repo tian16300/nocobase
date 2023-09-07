@@ -131,7 +131,7 @@ export default {
             onDelete: 'CASCADE',
             sourceKey: 'id',
             targetKey: 'id',
-            through: 'prjsUsers',
+            through: 'prjs_users',
             uiSchema: {
                 type: 'array',
                 title: '项目成员',
@@ -145,6 +145,41 @@ export default {
                 },
             },
 
+        },
+        {
+            "foreignKey": "prjId",
+            "onDelete": "SET NULL",
+            "reverseField": {
+                "uiSchema": {
+                    "title": "项目",
+                    "x-component": "AssociationField",
+                    "x-component-props": {
+                        "multiple": false,
+                        "fieldNames": {
+                            "label": "id",
+                            "value": "id"
+                        }
+                    }
+                },
+                "interface": "m2o",
+                "type": "belongsTo",
+                "name": "prj"
+            },
+            "name": "plans",
+            "type": "hasMany",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": true,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                },
+                "title": "项目计划"
+            },
+            "interface": "o2m",
+            "target": "prj_plan"
         },
         //项目类型
         {
@@ -172,8 +207,11 @@ export default {
                             "filter": {
                                 "$and": [
                                     {
-                                        "dicCode": {
-                                            "$eq": "prj_type"
+                                        "dic": {
+                                            "code": {
+                                                "$eq": "prj_type"
+                                            }
+
                                         }
                                     }
                                 ]
@@ -224,7 +262,7 @@ export default {
                                 "$and": [
                                     {
                                         "dicCode": {
-                                            "$eq": "prj_status"
+                                            "$eq": "prj_type"
                                         }
                                     }
                                 ]
@@ -267,7 +305,7 @@ export default {
                 "x-component": "Input",
                 "title": "项目编号"
             }
-        },{
+        }, {
             "name": "start",
             "type": "date",
             "interface": "datetime",
@@ -338,6 +376,40 @@ export default {
                 "x-component": "Input.TextArea",
                 "title": "备注说明"
             }
+        },{
+            "foreignKey": "prjId",
+            "onDelete": "SET NULL",
+            "reverseField": {
+                "uiSchema": {
+                    "title": "项目",
+                    "x-component": "AssociationField",
+                    "x-component-props": {
+                        "multiple": false,
+                        "fieldNames": {
+                            "label": "id",
+                            "value": "id"
+                        }
+                    }
+                },
+                "interface": "m2o",
+                "type": "belongsTo",
+                "name": "prj"
+            },
+            "name": "weekReport",
+            "type": "hasMany",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": true,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                },
+                "title": "本周进展"
+            },
+            "interface": "o2m",
+            "target": "reportDetail"
         },
         {
             "name": "customerComp",
@@ -358,7 +430,7 @@ export default {
                 "x-component": "Input",
                 "title": "客户代表"
             }
-        },        
+        },
         {
             "foreignKey": "prjId",
             "onDelete": "SET NULL",

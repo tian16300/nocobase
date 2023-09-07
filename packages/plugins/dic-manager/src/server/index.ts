@@ -13,6 +13,14 @@ export class DicManagerPlugin extends Plugin {
   }
   beforeLoad() {
     // TODO
+
+    this.db.addMigrations({
+      namespace: this.name,
+      directory: path.resolve(__dirname, './migrations'),
+      context: {
+        plugin: this,
+      },
+    });
   }
   async load() {
     /* 创建表 */

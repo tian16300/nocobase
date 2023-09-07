@@ -49,7 +49,7 @@ export const useAssociation = (props) => {
 
 const useResource = (props: UseResourceProps) => {
   const { block, resource, useSourceId } = props;
-  const record = useRecord();
+  let record = useRecord();
   const api = useAPIClient();
   const { fieldSchema } = useActionContext();
   const isCreateAction = fieldSchema?.['x-action'] === 'create';
@@ -58,6 +58,14 @@ const useResource = (props: UseResourceProps) => {
   const field = useField<Field>();
   const withoutTableFieldResource = useContext(WithoutTableFieldResource);
   const __parent = useContext(BlockRequestContext);
+  /**
+   * 采用动态record
+   */
+  if(__parent?.props?.recordIsDynamic && __parent?.props?.useRecord){
+    // record = useDataSelectBlockRecord();
+    field.loading = __parent.service.loading;
+    record = __parent.props.useRecord();
+  }
   if (block === 'TableField') {
     const options = {
       field,
@@ -110,7 +118,6 @@ export const useResourceAction = (props, opts = {}) => {
       params['appends'] = appends;
     }
   }
-
   const result = useRequest(
     snapshot
       ? async () => ({
@@ -345,12 +352,21 @@ export const useSourceIdFromRecord = () => {
 };
 
 export const useSourceIdFromParentRecord = () => {
+  const fieldSchema = useFieldSchema();
+  const collection = useCollection();
   const record = useRecord();
   const { getCollectionField } = useCollectionManager();
   const assoc = useContext(BlockAssociationContext);
   if (assoc) {
     const association = getCollectionField(assoc);
     return record?.__parent?.[association.sourceKey || 'id'];
+  }
+  /**
+   * 指向自己
+   */
+  if (collection.template !== 'tree') {
+    fieldSchema['x-decorator-props']['resource'] == collection.name;
+    return record?.__parent?.[collection.getPrimaryKey() || 'id'];
   }
 };
 

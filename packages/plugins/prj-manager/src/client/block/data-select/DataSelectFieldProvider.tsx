@@ -1,9 +1,6 @@
 import {
   DetailsBlockProvider,
   RecordProvider,
-  SchemaComponentOptions,
-  SchemaInitializerContext,
-  SchemaInitializerProvider,
   useBlockRequestContext,
   IField,
   FixedBlockWrapper,
@@ -16,18 +13,21 @@ import {
   removeNullCondition,
   useFilterBlock,
 } from '@nocobase/client';
-import { uid } from '@nocobase/utils';
-import { DataSelectBlockInitializer } from './DataSelectBlockInitializer';
-import { DataSelectDesigner } from './DataSelectDesigner';
-import debounce from 'lodash/debounce';
+import { forEach, uid } from '@nocobase/utils';
 import { createForm } from '@formily/core';
 import { Spin } from 'antd';
-// import { DetailsBlockProvider } from '@nocobase/client/src/block-provider/DetailsBlockProvider';
 
 export const DataSelectBlockContext = createContext<any>({
-  block: []
+  block: [],
+  setRecord(record){
+    this.record = record;
+  }
 });
-
+const useDataSelectBlockRecord = ()=>{
+  const {record} = useDataSelectBlockContext();  
+  console.log('----------下拉列表 useDataSelectBlockRecord----------', record);
+  return {...record};
+}
 const blockDoFilter = async (block, useCondition) => {
   const param = block.service.params?.[0] || {};
   // 保留原有的 filter
@@ -48,20 +48,18 @@ const blockDoFilter = async (block, useCondition) => {
 };
 
 export const useDataSelectBlockContext = () => {
-  const ctx = useContext(DataSelectBlockContext);
-  return {
-    ...ctx
-  };
+  return useContext(DataSelectBlockContext);
 };
 
-const useFormSelectBlockProps = () => {
+export const useFormSelectBlockProps = () => {
   const ctx = useDataSelectBlockContext();
   return {
     form: ctx?.form,
+    layout: 'inline'
   };
 };
 
-const useFormSelectOptionsProps = (props) => {
+export const useFormSelectOptionsProps = (props) => {
   const { resource, action, params } = useDataSelectBlockContext();
   const { filter } = params;
   const field: IField = useField();
@@ -84,9 +82,26 @@ const useFormSelectOptionsProps = (props) => {
     }
   };
 };
+const schemaForEach = (schema, callback) => {
+  forEach(schema.properties, (field, key) => {
+    callback(field, key);
+    if (field.properties) {
+      schemaForEach(field, callback)
+    }
+  });
+
+}
 const InnerRecordProvider = (props) => {
   const { record } = useDataSelectBlockContext();
-  return <RecordProvider record={record} parent={true}>{props.children}</RecordProvider>;
+  // const sourceId = useMemo(() => {
+  //   return record['id']
+  // }, [record]);
+  /**
+   * 遍历props.children
+   */
+  return <RecordProvider record={record}>
+    {props.children}
+  </RecordProvider>;
 };
 const isExistInSchema = (uid, fieldSchema) => {
   if (fieldSchema['x-uid'] == uid) {
@@ -166,8 +181,11 @@ const InternalDataSelectFieldProvider = (props) => {
       //刷新子区块
       dataBlocks.forEach(async (block) => {
         if (block.uid !== fieldSchema['x-uid']) {
-          let flag = isExistInSchema(block.uid, fieldSchema);
-          if (flag) {
+          //
+          const flag = isExistInSchema(block.uid, fieldSchema);
+          //shi fou xianshi 
+          const blockVisible = true;
+          if (flag && blockVisible) {
             block?.service?.refresh();
           }
         }
@@ -180,6 +198,8 @@ const InternalDataSelectFieldProvider = (props) => {
         const value = {
           id: field.value
         };
+        // setRecord(value);
+
         await refreshSelf(value);
       });
       if (!service.loading) {
@@ -196,6 +216,7 @@ const InternalDataSelectFieldProvider = (props) => {
       form.removeEffects(id);
     };
   }, [fieldSchema, service?.loading]);
+
   return (
     <FixedBlockWrapper>
       <DataSelectBlockContext.Provider
@@ -207,8 +228,7 @@ const InternalDataSelectFieldProvider = (props) => {
           records,
           record,
           params,
-          buid,
-          runIndex
+          buid
         }}
       >
         <InnerRecordProvider {...props}></InnerRecordProvider>
@@ -224,35 +244,10 @@ export const DataSelectFieldProvider = (props) => {
   runIndex.current++;
   return (
 
-    <DetailsBlockProvider {...props} params={params} runWhenParamsChanged>
+    <DetailsBlockProvider {...props} recordIsDynamic useRecord={useDataSelectBlockRecord}  params={params} runWhenParamsChanged>
       <InternalDataSelectFieldProvider {...props} field={field} fieldSchema={fieldSchema} runIndex={runIndex}></InternalDataSelectFieldProvider>
     </DetailsBlockProvider>
   );
 };
 DataSelectFieldProvider.displayName = 'DataSelectDesigner';
 
-export const DataSelectProvider = React.memo((props) => {
-  const items = useContext<any>(SchemaInitializerContext);
-  const children = items.BlockInitializers.items[0].children;
-  useEffect(() => {
-    if (!children.find((item) => item.component === 'DataSelectBlockInitializer')) {
-      children.push({
-        key: 'dataSelectBlock',
-        type: 'item',
-        title: '下拉列表',
-        component: 'DataSelectBlockInitializer',
-      });
-    }
-  }, []);
-  return (
-    <SchemaInitializerProvider>
-      <SchemaComponentOptions
-        scope={{ useFormSelectBlockProps, useFormSelectOptionsProps }}
-        components={{ DataSelectBlockInitializer, DataSelectDesigner, DataSelectFieldProvider }}
-      >
-        {props.children}
-      </SchemaComponentOptions>
-    </SchemaInitializerProvider>
-  );
-});
-DataSelectProvider.displayName = 'DataSelectProvider';

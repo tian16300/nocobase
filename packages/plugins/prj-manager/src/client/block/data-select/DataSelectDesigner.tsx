@@ -1,3 +1,4 @@
+import { ArrayItems } from '@formily/antd-v5';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +15,9 @@ import {
   useSchemaTemplate,
   useSortFields,
   FilterDynamicComponent,
-  removeNullCondition,
-  FixedBlockDesignerItem
+  removeNullCondition
 } from '@nocobase/client';
-import { useDataSelectBlockContext } from './DataSelectProvider';
+import { useDataSelectBlockContext } from './DataSelectFieldProvider';
 
 
 export const DataSelectDesigner = () => {
@@ -95,7 +95,99 @@ export const DataSelectDesigner = () => {
     <GeneralSchemaDesigner template={template} title={title || name}>
       <SchemaSettings.BlockTitleItem />
       <SchemaSettings.ModalItem title={t('Set the data scope')} schema={dataScopeSchema} onSubmit={onDataScopeSubmit} />
-      <FixedBlockDesignerItem />
+      {/* <FixedBlockDesignerItem /> */}
+      <SchemaSettings.ModalItem
+        title={t('Set default sorting rules')}
+        components={{ ArrayItems }}
+        schema={
+          {
+            type: 'object',
+            title: t('Set default sorting rules'),
+            properties: {
+              sort: {
+                type: 'array',
+                default: sort,
+                'x-component': 'ArrayItems',
+                'x-decorator': 'FormItem',
+                items: {
+                  type: 'object',
+                  properties: {
+                    space: {
+                      type: 'void',
+                      'x-component': 'Space',
+                      properties: {
+                        sort: {
+                          type: 'void',
+                          'x-decorator': 'FormItem',
+                          'x-component': 'ArrayItems.SortHandle',
+                        },
+                        field: {
+                          type: 'string',
+                          enum: sortFields,
+                          required: true,
+                          'x-decorator': 'FormItem',
+                          'x-component': 'Select',
+                          'x-component-props': {
+                            style: {
+                              width: 260,
+                            },
+                          },
+                        },
+                        direction: {
+                          type: 'string',
+                          'x-decorator': 'FormItem',
+                          'x-component': 'Radio.Group',
+                          'x-component-props': {
+                            optionType: 'button',
+                          },
+                          enum: [
+                            {
+                              label: t('ASC'),
+                              value: 'asc',
+                            },
+                            {
+                              label: t('DESC'),
+                              value: 'desc',
+                            },
+                          ],
+                        },
+                        remove: {
+                          type: 'void',
+                          'x-decorator': 'FormItem',
+                          'x-component': 'ArrayItems.Remove',
+                        },
+                      },
+                    },
+                  },
+                },
+                properties: {
+                  add: {
+                    type: 'void',
+                    title: t('Add sort field'),
+                    'x-component': 'ArrayItems.Addition',
+                  },
+                },
+              },
+            },
+          } as ISchema
+        }
+        onSubmit={({ sort }) => {
+          const sortArr = sort.map((item) => {
+            return item.direction === 'desc' ? `-${item.field}` : item.field;
+          });
+          const params = field.decoratorProps.params || {};
+          params.sort = sortArr;
+          field.decoratorProps.params = params;
+          fieldSchema['x-decorator-props']['params'] = params;
+          dn.emit('patch', {
+            schema: {
+              ['x-uid']: fieldSchema['x-uid'],
+              'x-decorator-props': fieldSchema['x-decorator-props'],
+            },
+          });
+          service.run({ ...service.params?.[0], sort: sortArr });
+        }}
+      />
       <SchemaSettings.ConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
       {supportTemplate && <SchemaSettings.Divider />}
       {supportTemplate && (

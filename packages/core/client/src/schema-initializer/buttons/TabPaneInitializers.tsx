@@ -10,6 +10,7 @@ export const TabPaneInitializers = (props?: any) => {
     const ctx = useActionContext();
     const index = useRecordIndex();
     let initializer = props.gridInitializer;
+    let initializerProps = props.gridInitializerProps ||{};
     if (!initializer) {
       initializer = 'RecordBlockInitializers';
       if (props.isCreate || index === null) {
@@ -35,6 +36,9 @@ export const TabPaneInitializers = (props?: any) => {
               type: 'void',
               'x-component': 'Grid',
               'x-initializer': initializer,
+              'x-initializer-props': {
+                ...initializerProps
+              },
               properties: {},
             },
           },

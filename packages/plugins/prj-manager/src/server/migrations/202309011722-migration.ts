@@ -1,70 +1,50 @@
 import { Migration } from '@nocobase/server';
 
-export default class FieldsMigration extends Migration {
+export default class extends Migration {
   async up() {
-    const tableRepo = this.db.getRepository<any>('collections');
-    const fieldRepo =  this.context.db.getRepository('fields');
-    if(tableRepo && fieldRepo){
-      const collectionName = 'prj';
-      const collection = await tableRepo.database.getCollection(collectionName);
+    await this.syncCollectionsOptions(['prj', 'prjsUsers', 'task', 'prj_plan']);
+    this.app.acl.registerSnippet({
+      name: `pm.${this.name}.prj-manager`,
+      actions: ['prj:*', 'prjsUsers:*', 'task:*', 'prj_plan:*'],
+    });
+    this.app.acl.allow('prj', 'list', 'loggedIn');
+    this.app.acl.allow('task', 'list', 'loggedIn');
+    this.app.acl.allow('prj_plan', 'list', 'loggedIn');
+  }
+  async sysncTableFieldsToCollection(collectionName) {
+    const repo = this.db.getRepository<any>('collections');
+    const record = await repo.findOne({
+      filter: {
+        name: collectionName
+      }
+    });
+    if (record) {
+      const fRepo = this.db.getRepository<any>('fields');
+      //更新fields
+      await fRepo.destroy({
+        filter: {
+          collectionName: collectionName
+        }
+      });
+      await repo.destroy({
+        filterByTk: record.id
+      });
+      
+      await repo.db2cm(collectionName);
 
-    // const fieldRepo = this.context.db.getRepository('fields');
-    // collection.fields.forEach(async (field) => {
-    //   const existField = await fieldRepo.findOne({
-    //     where: {
-    //       collectionName: collectionName,
-    //       name: field.name,
-    //     },
-    //   });
-    //   if (existField) {
-    //     // await fieldRepo.update({
-    //     //   filter: {
-    //     //     key: existField.key,
-    //     //   },
-    //     //   values: {
-    //     //     options: {
-    //     //       ...field.options,
-    //     //     },
-    //     //   },
-    //     // });
-    //   }else{
-    //     // const value = {
-    //     //   name: field
-    //     // };
-    //     // await fieldRepo.create({
 
-    //     //   values: {
-    //     //     options: {
-    //     //       ...field.options,
-    //     //     },
-    //     //   },
-    //     // })
-
-    //   }
-    // })
-    // const field = await repo.findOne({
-    //   where: {
-    //     collectionName: 'roles',
-    //     name: 'title',
-    //   },
-    // });
-    // if (field) {
-    //   await repo.update({
-    //     filter: {
-    //       key: field.key,
-    //     },
-    //     values: {
-    //       options: {
-    //         ...field.options,
-    //         translation: true,
-    //       },
-    //     },
-    //   });
-    // }
+    } else {
+      //创建
+      await repo.db2cm(collectionName);
 
     }
-    
-  }
 
+
+  }
+  async syncCollectionsOptions(collectionNames) {
+    collectionNames.forEach(async (collectionName) => {
+      await this.sysncTableFieldsToCollection(collectionName);
+    });
+  }
   async down() { }
 }

@@ -1,7 +1,7 @@
 import { CollectionOptions } from '@nocobase/database';
 
 export default {
-  name: 'prjsUsers',
+  name: 'prjs_users',
   "title": "项目成员中间表",
   // duplicator: 'optional',
   // namespace: 'acl.acl',

@@ -1,5 +1,5 @@
 import { Schema, useFieldSchema } from '@formily/react';
-import React from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SchemaInitializer, SchemaInitializerItemOptions, useCollection, useCollectionManager } from '../..';
 import { gridRowColWrap } from '../utils';
@@ -27,7 +27,6 @@ const useRelationFields = () => {
       fields = getCollectionFields(collection);
     }
   }
-
   const relationFields = fields
     .filter((field) => ['linkTo', 'subTable', 'o2m', 'm2m', 'obo', 'oho', 'o2o', 'm2o', 'dic'].includes(field.interface))
     .map((field) => {
@@ -67,6 +66,7 @@ const useRelationFields = () => {
               title: '{{t("Table")}}',
               field,
               component: 'RecordAssociationBlockInitializer',
+
             },
             {
               key: `${field.name}_details`,
@@ -102,6 +102,13 @@ const useRelationFields = () => {
               title: '{{t("Calendar")}}',
               field,
               component: 'RecordAssociationCalendarBlockInitializer',
+            },
+            {
+              key: `${field.name}_gantt`,
+              type: 'item',
+              title: '{{t("Gantt")}}',
+              field,
+              component: 'RecordAssociationGanttBlockInitializer',
             },
           ],
         };
@@ -177,7 +184,7 @@ const useFormCollections = (props) => {
 
 export const RecordBlockInitializers = (props: any) => {
   const { t } = useTranslation();
-  const { insertPosition, component, actionInitializers } = props;
+  const { insertPosition, component, actionInitializers, useHookItems } = props;
   const collection = useCollection();
   const { getChildrenCollections } = useCollectionManager();
   const formChildrenCollections = getChildrenCollections(collection.name);
@@ -185,6 +192,76 @@ export const RecordBlockInitializers = (props: any) => {
   const detailChildrenCollections = getChildrenCollections(collection.name, true);
   const hasDetailChildCollection = detailChildrenCollections?.length > 0;
   const modifyFlag = (collection as any).template !== 'view' || collection?.writableView;
+  const items: any = [
+    {
+      type: 'itemGroup',
+      title: '{{t("Current record blocks")}}',
+      children: [
+        hasDetailChildCollection
+          ? {
+            key: 'details',
+            type: 'subMenu',
+            title: '{{t("Details")}}',
+            children: useDetailCollections({
+              ...props,
+              childrenCollections: detailChildrenCollections,
+              collection,
+            }),
+          }
+          : {
+            key: 'details',
+            type: 'item',
+            title: '{{t("Details")}}',
+            component: 'RecordReadPrettyFormBlockInitializer',
+            actionInitializers,
+          },
+        hasFormChildCollection
+          ? {
+            key: 'form',
+            type: 'subMenu',
+            title: '{{t("Form")}}',
+            children: useFormCollections({
+              ...props,
+              childrenCollections: formChildrenCollections,
+              collection,
+            }),
+          }
+          : modifyFlag && {
+            key: 'form',
+            type: 'item',
+            title: '{{t("Form")}}',
+            component: 'RecordFormBlockInitializer',
+          },
+      ],
+    },
+    {
+      type: 'itemGroup',
+      title: '{{t("Relationship blocks")}}',
+      children: useRelationFields(),
+    },
+    {
+      type: 'itemGroup',
+      title: '{{t("Other blocks")}}',
+      children: [
+        {
+          key: 'markdown',
+          type: 'item',
+          title: '{{t("Markdown")}}',
+          component: 'MarkdownBlockInitializer',
+        },
+        {
+          key: 'auditLogs',
+          type: 'item',
+          title: '{{t("Audit logs")}}',
+          component: 'AuditLogsBlockInitializer',
+        },
+      ],
+    },
+  ];
+  if (typeof useHookItems == 'function') {
+    useHookItems(items);
+  }
+
   return (
     <SchemaInitializer.Button
       wrap={gridRowColWrap}
@@ -192,72 +269,125 @@ export const RecordBlockInitializers = (props: any) => {
       component={component}
       title={component ? null : t('Add block')}
       icon={'PlusOutlined'}
-      items={[
-        {
-          type: 'itemGroup',
-          title: '{{t("Current record blocks")}}',
-          children: [
-            hasDetailChildCollection
-              ? {
-                  key: 'details',
-                  type: 'subMenu',
-                  title: '{{t("Details")}}',
-                  children: useDetailCollections({
-                    ...props,
-                    childrenCollections: detailChildrenCollections,
-                    collection,
-                  }),
-                }
-              : {
-                  key: 'details',
-                  type: 'item',
-                  title: '{{t("Details")}}',
-                  component: 'RecordReadPrettyFormBlockInitializer',
-                  actionInitializers,
-                },
-            hasFormChildCollection
-              ? {
-                  key: 'form',
-                  type: 'subMenu',
-                  title: '{{t("Form")}}',
-                  children: useFormCollections({
-                    ...props,
-                    childrenCollections: formChildrenCollections,
-                    collection,
-                  }),
-                }
-              : modifyFlag && {
-                  key: 'form',
-                  type: 'item',
-                  title: '{{t("Form")}}',
-                  component: 'RecordFormBlockInitializer',
-                },
-          ],
-        },
-        {
-          type: 'itemGroup',
-          title: '{{t("Relationship blocks")}}',
-          children: useRelationFields(),
-        },
-        {
-          type: 'itemGroup',
-          title: '{{t("Other blocks")}}',
-          children: [
-            {
-              key: 'markdown',
-              type: 'item',
-              title: '{{t("Markdown")}}',
-              component: 'MarkdownBlockInitializer',
-            },
-            {
-              key: 'auditLogs',
-              type: 'item',
-              title: '{{t("Audit logs")}}',
-              component: 'AuditLogsBlockInitializer',
-            },
-          ],
-        },
-      ]}
+      items={items}
     />
   );
 };
+
+
+// export const RecordBlockInitializers = (props: any) => {
+//   return (
+//     <RecordBlockInitializerProvider {...props}></RecordBlockInitializerProvider>
+//   );
+// };
+
+
+
+// export const RecordBlockInitializerContext = createContext({});
+
+// export const useRecordBlockInitializerContext = () => {
+//   return useContext<any>(RecordBlockInitializerContext);
+// }
+
+// export const RecordBlockInitializerProvider = (props: any) => {
+//   const items = useRef<any>([]);
+//   const { insertPosition, component, ... others } = props;
+//   const { actionInitializers } = props;
+//   const collection = useCollection();
+//   const { getChildrenCollections } = useCollectionManager();
+//   const formChildrenCollections = getChildrenCollections(collection.name);
+//   const hasFormChildCollection = formChildrenCollections?.length > 0;
+//   const detailChildrenCollections = getChildrenCollections(collection.name, true);
+//   const hasDetailChildCollection = detailChildrenCollections?.length > 0;
+//   const modifyFlag = (collection as any).template !== 'view' || collection?.writableView;
+//   items.current = [
+//     {
+//       type: 'itemGroup',
+//       title: '{{t("Current record blocks")}}',
+//       children: [
+//         hasDetailChildCollection
+//           ? {
+//             key: 'details',
+//             type: 'subMenu',
+//             title: '{{t("Details")}}',
+//             children: useDetailCollections({
+//               ...props,
+//               childrenCollections: detailChildrenCollections,
+//               collection,
+//             }),
+//           }
+//           : {
+//             key: 'details',
+//             type: 'item',
+//             title: '{{t("Details")}}',
+//             component: 'RecordReadPrettyFormBlockInitializer',
+//             actionInitializers,
+//           },
+//         hasFormChildCollection
+//           ? {
+//             key: 'form',
+//             type: 'subMenu',
+//             title: '{{t("Form")}}',
+//             children: useFormCollections({
+//               ...props,
+//               childrenCollections: formChildrenCollections,
+//               collection,
+//             }),
+//           }
+//           : modifyFlag && {
+//             key: 'form',
+//             type: 'item',
+//             title: '{{t("Form")}}',
+//             component: 'RecordFormBlockInitializer',
+//           },
+//       ],
+//     },
+//     {
+//       type: 'itemGroup',
+//       title: '{{t("Relationship blocks")}}',
+//       children: useRelationFields(),
+//     },
+//     {
+//       type: 'itemGroup',
+//       title: '{{t("Other blocks")}}',
+//       children: [
+//         {
+//           key: 'markdown',
+//           type: 'item',
+//           title: '{{t("Markdown")}}',
+//           component: 'MarkdownBlockInitializer',
+//         },
+//         {
+//           key: 'auditLogs',
+//           type: 'item',
+//           title: '{{t("Audit logs")}}',
+//           component: 'AuditLogsBlockInitializer',
+//         },
+//       ],
+//     },
+//   ]
+
+//   return (
+//     <RecordBlockInitializerContext.Provider value={{ insertPosition, component, items, ...others }}>
+//       <RecordBlockInitializerInnerProvider></RecordBlockInitializerInnerProvider>
+//     </RecordBlockInitializerContext.Provider>
+//   );
+// };
+
+
+// export const RecordBlockInitializerInnerProvider = () => {
+//   const { t } = useTranslation();
+//   const { items, insertPosition, component } = useRecordBlockInitializerContext();
+//   return (
+//     <SchemaInitializer.Button
+//       wrap={gridRowColWrap}
+//       insertPosition={insertPosition}
+//       component={component}
+//       title={component ? null : t('Add block')}
+//       icon={'PlusOutlined'}
+//       items={items}
+//     />
+//   );
+// };
+
+

@@ -864,7 +864,7 @@ export const useCollectionDataSourceItems = (componentName) => {
             return false;
           } else if (['Kanban', 'FormItem'].includes(componentName) && item.template === 'view' && !item.writableView) {
             return false;
-          } else if (item.template === 'file' && ['Kanban', 'FormItem', 'Calendar'].includes(componentName)) {
+          } else if (item.template === 'file' && ['Kanban', 'FormItem', 'Calendar', 'Gantt'].includes(componentName)) {
             return false;
           } else {
             if (!item.title) {
@@ -1641,7 +1641,7 @@ export const createCalendarBlockSchema = (options) => {
 };
 
 export const createGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames, ...others } = options;
+  const { collection, resource, fieldNames,appends, ...others } = options;
   const schema: ISchema = {
     type: 'void',
     'x-acl-action': `${resource || collection}:list`,
@@ -1655,6 +1655,7 @@ export const createGanttBlockSchema = (options) => {
         ...fieldNames,
       },
       params: {
+        appends,
         paginate: false,
       },
       ...others,

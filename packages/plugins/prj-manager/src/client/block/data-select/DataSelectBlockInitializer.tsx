@@ -5,7 +5,9 @@ import {
 } from '@nocobase/client';
 import React from 'react';
 import { uid } from '@nocobase/utils';
+import { useRecordBlockInitializerItems } from '../../hooks';
 
+const useRecord = '{{useDataSelectBlockRecord}}';
 export const createDataSelectBlockSchema = (options) => {
   const {
     formItemInitializers = 'FormItemInitializers',
@@ -26,301 +28,110 @@ export const createDataSelectBlockSchema = (options) => {
       useProps: '{{ useFormSelectBlockProps }}',
     },
     properties: {
-      grid: {
-        type: 'void',
-        'x-component': 'FormGrid',
-        'x-component-props': {
-          minColumns: [4, 6, 10],
-        },
-        'properties': {
-          id: {
-            type: 'number',
-            title: '选择项目',
-            "x-designer": "FormItem.Designer",
-            'x-component': 'RemoteSelect',
-            'x-decorator': 'FormItem',
-            'x-component-props': {
-              multiple: false,
-              service: {
-                resource: resourceName,
-                action,
-                params,
-              },
-              fieldNames: {
-                label: 'title',
-                value: 'id'
-              },
-              useProps: '{{ useFormSelectOptionsProps }}',
-            },
-          },
-          status: {
-            "type": "string",
-            "name": "status",
-            "x-designer": "FormItem.Designer",
-            "x-component": "CollectionField",
-            "x-decorator": "FormItem",
-            "x-collection-field": "prj.status",
-            "x-component-props": {
-              "service": {
-                "params": {
-                  "filter": {
-                    "$and": [
-                      {
-                        "dicCode": {
-                          "$eq": "prj_status"
-                        }
-                      }
-                    ]
-                  }
+      ['grid_' + uid()]: {
+        "type": "void",
+        "x-component": "Grid",
+        "properties": {
+          ['row_' + uid()]: {
+            "type": "void",
+            "x-component": "Grid.Row",
+            "properties": {
+              ['col_' + uid()]: {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "x-component-props": {
+                  // "width": "83.20"
+                  "width": "24"
+                },
+                "properties": {
+                  id: {
+                    type: 'number',
+                    title: '选择项目',
+                    "x-designer": "FormItem.Designer",
+                    'x-component': 'RemoteSelect',
+                    'x-decorator': 'FormItem',
+                    'x-component-props': {
+                      multiple: false,
+                      service: {
+                        resource: resourceName,
+                        action,
+                        params,
+                      },
+                      fieldNames: {
+                        label: 'title',
+                        value: 'id'
+                      },
+                      useProps: '{{ useFormSelectOptionsProps }}',
+                    },
+                  },
+
+                }
+              }, 
+              ['col_' + uid()]: {
+                "type": "void",
+                "x-component": "Grid.Col",
+                "x-component-props": {
+                  // "width": "83.20"
+                  "width":  100-48
                 }
               },
-              "multiple": false,
-              "fieldNames": {
-                "label": "label",
-                "value": "id",
-                "icon": "icon",
-                "color": "color"
-              },
-              "mode": "Picker",
-              "openSize": "small"
-            },
-            "properties": {
-              [uid()]: {
+              ['col_' + uid()]: {
                 "type": "void",
-                "x-component": "AssociationField.Selector",
-                "title": "选择状态",
+                "x-component": "Grid.Col",
                 "x-component-props": {
-                  "className": "nb-record-picker-selector"
+                  "width": "24"
                 },
-                "x-index": 1,
                 "properties": {
-                  "grid": {
-                    "type": "void",
-                    "x-component": "Grid",
-                    "x-initializer": "TableSelectorInitializers",
-                    "properties": {
-                      [`r_${uid()}`]: {
-                        "type": "void",
-                        "x-component": "Grid.Row",
-                        "properties": {
-                          [`c_${uid()}`]: {
-                            "type": "void",
-                            "x-component": "Grid.Col",
-                            "properties": {
-                              [uid()]: {
-                                "type": "void",
-                                "x-acl-action": "dicItem:list",
-                                "x-decorator": "TableSelectorProvider",
-                                "x-decorator-props": {
-                                  "collection": "dicItem",
-                                  "resource": "dicItem",
-                                  "action": "list",
-                                  "params": {
-                                    "pageSize": 20,
-                                    "filter": {
-                                      "$and": [
-                                        {
-                                          "dic": {
-                                            "code": {
-                                              "$eq": "prj_status"
-                                            }
-                                          }
-                                        }
-                                      ]
-                                    }
-                                  }
-                                },
-                                "x-designer": "TableSelectorDesigner",
-                                "x-component": "BlockItem",
-                                "properties": {
-                                  "actions": {
-                                    "type": "void",
-                                    "x-initializer": "TableActionInitializers",
-                                    "x-component": "ActionBar",
-                                    "x-component-props": {
-                                      "style": {
-                                        "marginBottom": "var(--nb-spacing)"
-                                      }
-                                    },
-                                    "properties": {
-                                      [uid()]: {
-                                        "title": "{{ t(\"Refresh\") }}",
-                                        "x-action": "refresh",
-                                        "x-component": "Action",
-                                        "x-designer": "Action.Designer",
-                                        "x-component-props": {
-                                          "icon": "ReloadOutlined",
-                                          "useProps": "{{ useRefreshActionProps }}"
-                                        },
-                                        "x-align": "right",
-                                        "type": "void",
-                                        "x-async": false,
-                                        "x-index": 1
-                                      }
-                                    }
-                                  },
-                                  "value": {
-                                    "type": "array",
-                                    "x-initializer": "TableColumnInitializers",
-                                    "x-component": "TableV2.Selector",
-                                    "x-component-props": {
-                                      "rowSelection": {
-                                        "type": "checkbox"
-                                      },
-                                      "useProps": "{{ useTableSelectorProps }}"
-                                    },
-                                    "properties": {
-                                      [uid()]: {
-                                        "type": "void",
-                                        "x-decorator": "TableV2.Column.Decorator",
-                                        "x-designer": "TableV2.Column.Designer",
-                                        "x-component": "TableV2.Column",
-                                        "properties": {
-                                          "label": {
-                                            "x-collection-field": "dicItem.label",
-                                            "x-component": "CollectionField",
-                                            "x-component-props": {
-                                              "ellipsis": true
-                                            },
-                                            "x-read-pretty": true,
-                                            "x-decorator": null,
-                                            "x-decorator-props": {
-                                              "labelStyle": {
-                                                "display": "none"
-                                              }
-                                            }
-                                          }
-                                        }
-                                      },
-                                      [uid()]: {
-                                        "type": "void",
-                                        "x-decorator": "TableV2.Column.Decorator",
-                                        "x-designer": "TableV2.Column.Designer",
-                                        "x-component": "TableV2.Column",
-                                        "properties": {
-                                          "value": {
-                                            "x-collection-field": "dicItem.value",
-                                            "x-component": "CollectionField",
-                                            "x-component-props": {
-                                              "ellipsis": true
-                                            },
-                                            "x-read-pretty": true,
-                                            "x-decorator": null,
-                                            "x-decorator-props": {
-                                              "labelStyle": {
-                                                "display": "none"
-                                              }
-                                            }
-                                          }
-                                        }
-                                      },
-                                      [uid()]: {
-                                        "type": "void",
-                                        "x-decorator": "TableV2.Column.Decorator",
-                                        "x-designer": "TableV2.Column.Designer",
-                                        "x-component": "TableV2.Column",
-                                        "properties": {
-                                          "dic": {
-                                            "x-collection-field": "dicItem.dic",
-                                            "x-component": "CollectionField",
-                                            "x-component-props": {
-                                              "ellipsis": true,
-                                              "size": "small",
-                                              "mode": "Tag",
-                                              "enableLink": false
-                                            },
-                                            "x-read-pretty": true,
-                                            "x-decorator": null,
-                                            "x-decorator-props": {
-                                              "labelStyle": {
-                                                "display": "none"
-                                              }
-                                            }
-                                          }
-                                        }
-                                      }
-                                    }
-                                  }
+                  status: {
+                    "type": "string",
+                    "name": "status",
+                    "x-designer": "FormItem.Designer",
+                    "x-component": "CollectionField",
+                    "x-decorator": "FormItem",
+                    "x-collection-field": "prj.status",
+                    "x-component-props": {
+                      "service": {
+                        "params": {
+                          "filter": {
+                            "$and": [
+                              {
+                                "dicCode": {
+                                  "$eq": "prj_status"
                                 }
                               }
-                            }
+                            ]
                           }
                         }
-                      }
-                    }
-                  },
-                  "footer": {
-                    "x-component": "Action.Container.Footer",
-                    "x-component-props": {},
-                    "properties": {
-                      "actions": {
-                        "type": "void",
-                        "x-component": "ActionBar",
-                        "x-component-props": {},
-                        "properties": {
-                          "submit": {
-                            "title": "提交",
-                            "x-action": "submit",
-                            "x-component": "Action",
-                            "x-designer": "Action.Designer",
-                            "x-component-props": {
-                              "type": "primary",
-                              "htmlType": "submit",
-                              "useProps": "{{ usePickActionProps }}",
-                              "danger": false
-                            }
-                          }
-                        }
-                      }
+                      },
+                      "multiple": false,
+                      "fieldNames": {
+                        "label": "label",
+                        "value": "id",
+                        "icon": "icon",
+                        "color": "color"
+                      },
+                      "mode": "Select",
+                      "openSize": "small"
                     }
                   }
-                }
-              },
-              [uid()]: {
-                "type": "void",
-                "x-component": "AssociationField.Nester",
-                "x-index": 2,
-                "properties": {
-                  "grid": {
-                    "type": "void",
-                    "x-component": "Grid",
-                    "x-initializer": "FormItemInitializers",
-                    "properties": {
-                      [uid()]: {
-                        "type": "void",
-                        "x-component": "Grid.Row",
-                        "properties": {
-                          [uid()]: {
-                            "type": "void",
-                            "x-component": "Grid.Col",
-                            "properties": {
-                              "dic.items": {
-                                "type": "string",
-                                "x-designer": "FormItem.Designer",
-                                "x-component": "CollectionField",
-                                "x-read-pretty": true,
-                                "x-component-props": {
-                                  "pattern-disable": true,
-                                  "enableLink": false,
-                                  "mode": "Tag"
-                                },
-                                "x-decorator": "FormItem",
-                                "x-collection-field": "dicItem.dic.items",
-                                "x-async": false,
-                                "x-index": 1
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
+
                 }
               }
             }
+
           }
-        },
+        }
+
       }
+    }
+  };
+  const grid = {
+    type: 'void',
+    'x-component': 'Grid',
+    'x-initializer': 'RecordBlockInitializers',
+    'x-initializer-props': {
+      "isBulkEdit": true,
+      'useHookItems': useRecordBlockInitializerItems
     }
   };
   const tabs: ISchema = {
@@ -328,6 +139,13 @@ export const createDataSelectBlockSchema = (options) => {
     'x-component': 'Tabs',
     'x-component-props': {},
     'x-initializer': 'TabPaneInitializers',
+    'x-initializer-props': {
+      gridInitializer: 'RecordBlockInitializers',
+      gridInitializerProps:{
+        "isBulkEdit": true,
+        'useHookItems': useRecordBlockInitializerItems
+      }
+    },
     properties: {
       tab1: {
         type: 'void',
@@ -338,54 +156,56 @@ export const createDataSelectBlockSchema = (options) => {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            'x-initializer-props': {
-              "isBulkEdit": true
-            },
-            properties: {},
+            ...grid
           },
         },
       },
       tab2: {
         type: 'void',
-        title: '任务管理',
+        title: '项目成员',
         'x-component': 'Tabs.TabPane',
         'x-designer': 'Tabs.Designer',
         'x-component-props': {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            'x-initializer-props': {
-              "isBulkEdit": true
-            },
-            properties: {},
+            ...grid
           },
         },
       },
       tab3: {
         type: 'void',
-        title: '甘特图',
+        title: '项目计划',
         'x-component': 'Tabs.TabPane',
         'x-designer': 'Tabs.Designer',
         'x-component-props': {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            'x-initializer-props': {
-              "isBulkEdit": true
-            },
-            properties: {},
+            ...grid
           },
         },
       },
+      // tab4: {
+      //   type: 'void',
+      //   title: '项目汇总',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {
+      //   },
+      //   properties: {
+      //     grid: {
+      //       type: 'void',
+      //       'x-component': 'Grid',
+      //       'x-initializer': 'RecordBlockInitializers',
+      //       'x-initializer-props': {
+      //         "isBulkEdit": true,
+      //         'useHookItems': '{{ useRecordBlockInitializerItems }}'
+      //       },
+      //       properties: {},
+      //     },
+      //   },
+      // },
       tab4: {
         type: 'void',
         title: '工时统计',
@@ -395,10 +215,7 @@ export const createDataSelectBlockSchema = (options) => {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            properties: {},
+            ...grid
           },
         },
       },
@@ -411,10 +228,7 @@ export const createDataSelectBlockSchema = (options) => {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            properties: {},
+            ...grid
           },
         },
       },
@@ -427,10 +241,7 @@ export const createDataSelectBlockSchema = (options) => {
         },
         properties: {
           grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'RecordBlockInitializers',
-            properties: {},
+            ...grid
           },
         },
       },
@@ -448,7 +259,7 @@ export const createDataSelectBlockSchema = (options) => {
       action: 'list',
       params: {
         pageSize: 1,
-        appends:['status']
+        appends: ['status']
       },
     },
     'x-designer': 'DataSelectDesigner',

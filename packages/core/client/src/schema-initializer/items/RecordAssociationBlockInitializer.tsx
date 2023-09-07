@@ -7,7 +7,7 @@ import { SchemaInitializer } from '../SchemaInitializer';
 import { createTableBlockSchema, useRecordCollectionDataSourceItems } from '../utils';
 
 export const RecordAssociationBlockInitializer = (props) => {
-  const { item, onCreateBlockSchema, componentType, createBlockSchema, insert, ...others } = props;
+  const { item, onCreateBlockSchema, componentType, createBlockSchema, insert,   ...others } = props;
   const { getTemplateSchemaByMode } = useSchemaTemplateManager();
   const { getCollection } = useCollectionManager();
   const field = item.field;
@@ -27,7 +27,7 @@ export const RecordAssociationBlockInitializer = (props) => {
               rowKey: collection.filterTargetKey,
               collection: field.target,
               resource,
-              association: resource,
+              association: resource
             }),
           );
         }
