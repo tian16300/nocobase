@@ -13,7 +13,6 @@ import { RoleModel } from './model/RoleModel';
 import { RoleResourceActionModel } from './model/RoleResourceActionModel';
 import { RoleResourceModel } from './model/RoleResourceModel';
 import { Mutex } from 'async-mutex';
-import { aclFilterCondition, roleRecords } from './roles';
 
 export interface AssociationFieldAction {
   associationActions: string[];
@@ -405,15 +404,14 @@ export class PluginACL extends Plugin {
             strategy: { actions: ['create', 'view', 'update', 'destroy'] },
             snippets: ['ui.*', 'pm', 'pm.*'],
           },
-          // {
-          //   name: 'member',
-          //   title: '{{t("Member")}}',
-          //   allowNewMenu: true,
-          //   strategy: { actions: ['view', 'update:own', 'destroy:own', 'create'] },
-          //   default: true,
-          //   snippets: ['!ui.*', '!pm', '!pm.*'],
-          // },
-          ...roleRecords
+          {
+            name: 'member',
+            title: '{{t("Member")}}',
+            allowNewMenu: true,
+            strategy: { actions: ['view', 'update:own', 'destroy:own', 'create'] },
+            default: true,
+            snippets: ['!ui.*', '!pm', '!pm.*'],
+          },
         ],
       });
       const rolesResourcesScopes = this.app.db.getRepository('rolesResourcesScopes');
@@ -471,7 +469,7 @@ export class PluginACL extends Plugin {
     this.app.acl.addFixedParams('roles', 'destroy', () => {
       return {
         filter: {
-          $and: [{ 'name.$ne': 'root' }, { 'name.$ne': 'admin' }, ...aclFilterCondition],
+          $and: [{ 'name.$ne': 'root' }, { 'name.$ne': 'admin' }, { 'name.$ne': 'member' }],
         },
       };
     });
@@ -572,7 +570,6 @@ export class PluginACL extends Plugin {
           const action = ctx.can({ resource: collectionName, action: actionName });
 
           const availableAction = this.app.acl.getAvailableAction(actionName);
-
           if (availableAction?.options?.onNewRecord) {
             if (action) {
               ctx.permission.skip = true;
@@ -580,11 +577,14 @@ export class PluginACL extends Plugin {
               ctx.permission.can = false;
             }
           } else {
-            const filter = await parseJsonTemplate(action?.params?.filter || {}, ctx);
+            const filteredParams = this.app.acl.filterParams(ctx, collectionName, action?.params || {});
+            const params = await parseJsonTemplate(filteredParams, ctx);
+
             const sourceInstance = await ctx.db.getRepository(collectionName).findOne({
               filterByTk: resourceOf,
-              filter,
+              filter: params.filter || {},
             });
+
             if (!sourceInstance) {
               ctx.permission.can = false;
             }

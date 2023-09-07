@@ -4,6 +4,7 @@ import { Field, useField, useForm } from '@formily/react';
 import {
   FormProvider,
   Input,
+  PopoverWithStopPropagation,
   Radio,
   SchemaComponent,
   locale,
@@ -13,7 +14,7 @@ import {
   useResourceActionContext,
   useResourceContext,
 } from '@nocobase/client';
-import { Input as AntdInput, Button, Card, Checkbox, Col, Divider, Popover, Row, Tag, Typography, message } from 'antd';
+import { Input as AntdInput, Button, Card, Checkbox, Col, Divider, Row, Tag, Typography, message } from 'antd';
 import React, { useMemo, useState } from 'react';
 import { useLocalTranslation } from './locale';
 import { localizationSchema } from './schemas/localization';
@@ -114,7 +115,7 @@ const Sync = () => {
   };
 
   return (
-    <Popover
+    <PopoverWithStopPropagation
       placement="bottomRight"
       content={
         <>
@@ -157,7 +158,7 @@ const Sync = () => {
       >
         {t('Sync')}
       </Button>
-    </Popover>
+    </PopoverWithStopPropagation>
   );
 };
 

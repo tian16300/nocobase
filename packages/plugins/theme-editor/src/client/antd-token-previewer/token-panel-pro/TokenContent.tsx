@@ -1,5 +1,6 @@
 import { CaretRightOutlined, ExpandOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Collapse, ConfigProvider, Popover, Switch, Tooltip, Typography } from 'antd';
+import { PopoverWithStopPropagation } from '@nocobase/client';
+import { Button, Checkbox, Collapse, ConfigProvider, Switch, Tooltip, Typography } from 'antd';
 import type { ThemeConfig } from 'antd/es/config-provider/context';
 import seed from 'antd/es/theme/themes/seed';
 import classNames from 'classnames';
@@ -60,9 +61,10 @@ const useStyle = makeStyle('ColorTokenContent', (token) => ({
         transition: 'box-shadow 0.2s ease-in-out',
         borderRadius: 8,
       },
-      [`> ${token.rootCls}-collapse-item > ${token.rootCls}-collapse-content > ${token.rootCls}-collapse-content-box`]: {
-        paddingBlock: '0 12px',
-      },
+      [`> ${token.rootCls}-collapse-item > ${token.rootCls}-collapse-content > ${token.rootCls}-collapse-content-box`]:
+        {
+          paddingBlock: '0 12px',
+        },
 
       '.token-panel-pro-token-collapse-description': {
         color: token.colorTextTertiary,
@@ -302,7 +304,7 @@ const SeedTokenPreview: FC<SeedTokenProps> = ({ theme, tokenName, disabled, alph
         </Typography.Link>
       </div>
       {tokenName.startsWith('color') && (
-        <Popover
+        <PopoverWithStopPropagation
           trigger="click"
           placement="bottomRight"
           overlayInnerStyle={{ padding: 0 }}
@@ -324,7 +326,7 @@ const SeedTokenPreview: FC<SeedTokenProps> = ({ theme, tokenName, disabled, alph
             />
             <div className="token-panel-pro-token-collapse-seed-block-sample-card-value">{tokenValue}</div>
           </div>
-        </Popover>
+        </PopoverWithStopPropagation>
       )}
       {['fontSize', 'sizeUnit', 'sizeStep', 'borderRadius'].includes(tokenName) && (
         <InputNumberPlus

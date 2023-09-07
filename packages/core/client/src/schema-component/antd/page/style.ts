@@ -49,6 +49,9 @@ export const useStyles = genStyleHook('nb-page', (token) => {
           '.ant-page-header-footer': { marginBlockStart: '0' },
         },
         '.ant-tabs-nav': { marginBottom: '0' },
+        '.ant-page-header-heading-title': {
+          color: token.colorText,
+        },
       },
 
       '.height0': {
@@ -104,16 +107,14 @@ export const useStyles = genStyleHook('nb-page', (token) => {
         height: '100%',
         '> .nb-grid:not(:last-child)': {
           '> .nb-schema-initializer-button': { display: 'none' },
-        }
-
+        },
       },
 
       '.nb-page-wrapper': {
         padding: token.marginLG,
         // flex: 1,
         height: 'calc(100vh - 50px - 52px)',
-        overflowY:' scroll'
-        
+        overflowY: ' scroll',
       },
     },
   };

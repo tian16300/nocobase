@@ -1,9 +1,9 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { connect, mapProps, mapReadPretty } from '@formily/react';
 import { isValid } from '@formily/shared';
-import { css, Icon } from '@nocobase/client';
+import { Icon, PopoverWithStopPropagation, css } from '@nocobase/client';
 import type { SelectProps } from 'antd';
-import { Popover, Select as AntdSelect } from 'antd';
+import { Select as AntdSelect } from 'antd';
 import React from 'react';
 import { lang } from '../locale';
 import { ReadPretty } from './ReadPretty';
@@ -35,17 +35,15 @@ const InternalSelect = connect(
       >
         <OptGroup label={lang('Basic charts')}>
           {group1.map((option) => (
-            <Option value={option.key} label={lang(option.title)}>
-              <Popover
+            <Option key={option.key} value={option.key} label={lang(option.title)}>
+              <PopoverWithStopPropagation
                 placement={'right'}
                 zIndex={99999999999}
                 content={() => (
                   <span>
                     {lang(option?.description)
                       ?.split(',')
-                      .map((item) => (
-                        <div>{item}</div>
-                      ))}
+                      .map((item) => <div key={item}>{item}</div>)}
                   </span>
                 )}
                 trigger="hover"
@@ -62,23 +60,21 @@ const InternalSelect = connect(
                     {lang(option.title)}
                   </span>
                 </div>
-              </Popover>
+              </PopoverWithStopPropagation>
             </Option>
           ))}
         </OptGroup>
         <OptGroup label={lang('More charts')}>
           {group2.map((option) => (
-            <Option value={option.key} label={lang(option.title)}>
-              <Popover
+            <Option key={option.key} value={option.key} label={lang(option.title)}>
+              <PopoverWithStopPropagation
                 placement={'right'}
                 zIndex={99999999999}
                 content={() => (
                   <span>
                     {lang(option?.description)
                       ?.split(',')
-                      .map((item) => (
-                        <div>{item}</div>
-                      ))}
+                      .map((item) => <div key={item}>{item}</div>)}
                   </span>
                 )}
                 trigger="hover"
@@ -95,7 +91,7 @@ const InternalSelect = connect(
                     {lang(option.title)}
                   </span>
                 </div>
-              </Popover>
+              </PopoverWithStopPropagation>
             </Option>
           ))}
         </OptGroup>
