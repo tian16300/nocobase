@@ -27,6 +27,7 @@ export class PresetNocoBase extends Plugin {
     'auth',
     'sms-auth',
     'theme-editor',
+    'audit-logs',
     'company-info',
     'dic-manager',
     'prj-manager',
@@ -34,7 +35,6 @@ export class PresetNocoBase extends Plugin {
   ];
 
   localPlugins = [
-    'audit-logs',
     'sample-hello',
     'multi-app-manager',
     'multi-app-share-collection',

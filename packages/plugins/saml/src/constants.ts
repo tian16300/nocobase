@@ -1,5 +1,5 @@
 // @ts-ignore
-import { name } from '../package.json';
+import pkg from '../package.json';
 
 export const authType = 'SAML';
-export const namespace = name;
+export const namespace = pkg.name;

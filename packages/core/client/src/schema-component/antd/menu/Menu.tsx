@@ -192,7 +192,7 @@ const sideMenuClass = css`
         }
       }
     }
-  }  
+  }
 `;
 
 const menuItemClass = css`
@@ -226,30 +226,21 @@ const HeaderMenu = ({
   const items = useMemo(() => {
     const designerBtn: any = {
       key: 'x-designer-button',
-      disabled: true,
+      disabled: 1,
       style: { padding: '0 8px', textAlign: 'center' },
       label: render({ style: { background: 'none' } }),
-      notdelete: true,
-      order:9999
+      notdelete: 1,
+      order: 9999,
     };
     const result = getMenuItems(() => {
       return children;
     });
-    if(designable){
+    if (designable) {
       result.push(designerBtn);
-      //第一个和最后一个交换
-      // console.log(result);
-      // if(result.length > 1){
-      //    let temp = result.slice(1, result.length);
-      //    temp.push(designerBtn);
-      //    console.log(temp);
-      //    return temp;
-      // }
     }
-    
+
     return result;
   }, [children, designable]);
-
 
   return (
     <>
@@ -476,13 +467,13 @@ export const Menu: ComposedMenu = observer(
               defaultSelectedKeys={defaultSelectedKeys}
               defaultOpenKeys={defaultOpenKeys}
               selectedKeys={selectedKeys}
-              designable={designable}
+              designable={designable ? 1 : 0}
               render={render}
             >
               {children}
             </HeaderMenu>
             <SideMenu
-              loading={loading}
+              loading={loading ? 1 : 0}
               mode={mode}
               sideMenuSchema={sideMenuSchema}
               sideMenuRef={sideMenuRef}
@@ -493,9 +484,8 @@ export const Menu: ComposedMenu = observer(
               t={t}
               api={api}
               refresh={refresh}
-              designable={designable}
+              designable={designable ? 1 : 0}
             />
-          
           </MenuModeContext.Provider>
         </MenuItemDesignerContext.Provider>
       </DndContext>
@@ -524,7 +514,7 @@ Menu.Item = observer(
             <FieldContext.Provider value={field}>
               <SortableItem className={designerCss} removeParentsIfNoChildren={false}>
                 <div className={designerCss}>
-                  {(icon && '' !== icon && <Icon type={icon} style={{marginRight: 10}} />)}
+                  {icon && '' !== icon && <Icon type={icon} style={{ marginRight: 10 }} />}
                   <span
                     style={{
                       overflow: 'hidden',
@@ -533,7 +523,7 @@ Menu.Item = observer(
                       width: '100%',
                       verticalAlign: 'middle',
                     }}
-                    className='menu-item-label-text'
+                    className="menu-item-label-text"
                   >
                     {t(field.title)}
                   </span>
@@ -631,8 +621,8 @@ Menu.SubMenu = observer(
           <SchemaContext.Provider value={schema}>
             <FieldContext.Provider value={field}>
               <SortableItem className={subMenuDesignerCss} removeParentsIfNoChildren={false}>
-                <Icon type={icon} style={{marginRight: 10}} />
-                <span className='menu-item-label-text'>{t(field.title)}</span>
+                <Icon type={icon} style={{ marginRight: 10 }} />
+                <span className="menu-item-label-text">{t(field.title)}</span>
                 <Designer />
               </SortableItem>
             </FieldContext.Provider>

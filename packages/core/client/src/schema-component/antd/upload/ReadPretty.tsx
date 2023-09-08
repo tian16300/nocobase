@@ -1,4 +1,4 @@
-import DownloadOutlined from '@ant-design/icons/DownloadOutlined';
+import { DownloadOutlined } from '@ant-design/icons';
 import { Field } from '@formily/core';
 import { useField } from '@formily/react';
 import { isString } from '@nocobase/utils/client';
