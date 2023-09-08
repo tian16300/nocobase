@@ -1,5 +1,5 @@
 import { Plugin } from '@nocobase/client';
-// import { DataSelectProvider }  from './provider/index';
+import { DataSelectProvider } from './provider/index';
 export class PrjManagerPlugin extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -9,14 +9,12 @@ export class PrjManagerPlugin extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
-    // this.addProviders();
+    this.addProviders();
   }
-  addProviders(){ 
-    // this.app.addProvider(DataSelectProvider);
-    // this.app.addProvider(DataSelectProvider);
+  addProviders() {
+    this.app.addProvider(DataSelectProvider);
   }
-  addRoutes() {
-  }
+  addRoutes() {}
 }
 
 export default PrjManagerPlugin;
