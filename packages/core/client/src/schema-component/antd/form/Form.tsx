@@ -19,7 +19,7 @@ export interface FormProps {
 export type FormUseValues = (opts?: Opts, props?: FormProps) => Result<any, any>;
 
 const FormComponent: React.FC<FormProps> = (props) => {
-  const { form, children, ...others } = props;
+  const { form, children, layout='vertical', ...others } = props;
   const field = useField();
   const fieldSchema = useFieldSchema();
   // TODO: component 里 useField 会与当前 field 存在偏差
@@ -27,7 +27,7 @@ const FormComponent: React.FC<FormProps> = (props) => {
   return (
     <FieldContext.Provider value={undefined}>
       <FormContext.Provider value={form}>
-        <FormLayout layout={'vertical'} {...others}>
+        <FormLayout layout={layout} {...others}>
           <RecursionField basePath={f.address} schema={fieldSchema} onlyRenderProperties />
         </FormLayout>
       </FormContext.Provider>
@@ -38,7 +38,7 @@ const FormComponent: React.FC<FormProps> = (props) => {
 const Def = (props: any) => props.children;
 
 const FormDecorator: React.FC<FormProps> = (props) => {
-  const { form, children, disabled, ...others } = props;
+  const { form, children,layout='vertical', disabled, ...others } = props;
   const field = useField();
   const fieldSchema = useFieldSchema();
   // TODO: component 里 useField 会与当前 field 存在偏差
@@ -51,7 +51,7 @@ const FormDecorator: React.FC<FormProps> = (props) => {
     <ConfigProvider componentDisabled={disabled}>
       <FieldContext.Provider value={undefined}>
         <FormContext.Provider value={form}>
-          <FormLayout layout={'vertical'} {...others}>
+          <FormLayout layout={layout} {...others}>
             <FieldContext.Provider value={f}>
               <Component {...field.componentProps}>
                 <RecursionField basePath={f.address} schema={fieldSchema} onlyRenderProperties />

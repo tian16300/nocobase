@@ -25,7 +25,6 @@ export const DataSelectBlockContext = createContext<any>({
 });
 const useDataSelectBlockRecord = ()=>{
   const {record} = useDataSelectBlockContext();  
-  console.log('----------下拉列表 useDataSelectBlockRecord----------', record);
   return {...record};
 }
 const blockDoFilter = async (block, useCondition) => {
@@ -240,12 +239,9 @@ export const DataSelectFieldProvider = (props) => {
   const params = { ...props.params };
   const field = useField();
   const fieldSchema = useFieldSchema();
-  const runIndex = useRef(0);
-  runIndex.current++;
   return (
-
     <DetailsBlockProvider {...props} recordIsDynamic useRecord={useDataSelectBlockRecord}  params={params} runWhenParamsChanged>
-      <InternalDataSelectFieldProvider {...props} field={field} fieldSchema={fieldSchema} runIndex={runIndex}></InternalDataSelectFieldProvider>
+      <InternalDataSelectFieldProvider {...props} field={field} fieldSchema={fieldSchema}></InternalDataSelectFieldProvider>
     </DetailsBlockProvider>
   );
 };

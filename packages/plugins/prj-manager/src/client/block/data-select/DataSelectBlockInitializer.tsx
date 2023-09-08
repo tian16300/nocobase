@@ -5,9 +5,6 @@ import {
 } from '@nocobase/client';
 import React from 'react';
 import { uid } from '@nocobase/utils';
-import { useRecordBlockInitializerItems } from '../../hooks';
-
-const useRecord = '{{useDataSelectBlockRecord}}';
 export const createDataSelectBlockSchema = (options) => {
   const {
     formItemInitializers = 'FormItemInitializers',
@@ -128,10 +125,9 @@ export const createDataSelectBlockSchema = (options) => {
   const grid = {
     type: 'void',
     'x-component': 'Grid',
-    'x-initializer': 'RecordBlockInitializers',
+    'x-initializer': 'PrjRecordBlockInitializers',
     'x-initializer-props': {
-      "isBulkEdit": true,
-      'useHookItems': useRecordBlockInitializerItems
+      "isBulkEdit": true
     }
   };
   const tabs: ISchema = {
@@ -140,10 +136,9 @@ export const createDataSelectBlockSchema = (options) => {
     'x-component-props': {},
     'x-initializer': 'TabPaneInitializers',
     'x-initializer-props': {
-      gridInitializer: 'RecordBlockInitializers',
+      gridInitializer: 'PrjRecordBlockInitializers',
       gridInitializerProps:{
-        "isBulkEdit": true,
-        'useHookItems': useRecordBlockInitializerItems
+        "isBulkEdit": true
       }
     },
     properties: {
