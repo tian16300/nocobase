@@ -553,3 +553,7 @@ export const getPopupContainer = () => {
   }
   return (graphContainer = document.getElementById('graph_container'));
 };
+
+export const cleanGraphContainer = () => {
+  graphContainer = null;
+};
