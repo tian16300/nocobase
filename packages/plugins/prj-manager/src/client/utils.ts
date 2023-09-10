@@ -78,7 +78,7 @@ export const createDataSelectBlockSchema = (options) => {
                     status: {
                       type: 'string',
                       name: 'status',
-                      // 'x-designer': 'FormItem.Designer',
+                      'x-designer': 'FormItem.Designer',
                       'x-component': 'CollectionField',
                       'x-decorator': 'FormItem',
                       'x-collection-field': 'prj.status',
@@ -97,14 +97,19 @@ export const createDataSelectBlockSchema = (options) => {
                           },
                         },
                         multiple: false,
+                        enableLink: false,
                         fieldNames: {
                           label: 'label',
                           value: 'id',
                           icon: 'icon',
                           color: 'color',
                         },
-                        mode: 'Select'
-                      }
+                        mode: 'Tag',
+                        "ellipsis": true,
+                        "tagColorField": "color",
+                        "tagIconField": "icon",
+                      },
+                      'x-read-pretty':true
                     },
                   },
                 }
@@ -127,7 +132,8 @@ export const createDataSelectBlockSchema = (options) => {
       type: 'void',
       'x-component': 'Tabs',
       'x-component-props': {
-         'useProps': '{{ useDataSelectTabsProps }}'
+        //  'size':'large',
+        //  'type':'card'
       },
       // 'x-initializer': 'TabPaneInitializers',
       // 'x-initializer-props': {

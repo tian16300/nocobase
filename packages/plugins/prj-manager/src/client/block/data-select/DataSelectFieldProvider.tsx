@@ -45,7 +45,13 @@ export const useFormSelectBlockProps = () => {
   return {
     form: ctx?.form,
     layout: 'inline',
-    size: 'large'
+    size: 'large',
+    className:css`
+     .ant-formily-item-control-content-component{
+        display: flex;
+        align-items: center;
+     }
+    `
   };
 };
 

@@ -1,5 +1,6 @@
 export const useDataSelectTabsProps = ()=>{
     return {
-        size:'large'
+        size:'large',
+        type:'card'
     }
 }
