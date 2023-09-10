@@ -5,7 +5,7 @@ export const createDataSelectBlockSchema = (options) => {
     const {
       formItemInitializers = 'FormItemInitializers',
       actionInitializers = 'FormActionInitializers',
-      collection,
+      collection = 'prj',
       resource,
       action = 'list',
       template,
@@ -33,14 +33,12 @@ export const createDataSelectBlockSchema = (options) => {
                   type: 'void',
                   'x-component': 'Grid.Col',
                   'x-component-props': {
-                    // "width": "83.20"
-                    width: '24',
+                    width: 36,
                   },
                   properties: {
                     id: {
                       type: 'number',
                       title: '选择项目',
-                      // 'x-designer': 'FormItem.Designer',
                       'x-component': 'RemoteSelect',
                       'x-decorator': 'FormItem',
                       'x-component-props': {
@@ -56,16 +54,14 @@ export const createDataSelectBlockSchema = (options) => {
                         },
                         useProps: '{{ useFormSelectOptionsProps }}',
                       },
-                    },
+                    }
                   },
-                }
-                ,
+                },
                 ['col_' + uid()]: {
                   type: 'void',
                   'x-component': 'Grid.Col',
                   'x-component-props': {
-                    // "width": "83.20"
-                    width: 100 - 48,
+                    width: 100 - 36 - 24,
                   },
                 },
                 ['col_' + uid()]: {
@@ -78,7 +74,6 @@ export const createDataSelectBlockSchema = (options) => {
                     status: {
                       type: 'string',
                       name: 'status',
-                      'x-designer': 'FormItem.Designer',
                       'x-component': 'CollectionField',
                       'x-decorator': 'FormItem',
                       'x-collection-field': 'prj.status',
@@ -280,7 +275,7 @@ export const createDataSelectBlockSchema = (options) => {
                     // "width": "83.20"
                   },
                   properties: {
-                    form,
+                    ['form_'+uid()]:form
                   },
                 },
               },
@@ -300,7 +295,7 @@ export const createDataSelectBlockSchema = (options) => {
                   'x-component': 'Grid.Col',
                   'x-component-props': {},
                   properties: {
-                    tabs
+                    ['tabs_'+uid()]:tabs
                   }
                 },
               },
