@@ -84,7 +84,7 @@ const record =
         }
     ]
 };
-export default class extends Migration {
+export default class AddDicItems0904 extends Migration {
   async up() {
     const rep = this.app.db.getRepository('dic');
     const isExist = await rep.findOne({

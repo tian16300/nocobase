@@ -130,17 +130,21 @@ export const createDataSelectBlockSchema = (options) => {
         //  'size':'large',
         //  'type':'card'
       },
-      // 'x-initializer': 'TabPaneInitializers',
-      // 'x-initializer-props': {
-      //   gridInitializer: 'PrjRecordBlockInitializers',
-      //   gridInitializerProps: {
-      //     isBulkEdit: true,
-      //   },
-      // },
+      'x-initializer': 'TabPaneInitializers',
+      'x-initializer-props': {
+        gridInitializer: 'PrjRecordBlockInitializers',
+        gridInitializerProps: {
+          isBulkEdit: true,
+        },
+      },
       properties: {
-        ...createTabGrid('工时统计', {
+        // ...createTabGrid('项目概览', {}), 
+        tab1: createTabGrid('工时统计', {
           ['prjWorkStatic_' + uid()]: createPrjWorkStatic()
-        })
+        }),
+        tab2:createTabGrid('项目计划', {
+          ['prjWorkPlan_' + uid()]:  createPrjWorkPlan()
+        }),
         // tab1: {
         //   type: 'void',
         //   title: '项目概览',
@@ -308,57 +312,62 @@ export const createDataSelectBlockSchema = (options) => {
   };
 export const createTabGrid = (title, properties) => {
     return {
-      ['tab_' + uid()]: {
-        type: 'void',
-        title: title,
-        'x-component': 'Tabs.TabPane',
-        'x-designer': 'Tabs.Designer',
-        'x-component-props': {},
-        properties: {
-          ['grid_' + uid()]: {
-            type: 'void',
-            'x-component': 'Grid',
-            'properties': {
-              ['row_' + uid()]: {
-                type: 'void',
-                'x-component': 'Grid.Row',
-                properties: {
-                  ['col_' + uid()]: {
-                    type: 'void',
-                    'x-component': 'Grid.Col',
-                    properties: {
-                      ...properties
-                    },
+      type: 'void',
+      title: title,
+      'x-component': 'Tabs.TabPane',
+      'x-designer': 'Tabs.Designer',
+      'x-component-props': {},
+      properties: {
+        ['grid_' + uid()]: {
+          type: 'void',
+          'x-component': 'Grid',
+          'properties': {
+            ['row_' + uid()]: {
+              type: 'void',
+              'x-component': 'Grid.Row',
+              properties: {
+                ['col_' + uid()]: {
+                  type: 'void',
+                  'x-component': 'Grid.Col',
+                  properties: {
+                    ...properties
                   },
                 },
-              }
+              },
             }
-  
-          },
+          }
+
         },
       },
-  
     }
   
   };
-export const createPrjWorkStatic = () => {
-    return {
-        type: 'void',
-        'x-decorator': 'PrjWorkStatic.Decorator',
-        'x-component': 'PrjWorkStatic.Wrap',
-        'x-designer': 'PrjWorkStatic.Designer',
-        'properties': {
-            ['form_' + uid()]: {
-                type: 'void',
-                'x-component': 'PrjWorkStatic.Form',
-                'x-component-props': {
-                    'useProps': '{{ usePrjWorkStaticForm}}'
-                }
-            },
-            ['view_' + uid()]: {
-                type: 'void',
-                'x-component': 'PrjWorkStatic.View'
+
+export const createBaseComp = (comp)=>{
+  return {
+    type: 'void',
+    'x-decorator': `${comp}.Decorator`,
+    'x-component': `${comp}.Wrap`,
+    'x-designer': `${comp}.Designer`,
+    'properties': {
+        ['form_' + uid()]: {
+            type: 'void',
+            'x-component': `${comp}.Form`,
+            'x-component-props': {
+                'useProps':`{{ use${comp}Form}}`
             }
+        },
+        ['view_' + uid()]: {
+            type: 'void',
+            'x-component': `${comp}.View`
         }
     }
+}
+
+}
+export const createPrjWorkPlan = () => {
+  return  createBaseComp('PrjWorkPlan');
+}
+export const createPrjWorkStatic = () => {
+    return  createBaseComp('PrjWorkStatic');
 }

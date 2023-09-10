@@ -73,6 +73,54 @@ export default {
             "targetKey": "id"
         },
         {
+            "name": "status_dicId",
+            "type": "bigInt",
+            "interface": "integer",
+            "isForeignKey": true,
+            "uiSchema": {
+                "type": "number",
+                "title": "外键(status_dicId)",
+                "x-component": "InputNumber"
+            }
+        },
+        {
+            "name": "status",
+            "type": "belongsTo",
+            "interface": "dic",
+            "collectionName": "prj_plan",
+            "uiSchema": {
+                type: 'object',
+                "x-component-props": {
+                    "service": {
+                        "params": {
+                            "filter": {
+                                "$and": [
+                                    {
+                                        "dicCode": {
+                                            "$eq": "prj_cycle_status"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "multiple": false,
+                    "fieldNames": {
+                        "label": "label",
+                        "value": "id",
+                        "icon": "icon",
+                        "color": "color"
+                    }
+                },
+                "x-component": "AssociationField",
+                "title": "阶段状态"
+            },
+            "foreignKey": "status_dicId",
+            "target": "dicItem",
+            "dicCode": "prj_cycle_status",
+            "targetKey": "id"
+        },
+        {
             "name": "start",
             "type": "date",
             "interface": "datetime",
@@ -87,7 +135,8 @@ export default {
                     "dateFormat": "YYYY-MM-DD"
                 }
             }
-        }, {
+        },
+        {
             "name": "end",
             "type": "date",
             "interface": "datetime",
@@ -132,6 +181,28 @@ export default {
                     "dateFormat": "YYYY-MM-DD"
                 }
             }
+        },
+        
+        {
+            "name": "fruits_files",
+            "type": "belongsToMany",
+            "interface": "attachment",
+            "collectionName": "prj_plan",
+            "uiSchema": {
+                "x-component-props": {
+                    "accept": "image/*,application/pdf,application/msword,application/vnd.*,application/zip",
+                    "multiple": true
+                },
+                "type": "array",
+                "x-component": "Upload.Attachment",
+                "title": "成果物"
+            },
+            "target": "attachments",
+            "through": "prj_stages_files",
+            "foreignKey": "prj_stage_id",
+            "otherKey": "file_id",
+            "targetKey": "id",
+            "sourceKey": "id"
         },
         {
             "name": "createdAt",

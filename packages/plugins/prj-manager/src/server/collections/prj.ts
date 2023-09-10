@@ -361,7 +361,7 @@ export default {
                 "title": "项目材料"
             },
             "target": "attachments",
-            "through": "prj_files",
+            "through": "prjs_files",
             "foreignKey": "prj_id",
             "otherKey": "file_id",
             "targetKey": "id",

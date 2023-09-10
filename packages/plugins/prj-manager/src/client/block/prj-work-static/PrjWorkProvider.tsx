@@ -63,10 +63,8 @@ export const PrjWorkAsynDataProvider = observer((props) => {
       end,
     };
     return {
-      // url: 'reportDetail:list',
       resource: `reportDetail`,
       action: 'list',
-      // method: 'GET',
       params: {
         filter: {
           $and: [
@@ -83,17 +81,9 @@ export const PrjWorkAsynDataProvider = observer((props) => {
                   },
                 },
               },
-            // {
-            //   report: {
-            //     start: {
-            //       $dateNotAfter: dayjs(query.start).format('YYYY-MM-DD'),
-            //     },
-            //   },
-            // },
             {
               report: {
                 end: {
-                  // $dateNotBefore: dayjs(query.end).format('YYYY-MM-DD'),
                   $dateBetween:[dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
                 }
               }
