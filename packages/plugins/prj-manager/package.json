@@ -8,6 +8,7 @@
     "@nocobase/test": "0.x"
   },
   "dependencies": {
+    "react-countup": "^6.4.2",
     "react-window": "^1.8.9"
   }
 }

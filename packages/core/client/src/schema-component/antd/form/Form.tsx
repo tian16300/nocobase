@@ -9,6 +9,7 @@ import { useRequest } from '../../../api-client';
 import { useCollection } from '../../../collection-manager';
 import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
 import { useSchemaTemplate } from '../../../schema-templates';
+import { useProps } from '../../hooks/useProps';
 
 type Opts = Options<any, any> & { uid?: string };
 
@@ -85,7 +86,7 @@ const FormBlockContext = createContext<any>(null);
 
 export const Form: React.FC<FormProps> & { Designer?: any } = observer(
   (props) => {
-    const { request, effects, initialValue, useValues = useDefaultValues, ...others } = props;
+    const { request, effects, initialValue, useValues = useDefaultValues, ...others } = useProps(props);
     const fieldSchema = useFieldSchema();
     const field = useField();
     const form = useMemo(() => createForm({ effects }), []);

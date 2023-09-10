@@ -1,13 +1,12 @@
 import { SchemaComponentOptions, SchemaInitializerContext, SchemaInitializerProvider } from '@nocobase/client';
 import React, { useContext, useEffect } from 'react';
-import { DataSelect, PrjWorkStatic, useFormSelectBlockProps, useFormSelectOptionsProps } from '../block/index';
+import { DataSelect, PrjWorkStatic, useDataSelectTabsProps, useFormSelectBlockProps, useFormSelectOptionsProps } from '../block/index';
 import { PrjRecordBlockInitializers } from '../initializers';
 
 export const DataSelectProvider: React.FC = (props) => {
   const initializers = useContext<any>(SchemaInitializerContext);
   const children = initializers.BlockInitializers.items[0].children;
   const has = children.some((initializer) => initializer.component === 'DataSelect.initializer');
-  console.log('DataSelectProvider');
   if (!has) {
     children.push({
       key: 'dataSelectBlock',
@@ -21,6 +20,7 @@ export const DataSelectProvider: React.FC = (props) => {
       scope={{
         useFormSelectBlockProps,
         useFormSelectOptionsProps,
+        useDataSelectTabsProps
       }}
       components={{
         PrjRecordBlockInitializers,

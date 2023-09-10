@@ -4,29 +4,19 @@ import {
   useBlockRequestContext,
   IField,
   FixedBlockWrapper,
+  css,
 } from '@nocobase/client';
-import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useField, useFieldSchema } from '@formily/react';
-import { onFieldValueChange } from '@formily/core';
-import {
-  mergeFilter,
-  removeNullCondition,
-  useFilterBlock,
-} from '@nocobase/client';
+import { mergeFilter, removeNullCondition } from '@nocobase/client';
 import { forEach, uid } from '@nocobase/utils';
 import { createForm } from '@formily/core';
 import { Spin } from 'antd';
-
-export const DataSelectBlockContext = createContext<any>({
-  block: [],
-  setRecord(record){
-    this.record = record;
-  }
-});
-const useDataSelectBlockRecord = ()=>{
-  const {record} = useDataSelectBlockContext();  
-  return {...record};
-}
+export const DataSelectBlockContext = createContext<any>({});
+const useDataSelectBlockRecord = () => {
+  const { record } = useDataSelectBlockContext();
+  return record;
+};
 const blockDoFilter = async (block, useCondition) => {
   const param = block.service.params?.[0] || {};
   // 保留原有的 filter
@@ -54,14 +44,15 @@ export const useFormSelectBlockProps = () => {
   const ctx = useDataSelectBlockContext();
   return {
     form: ctx?.form,
-    layout: 'inline'
+    layout: 'inline',
+    size: 'large'
   };
 };
 
 export const useFormSelectOptionsProps = (props) => {
-  const { resource, action, params } = useDataSelectBlockContext();
+  const { resource, action, params, service } = useDataSelectBlockContext();
   const { filter } = params;
-  const field: IField = useField();
+  // const field: IField = useField();
   return {
     ...props,
     multiple: false,
@@ -69,42 +60,59 @@ export const useFormSelectOptionsProps = (props) => {
       resource,
       action,
       params: {
-        filter
+        filter,
+        appends: ['status'],
       },
     },
     fieldNames: {
       label: 'title',
       value: 'id',
     },
-    onChange(value) {
-      field.setValue(value);
-    }
+    onChange: async (val) => {
+      service.params[0].filter = {
+        $and: [
+          {
+            id: {
+              $eq: val,
+            },
+          },
+        ],
+      };
+      service.loading = true;
+      await service.refresh();
+      service.loading = false;
+
+    },
   };
 };
 const schemaForEach = (schema, callback) => {
   forEach(schema.properties, (field, key) => {
     callback(field, key);
     if (field.properties) {
-      schemaForEach(field, callback)
+      schemaForEach(field, callback);
     }
   });
-
-}
+};
 const InnerRecordProvider = (props) => {
-  const { record } = useDataSelectBlockContext();
-  // const sourceId = useMemo(() => {
-  //   return record['id']
-  // }, [record]);
-  /**
-   * 遍历props.children
-   */
-  return <RecordProvider record={record}>
-    {props.children}
-  </RecordProvider>;
+  const { form, setRecord, service } = useDataSelectBlockContext();
+  const field = useField();
+  useEffect(() => {
+    const id = uid();
+    form.addEffects(id, () => {
+      // onFormValuesChange((form) => {
+      //   // setRecord(form.values);
+      //   debugger;
+      // });
+    });
+    return () => {
+      form.removeEffects(id);
+    };
+  }, [form]);
+  return <>{props.children}</>;
 };
 const isExistInSchema = (uid, fieldSchema) => {
   if (fieldSchema['x-uid'] == uid) {
-    return true
+    return true;
   } else {
     let flag = null;
     const props = fieldSchema.properties || {};
@@ -118,12 +126,10 @@ const isExistInSchema = (uid, fieldSchema) => {
     }
     return flag;
   }
-}
+};
 const InternalDataSelectFieldProvider = (props) => {
-  const { readPretty, buid, field, runIndex } = props;
+  const { readPretty, buid, field } = props;
   const fieldSchema = useFieldSchema();
-  const { getDataBlocks } = useFilterBlock();
-  // const field = useField<any>();
   const form = useMemo(
     () =>
       createForm({
@@ -137,78 +143,15 @@ const InternalDataSelectFieldProvider = (props) => {
     return <Spin />;
   }
   field.loaded = true;
-  const records = service?.data?.data || [];
+  // const [record, setRecord] = useState(service?.data?.data[0]);
   const record = useMemo(() => {
-    return service?.data?.data[0];
-  }, [service?.loading]);
-  /**
-   * refresh children
-   */
+    return service.data.data[0];
+  }, [service?.data?.data[0]])
   useEffect(() => {
     const id = uid();
-    const refreshSelf = (value) => {
-      const dataBlocks = getDataBlocks();
-      /**
-       * 筛选 datablocks
-       */
-      const blocks = dataBlocks.filter((block) => {
-        return block.uid == fieldSchema['x-uid'];
-      });
-      //刷新自己
-      return blocks.forEach(async (block) => {
-        return await blockDoFilter(block, () => {
-          return {
-            [uid()]: {
-              $and: [
-                {
-                  ['id']: {
-                    $in: [value.id],
-                  },
-                },
-              ],
-            },
-          };
-        });
-      });
-
-    }
-    const refreshChildren = () => {
-      const dataBlocks = getDataBlocks();
-      /**
-       * 筛选 datablocks
-       */
-      //刷新子区块
-      dataBlocks.forEach(async (block) => {
-        if (block.uid !== fieldSchema['x-uid']) {
-          //
-          const flag = isExistInSchema(block.uid, fieldSchema);
-          //shi fou xianshi 
-          const blockVisible = true;
-          if (flag && blockVisible) {
-            block?.service?.refresh();
-          }
-        }
-      });
-
-    };
     form.addEffects(id, () => {
-      // onFormValuesChange((form) => {
-      onFieldValueChange('id', async (field) => {
-        const value = {
-          id: field.value
-        };
-        // setRecord(value);
-
-        await refreshSelf(value);
-      });
       if (!service.loading) {
         form.setInitialValues(record || {});
-        field.value = record;
-        if (record) {
-          refreshChildren();
-        } else {
-          /* 如果没有数据则清空 dataSource */
-        }
       }
     });
     return () => {
@@ -217,22 +160,20 @@ const InternalDataSelectFieldProvider = (props) => {
   }, [fieldSchema, service?.loading]);
 
   return (
-    <FixedBlockWrapper>
-      <DataSelectBlockContext.Provider
-        value={{
-          ...props,
-          field,
-          form,
-          service,
-          records,
-          record,
-          params,
-          buid
-        }}
-      >
-        <InnerRecordProvider {...props}></InnerRecordProvider>
-      </DataSelectBlockContext.Provider>
-    </FixedBlockWrapper>
+    <DataSelectBlockContext.Provider
+      value={{
+        ...props,
+        field,
+        form,
+        service,
+        record,
+        // setRecord,
+        params,
+        buid,
+      }}
+    >
+      <InnerRecordProvider {...props}></InnerRecordProvider>
+    </DataSelectBlockContext.Provider>
   );
 };
 export const DataSelectFieldProvider = (props) => {
@@ -240,10 +181,35 @@ export const DataSelectFieldProvider = (props) => {
   const field = useField();
   const fieldSchema = useFieldSchema();
   return (
-    <DetailsBlockProvider {...props} recordIsDynamic useRecord={useDataSelectBlockRecord}  params={params} runWhenParamsChanged>
-      <InternalDataSelectFieldProvider {...props} field={field} fieldSchema={fieldSchema}></InternalDataSelectFieldProvider>
-    </DetailsBlockProvider>
+    <div className={css`
+     height: calc(100vh - 52px - 40px - 24px*2 - 10px);
+     > div {
+      height:100%;
+      > .ant-nb-card-item{
+        height: 100%;
+        > .card {
+          height: 100%;
+          margin-bottom: 0;
+        }
+
+      }
+     }
+    `}>
+      <DetailsBlockProvider
+        uid="data-select-field"
+        {...props}
+        recordIsDynamic
+        useRecord={useDataSelectBlockRecord}
+        params={params}
+        runWhenParamsChanged
+      >
+        <InternalDataSelectFieldProvider
+          {...props}
+          field={field}
+          fieldSchema={fieldSchema}
+        ></InternalDataSelectFieldProvider>
+      </DetailsBlockProvider>
+    </div>
   );
 };
 DataSelectFieldProvider.displayName = 'DataSelectDesigner';
-

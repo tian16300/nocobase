@@ -1,124 +1,152 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { AsyncDataProvider, IField, useAsyncData } from "@nocobase/client";
-import { useField } from '@formily/react';
-import { useDataSelectBlockContext } from "../data-select";
-
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { AsyncDataProvider, IField, useAsyncData } from '@nocobase/client';
+import { connect, observer, useField } from '@formily/react';
+import { useDataSelectBlockContext } from '../data-select';
+import { createForm, onFormReact } from '@formily/core';
+import { usePrjWorkStaticFormDefValue } from './hooks';
+import { dayjs } from '@nocobase/utils';
 
 const PrjWorkProviderContext = createContext<any>({});
-
+const PrjWorkFormProviderContext = createContext<any>({});
 
 const PrjWorkProviderInner = (props) => {
-    const { record } = useDataSelectBlockContext();
-    const field: IField = useField();
-    const ctx = useAsyncData();
-    const [firstRun, setFirstRun] = useState(true);
-    useEffect(() => {
-        field.service = ctx;
-        field.loading = ctx.loading;
-        if (ctx.loading)
-            return;
-        setFirstRun(false);
-        return () => {
-            setFirstRun(true);
-        }
-    }, [ctx])
-
-    useEffect(() => {
-        if (!firstRun) {
-            ctx.refresh();
-        }
-    }, [record]);
-    return (<>{props.children}</>)
-}
-
-
-export const PrjWorkProvider = (props) => {
-    const { record } = useDataSelectBlockContext();
-    const request = useMemo(() => {
-        return {
-            url: 'reportDetail:list',
-            method: 'GET',
-            params: {
-                // "collection": "reportDetail",
-                // "measures": [
-                //     {
-                //         "field": [
-                //             "hours"
-                //         ]
-                //     }
-                // ],
-                // "dimensions": [
-                //     {
-                //         "field": [
-                //             "report",
-                //             "userId"
-                //         ],
-                //         "alias": "成员"
-                //     },
-                //     {
-                //         "field": [
-                //             "report",
-                //             "title"
-                //         ],
-                //         "alias": "周报"
-                //     },
-                //     {
-                //         "field": [
-                //             "isBusinessTrip"
-                //         ],
-                //         "alias": "是否出差"
-                //     }
-                // ],
-                "filter": {
-                    "$and": [
-                        {
-                            "prjId": {
-                                "$eq": record.id
-                            }
-                        },
-                        {
-                            "report":{
-                                "start": {
-                                    "$dateNotAfter": '2023-08-21'
-                                }
-                            }
-                        },
-                        {
-                            "report":{
-                                "end": {
-                                    "$dateNotBefore": '2023-08-27'
-                                }
-                            }
-                        },
-                        {
-                            "report":{
-                                "user": {
-                                    "id": {
-                                        "$in":[ 18 ]
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                "appends":[
-                    "report",
-                    "report.user"
-                ]
-                // ,
-                // // "paging": false
-            }
-        };
-
-    }, [record])
-    return (
-        <AsyncDataProvider request={request}>
-            <PrjWorkProviderInner {...props} />
-        </AsyncDataProvider>
-       
-    )
+  const { request } = props;
+  const formCtx = usePrjWorkFormProviderContext();
+  const field: IField = useField();
+  const ctx = useAsyncData();
+  const [firstRun, setFirstRun] = useState(true);
+  const form = formCtx.form;
+  useEffect(() => {
+    field.service = ctx;
+    field.loading = ctx.loading;
+    if (ctx.loading) return;
+    setFirstRun(false);
+    return () => {
+      setFirstRun(true);
+    };
+  }, [ctx]);
+  useEffect(() => {
+    if (!firstRun && !ctx.loading) {
+      ctx.refresh();
+    }
+  }, [request]);
+  return (
+    <PrjWorkProviderContext.Provider
+      value={{
+        service: ctx,
+        form: form,
+      }}
+    >
+      {props.children}
+    </PrjWorkProviderContext.Provider>
+  );
 };
 
+export const PrjWorkProvider = (props) => {
+  return (
+    <PrjWorkFormProvider {...props}>
+      <PrjWorkAsynDataProvider>
+        <PrjWorkProviderInner {...props} />
+      </PrjWorkAsynDataProvider>
+    </PrjWorkFormProvider>
+  );
+};
+export const PrjWorkAsynDataProvider = observer((props) => {
+  const { record } = useDataSelectBlockContext();
+  const { form } = usePrjWorkFormProviderContext();
+  const { start, end } = form.values;
+  const request = useMemo(() => {
+    if (!record || !record.id) return null;
+    const query = {
+      ...usePrjWorkStaticFormDefValue(),
+      start,
+      end,
+    };
+    return {
+      // url: 'reportDetail:list',
+      resource: `reportDetail`,
+      action: 'list',
+      // method: 'GET',
+      params: {
+        filter: {
+          $and: [
+            {
+              prjId: {
+                $eq: record.id,
+              },
+            },{
+                report: {
+                  status: {
+                    value:{
+                        $eq: '2'
+                    }
+                  },
+                },
+              },
+            // {
+            //   report: {
+            //     start: {
+            //       $dateNotAfter: dayjs(query.start).format('YYYY-MM-DD'),
+            //     },
+            //   },
+            // },
+            {
+              report: {
+                end: {
+                  // $dateNotBefore: dayjs(query.end).format('YYYY-MM-DD'),
+                  $dateBetween:[dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
+                },
+              },
+            },
+            {
+              report: {
+                user: {
+                  id: {
+                    $in: [18],
+                  },
+                },
+              },
+            },
+          ],
+        },
+        appends: ['report', 'report.user'],
+        paginate: false,
+      },
+    };
+  }, [record, start, end]);
+  return (
+    <AsyncDataProvider uid="prjWork" request={request}>
+      <PrjWorkProviderInner request={request} {...props} />
+    </AsyncDataProvider>
+  );
+});
+const PrjWorkFormProvider = connect((props) => {
+  const { service } = useDataSelectBlockContext();
+  const form = createForm({
+    effects() {
+      const defVal = usePrjWorkStaticFormDefValue();
+      onFormReact((form) => {
+        form.values = defVal;
+      });
+    },
+  });
+  if (service.loading) {
+    return;
+  }
+  return (
+    <PrjWorkFormProviderContext.Provider
+      value={{
+        form: form,
+      }}
+    >
+      {props.children}
+    </PrjWorkFormProviderContext.Provider>
+  );
+});
+
 export const usePrjWorkProviderContext = () => {
-    return useContext(PrjWorkProviderContext);
+  return useContext(PrjWorkProviderContext);
+};
+export const usePrjWorkFormProviderContext = () => {
+  return useContext(PrjWorkFormProviderContext);
 };

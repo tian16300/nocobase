@@ -1,6 +1,5 @@
 import { ISchema, Schema, SchemaOptionsContext, useField, useFieldSchema } from '@formily/react';
 import { uid } from '@formily/shared';
-import { message } from 'antd';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -8,6 +7,7 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { APIClient, useAPIClient } from '../../api-client';
 import { SchemaComponentContext } from '../context';
+import {message} from '@nocobase/utils';
 
 interface CreateDesignableProps {
   current: Schema;
@@ -578,7 +578,10 @@ export function useDesignable() {
   const { designable, setDesignable, refresh, reset } = useContext(SchemaComponentContext);
   const { components } = useContext(SchemaOptionsContext);
   const DesignableBar = () => {
-    return <></>;
+    return <>
+    
+
+    </>;
   };
   const field = useField();
   const fieldSchema = useFieldSchema();

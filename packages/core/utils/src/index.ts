@@ -19,4 +19,5 @@ export * from './registry';
 export * from './requireModule';
 export * from './toposort';
 export * from './uid';
+export * from './message';
 export { dayjs, lodash };
