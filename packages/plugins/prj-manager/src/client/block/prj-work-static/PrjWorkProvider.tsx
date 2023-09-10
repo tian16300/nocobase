@@ -95,18 +95,9 @@ export const PrjWorkAsynDataProvider = observer((props) => {
                 end: {
                   // $dateNotBefore: dayjs(query.end).format('YYYY-MM-DD'),
                   $dateBetween:[dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
-                },
-              },
-            },
-            {
-              report: {
-                user: {
-                  id: {
-                    $in: [18],
-                  },
-                },
-              },
-            },
+                }
+              }
+            }
           ],
         },
         appends: ['report', 'report.user'],
