@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormOutlined } from '@ant-design/icons';
 import { SchemaInitializer } from '@nocobase/client';
-import { createPrjWorkStatic } from '../../utils';
+import { createPrjWorkStaticShema } from '../../utils';
 
 export const PrjWorkStaticInitializer = (props) => {
   const { insert } = props;
@@ -10,7 +10,7 @@ export const PrjWorkStaticInitializer = (props) => {
       {...props}
       icon={<FormOutlined />}
       onClick={() => {
-        insert(createPrjWorkStatic());
+        insert(createPrjWorkStaticShema());
       }}
     />
   );

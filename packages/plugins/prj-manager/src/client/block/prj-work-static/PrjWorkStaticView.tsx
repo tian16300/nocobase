@@ -75,6 +75,9 @@ const sortByKey = (key, isBool?) => {
     return c - d;
   };
 };
+const renderIndex = (val, record, index)=>{
+  return <span>{index+1}</span>;
+}
 export const PrjWorkStaticView = observer((props) => {
   const ctx = usePrjWorkProviderContext();
 
@@ -234,7 +237,7 @@ export const PrjWorkStaticView = observer((props) => {
 
   const sencondExpandedRowRender = (record, index) => {
     const columns: any = [
-      { title: '序号', dataIndex: 'index', key: 'index', width: 70 },
+      { title: '序号', dataIndex: 'index', key: 'index', width: 70, render: renderIndex },
       { title: '周报', dataIndex: 'reportTitle', key: 'reportTitle' },
       { title: '开始日期', dataIndex: 'start', key: 'start' },
       { title: '结束日期', dataIndex: 'end', key: 'end' },
@@ -258,7 +261,7 @@ export const PrjWorkStaticView = observer((props) => {
   };
 
   const columns: any = [
-    { title: '序号', dataIndex: 'index', key: 'index', width: 70 },
+    { title: '序号', dataIndex: 'index', key: 'index', width: 70, render: renderIndex },
     { title: '成员', dataIndex: 'userName', key: 'userName', width: 120 },
     { title: '工时(小时)', dataIndex: 'hours', key: 'hours', sorter: sortByKey('hours') },
     { title: '在司工时(小时)', dataIndex: 'zsHours', key: 'zsHours', sorter: sortByKey('zsHours') },

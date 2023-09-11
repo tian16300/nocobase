@@ -4,6 +4,7 @@ import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
+import { useProps } from '..';
 
 export const GanttBlockContext = createContext<any>({});
 
@@ -72,6 +73,7 @@ const InternalGanttBlockProvider = (props) => {
 
 export const GanttBlockProvider = (props) => {
   const params = { filter: props.params.filter, tree: true, paginate: false, sort: props.fieldNames.start };
+  console.log('GanttBlockProvider', props);
   return (
     <BlockProvider {...props} params={params}>
       <TableBlockProvider {...props} params={params}>

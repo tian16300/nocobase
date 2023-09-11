@@ -24,7 +24,7 @@ export const GanttBlockInitializer = (props) => {
       icon={<FormOutlined />}
       onCreateBlockSchema={async ({ item }) => {
         const collectionFields = getCollectionFields(item.name);
-        const stringFields = collectionFields
+        let stringFields = collectionFields
           ?.filter((field) => field.type === 'string')
           ?.map((field) => {
             return {
@@ -32,6 +32,18 @@ export const GanttBlockInitializer = (props) => {
               value: field.name,
             };
           });
+        /**
+         * 扩展字典字段
+         */
+        const dicFields = collectionFields
+        ?.filter((field) => field.interface === 'dic').map((field) => {
+          return {
+            label: field?.uiSchema?.title,
+            value: [field.name,'label'].join('.'),
+          };
+        });
+        stringFields = stringFields.concat(dicFields);
+
         const dateFields = collectionFields
           ?.filter((field) => field.type === 'date')
           ?.map((field) => {

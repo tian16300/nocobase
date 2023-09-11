@@ -1,9 +1,9 @@
 import React from 'react';
-import { PrjWorkStaticInitializer } from './PrjWorkStaticInitializer';
-import { PrjWorkStaticDesigner } from './PrjWorkStatic.Designer';
+import { PrjWorkPlanInitializer } from './PrjWorkPlanInitializer';
+import { PrjWorkPlanDesigner } from './PrjWorkPlan.Designer';
 import { PrjWorkPlanForm } from './PrjWorkPlanForm';
 import { PrjWorkPlanProvider } from './PrjWorkPlanProvider';
-import { PrjWorkStaticView } from './PrjWorkStaticView';
+import { PrjWorkPlanView } from './PrjWorkPlanView';
 
 export const PrjWorkPlan = () => {
   return (
@@ -15,9 +15,7 @@ PrjWorkPlan.Wrap = ({ children }) => {
 
 }
 PrjWorkPlan.Form = PrjWorkPlanForm;
-PrjWorkPlan.View = PrjWorkStaticView;
+PrjWorkPlan.View = PrjWorkPlanView;
 PrjWorkPlan.Decorator = PrjWorkPlanProvider;
-PrjWorkPlan.Designer = PrjWorkStaticDesigner;
-
-
-PrjWorkPlan.Initial = PrjWorkStaticInitializer
+PrjWorkPlan.Designer = PrjWorkPlanDesigner;
+PrjWorkPlan.Initial = PrjWorkPlanInitializer

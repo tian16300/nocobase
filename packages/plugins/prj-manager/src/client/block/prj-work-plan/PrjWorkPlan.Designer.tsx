@@ -4,23 +4,11 @@ import {
   SchemaComponentOptions,
   GeneralSchemaDesigner,
   SchemaSettings,
-  useCollection
+  useCollection,
+  Gantt
 } from '@nocobase/client';
 
-export const PrjWorkStaticDesigner = () => {
-  const { name, title } = useCollection();
-  const fieldSchema = useFieldSchema();
-  return (
-    <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettings.Remove
-        removeParentsIfNoChildren
-        breakRemoveOn={{
-          'x-component': 'Grid',
-        }}
-      />
-    </GeneralSchemaDesigner>
-  );
-};
+export const PrjWorkPlanDesigner = Gantt.Designer;
 
 // export default React.memo((props) => {
 //   return (

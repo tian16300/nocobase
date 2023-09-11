@@ -10,16 +10,13 @@ export class PrjManagerPlugin extends Plugin {
   afterAdd() { }
 
   beforeLoad() {
-
-    // this.db.addMigrations({
-    //   namespace: this.name,
-    //   directory: resolve(__dirname, 'migrations'),
-    //   context: {
-    //     plugin: this
-    //   }
-    // });
-
-
+    this.db.addMigrations({
+      namespace: this.name,
+      directory: resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this
+      }
+    });
   }
 
   async load() {

@@ -201,8 +201,7 @@ export default {
                         "value": "id",
                         "label": "nickname"
                     }
-                },
-                "x-read-pretty": true
+                }
             }
         }
     ],

@@ -69,9 +69,18 @@ export const PrjWorkAsynDataProvider = observer((props) => {
         filter: {
           $and: [
             {
-              prjId: {
-                $eq: record.id,
-              },
+              $or: [
+                {
+                  belongsPrjKey: {
+                    $eq: record.id,
+                  },
+                },
+                {
+                  prjId: {
+                    $eq: record.id,
+                  },
+                }
+              ],
             },{
                 report: {
                   status: {

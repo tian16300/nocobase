@@ -23,7 +23,27 @@ export default {
                 "x-read-pretty": true
             },
             "interface": "id"
-        },//项目类型
+        },
+        {
+            "foreignKey": "prjId",
+            "onDelete": "SET NULL",
+            "name": "prj",
+            "type": "belongsTo",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": false,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                },
+                "title": "所属项目"
+            },
+            "interface": "m2o",
+            "target": "prj"
+        },
+        //项目类型
         {
             "name": "stage_dicId",
             "type": "bigInt",

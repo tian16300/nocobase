@@ -1,5 +1,5 @@
 import lodash from 'lodash';
-import { dayjs } from './dayjs';
+import { dayjs, zhCn } from './dayjs';
 
 export * from './assign';
 export * from './collections-graph';
@@ -20,4 +20,4 @@ export * from './requireModule';
 export * from './toposort';
 export * from './uid';
 export * from './message';
-export { dayjs, lodash };
+export { dayjs, zhCn, lodash };

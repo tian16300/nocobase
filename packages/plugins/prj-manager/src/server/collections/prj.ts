@@ -23,6 +23,17 @@ export default {
                 "x-read-pretty": true
             },
             "interface": "id"
+        },{
+            "name": "enable",
+            "type": "boolean",
+            "interface": "checkbox",
+            "collectionName": "prj",
+            "uiSchema": {
+                "type": "boolean",
+                "x-component": "Checkbox",
+                "title": "启用"
+            },
+            "defaultValue": true
         },
         {
             "name": "createdAt",
