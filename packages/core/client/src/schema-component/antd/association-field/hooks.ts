@@ -191,6 +191,14 @@ export default function useServiceOptions(props) {
   }, [collectionField?.target, action, filter, service]);
 }
 
+export const useEllipse = (props) => {
+  const fieldSchema = useFieldSchema();
+  const ellipse =
+    fieldSchema['x-component-props']?.['field']?.['uiSchema']?.['x-component-props']?.['ellipse'] ||
+    fieldSchema?.['x-component-props']?.['ellipse'] ||
+    props.ellipse;
+  return { ellipse };
+};
 export const useFieldNames = (props) => {
   const fieldSchema = useFieldSchema();
   const fieldNames =

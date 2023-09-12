@@ -178,6 +178,7 @@ export const TableColumnDesigner = (props) => {
           dn.refresh();
         }}
       />
+
       {intefaceCfg && intefaceCfg.sortable === true && !currentMode && (
         <SchemaSettings.SwitchItem
           title={t('Sortable')}
@@ -408,6 +409,30 @@ export const TableColumnDesigner = (props) => {
         )}
       {isSubTableColumn && !field?.readPretty && isShowDefaultValue(collectionField, getInterface) && (
         <SchemaSettings.DefaultValue fieldSchema={fieldSchema} />
+      )}
+      {isSubTableColumn && ['textarea'].includes(collectionField?.interface) && (
+        <SchemaSettings.SwitchItem
+          title={'是否省略'}
+          checked={field?.componentProps?.ellipsis}
+          onChange={(ellipsis) => {
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props']['ellipsis'] = ellipsis;
+            const path = field.path?.splice(field.path?.length - 1, 1);
+            field.form.query(`${path.concat(`*.` + fieldSchema.name)}`).forEach((f) => {
+              f.componentProps.ellipsis = ellipsis;
+            });
+            dn.emit('patch', {
+              schema: {
+                'x-uid': fieldSchema['x-uid'],
+                'x-component-props': {
+                  ...fieldSchema['x-component-props'],
+                },
+              },
+            });
+            dn.refresh();
+          }}
+          defaultChecked
+        />
       )}
       <SchemaSettings.Divider />
       <SchemaSettings.Remove

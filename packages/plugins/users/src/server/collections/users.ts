@@ -34,7 +34,7 @@ export default {
       },
     },
     {
-      interface: 'username',
+      interface: 'input',
       type: 'string',
       name: 'username',
       unique: true,
@@ -84,26 +84,25 @@ export default {
       },
     },
     {
-      "foreignKey": "userId",
-      "onDelete": "SET NULL",
-      "name": "dept",
-      "type": "belongsTo",
-      "uiSchema": {
-        "x-component": "AssociationField",
-        "x-component-props": {
-          "multiple": false,
-          "fieldNames": {
-            "label": "name",
-            "value": "id"
-          }
+      foreignKey: 'userId',
+      onDelete: 'SET NULL',
+      name: 'dept',
+      type: 'belongsTo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'name',
+            value: 'id',
+          },
         },
-        "title": "部门",
-        "icon": null
+        title: '部门',
+        icon: null,
       },
-      "interface": "m2o",
-      "target": "dept"
+      interface: 'm2o',
+      target: 'dept',
     },
-
 
     {
       type: 'string',

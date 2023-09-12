@@ -8,12 +8,15 @@ Object.assign(functions, {
     return toLocal(toDayjs(weekDay, { utcOffset: 0 }));
   },
   WEEKLASTDAY() {
-    const weekDay = dayjs(new Date()).endOf('week');
+    const weekDay = dayjs().endOf('week');
     return toLocal(toDayjs(weekDay, { utcOffset: 0 }));
   },
-  DATEFORMAT(date, format) {
-    // return dayjs.utc(date).utcOffset(1, true).format(format);
-    return '';
+  THISWEEKNAME() {
+    // const d = dayjs;
+    // console.log(dayjs.tz.guess());
+    // console.log(dayjs('2023-09-10').format('YYYY年第ww周'));
+    // console.log(toDayjs(new Date(), { utcOffset: 0 }).format('YYYY年第ww周'))
+    return dayjs().format('YYYY年第ww周');
   },
 });
 
