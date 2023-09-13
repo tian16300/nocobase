@@ -69,11 +69,6 @@ export const PrjWorkAsynDataProvider = observer((props) => {
             belongsPrjKey: {
               $eq: record.id,
             },
-          },
-          {
-            prjId: {
-              $eq: record.id,
-            },
           }
         ],
       }, {
