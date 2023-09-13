@@ -138,13 +138,13 @@ export const createDataSelectBlockSchema = (options) => {
         isBulkEdit: true,
       },
     },
-    properties: {
-      tab1: createTabGrid('项目计划', {
-        ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
-      }),      
-      tab2: createTabGrid('工时统计', {
+    properties: {      
+      tab1: createTabGrid('工时统计', {
         ['prjWorkStatic_' + uid()]: createPrjWorkStaticShema(),
       }),
+      // tab2: createTabGrid('项目计划', {
+      //   ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
+      // }),      
       // ...createTabGrid('项目概览', {}),
       // tab1: {
       //   type: 'void',
