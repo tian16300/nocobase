@@ -36,6 +36,22 @@ export default {
             "defaultValue": true
         },
         {
+            "name": "activeIndex",
+            "type": "bigInt",
+            "interface": "integer",
+            "uiSchema": {
+                "type": "number",
+                "x-component": "InputNumber",
+                "x-component-props": {
+                    "stringMode": true,
+                    "step": "1"
+                },
+                "x-validator": "integer",
+                "title": "活跃"
+            },
+            "defaultValue": 0
+        },
+        {
             "name": "createdAt",
             "interface": "createdAt",
             "type": "date",
@@ -387,25 +403,10 @@ export default {
                 "x-component": "Input.TextArea",
                 "title": "备注说明"
             }
-        },{
-            "foreignKey": "prjId",
+        },
+        {
+            "foreignKey": "belongsPrjKey",
             "onDelete": "SET NULL",
-            "reverseField": {
-                "uiSchema": {
-                    "title": "项目",
-                    "x-component": "AssociationField",
-                    "x-component-props": {
-                        "multiple": false,
-                        "fieldNames": {
-                            "label": "id",
-                            "value": "id"
-                        }
-                    }
-                },
-                "interface": "m2o",
-                "type": "belongsTo",
-                "name": "prj"
-            },
             "name": "weekReport",
             "type": "hasMany",
             "uiSchema": {

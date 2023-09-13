@@ -62,6 +62,37 @@ export default {
             "target": "task",
             "targetKey": "id",
             "sourceKey": "id"
+        },{
+            "name": "prjStageId",
+            "type": "bigInt",
+            "interface": "integer",
+            "isForeignKey": true,
+            "uiSchema": {
+                "type": "number",
+                "title": "prjStageId",
+                "x-component": "InputNumber"
+            }
+        },
+        {
+            "foreignKey": "prjStageId",
+            "onDelete": "SET NULL",
+            "name": "prjStage",
+            "type": "belongsTo",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": false,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                },
+                "title": "项目阶段"
+            },
+            "interface": "m2o",
+            "target": "prj_plan",            
+            "targetKey": "id",
+            "sourceKey": "id"
         },
         {
             "name": "id",

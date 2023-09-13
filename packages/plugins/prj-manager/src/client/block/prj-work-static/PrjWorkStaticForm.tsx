@@ -7,34 +7,34 @@ export const PrjWorkStaticForm = (props: any) => {
   const schema: ISchema = {
     type: 'object',
     properties: {
-      form: {
-        type: 'void',
-        'x-component': 'FormV2',
-        'x-component-props': {
-          useProps: '{{usePrjWorkStaticForm}}',
-        },
-        properties: {
-          grid: {
-            type: 'void',
-            'x-component': 'FormGrid',
-            'x-component-props': {
-              maxColumns: 4,
-              minColumns: 3,
-            },
-            properties: {
-              '[start, end]': {
-                title: '日期范围',
-                'x-decorator': 'FormItem',
-                'x-component': 'DatePicker.RangePicker',
-                'x-component-props': {
-                  showTime: false,
-                },
-                type: 'string',
-              }
-            },
-          },
-        },
-      },
+      // form: {
+      //   type: 'void',
+      //   'x-component': 'FormV2',
+      //   'x-component-props': {
+      //     useProps: '{{usePrjWorkStaticForm}}',
+      //   },
+      //   properties: {
+      //     grid: {
+      //       type: 'void',
+      //       'x-component': 'FormGrid',
+      //       'x-component-props': {
+      //         maxColumns: 4,
+      //         minColumns: 3,
+      //       },
+      //       properties: {
+      //         '[start, end]': {
+      //           title: '日期范围',
+      //           'x-decorator': 'FormItem',
+      //           'x-component': 'DatePicker.RangePicker',
+      //           'x-component-props': {
+      //             showTime: false,
+      //           },
+      //           type: 'string',
+      //         }
+      //       },
+      //     },
+      //   },
+      // },
     },
   };
   return (

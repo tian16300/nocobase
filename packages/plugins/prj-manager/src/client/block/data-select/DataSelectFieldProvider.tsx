@@ -17,25 +17,6 @@ const useDataSelectBlockRecord = () => {
   const { record } = useDataSelectBlockContext();
   return record;
 };
-const blockDoFilter = async (block, useCondition) => {
-  const param = block.service.params?.[0] || {};
-  // 保留原有的 filter
-  const storedFilter = block.service.params?.[1]?.filters || {};
-  const otherFilter = useCondition(storedFilter, block.defaultFilter);
-  const mergedFilter = mergeFilter([
-    ...Object.values({ ...storedFilter, ...otherFilter }).map((filter) => removeNullCondition(filter)),
-    block.defaultFilter,
-  ]);
-  return await block.doFilter(
-    {
-      ...param,
-      page: 1,
-      filter: mergedFilter,
-    },
-    { filters: storedFilter },
-  );
-};
-
 export const useDataSelectBlockContext = () => {
   return useContext(DataSelectBlockContext);
 };
@@ -57,8 +38,8 @@ export const useFormSelectBlockProps = () => {
 
 export const useFormSelectOptionsProps = (props) => {
   const { resource, action, params, service } = useDataSelectBlockContext();
-  const { filter } = params;
-  // const field: IField = useField();
+  const { filter = [], sort = [] } = params;
+  // const field: IField = useField();  
   return {
     ...props,
     multiple: false,
@@ -67,6 +48,7 @@ export const useFormSelectOptionsProps = (props) => {
       action,
       params: {
         filter,
+        sort,
         appends: ['status'],
       },
     },

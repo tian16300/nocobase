@@ -3,8 +3,8 @@ import { dayjs } from '@nocobase/utils';
 
 export const usePrjWorkStaticFormDefValue = () => {
     return {
-        start: dayjs().startOf('month').format('YYYY-MM-DD'),
-        end:  dayjs().endOf('month').format('YYYY-MM-DD')
+        // start: dayjs().startOf('month').format('YYYY-MM-DD'),
+        // end:  dayjs().endOf('month').format('YYYY-MM-DD')
     }
 }
 export const usePrjWorkStaticForm = () => {

@@ -62,42 +62,45 @@ export const PrjWorkAsynDataProvider = observer((props) => {
       start,
       end,
     };
+    const filterList: any = [
+      {
+        $or: [
+          {
+            belongsPrjKey: {
+              $eq: record.id,
+            },
+          },
+          {
+            prjId: {
+              $eq: record.id,
+            },
+          }
+        ],
+      }, {
+        report: {
+          status: {
+            value: {
+              $eq: '2'
+            }
+          },
+        },
+      }
+    ];
+    if (query.start && query.end) {
+      filterList.push({
+        report: {
+          end: {
+            $dateBetween: [dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
+          }
+        }
+      });
+    }
     return {
       resource: `reportDetail`,
       action: 'list',
       params: {
         filter: {
-          $and: [
-            {
-              $or: [
-                {
-                  belongsPrjKey: {
-                    $eq: record.id,
-                  },
-                },
-                {
-                  prjId: {
-                    $eq: record.id,
-                  },
-                }
-              ],
-            },{
-                report: {
-                  status: {
-                    value:{
-                        $eq: '2'
-                    }
-                  },
-                },
-              },
-            {
-              report: {
-                end: {
-                  $dateBetween:[dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
-                }
-              }
-            }
-          ],
+          $and: filterList
         },
         appends: ['report', 'report.user'],
         paginate: false,

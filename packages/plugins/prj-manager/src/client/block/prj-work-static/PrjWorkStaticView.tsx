@@ -10,24 +10,10 @@ import { Col, Row, Statistic, Card, Typography, Divider } from 'antd';
 import { G2PlotRenderer, css } from '@nocobase/client';
 import { Column } from '@antv/g2plot';
 const { Title } = Typography;
-const formatter = (value: number) => <CountUp end={value} separator="," />;
+const formatter = (value: number | null) => {
+  return value == null ? '--' : <CountUp end={value} separator="," />;
+};
 
-interface DataType {
-  key: React.Key;
-  name: string;
-  platform: string;
-  version: string;
-  upgradeNum: number;
-  creator: string;
-  createdAt: string;
-}
-
-interface ExpandedDataType {
-  key: React.Key;
-  date: string;
-  name: string;
-  upgradeNum: string;
-}
 
 const items = [
   { key: '1', label: 'Action 1' },
@@ -54,14 +40,20 @@ const countHours = (arr) => {
     }
     hours += temp['hours'];
   }
+  const jbHours = null;
+  const ccDays = Math.round((ccHours * 10) / 8) / 10;
+
   return {
     hours,
-    ccHours,
+    ccDays,
     zsHours,
+    jbHours,
+    ccHours,
     count: arr.length,
     '工时(小时)': hours,
-    '在司工时(小时)': zsHours,
-    '出差工时(小时)': ccHours,
+    '加班(小时)': null,
+    '公司(小时)': zsHours,
+    '出差(天)': ccDays,
   };
 };
 const sortByKey = (key, isBool?) => {
@@ -75,9 +67,9 @@ const sortByKey = (key, isBool?) => {
     return c - d;
   };
 };
-const renderIndex = (val, record, index)=>{
-  return <span>{index+1}</span>;
-}
+const renderIndex = (val, record, index) => {
+  return <span>{index + 1}</span>;
+};
 export const PrjWorkStaticView = observer((props) => {
   const ctx = usePrjWorkProviderContext();
 
@@ -139,49 +131,32 @@ export const PrjWorkStaticView = observer((props) => {
     firstData.push(record);
   });
 
-  const threeExpandedRowRender = (record, index) => {
-    const columns: any = [
-      { title: '序号', dataIndex: 'index', key: 'index' },
-      { title: '工时(小时)', dataIndex: 'hours', key: 'hours', sorter: sortByKey('hours') },
-      {
-        title: '是否出差',
-        dataIndex: 'isBusinessTrip',
-        key: 'isBusinessTrip',
-        sorter: sortByKey('isBusinessTrip', true),
-        render: (value) => {
-          if (value) {
-            return <CheckOutlined style={{ color: '#52c41a' }} />;
-          }
-          return null;
-        },
-      },
-      { title: '内容', dataIndex: 'content', key: 'content' },
-      { title: '完成情况', dataIndex: 'complete', key: 'complete' },
-    ];
-
-    const data = userGroup[record.userId].reportGroup[record.reportId];
-    return <Table rowKey="id" columns={columns} dataSource={data} pagination={false} />;
-  };
-
   const barData = [];
   const annotations = [];
   firstData.sort((a, b) => {
-    return a.hours - b.hours;
+    return b.hours - a.hours;
   });
 
   firstData.forEach((record, index) => {
     barData.push({
       userId: record.userId,
       userName: record.userName,
-      value: record.ccHours,
-      type: '出差工时(小时)',
+      value: record.zsHours,
+      type: '公司(小时)',
     });
     barData.push({
       userId: record.userId,
       userName: record.userName,
-      value: record.zsHours,
-      type: '在司工时(小时)',
+      value: record.ccHours,
+      type: '出差(小时)',
     });
+    barData.push({
+      userId: record.userId,
+      userName: record.userName,
+      value: record.jbHours,
+      type: '加班(小时)',
+    });
+
     const value = record.hours;
     annotations.push({
       type: 'text',
@@ -217,7 +192,7 @@ export const PrjWorkStaticView = observer((props) => {
       minColumnWidth: 20,
       maxColumnWidth: 20,
       data: barData,
-      height: 400,
+      height: 360,
       appendPadding: [24, 8, 12, 8],
       legend: {
         layout: 'horizontal',
@@ -235,15 +210,20 @@ export const PrjWorkStaticView = observer((props) => {
     },
   };
 
+  const staticCols = [
+    { title: '工时(小时)', dataIndex: 'hours', key: 'hours', sorter: sortByKey('hours') },
+    { title: '公司(小时)', dataIndex: 'zsHours', key: 'zsHours', sorter: sortByKey('zsHours') },
+    { title: '出差(天)', dataIndex: 'ccDays', key: 'ccDays', sorter: sortByKey('ccDays') },
+    { title: '加班(小时)', dataIndex: 'jbHours', key: 'jbHours', sorter: sortByKey('jbHours') },
+  ];
+
   const sencondExpandedRowRender = (record, index) => {
     const columns: any = [
       { title: '序号', dataIndex: 'index', key: 'index', width: 70, render: renderIndex },
       { title: '周报', dataIndex: 'reportTitle', key: 'reportTitle' },
       { title: '开始日期', dataIndex: 'start', key: 'start' },
       { title: '结束日期', dataIndex: 'end', key: 'end' },
-      { title: '工时(小时)', dataIndex: 'hours', key: 'hours', sorter: sortByKey('hours') },
-      { title: '在司工时(小时)', dataIndex: 'zsHours', key: 'zsHours', sorter: sortByKey('zsHours') },
-      { title: '出差工时(小时)', dataIndex: 'ccHours', key: 'ccHours', sorter: sortByKey('ccHours') },
+      ...staticCols,
     ];
 
     const data = userGroup[record.userId].reports;
@@ -263,16 +243,14 @@ export const PrjWorkStaticView = observer((props) => {
   const columns: any = [
     { title: '序号', dataIndex: 'index', key: 'index', width: 70, render: renderIndex },
     { title: '成员', dataIndex: 'userName', key: 'userName', width: 120 },
-    { title: '工时(小时)', dataIndex: 'hours', key: 'hours', sorter: sortByKey('hours') },
-    { title: '在司工时(小时)', dataIndex: 'zsHours', key: 'zsHours', sorter: sortByKey('zsHours') },
-    { title: '出差工时(小时)', dataIndex: 'ccHours', key: 'zsHours', sorter: sortByKey('zsHours') },
+    ...staticCols,
   ];
 
   return (
     <>
-      <Divider orientation="left">
+      {/* <Divider orientation="left">
         <Title level={5}>工时统计</Title>
-      </Divider>
+      </Divider> */}
       <Row gutter={16}>
         <Col flex="0 1  500px">
           <div
@@ -282,19 +260,19 @@ export const PrjWorkStaticView = observer((props) => {
               .ant-card .ant-card-body {
                 display: flex;
                 align-items: center;
-                height: 160px;
+                height: 140px;
               }
-              .ant-statistic-content{
-                  font-size: 32px;
-                  font-weight: bold;
-                  .ant-statistic-content-prefix{
-                    color: #cacaca;
-                    width: 48px;
-                    height: 48px;
-                    display: inline-flex;
-                    font-size: 24px;
-                    justify-content: center;
-                  }
+              .ant-statistic-content {
+                font-size: 32px;
+                font-weight: bold;
+                .ant-statistic-content-prefix {
+                  color: #cacaca;
+                  width: 48px;
+                  height: 48px;
+                  display: inline-flex;
+                  font-size: 24px;
+                  justify-content: center;
+                }
               }
             `}
           >
@@ -311,17 +289,17 @@ export const PrjWorkStaticView = observer((props) => {
               </Col>
               <Col span={12}>
                 <Card bordered={false}>
-                  <Statistic title="登记次数" value={all.count} formatter={formatter} />
+                  <Statistic title="公司(小时)" value={all.zsHours} formatter={formatter} />
                 </Card>
               </Col>
               <Col span={12}>
                 <Card bordered={false}>
-                  <Statistic title="在司工时(小时)" value={all.zsHours} formatter={formatter} />
+                  <Statistic title="出差(天)" value={all.ccDays} formatter={formatter} />
                 </Card>
               </Col>
               <Col span={12}>
                 <Card bordered={false}>
-                  <Statistic title="出差工时(小时)" value={all.ccHours} formatter={formatter} />
+                  <Statistic title="加班(小时)" value={all.jbHours} formatter={formatter} />
                 </Card>
               </Col>
             </Row>
@@ -334,7 +312,7 @@ export const PrjWorkStaticView = observer((props) => {
             rowKey="userId"
             dataSource={firstData}
             pagination={false}
-            scroll={{ y: 376 - 47 }}
+            scroll={{ y: 336 - 47 }}
             size="middle"
           />
         </Col>

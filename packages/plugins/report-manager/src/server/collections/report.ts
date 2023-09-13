@@ -314,7 +314,63 @@ export default {
             },
             "interface": "o2m",
             "target": "reportPlan"
-        }
+        },
+        {
+            "foreignKey": "reportId",
+            "name": "weekTarget",
+            "type": "hasMany",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": true,
+                    "fieldNames": {
+                        "label": "content",
+                        "value": "id"
+                    }
+                },
+                "title": "本周目标"
+            },
+            "interface": "o2m",
+            "target": "report_target"
+        },
+        {
+            "name": "createdBy",
+            "interface": "createdBy",
+            "type": "belongsTo",
+            "target": "users",
+            "foreignKey": "createdById",
+            "uiSchema": {
+                "type": "object",
+                "title": "{{t(\"Created by\")}}",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "fieldNames": {
+                        "value": "id",
+                        "label": "nickname"
+                    }
+                },
+                "x-read-pretty": true
+            }
+        },
+        {
+            "type": "belongsTo",
+            "target": "users",
+            "foreignKey": "updatedById",
+            "name": "updatedBy",
+            "interface": "updatedBy",
+            "uiSchema": {
+                "type": "object",
+                "title": "{{t(\"Last updated by\")}}",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "fieldNames": {
+                        "value": "id",
+                        "label": "nickname"
+                    }
+                },
+                "x-read-pretty": true
+            }
+        },
     ],
     "title": "报告"
 }

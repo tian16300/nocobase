@@ -62,6 +62,37 @@ export default {
             "targetKey": "id"
         },
         {
+        
+            "name": "belongsPrjKey",
+            "type": "bigInt",
+            "interface": "integer",
+            "isForeignKey": true,
+            "uiSchema": {
+                "type": "number",
+                "title": "belongsPrjKey",
+                "x-component": "InputNumber",
+                "x-read-pretty": true
+            }
+        },
+        {
+            "uiSchema": {
+                "title": "项目",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": false,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                }
+            },
+            "interface": "m2o",
+            "type": "belongsTo",
+            "name": "belongsPrj",
+            "foreignKey": "belongsPrjKey",
+            "target":"prj"
+        },
+        {
             "foreignKey": "taskId",
             "onDelete": "SET NULL",
             "name": "linkTask",
@@ -80,6 +111,17 @@ export default {
             },
             "interface": "obo",
             "target": "task"
+        },
+        
+        {
+            "name": "weekNumName",
+            "interface": "input",
+            "type": "string",
+            "uiSchema": {
+                "type": "string",
+                "x-component": "Input",
+                "title": "周几"
+            }
         },{
             "name": "content",
             "interface": "textarea",

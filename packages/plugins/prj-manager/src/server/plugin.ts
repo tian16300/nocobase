@@ -1,70 +1,83 @@
-import path from 'path';
 import { InstallOptions, Plugin } from '@nocobase/server';
 import { resolve } from 'path';
-// import prj from './collections/prj';
-// import prjPlan from './collections/prj-plan';
-// import prjsUsers from './collections/prjs-users';
-// import task from './collections/task';
-// import taskHour from './collections/taskHour';
+
 export class PrjManagerPlugin extends Plugin {
-  afterAdd() { }
+  afterAdd() {}
+
+  bindSync(names) {
+    names.forEach((name) => {
+      this.db.on(`${name}.afterSync`, async (model, options) => {
+        const collectionName = name;
+        const collection = this.db.getCollection(collectionName);
+        const repo = this.db.getRepository<any>('collections');
+        const result = await repo.findOne({
+          filter: {
+            name: collectionName,
+          },
+        });
+        if (!result) {
+          await repo.db2cm(collectionName);
+        } else {
+          const fields = [];
+          for (const [name, field] of collection.fields) {
+            fields.push({
+              name,
+              ...field.options,
+            });
+          }
+          const upRes = await repo.update({
+            filter: {
+              name: collectionName,
+            },
+            values: {
+              fields,
+              from: 'db2cm',
+            },
+          });
+        }
+      });
+    });
+  }
 
   beforeLoad() {
     this.db.addMigrations({
       namespace: this.name,
       directory: resolve(__dirname, 'migrations'),
       context: {
-        plugin: this
-      }
+        plugin: this,
+      },
     });
+    this.bindSync(['prj', 'prj_plan', 'prj_stages_files', 'prjs_files', 'prjs_users', 'task', 'task_hour']);
   }
-
   async load() {
     //导入库
     await this.importCollections(resolve(__dirname, 'collections'));
-    // await this.db.collection(prjsUsers).sync();
-    // await this.db.collection(prj).sync();
-    // await this.db.collection(prjPlan).sync();
-    // await this.db.collection(task).sync();
-    // await this.db.collection(taskHour).sync();
-
-
-    
-
+    //中间表
   }
   async install(options?: InstallOptions) {
-    await this.syncCollectionsOptions(['prj', 'prjs_users', 'task', 'prj_plan']);
-    this.app.acl.registerSnippet({
-      name: `pm.${this.name}.prj-manager`,
-      actions: ['prj:*', 'prjsUsers:*', 'task:*', 'prj_plan:*'],
-    });
-    this.app.acl.allow('prj', 'list', 'loggedIn');
-    this.app.acl.allow('task', 'list', 'loggedIn');
-    this.app.acl.allow('prj_plan', 'list', 'loggedIn');
-
-
-  }
-  async sysncTableFieldsToCollection(collectionName) {
     const repo = this.db.getRepository<any>('collections');
     if (repo) {
-      await repo.db2cm(collectionName);
+      await repo.db2cm('prj_plan');
+      await repo.db2cm('prj_stages_files');
+      await repo.db2cm('prj');
+      await repo.db2cm('prjs_files');
+      await repo.db2cm('prjs_users');
+      await repo.db2cm('task');
+      await repo.db2cm('task_hour');
+      this.app.acl.allow('prj_plan', 'list', 'loggedIn');
+      this.app.acl.allow('prj_stages_files', 'list', 'public');
+      this.app.acl.allow('prj', 'list', 'loggedIn');
+      this.app.acl.allow('prjs_files', 'list', 'public');
+      this.app.acl.allow('prjs_users', 'list', 'public');
+      this.app.acl.allow('task', 'list', 'loggedIn');
+      this.app.acl.allow('task_hour', 'list', 'loggedIn');
     }
   }
-  async syncCollectionsOptions(collectionNames) {
-    collectionNames.forEach(async (collectionName) => {
-      await this.sysncTableFieldsToCollection(collectionName);
-    });
-  }
+  async afterEnable() {}
 
+  async afterDisable() {}
 
-  async afterEnable() {
-
-  }
-
-
-  async afterDisable() { }
-
-  async remove() { }
+  async remove() {}
 }
 
 export default PrjManagerPlugin;

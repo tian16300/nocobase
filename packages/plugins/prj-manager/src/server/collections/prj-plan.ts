@@ -24,25 +24,6 @@ export default {
             },
             "interface": "id"
         },
-        {
-            "foreignKey": "prjId",
-            "onDelete": "SET NULL",
-            "name": "prj",
-            "type": "belongsTo",
-            "uiSchema": {
-                "x-component": "AssociationField",
-                "x-component-props": {
-                    "multiple": false,
-                    "fieldNames": {
-                        "label": "id",
-                        "value": "id"
-                    }
-                },
-                "title": "所属项目"
-            },
-            "interface": "m2o",
-            "target": "prj"
-        },
         //项目类型
         {
             "name": "stage_dicId",
@@ -138,6 +119,25 @@ export default {
             "foreignKey": "status_dicId",
             "target": "dicItem",
             "dicCode": "prj_cycle_status",
+            "targetKey": "id"
+        },
+        {
+            "uiSchema": {
+                "title": "任务",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": true,
+                    "fieldNames": {
+                        "label": "title",
+                        "value": "id"
+                    }
+                }
+            },
+            "interface": "o2m",
+            "type": "hasMany",
+            "name": "task",
+            "target":'task',
+            "foreignKey": "prjStageId",
             "targetKey": "id"
         },
         {

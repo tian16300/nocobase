@@ -78,10 +78,6 @@ export class UiRoutesStoragePlugin extends Plugin {
         values,
       });
     }
-    const repo = this.db.getRepository<any>('collections');
-    if (repo) {
-      await repo.db2cm('uiRoutes');
-    }
   }
 
   async load() {
