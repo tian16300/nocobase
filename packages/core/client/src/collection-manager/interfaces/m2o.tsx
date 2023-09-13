@@ -82,13 +82,6 @@ export const m2o: IField = {
       'x-decorator': 'FormItem',
       'x-component': 'IconPicker',
     },
-    'uiSchema.icon': {
-      type: 'string',
-      title: '{{t("Field icon")}}',
-      // required: true,
-      'x-decorator': 'FormItem',
-      'x-component': 'IconPicker',
-    },
     type: relationshipType,
     grid: {
       type: 'void',

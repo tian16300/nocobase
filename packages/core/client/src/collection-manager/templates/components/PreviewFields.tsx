@@ -124,18 +124,20 @@ const PreviewCom = (props) => {
       key: 'source',
       width: 200,
       render: (text, record, index) => {
-        return (
-          <Cascader
-            defaultValue={typeof text === 'string' ? text?.split('.') : text}
-            allowClear
-            style={{ width: '100%' }}
-            options={compile(sourceFields)}
-            onChange={(value, selectedOptions) => {
+        const props: any = {
+          defaultValue:typeof text === 'string' ? text?.split('.') : text,
+            allowClear: true,
+            style: { width: '100%' },
+            options: compile(sourceFields),
+            onChange:(value, selectedOptions) => {
               const sourceField = getCollectionFields(value?.[0])?.find((v) => v.name === last(value));
               handleFieldChange({ ...record, source: value, uiSchema: sourceField?.uiSchema }, index);
-            }}
-            placeholder={t('Select field source')}
-          />
+            },
+            placeholder:t('Select field source')
+
+        };
+        return (
+          <Cascader {...props} />
         );
       },
     },

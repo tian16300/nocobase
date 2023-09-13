@@ -116,7 +116,7 @@ const InternalRemoteSelect = connect(
       },
       [targetField?.uiSchema, fieldNames],
     );
-    const { data, run, loading } = useRequest(
+    const { data , run, loading } = useRequest(
       {
         action: 'list',
         ...service,
@@ -179,13 +179,13 @@ const InternalRemoteSelect = connect(
 
     const options = useMemo(() => {
       const v = value || defaultValue;
-      if (!data?.data?.length) {
+      if (!(data as any)?.data?.length) {
         return v != null ? (Array.isArray(v) ? v : [v]) : [];
       }
       const valueOptions =
         (v != null && (Array.isArray(v) ? v : [{ ...v, [fieldNames.value]: v[fieldNames.value] || v }])) || [];
-      return uniqBy(data?.data?.concat(valueOptions) || [], fieldNames.value);
-    }, [value, defaultValue, data?.data, fieldNames.value]);
+      return uniqBy((data as any)?.data?.concat(valueOptions) || [], fieldNames.value);
+    }, [value, defaultValue, (data as any)?.data, fieldNames.value]);
     const onDropdownVisibleChange = (visible) => {
       setOpen(visible);
       searchData.current = null;
@@ -217,8 +217,8 @@ const InternalRemoteSelect = connect(
             <>
               {isQuickAdd ? (
                 <>
-                  {!(data?.data.length === 0 && searchData?.current) && menu}
-                  {data?.data.length > 0 && searchData?.current && !isFullMatch && <Divider style={{ margin: 0 }} />}
+                  {!((data as any)?.data.length === 0 && searchData?.current) && menu}
+                  {(data as any)?.data.length > 0 && searchData?.current && !isFullMatch && <Divider style={{ margin: 0 }} />}
                   {!isFullMatch && <CustomRenderCom />}
                 </>
               ) : (

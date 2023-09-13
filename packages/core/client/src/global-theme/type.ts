@@ -1,5 +1,4 @@
-import { MappingAlgorithm } from 'antd/es/config-provider/context';
-import { OverrideToken } from 'antd/es/theme/interface';
+import { MappingAlgorithm, OverrideToken } from 'antd/es/theme/interface';
 import { AliasToken } from 'antd/es/theme/internal';
 
 export interface CustomToken extends AliasToken {

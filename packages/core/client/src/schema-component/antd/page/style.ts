@@ -1,7 +1,8 @@
+import { CSSInterpolation } from '@ant-design/cssinjs';
 import { genStyleHook } from './../__builtins__';
 
 export const useStyles = genStyleHook('nb-page', (token) => {
-  const { componentCls } = token;
+  const { componentCls } = token as any;
 
   return {
     [componentCls]: {
@@ -115,7 +116,7 @@ export const useStyles = genStyleHook('nb-page', (token) => {
         // flex: 1,
         height: 'calc(100vh - 50px - 52px)',
         overflowY: ' scroll',
-      },
-    },
-  };
+      }
+    }
+  } as unknown as CSSInterpolation;
 });

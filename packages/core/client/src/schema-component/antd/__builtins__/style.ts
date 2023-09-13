@@ -89,7 +89,7 @@ export const genStyleHook = <ComponentName extends OverrideComponent>(
             antCls: `.${rootPrefixCls}`,
           });
 
-          const styleInterpolation = styleFn(mergedToken, props, {
+          const styleInterpolation: any = styleFn(mergedToken, props, {
             hashId,
             prefixCls,
             rootPrefixCls,
