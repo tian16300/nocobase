@@ -129,19 +129,19 @@ const MenuEditor = (props) => {
     },
   );
 
-  useEffect(() => {
-    const properties = Object.values(current?.root?.properties || {}).shift()?.['properties'] || data?.data?.properties;
-    if (properties && sideMenuRef.current) {
-      const pageType = Object.values(properties).find(
-        (item) => item['x-uid'] === params.name && item['x-component'] === 'Menu.Item',
-      );
-      if (pageType) {
-        sideMenuRef.current.style.display = 'none';
-      } else {
-        sideMenuRef.current.style.display = 'block';
-      }
-    }
-  }, [data?.data, params.name, sideMenuRef]);
+  // useEffect(() => {
+  //   const properties = Object.values(current?.root?.properties || {}).shift()?.['properties'] || data?.data?.properties;
+  //   if (properties && sideMenuRef.current) {
+  //     const pageType = Object.values(properties).find(
+  //       (item) => item['x-uid'] === params.name && item['x-component'] === 'Menu.Item',
+  //     );
+  //     // if (pageType) {
+  //     //   sideMenuRef.current.style.display = 'none';
+  //     // } else {
+  //     //   sideMenuRef.current.style.display = 'block';
+  //     // }
+  //   }
+  // }, [data?.data, params.name, sideMenuRef]);
 
   const schema = useMemo(() => {
     const s = filterByACL(data?.data, ctx);
