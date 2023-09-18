@@ -7,7 +7,7 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { APIClient, useAPIClient } from '../../api-client';
 import { SchemaComponentContext } from '../context';
-import {message} from '@nocobase/utils';
+import { App } from 'antd';
 
 interface CreateDesignableProps {
   current: Schema;
@@ -104,9 +104,11 @@ export class Designable {
   constructor(options: CreateDesignableProps) {
     this.options = options;
     this.current = options.current;
+    
   }
 
-  loadAPIClientEvents() {
+  loadAPIClientEvents() {    
+    const { message } = App.useApp();
     const { api, t = translate } = this.options;
     if (!api) {
       return;

@@ -1,0 +1,1 @@
+# @zkjx/plugin-dic-manager
