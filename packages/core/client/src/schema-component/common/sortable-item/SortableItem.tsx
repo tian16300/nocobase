@@ -2,7 +2,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { cx } from '@emotion/css';
 import { Schema, observer, useField, useFieldSchema } from '@formily/react';
-import React, { HTMLAttributes, createContext, useContext } from 'react';
+import React, { HTMLAttributes, createContext, forwardRef, useContext } from 'react';
 import { useToken } from '../../antd/__builtins__';
 
 export const DraggableContext = createContext(null);
@@ -21,7 +21,7 @@ export const SortableProvider = (props) => {
   return <SortableContext.Provider value={{ draggable, droppable }}>{children}</SortableContext.Provider>;
 };
 
-export const Sortable = (props: any) => {
+export const Sortable:React.FC = (props: any) => {
   const { component, overStyle, style, children, openMode, ...others } = props;
   const { token } = useToken();
   const { draggable, droppable } = useContext(SortableContext);
@@ -91,7 +91,7 @@ export const SortableItem: React.FC<SortableItemProps> = observer(
   { displayName: 'SortableItem' },
 );
 
-export const DragHandler = (props) => {
+export const DragHandler:React.FC = (props) => {
   const { draggable } = useContext(SortableContext);
   const { isDragging, attributes, listeners, setNodeRef, transform } = draggable;
   const style = transform

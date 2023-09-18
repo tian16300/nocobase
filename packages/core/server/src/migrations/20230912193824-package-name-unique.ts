@@ -27,16 +27,28 @@ export default class extends Migration {
       if (plugin.packageName) {
         continue;
       }
-      const packageName = PluginManager.getPackageName(name);
-      await repository.update({
-        filter: {
-          name,
-        },
-        values: {
-          packageName,
-        },
-      });
-      console.log(name, packageName);
+      let packageName = '';
+      if (name == 'report-manager') {
+        await repository.destroy({
+          filter: {
+            name,
+          },
+        });
+      } else {
+        if (['dic-manager', 'company-info', 'prj-manager'].includes(name)) {
+          packageName = ['@zkjx/plugin-', name].join('');
+        }else{
+          packageName = PluginManager.getPackageName(name);
+        }
+        await repository.update({
+          filter: {
+            name,
+          },
+          values: {
+            packageName,
+          },
+        });
+      }
     }
   }
 }

@@ -7,7 +7,7 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { APIClient, useAPIClient } from '../../api-client';
 import { SchemaComponentContext } from '../context';
-import { App } from 'antd';
+import { message } from 'antd';
 
 interface CreateDesignableProps {
   current: Schema;
@@ -108,7 +108,7 @@ export class Designable {
   }
 
   loadAPIClientEvents() {    
-    const { message } = App.useApp();
+    // const { message } = App.useApp();
     const { api, t = translate } = this.options;
     if (!api) {
       return;
@@ -191,7 +191,7 @@ export class Designable {
         method: 'post',
         data: schemas,
       });
-      message.success(t('Saved successfully'), 0.2);
+      // message.success(t('Saved successfully'), 0.2);
     });
     this.on('remove', async ({ removed }) => {
       let schemas = [];

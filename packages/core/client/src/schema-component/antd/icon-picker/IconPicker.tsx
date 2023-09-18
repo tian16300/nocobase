@@ -2,7 +2,7 @@ import { CloseOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useFormLayout } from '@formily/antd-v5';
 import { connect, mapProps, mapReadPretty } from '@formily/react';
 import { isValid } from '@formily/shared';
-import { Button, Input } from 'antd';
+import { Button, Input, Space } from 'antd';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon, hasIcon, icons } from '../../../icon';
@@ -15,7 +15,8 @@ function IconField(props: any) {
   const { t } = useTranslation();
   return (
     <div>
-      <Input.Group compact>
+      <Space.Compact>
+      {/* <Input.Group compact> */}
         <PopoverWithStopPropagation
           placement={'bottom'}
           open={visible}
@@ -57,7 +58,8 @@ function IconField(props: any) {
             }}
           ></Button>
         )}
-      </Input.Group>
+      {/* </Input.Group> */}
+      </Space.Compact>
     </div>
   );
 }

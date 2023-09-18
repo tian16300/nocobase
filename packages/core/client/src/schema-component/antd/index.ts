@@ -44,6 +44,7 @@ export * from './remote-select';
 export * from './rich-text';
 export * from './select';
 export * from './space';
+export * from './switch';
 export * from './table';
 export * from './table-v2';
 export * from './tabs';
@@ -51,5 +52,4 @@ export * from './time-picker';
 export * from './tree-select';
 export * from './upload';
 export * from './variable';
-
 import './index.less';

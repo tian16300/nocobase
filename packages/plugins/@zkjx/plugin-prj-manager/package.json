@@ -9,8 +9,5 @@
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",
     "@nocobase/test": "0.x"
-  },
-  "devDependencies": {
-    "@types/react-countup": "^4.3.1"
   }
 }

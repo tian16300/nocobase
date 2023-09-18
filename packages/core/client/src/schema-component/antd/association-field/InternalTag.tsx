@@ -13,6 +13,7 @@ import { EllipsisWithTooltip } from '../input/EllipsisWithTooltip';
 import { useAssociationFieldContext, useFieldNames, useInsertSchema } from './hooks';
 import schema from './schema';
 import { getTabFormatValue, useLabelUiSchema } from './util';
+import { uid } from '@nocobase/utils';
 
 interface IEllipsisWithTooltipRef {
   setPopoverVisible: (boolean) => void;
@@ -48,8 +49,9 @@ export const ReadPrettyInternalTag: React.FC = observer(
         const color = toValue(compile(record?.[fieldNames?.color || 'color']), tagColor);
         const icon = toValue(compile(record?.[fieldNames?.icon || 'icon']), '');
         const text = getTabFormatValue(compile(labelUiSchema), val, color, icon);
+        const key = `${recordCtx.id}_${field.props.name}_${index}_${uid()}`;
         return (
-          <Fragment key={`${record.id}_${index}`}>
+          <Fragment key={`${key}`}>
             <span>
               {snapshot ? (
                 text
