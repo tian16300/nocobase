@@ -104,14 +104,14 @@ export const uiSchemaTemplatesSchema: ISchema = {
                     split: '|',
                   },
                   properties: {
-                    // view: {
-                    //   title: '{{ t("View") }}',
-                    //   'x-action': 'view',
-                    //   'x-component': 'RecordLink',
-                    //   'x-component-props': {
-                    //     to: '/admin/plugins/block-templates/${record.key}',
-                    //   },
-                    // },
+                    view: {
+                      title: '{{ t("View") }}',
+                      'x-action': 'view',
+                      'x-component': 'RecordLink',
+                      'x-component-props': {
+                        to: '/admin/plugins/block-templates/${record.key}',
+                      },
+                    },
                     edit: {
                       type: 'void',
                       title: '{{ t("Edit") }}',
