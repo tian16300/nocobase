@@ -5,7 +5,25 @@ export class PluginPrjManagerServer extends Plugin {
   afterAdd() {}
 
   beforeLoad() {
-    
+    this.app.db.on(`dicItem.afterSync`, async (model, options) => {
+      const dic = this.app.db.getCollection('dic')?.existsInDb();
+      const dicItem = this.app.db.getCollection('dicItem')?.existsInDb();
+      if (dic && dicItem) await this.addRecords();
+    });
+    this.bindSync([
+      'prj',
+      'prj_plan',
+      'prj_stages_files',
+      'prjs_files',
+      'prjs_users',
+      'reportSetting',
+      'report',
+      'reportDetail',
+      'reportPlan',
+      'report_target',
+      'task',
+      'task_hour',
+    ]);
   }
   bindSync(names) {
     names.forEach((name) => {
@@ -47,22 +65,8 @@ export class PluginPrjManagerServer extends Plugin {
     });
   }
   async load() {
-    this.bindSync([
-      'prj',
-      'prj_plan',
-      'prj_stages_files',
-      'prjs_files',
-      'prjs_users',
-      'reportSetting',
-      'report',
-      'reportDetail',
-      'reportPlan',
-      'report_target',
-      'task',
-      'task_hour',
-    ]);
     //增加字典数据
-    await this.addRecords();
+    // await this.addRecords();
 
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/prj'),
@@ -89,15 +93,12 @@ export class PluginPrjManagerServer extends Plugin {
     );
     this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users'], 'public');
     //依赖 dic 及 dicItem 表
-    
-    
-
   }
-  async addRecords(){
+  async addRecords() {
     dicRecords.forEach(async (record) => {
       const { code } = record;
       const rep = this.app.db.getRepository('dic');
-      let result = await rep.findOne({
+      const result = await rep.findOne({
         filter: {
           code: code,
         },
@@ -108,14 +109,9 @@ export class PluginPrjManagerServer extends Plugin {
         });
       }
     });
-
   }
 
-  async install(options?: InstallOptions) {
-    
- 
-
-  }
+  async install(options?: InstallOptions) {}
 
   async afterEnable() {}
 

@@ -6,18 +6,11 @@ export class PluginPrjManagerClient extends Plugin {
     // await this.app.pm.add()
   }
 
-  async beforeLoad() {
-    
-  }
+  async beforeLoad() {}
 
   // You can get and modify the app instance here
   async load() {
     this.app.addProvider(DataSelectProvider);
-    // this.app.addComponents({})
-    // this.app.addScopes({})
-    // this.app.addProvider()
-    // this.app.addProviders()
-    // this.app.router.add()
   }
 }
 

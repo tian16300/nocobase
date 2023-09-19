@@ -22,10 +22,10 @@ export class SystemSettingsPlugin extends Plugin {
         },
       },
     });
-    const repo = this.db.getRepository<any>('collections');
-    if (repo) {
-      await repo.db2cm('systemSettings');
-    }
+    // const repo = this.db.getRepository<any>('collections');
+    // if (repo) {
+    //   await repo.db2cm('systemSettings');
+    // }
   }
 
   beforeLoad() {
