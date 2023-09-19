@@ -39,6 +39,23 @@ export const PageDesigner = ({ title }) => {
             {!disablePageHeader && <SchemaSettings.Divider />}
             {!disablePageHeader && (
               <SchemaSettings.SwitchItem
+                title={t('显示导航图标')}
+                checked={!fieldSchema['x-component-props']?.hidePageNavIcon}
+                onChange={(v) => {
+                  fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+                  fieldSchema['x-component-props']['hidePageNavIcon'] = !v;
+                  dn.emit('patch', {
+                    schema: {
+                      ['x-uid']: fieldSchema['x-uid'],
+                      ['x-component-props']: fieldSchema['x-component-props'],
+                    },
+                  });
+                  dn.refresh();
+                }}
+              />
+            )}
+            {!disablePageHeader && (
+              <SchemaSettings.SwitchItem
                 title={t('Display page title')}
                 checked={!fieldSchema['x-component-props']?.hidePageTitle}
                 onChange={(v) => {

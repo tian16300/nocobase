@@ -1,13 +1,13 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons';
 import { PageHeader as AntdPageHeader } from '@ant-design/pro-layout';
 import { FormLayout } from '@formily/antd-v5';
 import { Schema, SchemaOptionsContext, useFieldSchema } from '@formily/react';
-import { Button, Tabs } from 'antd';
+import { Button, Space, Tabs } from 'antd';
 import classNames from 'classnames';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FormDialog } from '..';
 import { useAppSpin } from '../../../application/hooks/useAppSpin';
 import { useDocumentTitle } from '../../../document-title';
@@ -24,6 +24,40 @@ import FixedBlock from './FixedBlock';
 import { PageDesigner, PageTabDesigner } from './PageTabDesigner';
 import { useStyles } from './style';
 
+const PageHeaderTitleRender = (props) => {
+  const fieldSchema = useFieldSchema();
+  const { children, ...others } = props;
+  const { t } = useTranslation();
+  const compile = useCompile();
+  const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
+  const hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  const { title, setTitle } = useDocumentTitle();
+  const dn = useDesignable();
+  const { theme } = useGlobalTheme();
+  const navigate = useNavigate();
+
+  // react18  tab 动画会卡顿，所以第一个 tab 时，动画禁用，后面的 tab 才启用
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setHasMounted(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!title) {
+      setTitle(t(fieldSchema.title));
+    }
+  }, [fieldSchema.title, title]);
+  const pageHeaderTitle = hidePageTitle ? undefined : fieldSchema.title || compile(title);
+  const text = t(pageHeaderTitle || '');
+  return (
+    <Space>
+      {!hidePageNavIcon && <ArrowLeftOutlined onClick={() => navigate(-1)} />}
+      <span>{text}</span>
+    </Space>
+  );
+};
 export const Page = (props) => {
   const { children, ...others } = props;
   const { t } = useTranslation();
@@ -49,6 +83,7 @@ export const Page = (props) => {
   const disablePageHeader = fieldSchema['x-component-props']?.disablePageHeader;
   const enablePageTabs = fieldSchema['x-component-props']?.enablePageTabs;
   const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
+  const hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
   const options = useContext(SchemaOptionsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -64,6 +99,7 @@ export const Page = (props) => {
   };
 
   const pageHeaderTitle = hidePageTitle ? undefined : fieldSchema.title || compile(title);
+
   return wrapSSR(
     <FilterBlockProvider>
       <div className={`${componentCls} ${hashId}`}>
@@ -75,10 +111,13 @@ export const Page = (props) => {
         >
           {!disablePageHeader && (
             <AntdPageHeader
-              className={classNames('pageHeaderCss', pageHeaderTitle || enablePageTabs ? '' : 'height0')}
+              className={classNames(
+                'pageHeaderCss',
+                pageHeaderTitle || enablePageTabs || !hidePageNavIcon ? '' : 'height0',
+              )}
               ghost={false}
               // 如果标题为空的时候会导致 PageHeader 不渲染，所以这里设置一个空白字符，然后再设置高度为 0
-              title={t(pageHeaderTitle || ' ')}
+              title={<PageHeaderTitleRender {...props} />}
               {...others}
               footer={
                 enablePageTabs && (
