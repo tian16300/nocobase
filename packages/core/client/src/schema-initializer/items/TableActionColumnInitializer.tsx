@@ -17,7 +17,7 @@ export const TableActionColumnInitializer = (props) => {
         'x-decorator': 'DndContext',
         'x-component': 'Space',
         'x-component-props': {
-          split: '|',
+          split: '',
         },
         properties: {},
       },

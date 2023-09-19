@@ -138,13 +138,13 @@ export const createDataSelectBlockSchema = (options) => {
         isBulkEdit: true,
       },
     },
-    properties: {      
+    properties: {
       tab1: createTabGrid('工时统计', {
         ['prjWorkStatic_' + uid()]: createPrjWorkStaticShema(),
       }),
       // tab2: createTabGrid('项目计划', {
       //   ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
-      // }),      
+      // }),
       // ...createTabGrid('项目概览', {}),
       // tab1: {
       //   type: 'void',
@@ -418,7 +418,7 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
                 'x-decorator': 'DndContext',
                 'x-component': 'Space',
                 'x-component-props': {
-                  split: '|',
+                  split: '',
                 },
                 properties: {},
               },
@@ -501,14 +501,14 @@ export const createPrjWorkPlanShema = () => {
         type: 'void',
         'x-component': `div`,
         'x-component-props': {
-           className: css` height: 880px;`
+          className: css`
+            height: 880px;
+          `,
         },
-        properties:{
-          [uid()]:createPrjWorkPlanGanttBlockSchema({})
-
-        }
-
-      } 
+        properties: {
+          [uid()]: createPrjWorkPlanGanttBlockSchema({}),
+        },
+      },
     },
   };
 };

@@ -1456,7 +1456,7 @@ export const createTableBlockSchema = (options) => {
                 'x-decorator': 'DndContext',
                 'x-component': 'Space',
                 'x-component-props': {
-                  split: '|',
+                  split: '',
                 },
                 properties: {},
               },
@@ -1641,7 +1641,7 @@ export const createCalendarBlockSchema = (options) => {
 };
 
 export const createGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames,appends, ...others } = options;
+  const { collection, resource, fieldNames, appends, ...others } = options;
   const schema: ISchema = {
     type: 'void',
     'x-acl-action': `${resource || collection}:list`,
@@ -1716,7 +1716,7 @@ export const createGanttBlockSchema = (options) => {
                     'x-decorator': 'DndContext',
                     'x-component': 'Space',
                     'x-component-props': {
-                      split: '|',
+                      split: '',
                     },
                     properties: {},
                   },
