@@ -139,6 +139,9 @@ const InsertMenuItems = (props) => {
               page: {
                 type: 'void',
                 'x-component': 'Page',
+                'x-component-props': {
+                  hidePageNavIcon: !hidden,
+                },
                 'x-async': true,
                 properties: {
                   grid: {

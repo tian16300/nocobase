@@ -171,6 +171,9 @@ export const PageMenuItem = itemWrap((props) => {
         page: {
           type: 'void',
           'x-component': 'Page',
+          'x-component-props': {
+            hidePageNavIcon: !hidden,
+          },
           'x-async': true,
           properties: {
             [uid()]: {
