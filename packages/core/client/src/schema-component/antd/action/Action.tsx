@@ -22,6 +22,7 @@ import { ActionContextProvider } from './context';
 import { useA } from './hooks';
 import { ComposedAction } from './types';
 import { linkageAction } from './utils';
+import { RecordLink } from '@nocobase/client';
 
 export const Action: ComposedAction = observer(
   (props: any) => {
@@ -53,6 +54,7 @@ export const Action: ComposedAction = observer(
     const openMode = fieldSchema?.['x-component-props']?.['openMode'];
     const disabled = form.disabled || field.disabled || props.disabled;
     const openSize = fieldSchema?.['x-component-props']?.['openSize'];
+    const toHref = fieldSchema?.['x-component-props']?.['to'];
     const linkageRules = fieldSchema?.['x-linkage-rules'] || [];
     const { designable } = useDesignable();
     const tarComponent = useComponent(component) || component;
@@ -75,7 +77,7 @@ export const Action: ComposedAction = observer(
       if (!designable && field?.data?.hidden) {
         return null;
       }
-      return (
+      return component !== 'RecordLink' ? (
         <SortableItem
           {...others}
           loading={field?.data?.loading}
@@ -109,6 +111,25 @@ export const Action: ComposedAction = observer(
           type={props.type === 'danger' ? undefined : props.type}
         >
           {actionTitle}
+          <Designer {...designerProps} />
+        </SortableItem>
+      ) : (
+        <SortableItem
+          {...others}
+          loading={field?.data?.loading}
+          icon={icon ? <Icon type={icon} /> : null}
+          disabled={disabled}
+          style={{
+            ...others.style,
+            opacity: designable && field?.data?.hidden && 0.1,
+          }}
+          component={'span'}
+          className={classnames(componentCls, hashId, className)}
+          type={props.type === 'danger' ? undefined : props.type}
+        >
+          <RecordLink {...others} to={toHref}>
+            {actionTitle}
+          </RecordLink>
           <Designer {...designerProps} />
         </SortableItem>
       );
