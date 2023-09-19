@@ -116,10 +116,15 @@ const InsertMenuItems = (props) => {
                 'x-component': 'IconPicker',
                 'x-decorator': 'FormItem',
               },
+              hidden: {
+                title: '是否隐藏',
+                'x-component': 'Switch',
+                'x-decorator': 'FormItem',
+              },
             },
           } as ISchema
         }
-        onSubmit={({ title, icon }) => {
+        onSubmit={({ title, icon, hidden }) => {
           dn.insertAdjacent(insertPosition, {
             type: 'void',
             title,
@@ -127,6 +132,7 @@ const InsertMenuItems = (props) => {
             'x-decorator': 'ACLMenuItemProvider',
             'x-component-props': {
               icon,
+              hidden,
             },
             'x-server-hooks': serverHooks,
             properties: {
@@ -196,7 +202,7 @@ export const MenuDesigner = () => {
   const field = useField();
   const fieldSchema = useFieldSchema();
   const api = useAPIClient();
-  const { dn, refresh } = useDesignable();
+  const { dn, refresh, designable } = useDesignable();
   const { t } = useTranslation();
   const menuSchema = findMenuSchema(fieldSchema);
   const items = toItems(menuSchema?.properties);
@@ -234,11 +240,17 @@ export const MenuDesigner = () => {
         'x-component': 'IconPicker',
         'x-decorator': 'FormItem',
       },
+      hidden: {
+        title: '是否隐藏',
+        'x-component': 'Switch',
+        'x-decorator': 'FormItem',
+      },
     },
   };
   const initialValues = {
     title: field.title,
     icon: field.componentProps.icon,
+    hidden: field.componentProps.hidden,
   };
   if (fieldSchema['x-component'] === 'Menu.URL') {
     schema.properties['href'] = {
@@ -255,7 +267,7 @@ export const MenuDesigner = () => {
         eventKey="edit"
         schema={schema as ISchema}
         initialValues={initialValues}
-        onSubmit={({ title, icon, href }) => {
+        onSubmit={({ title, icon, href, hidden }) => {
           const schema = {
             ['x-uid']: fieldSchema['x-uid'],
             'x-server-hooks': [
@@ -271,12 +283,19 @@ export const MenuDesigner = () => {
             schema['title'] = title;
             refresh();
           }
+          // if (hidden) {
+          //   fieldSchema['hidden'] = hidden;
+          //   field.hidden = hidden;
+          //   schema['hidden'] = hidden;
+          // }
           field.componentProps.icon = icon;
           field.componentProps.href = href;
-          schema['x-component-props'] = { icon, href };
+          field.componentProps.hidden = hidden;
+          schema['x-component-props'] = { icon, href, hidden };
           fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
           fieldSchema['x-component-props']['icon'] = icon;
           fieldSchema['x-component-props']['href'] = href;
+          fieldSchema['x-component-props']['hidden'] = hidden;
           dn.emit('patch', {
             schema,
           });

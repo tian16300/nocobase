@@ -498,13 +498,16 @@ Menu.Item = observer(
   (props) => {
     const { t } = useTranslation();
     const { pushMenuItem } = useCollectMenuItems();
-    const { icon, children, ...others } = props;
+    const { icon, children, hidden, ...others } = props;
     const schema = useFieldSchema();
     const field = useField();
     const Designer = useContext(MenuItemDesignerContext);
+    const { designable } = useDesignable();
     const item = useMemo(() => {
+      const hiddenVal = designable ? false : hidden;
       return {
         ...others,
+        hidden: hiddenVal,
         className: menuItemClass,
         key: schema.name,
         eventKey: schema.name,
@@ -534,7 +537,7 @@ Menu.Item = observer(
           </SchemaContext.Provider>
         ),
       };
-    }, [field.title, icon, schema, Designer]);
+    }, [field.title, icon, schema, Designer, designable]);
 
     if (!pushMenuItem) {
       error('Menu.Item must be wrapped by GetMenuItemsContext.Provider');

@@ -131,6 +131,11 @@ export const PageMenuItem = itemWrap((props) => {
                       'x-component': 'IconPicker',
                       'x-decorator': 'FormItem',
                     },
+                    hidden: {
+                      title: '是否隐藏',
+                      'x-component': 'Switch',
+                      'x-decorator': 'FormItem',
+                    },
                   },
                 }}
               />
@@ -142,7 +147,7 @@ export const PageMenuItem = itemWrap((props) => {
     ).open({
       initialValues: {},
     });
-    const { title, icon } = values;
+    const { title, icon, hidden } = values;
     insert({
       type: 'void',
       title,
@@ -150,6 +155,7 @@ export const PageMenuItem = itemWrap((props) => {
       'x-decorator': 'ACLMenuItemProvider',
       'x-component-props': {
         icon,
+        hidden,
       },
       'x-server-hooks': [
         {
