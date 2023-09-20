@@ -13,6 +13,10 @@ export const PageDesigner = ({ title }) => {
   const fieldSchema = useFieldSchema();
   const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
   const disablePageHeader = fieldSchema['x-component-props']?.disablePageHeader;
+  let hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  if (typeof hidePageNavIcon == 'undefined') {
+    hidePageNavIcon = true;
+  }
   if (!designable) {
     return null;
   }
@@ -39,8 +43,8 @@ export const PageDesigner = ({ title }) => {
             {!disablePageHeader && <SchemaSettings.Divider />}
             {!disablePageHeader && (
               <SchemaSettings.SwitchItem
-                title={t('显示导航图标')}
-                checked={!fieldSchema['x-component-props']?.hidePageNavIcon}
+                title={t('显示返回图标')}
+                checked={!hidePageNavIcon}
                 onChange={(v) => {
                   fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
                   fieldSchema['x-component-props']['hidePageNavIcon'] = !v;

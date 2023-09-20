@@ -30,7 +30,10 @@ const PageHeaderTitleRender = (props) => {
   const { t } = useTranslation();
   const compile = useCompile();
   const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
-  const hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  let hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  if (typeof hidePageNavIcon == 'undefined') {
+    hidePageNavIcon = true;
+  }
   const { title, setTitle } = useDocumentTitle();
   const dn = useDesignable();
   const { theme } = useGlobalTheme();
@@ -83,7 +86,11 @@ export const Page = (props) => {
   const disablePageHeader = fieldSchema['x-component-props']?.disablePageHeader;
   const enablePageTabs = fieldSchema['x-component-props']?.enablePageTabs;
   const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
-  const hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  let hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
+  if (typeof hidePageNavIcon == 'undefined') {
+    hidePageNavIcon = true;
+  }
+
   const options = useContext(SchemaOptionsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
