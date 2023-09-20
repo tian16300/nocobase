@@ -1,17 +1,11 @@
-import {
-  DetailsBlockProvider,
-  RecordProvider,
-  useBlockRequestContext,
-  IField,
-  FixedBlockWrapper,
-  css,
-} from '@nocobase/client';
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { DetailsBlockProvider, useBlockRequestContext, css } from '@nocobase/client';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useField, useFieldSchema } from '@formily/react';
-import { mergeFilter, removeNullCondition } from '@nocobase/client';
+import { mergeFilter } from '@nocobase/client';
 import { forEach, uid } from '@nocobase/utils';
 import { createForm } from '@formily/core';
 import { Spin } from 'antd';
+import { useSearchParams } from 'react-router-dom';
 export const DataSelectBlockContext = createContext<any>({});
 const useDataSelectBlockRecord = () => {
   const { record } = useDataSelectBlockContext();
@@ -27,19 +21,18 @@ export const useFormSelectBlockProps = () => {
     form: ctx?.form,
     layout: 'inline',
     size: 'large',
-    className:css`
-     .ant-formily-item-control-content-component{
+    className: css`
+      .ant-formily-item-control-content-component {
         display: flex;
         align-items: center;
-     }
-    `
+      }
+    `,
   };
 };
 
 export const useFormSelectOptionsProps = (props) => {
   const { resource, action, params, service } = useDataSelectBlockContext();
   const { filter = [], sort = [] } = params;
-  // const field: IField = useField();  
   return {
     ...props,
     multiple: false,
@@ -69,7 +62,6 @@ export const useFormSelectOptionsProps = (props) => {
       service.loading = true;
       await service.refresh();
       service.loading = false;
-
     },
   };
 };
@@ -82,20 +74,6 @@ const schemaForEach = (schema, callback) => {
   });
 };
 const InnerRecordProvider = (props) => {
-  const { form, setRecord, service } = useDataSelectBlockContext();
-  const field = useField();
-  useEffect(() => {
-    const id = uid();
-    form.addEffects(id, () => {
-      // onFormValuesChange((form) => {
-      //   // setRecord(form.values);
-      //   debugger;
-      // });
-    });
-    return () => {
-      form.removeEffects(id);
-    };
-  }, [form]);
   return <>{props.children}</>;
 };
 const isExistInSchema = (uid, fieldSchema) => {
@@ -116,25 +94,13 @@ const isExistInSchema = (uid, fieldSchema) => {
   }
 };
 const InternalDataSelectFieldProvider = (props) => {
-  const { readPretty, buid, field } = props;
-  const fieldSchema = useFieldSchema();
-  const form = useMemo(
-    () =>
-      createForm({
-        readPretty,
-      }),
-    [],
-  );
+  const { buid, field } = props;
+  const form = createForm({});
   const params = { ...props.params };
   const { service } = useBlockRequestContext();
-  if (service.loading && !field.loaded) {
-    return <Spin />;
-  }
-  field.loaded = true;
-  // const [record, setRecord] = useState(service?.data?.data[0]);
   const record = useMemo(() => {
-    return service.data.data[0];
-  }, [service?.data?.data[0]])
+    return service?.data?.data[0];
+  }, [service?.data?.data]);
   useEffect(() => {
     const id = uid();
     form.addEffects(id, () => {
@@ -145,8 +111,12 @@ const InternalDataSelectFieldProvider = (props) => {
     return () => {
       form.removeEffects(id);
     };
-  }, [fieldSchema, service?.loading]);
+  }, [service?.loading, form, record]);
 
+  if (service.loading && !field.loaded) {
+    return <Spin />;
+  }
+  field.loaded = true;
   return (
     <DataSelectBlockContext.Provider
       value={{
@@ -155,7 +125,6 @@ const InternalDataSelectFieldProvider = (props) => {
         form,
         service,
         record,
-        // setRecord,
         params,
         buid,
       }}
@@ -165,24 +134,42 @@ const InternalDataSelectFieldProvider = (props) => {
   );
 };
 export const DataSelectFieldProvider = (props) => {
+  //首次加载使用 id
+  const [searchParams] = useSearchParams();
   const params = { ...props.params };
   const field = useField();
   const fieldSchema = useFieldSchema();
+  const id = searchParams.get('id');
+  let filterArr = [];
+  if (params.filter) {
+    filterArr = [...Object.values(params.filter)];
+  }
+  if (id) {
+    filterArr.push({
+      id: {
+        $eq: id,
+      },
+    });
+  }
+  if (filterArr.length > 0) {
+    params.filter = mergeFilter(filterArr);
+  }
   return (
-    <div className={css`
-     height: calc(100vh - 52px - 40px - 24px*2 - 10px);
-     > div {
-      height:100%;
-      > .ant-nb-card-item{
-        height: 100%;
-        > .card {
+    <div
+      className={css`
+        height: calc(100vh - 52px - 40px - 24px * 2 - 10px);
+        > div {
           height: 100%;
-          margin-bottom: 0;
+          > .ant-nb-card-item {
+            height: 100%;
+            > .card {
+              height: 100%;
+              margin-bottom: 0;
+            }
+          }
         }
-
-      }
-     }
-    `}>
+      `}
+    >
       <DetailsBlockProvider
         uid="data-select-field"
         {...props}
