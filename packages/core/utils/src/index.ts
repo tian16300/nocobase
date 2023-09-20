@@ -21,4 +21,4 @@ export * from './toposort';
 export * from './uid';
 export * from './url';
 
-export { dayjs, lodash };
+export { dayjs, lodash, zhCn };

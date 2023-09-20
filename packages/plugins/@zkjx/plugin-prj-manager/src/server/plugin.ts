@@ -1,6 +1,7 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
 import dicRecords from './dicRecords';
+import { generatePlan } from './actions/plan';
 export class PluginPrjManagerServer extends Plugin {
   afterAdd() {}
 
@@ -77,6 +78,10 @@ export class PluginPrjManagerServer extends Plugin {
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/task'),
     });
+    //注册actions
+    this.app.resourcer.registerActionHandlers({
+      'prj:generatePlan': generatePlan,
+    });
     this.aclAllowList(
       [
         'prj',
@@ -92,7 +97,6 @@ export class PluginPrjManagerServer extends Plugin {
       'loggedIn',
     );
     this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users'], 'public');
-    //依赖 dic 及 dicItem 表
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {
