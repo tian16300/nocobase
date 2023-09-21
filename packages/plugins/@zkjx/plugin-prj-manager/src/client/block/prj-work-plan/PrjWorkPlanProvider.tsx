@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { AsyncDataProvider, GanttBlockProvider, IField, useAsyncData } from '@nocobase/client';
+import {
+  AsyncDataProvider,
+  BlockProvider,
+  GanttBlockContext,
+  GanttBlockProvider,
+  IField,
+  TableBlockProvider,
+  useAsyncData,
+  useBlockRequestContext,
+} from '@nocobase/client';
 import { connect, observer, useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
 import { createForm, onFormReact } from '@formily/core';
@@ -12,227 +21,107 @@ const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
 const PrjWorkPlanProviderInner = (props) => {
-  const { request } = props;
-  const formCtx = usePrjWorkFormProviderContext();
-  const field: IField = useField();
-  const ctx = useAsyncData();
-  const [firstRun, setFirstRun] = useState(true);
-  const form = formCtx.form;
-  useEffect(() => {
-    field.service = ctx;
-    field.loading = ctx.loading;
-    if (ctx.loading) return;
-    setFirstRun(false);
-    return () => {
-      setFirstRun(true);
-    };
-  }, [ctx]);
-  useEffect(() => {
-    if (!firstRun && !ctx.loading) {
-      ctx.refresh();
-    }
-  }, [request]);
+  const { fieldNames, timeRange, resource } = props;
+  const field = useField();
+  const { service, parent } = useBlockRequestContext();
+
   return (
-    <PrjWorkProviderContext.Provider
+    <GanttBlockContext.Provider
       value={{
-        service: ctx,
-        form: form,
+        field,
+        service,
+        resource,
+        fieldNames,
+        timeRange,
       }}
     >
       {props.children}
-    </PrjWorkProviderContext.Provider>
+    </GanttBlockContext.Provider>
   );
 };
-
-// export const PrjWorkPlanProvider = observer((props) => {
-//   const options = {
-//     collection: 'prj_plan',
-//     resource: 'prj_plan',
-//     action: 'list',
-//     fieldNames: {
-//       id: 'id',
-//       title: 'stage',
-//       start: 'start',
-//       end: 'end',
-//       range: 'day',
-//     },
-//     params: {
-//       appends: [],
-//       paginate: false,
-//       filters: {
-//         // $and: [
-//         //   {
-//         //     prj: {
-//         //       id: {
-//         //         $eq: record?.id,
-//         //       },
-//         //     },
-//         //   },
-//         // ],
-//       },
-//     },
-//   };
-//   return (
-//     // <PrjWorkFormProvider {...props}>
-
-//     // </PrjWorkFormProvider>
-//     //    <PrjWorkPlanAsynDataProvider  {...props}>
-//     //    {props.children}
-//     //  </PrjWorkPlanAsynDataProvider>
-//     <GanttBlockProvider {...options}>{props.children}</GanttBlockProvider>
-//   );
-// });
-
 export const PrjWorkPlanProvider = (props) => {
   const { record, service } = useDataSelectBlockContext();
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
-  const [recordId,  setRecordId] = useState(record.id);
+  // const [recordId, setRecordId] = useState(record.id);
   const options: any = {
     collection: 'prj_plan',
     resource: 'prj_plan',
-    action: 'list',
-    fieldNames: {
-      id: 'id',
-      title: 'stage',
-      start: 'start',
-      end: 'end',
-      range: 'day',
-    },
-    params: {
-      paginate: false,
-      filter: {
-        $and: [
-          {
-            prj: {
-              id: {
-                $eq: record.id,
-              },
-            },
-          },
-        ],
-      },
-    },
+    action: 'list'
+    // fieldNames: {
+    //   id: 'id',
+    //   title: 'stage',
+    //   start: 'start',
+    //   end: 'end',
+    //   range: 'day',
+    // },
+    // params: {
+    //   paginate: false,
+    //   filter: {
+    //     $and: [
+    //       {
+    //         prj: {
+    //           id: {
+    //             $eq: record.id,
+    //           },
+    //         },
+    //       },
+    //     ],
+    //   },
+    // },
   };
-  useEffect(() => {
-    options.params = {
-      filter: {
-        $and: [
-          {
-            prj: {
-              id: {
-                $eq: record.id,
-              },
-            },
-          },
-        ]
-      }
-    };
-  }, [record.id]);
+  const appends =  ['stage', 'status'];
 
   // Object.assign(props, ...options);
   // props.params= options.params;
-  
-  return <GanttBlockProvider {...props} params={options.params}></GanttBlockProvider>;
-};
-export const PrjWorkPlanAsynDataProvider = (props) => {
-  const { record, service } = useDataSelectBlockContext();
-  // const { form } = usePrjWorkFormProviderContext();
-  if (!service || service.loading) {
-    return null;
-  }
-  // const { start, end } = form.values;
-  // const request = useMemo(() => {
-  //   if (!record || !record.id) return null;
-  //   const query = {
-  //     ...usePrjWorkPlanFormDefValue(),
-  //     start,
-  //     end,
-  //   };
-  //   return {
-  //     resource: `reportDetail`,
-  //     action: 'list',
-  //     params: {
-  //       filter: {
-  //         $and: [
-  //           {
-  //             prjId: {
-  //               $eq: record.id,
-  //             },
-  //           },{
-  //               report: {
-  //                 status: {
-  //                   value:{
-  //                       $eq: '2'
-  //                   }
-  //                 },
-  //               },
-  //             },
-  //           {
-  //             report: {
-  //               end: {
-  //                 $dateBetween:[dayjs(query.start).format('YYYY-MM-DD'), dayjs(query.end).format('YYYY-MM-DD')]
-  //               }
-  //             }
-  //           }
-  //         ],
-  //       },
-  //       appends: ['report', 'report.user'],
-  //       paginate: false,
-  //     },
-  //   };
-  // }, [record, start, end]);
 
-  const options = {
-    collection: 'prj_plan',
-    resource: 'prj_plan',
-    action: 'list',
-    fieldNames: {
-      id: 'id',
-      title: 'stage',
-      start: 'start',
-      end: 'end',
-      range: 'day',
-    },
-    params: {
-      appends: [],
-      paginate: false,
-      filters: {
-        // $and: [
-        //   {
-        //     prj: {
-        //       id: {
-        //         $eq: record?.id,
-        //       },
-        //     },
-        //   },
-        // ],
-      },
-    },
-  };
-  const { params, ...others } = options;
-
-  props.params.filter = {
-    $and: [
-      {
-        prj: {
-          id: {
-            $eq: record?.id,
+  // return <GanttBlockProvider {...props} params={options.params}></GanttBlockProvider>;
+  const params = {
+    filter: {
+      $and: [
+        {
+          prj: {
+            id: {
+              $eq: record.id,
+            },
           },
         },
-      },
-    ],
+      ],
+    },
+    tree: true,
+    paginate: false,
+    // sort: 'stage_dicId',
+    // , sort: props.fieldNames.start
   };
-
+  const taskOptions: any = {
+    collection: 'task',
+    resource: 'task',
+    action: 'list',
+  };
+  useEffect(() => {
+    params.filter = {
+      $and: [
+        {
+          prj: {
+            id: {
+              $eq: record.id,
+            },
+          },
+        },
+      ],
+    };
+  }, [record.id]);
+  /* 首先获取 项目阶段 */
+  /* 获取项目任务 */
   return (
-    <GanttBlockProvider {...props}></GanttBlockProvider>
-    // <GanttBlockProvider uid="prjWork" {...{...props,...others}} params={params} runWhenParamsChanged>
-    //   {/* <PrjWorkPlanProviderInner request={request} {...props} />
-    //    */}
-    //    {props.children}
-    // </GanttBlockProvider>
-    // <>{props.children}</>
+    <>
+      <BlockProvider block="prj-plan" {...options} params={{...params,appends}}>
+        <TableBlockProvider block="prj-task" {...taskOptions} params={params}>
+          <PrjWorkPlanProviderInner {...props} />
+        </TableBlockProvider>
+      </BlockProvider>
+    </>
   );
 };
 const PrjWorkFormProvider = connect((props) => {

@@ -4,6 +4,7 @@ import { PrjWorkPlanDesigner } from './PrjWorkPlan.Designer';
 import { PrjWorkPlanForm } from './PrjWorkPlanForm';
 import { PrjWorkPlanProvider } from './PrjWorkPlanProvider';
 import { PrjWorkPlanView } from './PrjWorkPlanView';
+import { PrjWorkPlanTable } from './PrjWorkPlanTable';
 
 export const PrjWorkPlan = () => {
   return (
@@ -12,8 +13,9 @@ export const PrjWorkPlan = () => {
 };
 PrjWorkPlan.Wrap = ({ children }) => {
   return (<>{children}</>)
-
 }
+
+PrjWorkPlan.Table = PrjWorkPlanTable
 PrjWorkPlan.Form = PrjWorkPlanForm;
 PrjWorkPlan.View = PrjWorkPlanView;
 PrjWorkPlan.Decorator = PrjWorkPlanProvider;

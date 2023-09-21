@@ -162,9 +162,10 @@ export const useAssociatedTableColumnInitializerFields = () => {
         )
         ?.map((subField) => {
           const interfaceConfig = getInterface(subField.interface);
+          let name = `${field.name}.${subField.name}`;
           const schema = {
             // type: 'string',
-            name: `${field.name}.${subField.name}`,
+            name: name,
             // title: subField?.uiSchema?.title || subField.name,
 
             'x-component': 'CollectionField',

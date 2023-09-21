@@ -66,6 +66,9 @@ export const TableColumnDesigner = (props) => {
   const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'snapshot', 'dic'].includes(
     collectionField?.interface,
   );
+  const isDicField = ['dic'].includes(
+    collectionField?.interface,
+  );
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
   const fieldMode = fieldSchema?.['x-component-props']?.['mode'] || 'Select';
   let readOnlyMode = 'editable';
@@ -76,6 +79,9 @@ export const TableColumnDesigner = (props) => {
     readOnlyMode = 'read-pretty';
   }
   const isSelectFieldMode = isAssociationField && fieldMode === 'Select';
+  if(isDicField){
+    console.log(field);
+  }
   return (
     <GeneralSchemaDesigner disableInitializer>
       <SchemaSettings.ModalItem
@@ -190,7 +196,12 @@ export const TableColumnDesigner = (props) => {
             columnSchema['x-component-props'] = {
               ...columnSchema['x-component-props'],
               sorter: v,
+              isDicField:isDicField
             };
+            if(isDicField){
+              columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey; 
+              columnSchema['x-component-props']['isDicField']
+            }
             schema['x-component-props'] = columnSchema['x-component-props'];
             field.componentProps.sorter = v;
             dn.emit('patch', {

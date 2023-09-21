@@ -26,6 +26,10 @@ import { VerticalScroll } from '../other/vertical-scroll';
 import useStyles from './style';
 import { TaskGantt } from './task-gantt';
 import { TaskGanttContentProps } from './task-gantt-content';
+import { useProps } from '../../../../hooks';
+import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
+
+import 'react-reflex/styles.css';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 50 ? Math.floor(clientWidth / dataSetLength) + 20 : 50;
@@ -94,9 +98,10 @@ export const Gantt: any = (props: any) => {
     onClick,
     onDelete,
     onSelect,
-    useProps,
+    // useProps,
   } = props;
-  const { onExpanderClick, tasks, expandAndCollapseAll } = useProps();
+  // const { onExpanderClick, tasks, expandAndCollapseAll } = useProps();
+  const { fieldNames, onExpanderClick, tasks, expandAndCollapseAll } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
@@ -104,7 +109,6 @@ export const Gantt: any = (props: any) => {
   const tableCtx = useTableBlockContext();
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
-  const { fieldNames } = useProps(props);
   const viewMode = fieldNames.range || 'day';
   const wrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
@@ -504,50 +508,59 @@ export const Gantt: any = (props: any) => {
     >
       <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} />
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
-      <RecursionField name={'table'} schema={fieldSchema.properties.table} />
-      <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
-        <TaskGantt
-          gridProps={gridProps}
-          calendarProps={calendarProps}
-          barProps={barProps}
-          ganttHeight={ganttHeight}
-          scrollY={scrollY}
-          scrollX={scrollX}
-          ref={verticalGanttContainerRef}
-        />
-        {ganttEvent.changedTask && (
-          <Tooltip
-            arrowIndent={arrowIndent}
-            rowHeight={rowHeight}
-            svgContainerHeight={svgContainerHeight}
-            svgContainerWidth={svgContainerWidth}
-            fontFamily={fontFamily}
-            fontSize={fontSize}
-            scrollX={scrollX}
-            scrollY={scrollY}
-            task={ganttEvent.changedTask}
-            headerHeight={headerHeight}
-            taskListWidth={taskListWidth}
-            TooltipContent={TooltipContent}
-            rtl={rtl}
-            svgWidth={svgWidth}
-          />
-        )}
-        <VerticalScroll
-          ganttFullHeight={ganttFullHeight}
-          ganttHeight={ganttHeight}
-          headerHeight={headerHeight}
-          scroll={scrollY}
-          onScroll={handleScrollY}
-          rtl={rtl}
-        />
-        <HorizontalScroll
-          svgWidth={svgWidth}
-          taskListWidth={taskListWidth}
-          scroll={scrollX}
-          rtl={rtl}
-          onScroll={handleScrollX}
-        />
+      <div style={{height:'600px'}}>        
+      <ReflexContainer orientation="vertical">
+        <ReflexElement className="left-pane">
+          <RecursionField name={'table'} schema={fieldSchema.properties.table} />
+        </ReflexElement>
+        <ReflexSplitter />
+        <ReflexElement className="right-pane">
+          <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
+            <TaskGantt
+              gridProps={gridProps}
+              calendarProps={calendarProps}
+              barProps={barProps}
+              ganttHeight={ganttHeight}
+              scrollY={scrollY}
+              scrollX={scrollX}
+              ref={verticalGanttContainerRef}
+            />
+            {ganttEvent.changedTask && (
+              <Tooltip
+                arrowIndent={arrowIndent}
+                rowHeight={rowHeight}
+                svgContainerHeight={svgContainerHeight}
+                svgContainerWidth={svgContainerWidth}
+                fontFamily={fontFamily}
+                fontSize={fontSize}
+                scrollX={scrollX}
+                scrollY={scrollY}
+                task={ganttEvent.changedTask}
+                headerHeight={headerHeight}
+                taskListWidth={taskListWidth}
+                TooltipContent={TooltipContent}
+                rtl={rtl}
+                svgWidth={svgWidth}
+              />
+            )}
+            <VerticalScroll
+              ganttFullHeight={ganttFullHeight}
+              ganttHeight={ganttHeight}
+              headerHeight={headerHeight}
+              scroll={scrollY}
+              onScroll={handleScrollY}
+              rtl={rtl}
+            />
+            <HorizontalScroll
+              svgWidth={svgWidth}
+              taskListWidth={taskListWidth}
+              scroll={scrollX}
+              rtl={rtl}
+              onScroll={handleScrollX}
+            />
+          </div>
+        </ReflexElement>
+      </ReflexContainer>
       </div>
     </div>,
   );

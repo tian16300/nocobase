@@ -33,7 +33,7 @@ interface Props {
 const InternalTableBlockProvider = (props: Props) => {
   const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, ...others } = props;
   const field: any = useField();
-  const { resource, service } = useBlockRequestContext();
+  const { resource, service, __parent } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const { treeTable } = fieldSchema?.['x-decorator-props'] || {};
   const [expandFlag, setExpandFlag] = useState(fieldNames ? true : false);
@@ -51,6 +51,7 @@ const InternalTableBlockProvider = (props: Props) => {
           field,
           service,
           resource,
+          __parent,
           params,
           showIndex,
           dragSort,
@@ -155,10 +156,14 @@ export const useTableBlockProps = () => {
       ctx.service.refresh();
     },
     onChange({ current, pageSize }, filters, sorter) {
+      let sorterKey = sorter.field;
+      if(sorter?.column?.isDicField){
+        sorterKey = sorter?.column?.sorterKey;
+      }
       const sort = sorter.order
         ? sorter.order === `ascend`
-          ? [sorter.field]
-          : [`-${sorter.field}`]
+          ? [sorterKey]
+          : [`-${sorterKey}`]
         : globalSort || ctx.service.params?.[0]?.sort;
       ctx.service.run({ ...ctx.service.params?.[0], page: current, pageSize, sort });
     },

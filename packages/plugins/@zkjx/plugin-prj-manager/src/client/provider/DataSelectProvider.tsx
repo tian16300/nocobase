@@ -4,11 +4,15 @@ import {
   DataSelect,
   PrjWorkPlan,
   PrjWorkStatic,
+  StageColumnInitializers,
   SubPageAction,
+  TaskColumnInitializers,
   useDataSelectTabsProps,
   useFormSelectBlockProps,
   useFormSelectOptionsProps,
   usePrjWorkPlanDecoratorProps,
+  useStageTableBlockProps,
+  useTaskTableBlockProps,
 } from '../block/index';
 import { PrjRecordBlockInitializers } from '../initializers';
 
@@ -24,15 +28,6 @@ export const DataSelectProvider: React.FC = (props) => {
       component: 'DataSelect.initializer',
     });
   }
-  const hasSubPage = children.some((initializer) => initializer.component === 'SubPageAction.initializer');
-  if (!hasSubPage) {
-    children.push({
-      key: 'subPageBlock',
-      type: 'item',
-      title: '界面详情',
-      component: 'SubPageAction.initializer',
-    });
-  }
   return (
     <SchemaComponentOptions
       scope={{
@@ -40,16 +35,24 @@ export const DataSelectProvider: React.FC = (props) => {
         useFormSelectOptionsProps,
         useDataSelectTabsProps,
         usePrjWorkPlanDecoratorProps,
+        useStageTableBlockProps,
+        useTaskTableBlockProps,
       }}
       components={{
         PrjRecordBlockInitializers,
         DataSelect,
         PrjWorkStatic,
         PrjWorkPlan,
-        SubPageAction,
       }}
     >
-      <SchemaInitializerProvider initializers={{ ...initializers, 'DataSelect.initializer': DataSelect.initializer }}>
+      <SchemaInitializerProvider
+        initializers={{
+          ...initializers,
+          'DataSelect.initializer': DataSelect.initializer,
+          StageColumnInitializers,
+          TaskColumnInitializers,
+        }}
+      >
         {props.children}
       </SchemaInitializerProvider>
     </SchemaComponentOptions>
