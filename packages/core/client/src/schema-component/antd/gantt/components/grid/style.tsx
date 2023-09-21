@@ -6,7 +6,7 @@ const useStyles = genStyleHook('nb-grid-body', (token) => {
   return {
     [componentCls]: {
       '.gridRow': {
-        fill: token.colorBgContainer,
+        fill: token.colorFillQuaternary,
       },
 
       '.gridHeightRow': {
@@ -15,14 +15,21 @@ const useStyles = genStyleHook('nb-grid-body', (token) => {
       },
 
       '.gridRowLine': {
-        stroke: token.colorBorderSecondary,
-        strokeWidth: 0,
-        borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        stroke: token.colorBorder,
+        // strokeWidth: 0,
+        borderBottom: `1px solid ${token.colorBorder}`,
       },
 
       '.gridTick': {
-        stroke: token.colorBorderSecondary,
+        stroke: token.colorBorder,
+        // strokeDasharray:3
+        // ,
+        // strokeWidth: 0
       },
+      // '.gridTick:nth-child(7)': {
+      //   stroke: token.colorBorderSecondary,
+      //   strokeWidth: 0
+      // }
     },
   };
 });

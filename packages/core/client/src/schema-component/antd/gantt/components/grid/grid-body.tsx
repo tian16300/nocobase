@@ -64,7 +64,26 @@ export const GridBody: React.FC<GridBodyProps> = ({
   let today: ReactChild = <rect />;
   for (let i = 0; i < dates.length; i++) {
     const date = dates[i];
-    ticks.push(<line key={date.getTime()} x1={tickX} y1={0} x2={tickX} y2={y} className={cx('gridTick')} />);
+    let strokeWidth = 0;
+    /**
+     * 如果是天的话 则每周的最后一天 分隔线为1 如果是月 分隔线为
+     */
+   const isWeekEnd = date.getDay() % 7 == 0;
+   if (isWeekEnd) {
+     strokeWidth = 1;
+   }
+
+    ticks.push(
+      <line
+        key={date.getTime()}
+        x1={tickX}
+        y1={0}
+        x2={tickX}
+        y2={y}
+        className={cx('gridTick')}
+        strokeWidth={strokeWidth}
+      />,
+    );
     if (
       (i + 1 !== dates.length && date.getTime() < now.getTime() && dates[i + 1].getTime() >= now.getTime()) ||
       // if current date is last

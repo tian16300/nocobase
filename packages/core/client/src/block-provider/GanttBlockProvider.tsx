@@ -1,5 +1,5 @@
 import { useField } from '@formily/react';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
@@ -99,6 +99,9 @@ export const useGanttBlockProps = () => {
     const params = parseAction(actionPath, { schema, recordPkValue });
     return (template === 'view' && !writableView) || !params;
   };
+  const headerHeight = document.querySelector('.ant-table-thead')?.clientHeight || 0;
+  const [ganttHeight, setGanttHeight] = useState<any>(`calc(100% - ${headerHeight}px)`);
+  const [hasScroll, setHasScroll] = useState<any>(false);
 
   const onExpanderClick = (task: any) => {
     const data = ctx.field.data;
@@ -110,6 +113,11 @@ export const useGanttBlockProps = () => {
     const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, flag, checkPermassion);
     setTasks(data);
     ctx.field.data = data;
+  };
+  const onResize = (size, hasScroll) => {
+    setGanttHeight(size);
+    setHasScroll(hasScroll);
+    console.log('setGanttHeight', size);
   };
   useEffect(() => {
     if (!ctx?.service?.loading) {
@@ -124,5 +132,8 @@ export const useGanttBlockProps = () => {
     onExpanderClick,
     expandAndCollapseAll,
     tasks,
+    ganttHeight,
+    onResize,
+    hasScroll
   };
 };
