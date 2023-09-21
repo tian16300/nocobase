@@ -467,7 +467,8 @@ export const Table: any = observer(
       [field, dragSort],
     );
     const fieldSchema = useFieldSchema();
-    const fixedBlock = fieldSchema?.parent?.['x-decorator-props']?.fixedBlock;
+    /* 兼容 如果是甘特图的情况 */
+    const fixedBlock = fieldSchema?.parent?.parent?.['x-decorator-props']?.fixedBlock || fieldSchema?.parent?.['x-decorator-props']?.fixedBlock;
 
     const { height: tableHeight, tableSizeRefCallback } = useTableSize();
     const scroll = useMemo(() => {

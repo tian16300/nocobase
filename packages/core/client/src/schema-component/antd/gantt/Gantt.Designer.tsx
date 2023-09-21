@@ -1,7 +1,7 @@
 import { ISchema, useField, useFieldSchema } from '@formily/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCompile, useDesignable } from '../..';
+import { FixedBlockDesignerItem, useCompile, useDesignable } from '../..';
 import { useGanttBlockContext } from '../../../block-provider';
 import { useCollection } from '../../../collection-manager';
 import { useCollectionFilterOptions } from '../../../collection-manager/action-hooks';
@@ -38,6 +38,7 @@ export const GanttDesigner = () => {
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
       <SchemaSettings.BlockTitleItem />
+      <FixedBlockDesignerItem />
       <SchemaSettings.SelectItem
         title={t('Title field')}
         value={fieldNames.title}

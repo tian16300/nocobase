@@ -41,6 +41,7 @@ export const useFixedBlock = () => {
 };
 
 export const FixedBlockWrapper: React.FC = (props) => {
+  const field = useField();
   const fixedBlock = useFixedSchema();
   const { height, fixedBlockUID } = useFixedBlock();
   const record = useRecord();
@@ -53,17 +54,23 @@ export const FixedBlockWrapper: React.FC = (props) => {
    * isPopup means that the FixedBlock is in the popup mode
    */
   if (!fixedBlock && fixedBlockUID) return null;
+  const otherHeight = field?.decoratorProps?.otherHeight;
+  const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+
   return (
     <div
       className="nb-fixed-block"
       style={{
-        height: fixedBlockUID ? `calc(100vh - ${height})` : undefined,
+        height: fixedBlockUID ? vHeight : undefined,
       }}
     >
       {props.children}
     </div>
   );
 };
+
+
+
 
 export const FixedBlockDesignerItem = () => {
   const field = useField();
@@ -76,24 +83,60 @@ export const FixedBlockDesignerItem = () => {
   if (Object.keys(record).length || !inFixedBlock) {
     return null;
   }
+
+  const onFixedBlockPropsSubmit = async ({otherHeight}) => {
+    const decoratorProps = {
+      ...fieldSchema['x-decorator-props'],
+      otherHeight
+    };
+    await dn.emit('patch', {
+      schema: {
+        ['x-uid']: fieldSchema['x-uid'],
+        'x-decorator-props': decoratorProps,
+      },
+    });
+    field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
+  };
+  const fixedBlockPropsSchema = {
+    type: 'object',
+    properties: {
+      otherHeight: {
+        type: 'string',
+        title: '其它区块高度',
+        'x-decorator': 'FormItem',
+        'x-component': 'Input',
+        default: fieldSchema['x-decorator-props']?.otherHeight,
+        required: true
+      },
+    },
+  };
   return (
-    <SchemaSettings.SwitchItem
-      title={t('Fix block')}
-      checked={fieldSchema['x-decorator-props']?.fixedBlock}
-      onChange={async (fixedBlock) => {
-        const decoratorProps = {
-          ...fieldSchema['x-decorator-props'],
-          fixedBlock,
-        };
-        await dn.emit('patch', {
-          schema: {
-            ['x-uid']: fieldSchema['x-uid'],
-            'x-decorator-props': decoratorProps,
-          },
-        });
-        field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
-      }}
-    />
+    <>
+      <SchemaSettings.SwitchItem
+        title={t('Fix block')}
+        checked={fieldSchema['x-decorator-props']?.fixedBlock}
+        onChange={async (fixedBlock) => {
+          const decoratorProps = {
+            ...fieldSchema['x-decorator-props'],
+            fixedBlock,
+          };
+          await dn.emit('patch', {
+            schema: {
+              ['x-uid']: fieldSchema['x-uid'],
+              'x-decorator-props': decoratorProps,
+            },
+          });
+          field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
+        }}
+      />
+      {fieldSchema['x-decorator-props']?.fixedBlock ? (
+        <SchemaSettings.ModalItem
+          title={t('设置固定区块属性')}
+          schema={fixedBlockPropsSchema}
+          onSubmit={onFixedBlockPropsSubmit}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -122,6 +165,7 @@ const fixedBlockCss = css`
 `;
 
 const FixedBlock: React.FC<FixedBlockProps> = (props) => {
+  const field = useField();
   const { height } = props;
   const [fixedBlockUID, _setFixedBlock] = useState<false | string>(false);
   const fixedBlockUIDRef = useRef(fixedBlockUID);
@@ -129,12 +173,15 @@ const FixedBlock: React.FC<FixedBlockProps> = (props) => {
     fixedBlockUIDRef.current = v;
     _setFixedBlock(v);
   };
+  const otherHeight = field?.decoratorProps?.otherHeight;
+  const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+
   return (
     <FixedBlockContext.Provider value={{ inFixedBlock: true, height, setFixedBlock, fixedBlockUID, fixedBlockUIDRef }}>
       <div
         className={fixedBlockUID ? fixedBlockCss : ''}
         style={{
-          height: fixedBlockUID ? `calc(100vh - ${height})` : undefined,
+          height: fixedBlockUID ? vHeight : undefined,
         }}
       >
         {props.children}

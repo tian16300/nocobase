@@ -70,7 +70,7 @@ export const Gantt: any = (props: any) => {
     headerHeight = document.querySelector('.ant-table-thead')?.clientHeight || 0, // 与 antd 表格头部高度一致
     listCellWidth = '155px',
     rowHeight = tableRowHeight,
-    ganttHeight = 0,
+    ganttHeight = 'calc(100% - 55px - 1.2rem)',
     preStepsCount = 1,
     barFill = 60,
     barCornerRadius = token.borderRadiusXS,
@@ -111,6 +111,7 @@ export const Gantt: any = (props: any) => {
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
   const verticalGanttContainerRef = useRef<HTMLDivElement>(null);
   const [dateSetup, setDateSetup] = useState<DateSetup>(() => {
@@ -497,21 +498,31 @@ export const Gantt: any = (props: any) => {
         componentCls,
         hashId,
         css`
+          height: 100%;
+          min-height: 800px;
           .ant-table-container::after {
             box-shadow: none !important;
           }
           .ant-table-row {
             height: ${tableRowHeight}px;
           }
+          .wrapper, .ganttVerticalContainer{
+            height: 100%;
+          }
+          .scrollWrapper{
+            bottom: 0;
+          }
         `,
       )}
     >
       <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} />
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
-      <div style={{height:'600px'}}>        
+      <div style={{height:'calc(100% - 32px - 24px)'}}>        
       <ReflexContainer orientation="vertical">
         <ReflexElement className="left-pane">
+        <div className="wrapper" ref={tableWrapperRef}>
           <RecursionField name={'table'} schema={fieldSchema.properties.table} />
+        </div>
         </ReflexElement>
         <ReflexSplitter />
         <ReflexElement className="right-pane">

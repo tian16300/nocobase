@@ -28,10 +28,11 @@ interface Props {
   rowKey?: string;
   childrenColumnName: any;
   fieldNames?: any;
+  height?: any
 }
 
 const InternalTableBlockProvider = (props: Props) => {
-  const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, ...others } = props;
+  const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, height , ...others } = props;
   const field: any = useField();
   const { resource, service, __parent } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();

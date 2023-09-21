@@ -1684,13 +1684,13 @@ export const createGanttBlockSchema = (options) => {
           },
           table: {
             type: 'array',
-            'x-decorator': 'div',
-            'x-decorator-props': {
-              style: {
-                float: 'left',
-                maxWidth: '35%',
-              },
-            },
+            // 'x-decorator': 'div',
+            // 'x-decorator-props': {
+            //   // style: {
+            //   //   float: 'left',
+            //   //   maxWidth: '35%',
+            //   // },
+            // },
 
             'x-initializer': 'TableColumnInitializers',
             'x-component': 'TableV2',

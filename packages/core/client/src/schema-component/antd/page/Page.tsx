@@ -246,13 +246,12 @@ function PageContent(
   if (loading) {
     return render();
   }
-
   return !disablePageHeader && enablePageTabs ? (
     fieldSchema.mapProperties((schema) => {
       if (schema.name !== activeKey) return null;
 
       return (
-        <FixedBlock key={schema.name} height={`calc(${height}px + 46px + ${token.marginLG}px * 2)`}>
+        <FixedBlock key={schema.name} height={`calc(${height}px +  90px + ${token.marginLG}px * 2)`}>
           <SchemaComponent
             schema={
               new Schema({
@@ -266,7 +265,7 @@ function PageContent(
       );
     })
   ) : (
-    <FixedBlock height={`calc(${height}px + 46px + ${token.marginLG}px * 2)`}>
+    <FixedBlock height={`calc(${height}px + 52px + ${token.marginLG}px * 2)`}>
       <div className={`pageWithFixedBlockCss nb-page-content`}>{props.children}</div>
     </FixedBlock>
   );

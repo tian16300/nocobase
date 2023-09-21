@@ -11,6 +11,7 @@ export const useStyles = genStyleHook('nb-page', (token) => {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
+      height:'calc(100vh - 50px)',
       '&:hover': { '> .general-schema-designer': { display: 'block' } },
       '.ant-page-header': { zIndex: 1, position: 'relative' },
       '> .general-schema-designer': {
@@ -114,8 +115,9 @@ export const useStyles = genStyleHook('nb-page', (token) => {
       '.nb-page-wrapper': {
         padding: token.marginLG,
         // flex: 1,
-        height: 'calc(100vh - 50px - 52px)',
-        overflowY: ' scroll',
+        // height: 'calc(100vh - 50px - 52px)',
+        overflowY: 'scroll',
+        height: '100%'
       }
     }
   } as unknown as CSSInterpolation;
