@@ -548,6 +548,9 @@ export const Gantt: any = (props: any) => {
           .ant-table-body {
             overflow-y: hidden!important;
           }
+          .gantt-horizontal-scoll{
+            display: block!important;
+          }
         `,
       )}
     >
