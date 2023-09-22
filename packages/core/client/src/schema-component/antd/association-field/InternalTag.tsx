@@ -14,6 +14,7 @@ import { useAssociationFieldContext, useFieldNames, useInsertSchema } from './ho
 import schema from './schema';
 import { getTabFormatValue, useLabelUiSchema } from './util';
 import { uid } from '@nocobase/utils';
+import { getValuesByPath } from '@nocobase/utils/client';
 
 interface IEllipsisWithTooltipRef {
   setPopoverVisible: (boolean) => void;
@@ -45,9 +46,9 @@ export const ReadPrettyInternalTag: React.FC = observer(
     const tagColor = flat(recordCtx)[`${fieldSchema.name}.${tagColorField}`];
     const renderRecords = () =>
       toArr(props.value).map((record, index, arr) => {
-        const val = toValue(compile(record?.[fieldNames?.label || 'label']), 'N/A');
-        const color = toValue(compile(record?.[fieldNames?.color || 'color']), tagColor);
-        const icon = toValue(compile(record?.[fieldNames?.icon || 'icon']), '');
+        const val = toValue(compile(getValuesByPath(record, fieldNames?.label || 'label')), 'N/A');
+        const color = toValue(compile(getValuesByPath(record, fieldNames?.color || 'color')), tagColor);
+        const icon = toValue(compile(getValuesByPath(record, fieldNames?.icon || 'icon')), '');
         const text = getTabFormatValue(compile(labelUiSchema), val, color, icon);
         const key = `${recordCtx.id}_${field.props.name}_${index}_${uid()}`;
         return (

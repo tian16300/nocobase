@@ -231,7 +231,7 @@ export const TableTransfer = connect((props) => {
             `}
           >
             <strong style={{ fontSize: token.fontSizeLG, color: token.colorText }}>{t('Unshared collections')}</strong>
-            <Input.Group compact style={{ width: 360 }}>
+            <Space.Compact style={{ width: 360 }}>
               <Select
                 popupMatchSelectWidth={false}
                 onChange={(value) => {
@@ -250,7 +250,7 @@ export const TableTransfer = connect((props) => {
                 placeholder={t('Enter name or title...')}
                 allowClear
               />
-            </Input.Group>
+            </Space.Compact>
           </div>
           <Table
             bordered
@@ -316,7 +316,7 @@ export const TableTransfer = connect((props) => {
             `}
           >
             <strong style={{ fontSize: token.fontSizeLG, color: token.colorText }}>{t('Shared collections')}</strong>
-            <Input.Group compact style={{ width: 360 }}>
+            <Space.Compact  style={{ width: 360 }}>
               <Select
                 popupMatchSelectWidth={false}
                 onChange={(value) => {
@@ -335,7 +335,7 @@ export const TableTransfer = connect((props) => {
                 placeholder={t('Enter name or title...')}
                 allowClear
               />
-            </Input.Group>
+            </Space.Compact>
           </div>
           <Table
             bordered

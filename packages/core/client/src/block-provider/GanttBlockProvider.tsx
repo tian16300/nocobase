@@ -5,23 +5,10 @@ import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { useAssociationNames, useProps } from '..';
+import { getValuesByPath } from '@nocobase/utils/client';
 
 export const GanttBlockContext = createContext<any>({});
 
-function getValue(data: any, keys: string[]) {
-  for (let key of keys) {
-    if (data[key] === undefined) {
-      return undefined;
-    } else {
-      data = data[key];
-    }
-  }
-  return data;
-}
-const getRecordValue = (record, fieldName) => {
-  const keys = fieldName.split('.');
-  return getValue(record, keys);
-};
 const formatData = (
   data = [],
   fieldNames,
@@ -34,12 +21,12 @@ const formatData = (
     const disable = checkPermassion(item);
     const percent = item[fieldNames.progress] * 100;
     if (item.children && item.children.length) {
-      const start = getRecordValue(item, fieldNames.start);
-      const end = getRecordValue(item, fieldNames.end);
+      const start = getValuesByPath(item, fieldNames.start);
+      const end = getValuesByPath(item, fieldNames.end);
       tasks.push({
         start: new Date(start ?? undefined),
         end: new Date(end ?? undefined),
-        name: getRecordValue(item, fieldNames.title) || '',
+        name: getValuesByPath(item, fieldNames.title) || '',
         id: item.id + '',
         type: 'project',
         progress: percent > 100 ? 100 : percent || 0,
@@ -50,12 +37,12 @@ const formatData = (
       });
       formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion);
     } else {
-      const start = getRecordValue(item, fieldNames.start);
-      const end = getRecordValue(item, fieldNames.end);
+      const start = getValuesByPath(item, fieldNames.start);
+      const end = getValuesByPath(item, fieldNames.end);
       tasks.push({
         start: start ? new Date(start) : undefined,
         end: new Date(end || start),
-        name: getRecordValue(item, fieldNames.title) || '',
+        name: getValuesByPath(item, fieldNames.title) || '',
         id: item.id + '',
         type: fieldNames.end ? 'task' : 'milestone',
         progress: percent > 100 ? 100 : percent || 0,

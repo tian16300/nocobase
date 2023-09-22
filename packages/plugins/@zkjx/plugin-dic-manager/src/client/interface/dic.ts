@@ -200,4 +200,5 @@ export const dic: IField = {
     }
   },
   invariable: true,
+  titleUsable: true
 };

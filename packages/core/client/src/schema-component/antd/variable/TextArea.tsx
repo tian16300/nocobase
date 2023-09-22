@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { useForm } from '@formily/react';
-import { Input } from 'antd';
+import { Input, Space } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import sanitizeHTML from 'sanitize-html';
@@ -338,8 +338,7 @@ export function TextArea(props) {
   const disabled = props.disabled || form.disabled;
 
   return wrapSSR(
-    <Input.Group
-      compact
+    <Space.Compact
       className={cx(
         componentCls,
         hashId,
@@ -393,7 +392,7 @@ export function TextArea(props) {
       {!disabled ? (
         <VariableSelect options={options} setOptions={setOptions} onInsert={onInsert} changeOnSelect={changeOnSelect} />
       ) : null}
-    </Input.Group>,
+    </Space.Compact>,
   );
 }
 

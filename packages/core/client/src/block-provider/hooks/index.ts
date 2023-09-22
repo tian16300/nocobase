@@ -1126,6 +1126,17 @@ export const useAssociationNames = () => {
           const bufPrefix = prefix && prefix !== '' ? prefix + '.' + s.name : s.name;
           getAssociationAppends(s, bufPrefix);
         }
+        /**
+         * 兼容字典字段使用
+         */
+        if (['Tag'].includes(s['x-component-props']?.mode)) {
+          const label = s['x-component-props']?.fieldNames?.label||'';
+          const labelKeys = label.split('.');
+          if (labelKeys.length > 1) {
+            const newPath = [path, ...labelKeys.slice(0, labelKeys.length - 1)].join('.');
+            appends.add(newPath);
+          }
+        }
       } else if (
         ![
           'ActionBar',

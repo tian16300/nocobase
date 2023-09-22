@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Input, Select } from 'antd';
+import { Input, Select, Space } from 'antd';
 import { css } from '@emotion/css';
 import { useTranslation } from 'react-i18next';
 import { DynamicComponent } from './DynamicComponent';
@@ -14,7 +14,7 @@ export const ValueDynamicComponent = (props) => {
   const { t } = useTranslation();
   const scope = useVariableOptions(collectionName);
   return (
-    <Input.Group compact>
+    <Space.Compact compact>
       <Select
         value={mode}
         style={{ width: 150 }}
@@ -67,6 +67,6 @@ export const ValueDynamicComponent = (props) => {
           </>
         </div>
       ) : null}
-    </Input.Group>
+    </Space.Compact>
   );
 };

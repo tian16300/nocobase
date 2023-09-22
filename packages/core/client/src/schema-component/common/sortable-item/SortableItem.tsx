@@ -2,7 +2,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { cx } from '@emotion/css';
 import { Schema, observer, useField, useFieldSchema } from '@formily/react';
-import React, { HTMLAttributes, createContext, forwardRef, useContext } from 'react';
+import React, { HTMLAttributes, createContext, forwardRef, useContext, useEffect, useRef } from 'react';
 import { useToken } from '../../antd/__builtins__';
 
 export const DraggableContext = createContext(null);
@@ -21,11 +21,11 @@ export const SortableProvider = (props) => {
   return <SortableContext.Provider value={{ draggable, droppable }}>{children}</SortableContext.Provider>;
 };
 
-export const Sortable:React.FC = (props: any) => {
+export const Sortable = (props: any) => {
   const { component, overStyle, style, children, openMode, ...others } = props;
   const { token } = useToken();
   const { draggable, droppable } = useContext(SortableContext);
-  const { isOver, setNodeRef } = droppable;
+  const { isOver, setNodeRef} = droppable;
   const droppableStyle = { ...style };
 
   if (isOver && draggable?.active?.id !== droppable?.over?.id) {
@@ -34,12 +34,13 @@ export const Sortable:React.FC = (props: any) => {
       .toHex8String();
     Object.assign(droppableStyle, overStyle);
   }
+  const className = cx('nb-sortable-designer', props.className);
 
   return React.createElement(
     component || 'div',
     {
       ...others,
-      className: cx('nb-sortable-designer', props.className),
+      className: className,
       ref: setNodeRef,
       style: droppableStyle,
     },
@@ -91,7 +92,7 @@ export const SortableItem: React.FC<SortableItemProps> = observer(
   { displayName: 'SortableItem' },
 );
 
-export const DragHandler:React.FC = (props) => {
+export const DragHandler: React.FC = (props) => {
   const { draggable } = useContext(SortableContext);
   const { isDragging, attributes, listeners, setNodeRef, transform } = draggable;
   const style = transform

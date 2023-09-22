@@ -539,9 +539,12 @@ export const EditTitleField = () => {
     ? getCollectionFields(collectionField?.target)
     : getCollectionFields(collectionField?.targetCollection) ?? [];
   const options = targetFields
-    .filter((field) => !field?.target && field.type !== 'boolean')
+    .filter((field) => (
+      (['dic'].includes(field?.interface) ? true : !field?.target)
+      && field.type !== 'boolean'
+      ))
     .map((field) => ({
-      value: field?.name,
+      value: ['dic'].includes(field?.interface) ? [field.name, 'label'].join('.') : field.name,
       label: compile(field?.uiSchema?.title) || field?.name,
     }));
 

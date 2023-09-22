@@ -542,6 +542,9 @@ export const Gantt: any = (props: any) => {
           .ant-table-row {
             height: ${tableRowHeight}px;
           }
+          .left-pane{
+             overflow:hidden;
+          }
           .wrapper,
           .ganttVerticalContainer {
             height: 100%;

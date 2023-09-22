@@ -19,10 +19,16 @@ const useLabelFields = (collectionName?: any) => {
   }
   const targetFields = getCollectionFields(collectionName);
   return targetFields
-    ?.filter?.((field) => field?.interface && !field?.target && field.type !== 'boolean' && !field.isForeignKey)
+    ?.filter?.(
+      (field) =>
+        field?.interface &&
+        (['dic'].includes(field?.interface) ? true : !field?.target) &&
+        field.type !== 'boolean' &&
+        !field.isForeignKey,
+    )
     ?.map?.((field) => {
       return {
-        value: field.name,
+        value: ['dic'].includes(field?.interface) ? [field.name, 'label'].join('.') : field.name,
         label: compile(field?.uiSchema?.title || field.name),
       };
     });
@@ -66,9 +72,7 @@ export const TableColumnDesigner = (props) => {
   const isAssociationField = ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'snapshot', 'dic'].includes(
     collectionField?.interface,
   );
-  const isDicField = ['dic'].includes(
-    collectionField?.interface,
-  );
+  const isDicField = ['dic'].includes(collectionField?.interface);
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
   const fieldMode = fieldSchema?.['x-component-props']?.['mode'] || 'Select';
   let readOnlyMode = 'editable';
@@ -193,11 +197,11 @@ export const TableColumnDesigner = (props) => {
             columnSchema['x-component-props'] = {
               ...columnSchema['x-component-props'],
               sorter: v,
-              isDicField:isDicField
+              isDicField: isDicField,
             };
-            if(isDicField){
-              columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey; 
-              columnSchema['x-component-props']['isDicField']
+            if (isDicField) {
+              columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey;
+              columnSchema['x-component-props']['isDicField'];
             }
             schema['x-component-props'] = columnSchema['x-component-props'];
             field.componentProps.sorter = v;

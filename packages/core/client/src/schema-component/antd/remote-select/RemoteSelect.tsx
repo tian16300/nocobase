@@ -60,6 +60,21 @@ const InternalRemoteSelect = connect(
       return '$includes';
     }, [targetField]);
     const compile = useCompile();
+    function getValue(data: any, keys: string[]) {
+      for (let key of keys) {
+        if (data[key] === undefined) {
+          return undefined;
+        } else {
+          data = data[key];
+        }
+      }
+      return data;
+    }
+
+    const getRecordValue = (record, fieldName) => {
+      const keys = fieldName.split('.');
+      return getValue(record, keys);
+    };
 
     const mapOptionsToTags = useCallback(
       (options) => {
@@ -67,8 +82,7 @@ const InternalRemoteSelect = connect(
           return options
             .filter((v) => ['number', 'string'].includes(typeof v[fieldNames.value]))
             .map((option) => {
-              let label = compile(option[fieldNames.label]);
-
+              let label = compile(getRecordValue(option,fieldNames.label));
               if (targetField?.uiSchema?.enum) {
                 if (Array.isArray(label)) {
                   label = label

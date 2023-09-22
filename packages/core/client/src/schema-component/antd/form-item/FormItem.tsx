@@ -202,7 +202,7 @@ FormItem.Designer = function Designer() {
       return isTitleField(field);
     })
     .map((field) => ({
-      value: field?.name,
+      value: ['dic'].includes(field?.interface) ? [field?.name, 'label'].join('.') : field?.name,
       label: compile(field?.uiSchema?.title) || field?.name,
     }));
   const colorFieldOptions = useColorFields(collectionField?.target ?? collectionField?.targetCollection);
@@ -706,19 +706,29 @@ FormItem.Designer = function Designer() {
           title={t('Title field')}
           options={options}
           value={field?.componentProps?.fieldNames?.label}
-          onChange={(label) => {
+          onChange={(value) => {
             const schema = {
               ['x-uid']: fieldSchema['x-uid'],
             };
+            const label = value.split('.');
+            const appends = label.slice(0, label.length - 1);
             const fieldNames = {
               ...collectionField?.uiSchema?.['x-component-props']?.['fieldNames'],
               ...field.componentProps.fieldNames,
-              label,
+              label:value
             };
             fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
             fieldSchema['x-component-props']['fieldNames'] = fieldNames;
+            fieldSchema['x-component-props']['service'] = fieldSchema['x-component-props']['service'] || {};
+            fieldSchema['x-component-props']['service']['params'] = fieldSchema['x-component-props']['service']['params'] || {};
+            fieldSchema['x-component-props']['service']['params'] = {
+              ...fieldSchema['x-component-props']['service']['params'],
+              appends
+            };
             schema['x-component-props'] = fieldSchema['x-component-props'];
             field.componentProps.fieldNames = fieldSchema['x-component-props'].fieldNames;
+            field.componentProps.service = field.componentProps.service ||{};
+            field.componentProps.service.params =  fieldSchema['x-component-props']['service']['params'];
             dn.emit('patch', {
               schema,
             });

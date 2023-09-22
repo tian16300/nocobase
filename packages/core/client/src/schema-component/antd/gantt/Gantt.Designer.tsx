@@ -25,10 +25,10 @@ const useTitleFields=()=>{
   const compile = useCompile();
   const { fields } = useCollection();
   const options = fields
-    ?.filter((field) => field.type === 'string' || ['dic'].includes(field.interface))
+    ?.filter((field) => ((field.type === 'string') || ['dic'].includes(field.interface)))
     ?.map((field) => {
       return {
-        value: [field.name,'label'].join('.'),
+        value: ['dic'].includes(field.interface)?[field.name,'label'].join('.'):field.name,
         label: compile(field?.uiSchema?.title),
       };
     });
