@@ -162,6 +162,37 @@ export const GanttDesigner = () => {
         }}
       />
       <SchemaSettings.ModalItem
+        title={t('设置面板属性')}
+        schema={
+          {
+            type: 'object',
+            title: t('设置面板属性'),
+            properties: {
+              leftSize: {
+                'title':'左侧宽度',
+                'x-component': 'Percent',
+                'x-decorator': 'FormItem'
+              },
+            },
+          } as ISchema
+        }
+        initialValues={
+          {
+            leftSize:  fieldSchema['x-decorator-props'].leftSize
+          }
+        }
+        onSubmit={({ leftSize }) => {
+          field.decoratorProps.leftSize  =  leftSize;
+          fieldSchema['x-decorator-props']['leftSize'] = leftSize;
+          dn.emit('patch', {
+            schema: {
+              ['x-uid']: fieldSchema['x-uid'],
+              'x-decorator-props': field.decoratorProps,
+            },
+          });
+        }}
+      />
+      <SchemaSettings.ModalItem
         title={t('Set the data scope')}
         schema={
           {

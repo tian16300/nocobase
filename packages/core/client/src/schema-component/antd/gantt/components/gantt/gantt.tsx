@@ -107,7 +107,8 @@ export const Gantt: any = (props: any) => {
     onResize,
     tasks, 
     expandAndCollapseAll,
-    ganttHeight  = `calc(100% - ${headerHeight}px)`
+    ganttHeight  = `calc(100% - ${headerHeight}px)`,
+    leftSize
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -463,11 +464,12 @@ export const Gantt: any = (props: any) => {
     setRecord(recordData);
     setVisible(true);
   };
-  const handerResize = ()=>{
+  const handerResize = ({domElement, component})=>{
+    // console.log();
     const hasScrollX = tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth - document.querySelector('.ant-table-body')?.clientWidth;
     const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
     const scrollBar = hasScrollX > 0 ?10:0;
-    onResize.call(this,`calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX );
+    onResize.call(this,`calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component );
     if (wrapperRef.current) {
       const width = wrapperRef.current.offsetWidth - taskListWidth;
       setSvgContainerWidth(width);
@@ -563,12 +565,12 @@ export const Gantt: any = (props: any) => {
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
-          <ReflexElement className="left-pane">
+          <ReflexElement className="left-pane" flex={leftSize} onStopResize={handerResize} >
             <div className="wrapper" ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>
-          <ReflexSplitter onStopResize={handerResize} />
+          <ReflexSplitter />
           <ReflexElement className="right-pane">
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt
