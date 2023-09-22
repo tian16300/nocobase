@@ -50,7 +50,7 @@ export const useAssociation = (props) => {
 
 const useResource = (props: UseResourceProps) => {
   const { block, collection, resource, useSourceId } = props;
-  const record = useRecord();
+  let record = useRecord();
   const api = useAPIClient();
   const { fieldSchema } = useActionContext();
   const isCreateAction = fieldSchema?.['x-action'] === 'create';
