@@ -103,12 +103,14 @@ export const Gantt: any = (props: any) => {
     // useProps,
   } = props;
   // const { onExpanderClick, tasks, expandAndCollapseAll } = useProps();
-  const { fieldNames, onExpanderClick,
+  const {
+    fieldNames,
+    onExpanderClick,
     onResize,
-    tasks, 
+    tasks,
     expandAndCollapseAll,
-    ganttHeight  = `calc(100% - ${headerHeight}px)`,
-    leftSize
+    ganttHeight = `calc(100% - ${headerHeight}px)`,
+    leftSize,
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -282,15 +284,19 @@ export const Gantt: any = (props: any) => {
   }, [wrapperRef, taskListWidth]);
   useEffect(() => {
     const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
-    //如果到底部 scrollY 
+    //如果到底部 scrollY
     if (tbody) {
       tbody.scrollTop = scrollY;
     }
   }, [scrollY]);
 
   useEffect(() => {
-    if (ganttHeight) {     
+    const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
+    if (ganttHeight) {
       setSvgContainerHeight(ganttHeight + headerHeight);
+      // if(tbody){
+      //   (tbody as any).style = `min-height:${ganttHeight}px;max-height:${ganttHeight}px;`;
+      // }
     } else {
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
@@ -464,17 +470,19 @@ export const Gantt: any = (props: any) => {
     setRecord(recordData);
     setVisible(true);
   };
-  const handerResize = ({domElement, component})=>{
+  const handerResize = ({ domElement, component }) => {
     // console.log();
-    const hasScrollX = tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth - document.querySelector('.ant-table-body')?.clientWidth;
+    const hasScrollX =
+      tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
+      document.querySelector('.ant-table-body')?.clientWidth;
     const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
-    const scrollBar = hasScrollX > 0 ?10:0;
-    onResize.call(this,`calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component );
+    const scrollBar = hasScrollX > 0 ? 10 : 0;
+    onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
     if (wrapperRef.current) {
       const width = wrapperRef.current.offsetWidth - taskListWidth;
       setSvgContainerWidth(width);
     }
-  }
+  };
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
@@ -552,11 +560,18 @@ export const Gantt: any = (props: any) => {
             background-color: transparent;
             // width: 1px;
           }
-          .ant-table-body {
-            overflow-y: hidden!important;
+          .ant-table-wrapper {
+            height: 100%;
+            .ant-table,.ant-table-container{
+              height: 100%;
+            }
           }
-          .gantt-horizontal-scoll{
-            display: block!important;
+          .ant-table-body {
+            overflow-y: hidden !important;
+            min-height: calc(100% - ${headerHeight}px);
+          }
+          .gantt-horizontal-scoll {
+            display: block !important;
           }
         `,
       )}
@@ -565,7 +580,7 @@ export const Gantt: any = (props: any) => {
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
-          <ReflexElement className="left-pane" flex={leftSize} onStopResize={handerResize} >
+          <ReflexElement className="left-pane" flex={leftSize} onStopResize={handerResize}>
             <div className="wrapper" ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>

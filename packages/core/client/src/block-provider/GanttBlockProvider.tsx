@@ -4,25 +4,23 @@ import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
-import { useProps } from '..';
+import { useAssociationNames, useProps } from '..';
 
 export const GanttBlockContext = createContext<any>({});
 
-
-function getValue(data:any, keys: string[]) {
-  for(let key of keys) {
-    if(data[key] === undefined) {
-      return undefined
-    }
-    else {
-      data = data[key]
+function getValue(data: any, keys: string[]) {
+  for (let key of keys) {
+    if (data[key] === undefined) {
+      return undefined;
+    } else {
+      data = data[key];
     }
   }
-  return data
+  return data;
 }
-const getRecordValue = (record, fieldName)=>{
-  const keys =  fieldName.split('.');
-  return getValue(record,keys);
+const getRecordValue = (record, fieldName) => {
+  const keys = fieldName.split('.');
+  return getValue(record, keys);
 };
 const formatData = (
   data = [],
@@ -36,12 +34,12 @@ const formatData = (
     const disable = checkPermassion(item);
     const percent = item[fieldNames.progress] * 100;
     if (item.children && item.children.length) {
-      const start = getRecordValue(item,fieldNames.start);
-      const end = getRecordValue(item,fieldNames.end);
+      const start = getRecordValue(item, fieldNames.start);
+      const end = getRecordValue(item, fieldNames.end);
       tasks.push({
         start: new Date(start ?? undefined),
         end: new Date(end ?? undefined),
-        name: getRecordValue(item,fieldNames.title)||'',
+        name: getRecordValue(item, fieldNames.title) || '',
         id: item.id + '',
         type: 'project',
         progress: percent > 100 ? 100 : percent || 0,
@@ -52,12 +50,12 @@ const formatData = (
       });
       formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion);
     } else {
-      const start = getRecordValue(item,fieldNames.start);
-      const end = getRecordValue(item,fieldNames.end);
+      const start = getRecordValue(item, fieldNames.start);
+      const end = getRecordValue(item, fieldNames.end);
       tasks.push({
         start: start ? new Date(start) : undefined,
         end: new Date(end || start),
-        name: getRecordValue(item,fieldNames.title)||'',
+        name: getRecordValue(item, fieldNames.title) || '',
         id: item.id + '',
         type: fieldNames.end ? 'task' : 'milestone',
         progress: percent > 100 ? 100 : percent || 0,
@@ -84,7 +82,7 @@ const InternalGanttBlockProvider = (props) => {
         resource,
         fieldNames,
         timeRange,
-        leftSize
+        leftSize,
       }}
     >
       {props.children}
@@ -93,18 +91,21 @@ const InternalGanttBlockProvider = (props) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const params = { filter: props.params.filter, 
-    tree: true, 
-    paginate: false, 
+  const { appends } =  useAssociationNames();
+  const params = {
+    filter: props.params.filter,
+    tree: true,
+    paginate: false,
     sort: props.fieldNames.start,
-    appends: props.params.appends||[]
-   };
+    appends: Array.from(new Set([...(props.params.appends||[]), ...appends])),
+  };
   return (
-    <BlockProvider {...props} params={params}>
-      <TableBlockProvider {...props} params={params}>
-        <InternalGanttBlockProvider {...props} />
-      </TableBlockProvider>
-    </BlockProvider>
+    // <BlockProvider {...props} params={params}>
+
+    // </BlockProvider>
+    <TableBlockProvider {...props} params={params}>
+      <InternalGanttBlockProvider {...props} />
+    </TableBlockProvider>
   );
 };
 
@@ -114,7 +115,7 @@ export const useGanttBlockContext = () => {
 
 export const useGanttBlockProps = () => {
   const ctx = useGanttBlockContext();
-  const [tasks, setTasks] = useState<any>([]);  
+  const [tasks, setTasks] = useState<any>([]);
   const [leftSize, setLeftSize] = useState<any>(ctx.leftSize);
   const { getPrimaryKey, name, template, writableView } = useCollection();
   const { parseAction } = useACLRoleContext();
@@ -146,11 +147,9 @@ export const useGanttBlockProps = () => {
     setHasScroll(hasScroll);
     setLeftSize(comp.props.flex);
   };
-  useEffect(()=>{
+  useEffect(() => {
     setLeftSize(ctx.leftSize);
-  },[
-    ctx.leftSize
-  ])
+  }, [ctx.leftSize]);
   useEffect(() => {
     if (!ctx?.service?.loading) {
       const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, false, checkPermassion);
@@ -167,6 +166,6 @@ export const useGanttBlockProps = () => {
     ganttHeight,
     onResize,
     hasScroll,
-    leftSize
+    leftSize,
   };
 };

@@ -79,9 +79,6 @@ export const TableColumnDesigner = (props) => {
     readOnlyMode = 'read-pretty';
   }
   const isSelectFieldMode = isAssociationField && fieldMode === 'Select';
-  if(isDicField){
-    console.log(field);
-  }
   return (
     <GeneralSchemaDesigner disableInitializer>
       <SchemaSettings.ModalItem

@@ -1110,7 +1110,6 @@ export const useAssociationNames = () => {
   const fieldSchema = useFieldSchema();
   const updateAssociationValues = new Set([]);
   const appends = new Set([]);
-  console.log('useAssociationNames appends');
   const getAssociationAppends = (schema, str) => {
     schema?.reduceProperties((pre, s) => {
       const prefix = pre || str;

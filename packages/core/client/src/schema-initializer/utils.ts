@@ -1658,7 +1658,8 @@ export const createGanttBlockSchema = (options) => {
         appends,
         paginate: false,
       },
-      ...others,
+      leftSize: 0.3,
+      ...others
     },
     'x-designer': 'Gantt.Designer',
     'x-component': 'CardItem',
@@ -1767,7 +1768,6 @@ export const createGanttBlockSchema = (options) => {
       },
     },
   };
-  console.log(JSON.stringify(schema, null, 2));
   return schema;
 };
 export const createKanbanBlockSchema = (options) => {

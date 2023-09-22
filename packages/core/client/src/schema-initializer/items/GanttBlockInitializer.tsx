@@ -133,7 +133,6 @@ export const GanttBlockInitializer = (props) => {
             appends.push(keys.slice(0, keys.length - 1).join('.'));
           }
         });
-        debugger;
         insert(
           createGanttBlockSchema({
             collection: item.name,
