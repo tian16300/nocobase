@@ -275,7 +275,8 @@ export const Gantt: any = (props: any) => {
 
   useEffect(() => {
     if (wrapperRef.current) {
-      setSvgContainerWidth(wrapperRef.current.offsetWidth - taskListWidth);
+      const width = wrapperRef.current.offsetWidth - taskListWidth;
+      setSvgContainerWidth(width);
     }
   }, [wrapperRef, taskListWidth]);
   useEffect(() => {
@@ -467,6 +468,10 @@ export const Gantt: any = (props: any) => {
     const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
     const scrollBar = hasScrollX > 0 ?10:0;
     onResize.call(this,`calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX );
+    if (wrapperRef.current) {
+      const width = wrapperRef.current.offsetWidth - taskListWidth;
+      setSvgContainerWidth(width);
+    }
   }
   const gridProps: GridProps = {
     columnWidth,

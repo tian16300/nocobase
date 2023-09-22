@@ -8,6 +8,22 @@ import { useProps } from '..';
 
 export const GanttBlockContext = createContext<any>({});
 
+
+function getValue(data:any, keys: string[]) {
+  for(let key of keys) {
+    if(data[key] === undefined) {
+      return undefined
+    }
+    else {
+      data = data[key]
+    }
+  }
+  return data
+}
+const getRecordValue = (record, fieldName)=>{
+  const keys =  fieldName.split('.');
+  return getValue(record,keys);
+};
 const formatData = (
   data = [],
   fieldNames,
@@ -20,10 +36,12 @@ const formatData = (
     const disable = checkPermassion(item);
     const percent = item[fieldNames.progress] * 100;
     if (item.children && item.children.length) {
+      const start = getRecordValue(item,fieldNames.start);
+      const end = getRecordValue(item,fieldNames.end);
       tasks.push({
-        start: new Date(item[fieldNames.start] ?? undefined),
-        end: new Date(item[fieldNames.end] ?? undefined),
-        name: item[fieldNames.title],
+        start: new Date(start ?? undefined),
+        end: new Date(end ?? undefined),
+        name: getRecordValue(item,fieldNames.title)||'',
         id: item.id + '',
         type: 'project',
         progress: percent > 100 ? 100 : percent || 0,
@@ -34,10 +52,12 @@ const formatData = (
       });
       formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion);
     } else {
+      const start = getRecordValue(item,fieldNames.start);
+      const end = getRecordValue(item,fieldNames.end);
       tasks.push({
-        start: item[fieldNames.start] ? new Date(item[fieldNames.start]) : undefined,
-        end: new Date(item[fieldNames.end] || item[fieldNames.start]),
-        name: item[fieldNames.title],
+        start: start ? new Date(start) : undefined,
+        end: new Date(end || start),
+        name: getRecordValue(item,fieldNames.title)||'',
         id: item.id + '',
         type: fieldNames.end ? 'task' : 'milestone',
         progress: percent > 100 ? 100 : percent || 0,
@@ -72,7 +92,12 @@ const InternalGanttBlockProvider = (props) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const params = { filter: props.params.filter, tree: true, paginate: false, sort: props.fieldNames.start };
+  const params = { filter: props.params.filter, 
+    tree: true, 
+    paginate: false, 
+    sort: props.fieldNames.start,
+    appends: props.params.appends||[]
+   };
   return (
     <BlockProvider {...props} params={params}>
       <TableBlockProvider {...props} params={params}>

@@ -66,7 +66,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         const tooltipLeftmostPoint = tooltipWidth + newRelatedX;
         const fullChartWidth = taskListWidth + svgContainerWidth;
         if (tooltipLeftmostPoint > fullChartWidth) {
-          newRelatedX = task.x1 + taskListWidth - arrowIndent * 1.5 - scrollX - tooltipWidth;
+          newRelatedX = task.x1 + taskListWidth - arrowIndent * 1.5 - scrollX - tooltipWidth;   
         }
         if (newRelatedX < taskListWidth) {
           newRelatedX = svgContainerWidth + taskListWidth - tooltipWidth;
@@ -123,9 +123,9 @@ export const StandardTooltipContent: React.FC<{
         {task.name}: {getYmd(task.start)} ~ {getYmd(task.end)}
       </b>
       {task.end.getTime() - task.start.getTime() !== 0 && (
-        <p className="tooltipDefaultContainerParagraph">{`Duration: ${
+        <p className="tooltipDefaultContainerParagraph">{`期限: ${
           Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-        } day(s)`}</p>
+        } 天`}</p>
       )}
 
       <p className="tooltipDefaultContainerParagraph">{!!task.progress && `Progress: ${task.progress}%`}</p>

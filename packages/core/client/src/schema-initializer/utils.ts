@@ -1637,7 +1637,6 @@ export const createCalendarBlockSchema = (options) => {
       },
     },
   };
-  console.log(JSON.stringify(schema, null, 2));
   return schema;
 };
 

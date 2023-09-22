@@ -21,6 +21,20 @@ const useOptions = (type = 'string') => {
     });
   return options;
 };
+const useTitleFields=()=>{
+  const compile = useCompile();
+  const { fields } = useCollection();
+  const options = fields
+    ?.filter((field) => field.type === 'string' || ['dic'].includes(field.interface))
+    ?.map((field) => {
+      return {
+        value: [field.name,'label'].join('.'),
+        label: compile(field?.uiSchema?.title),
+      };
+    });
+  return options;
+
+}
 
 export const GanttDesigner = () => {
   const field = useField();
@@ -42,7 +56,7 @@ export const GanttDesigner = () => {
       <SchemaSettings.SelectItem
         title={t('Title field')}
         value={fieldNames.title}
-        options={useOptions('string')}
+        options={useTitleFields()}
         onChange={(title) => {
           const fieldNames = field.decoratorProps.fieldNames || {};
           fieldNames['title'] = title;
