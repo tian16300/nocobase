@@ -37,7 +37,7 @@ const useTableColumns = (props) => {
   const { exists, render } = useSchemaInitializer(schema['x-initializer']);
   const columns = schema
     .reduceProperties((buf, s) => {
-      if (isColumnComponent(s) && schemaInWhitelist(Object.values(s.properties || {}).pop(), props?.isSubTable)) {
+      if (isColumnComponent(s) && schemaInWhitelist(Object.values(s.properties || {}).pop())) {
         return buf.concat([s]);
       }
       return buf;
@@ -468,7 +468,9 @@ export const Table: any = observer(
     );
     const fieldSchema = useFieldSchema();
     /* 兼容 如果是甘特图的情况 */
-    const fixedBlock = fieldSchema?.parent?.parent?.['x-decorator-props']?.fixedBlock || fieldSchema?.parent?.['x-decorator-props']?.fixedBlock;
+    const fixedBlock =
+      fieldSchema?.parent?.parent?.['x-decorator-props']?.fixedBlock ||
+      fieldSchema?.parent?.['x-decorator-props']?.fixedBlock;
 
     const { height: tableHeight, tableSizeRefCallback } = useTableSize();
     const scroll = useMemo(() => {

@@ -34,6 +34,7 @@ interface UseResourceProps {
   resource: any;
   association?: any;
   useSourceId?: any;
+  collection?: any;
   block?: any;
 }
 
@@ -48,8 +49,8 @@ export const useAssociation = (props) => {
 };
 
 const useResource = (props: UseResourceProps) => {
-  const { block, resource, useSourceId } = props;
-  let record = useRecord();
+  const { block, collection, resource, useSourceId } = props;
+  const record = useRecord();
   const api = useAPIClient();
   const { fieldSchema } = useActionContext();
   const isCreateAction = fieldSchema?.['x-action'] === 'create';
@@ -61,7 +62,7 @@ const useResource = (props: UseResourceProps) => {
   /**
    * 采用动态record
    */
-  if(__parent?.props?.recordIsDynamic && __parent?.props?.useRecord){
+  if (__parent?.props?.recordIsDynamic && __parent?.props?.useRecord) {
     // record = useDataSelectBlockRecord();
     field.loading = __parent.service.loading;
     record = __parent.props.useRecord();
@@ -91,8 +92,10 @@ const useResource = (props: UseResourceProps) => {
   if (sourceId) {
     return api.resource(resource, sourceId);
   }
-
-  return api.resource(resource, record[association?.sourceKey || 'id']);
+  if (record[association?.sourceKey || 'id']) {
+    return api.resource(resource, record[association?.sourceKey || 'id']);
+  }
+  return api.resource(collection);
 };
 
 const useActionParams = (props) => {
@@ -121,32 +124,32 @@ export const useResourceAction = (props, opts = {}) => {
   const result = useRequest(
     snapshot
       ? async () => ({
-        data: record[tableFieldName] ?? [],
-      })
+          data: record[tableFieldName] ?? [],
+        })
       : (opts) => {
-        if (!action) {
-          return Promise.resolve({});
-        }
-        const actionParams = { ...params, ...opts };
-        if (params?.appends) {
-          actionParams.appends = params.appends;
-        }
-        /**
-         * 过滤自己
-         */
-        if (Reflect.has(actionParams, 'appends')) {
-          const resourceName = association || collection;
-          const appends = actionParams.appends.filter((key) => {
-            return key !== resourceName
-          });
-          if (appends.length == 0) {
-            Reflect.deleteProperty(actionParams, 'appends');
-          } else {
-            Reflect.set(actionParams, 'appends', appends);
+          if (!action) {
+            return Promise.resolve({});
           }
-        }
-        return resource[action](actionParams).then((res) => res.data);
-      },
+          const actionParams = { ...params, ...opts };
+          if (params?.appends) {
+            actionParams.appends = params.appends;
+          }
+          /**
+           * 过滤自己
+           */
+          if (Reflect.has(actionParams, 'appends')) {
+            const resourceName = association || collection;
+            const appends = actionParams.appends.filter((key) => {
+              return key !== resourceName;
+            });
+            if (appends.length == 0) {
+              Reflect.deleteProperty(actionParams, 'appends');
+            } else {
+              Reflect.set(actionParams, 'appends', appends);
+            }
+          }
+          return resource[action](actionParams).then((res) => res.data);
+        },
     {
       ...opts,
       onSuccess(data, params) {
