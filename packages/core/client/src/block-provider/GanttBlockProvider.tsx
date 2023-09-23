@@ -55,7 +55,7 @@ const formatData = (
   return tasks;
 };
 const InternalGanttBlockProvider = (props) => {
-  const { fieldNames, timeRange, resource, leftSize } = props;
+  const { fieldNames, timeRange, resource, rightSize } = props;
   const field = useField();
   const { service } = useBlockRequestContext();
   // if (service.loading) {
@@ -69,7 +69,7 @@ const InternalGanttBlockProvider = (props) => {
         resource,
         fieldNames,
         timeRange,
-        leftSize,
+        rightSize,
       }}
     >
       {props.children}
@@ -103,7 +103,7 @@ export const useGanttBlockContext = () => {
 export const useGanttBlockProps = () => {
   const ctx = useGanttBlockContext();
   const [tasks, setTasks] = useState<any>([]);
-  const [leftSize, setLeftSize] = useState<any>(ctx.leftSize);
+  const [rightSize, setRightSize] = useState<any>(ctx.rightSize);
   const { getPrimaryKey, name, template, writableView } = useCollection();
   const { parseAction } = useACLRoleContext();
   const primaryKey = getPrimaryKey();
@@ -132,11 +132,11 @@ export const useGanttBlockProps = () => {
   const onResize = (size, hasScroll, dom, comp) => {
     setGanttHeight(size);
     setHasScroll(hasScroll);
-    setLeftSize(comp.props.flex);
+    setRightSize(comp.props.flex);
   };
   useEffect(() => {
-    setLeftSize(ctx.leftSize);
-  }, [ctx.leftSize]);
+    setRightSize(ctx.rightSize);
+  }, [ctx.rightSize]);
   useEffect(() => {
     if (!ctx?.service?.loading) {
       const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, false, checkPermassion);
@@ -153,6 +153,6 @@ export const useGanttBlockProps = () => {
     ganttHeight,
     onResize,
     hasScroll,
-    leftSize,
+    rightSize,
   };
 };

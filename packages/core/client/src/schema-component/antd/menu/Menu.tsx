@@ -230,6 +230,7 @@ const HeaderMenu = ({
       style: { padding: '0 8px', order: 9999 },
       label: render({ 'data-testid': 'add-menu-item-button-in-header', style: { background: 'none' } }),
       notdelete: true,
+      order: 9999
     };
     const result = getMenuItems(() => {
       return children;
@@ -309,25 +310,25 @@ const SideMenu = ({
     });
 
     if (designable) {
-      result.push({
-        key: 'x-designer-button',
-        disabled: true,
-        label: render({
-          'data-testid': 'add-menu-item-button-in-side',
-          insert: (s) => {
-            const dn = createDesignable({
-              t,
-              api,
-              refresh,
-              current: sideMenuSchema,
-            });
-            dn.loadAPIClientEvents();
-            dn.insertAdjacent('beforeEnd', s);
-          },
-        }),
-        order: 1,
-        notdelete: true,
-      });
+      // result.push({
+      //   key: 'x-designer-button',
+      //   disabled: true,
+      //   label: render({
+      //     'data-testid': 'add-menu-item-button-in-side',
+      //     insert: (s) => {
+      //       const dn = createDesignable({
+      //         t,
+      //         api,
+      //         refresh,
+      //         current: sideMenuSchema,
+      //       });
+      //       dn.loadAPIClientEvents();
+      //       dn.insertAdjacent('beforeEnd', s);
+      //     },
+      //   }),
+      //   order: 1,
+      //   notdelete: true,
+      // });
     }
 
     return result;

@@ -73,7 +73,7 @@ export const Gantt: any = (props: any) => {
     rowHeight = tableRowHeight,
     // ganttHeight = `calc(100% - ${headerHeight}px)`,
     preStepsCount = 1,
-    barFill = 60,
+    barFill = 45,
     barCornerRadius = token.borderRadiusXS,
     barProgressColor = token.colorPrimary,
     barProgressSelectedColor = token.colorPrimary,
@@ -110,7 +110,7 @@ export const Gantt: any = (props: any) => {
     tasks,
     expandAndCollapseAll,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
-    leftSize,
+    rightSize,
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -120,7 +120,8 @@ export const Gantt: any = (props: any) => {
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null); 
+  const rightPaneRef = useRef<HTMLDivElement>(null); 
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
   const verticalGanttContainerRef = useRef<HTMLDivElement>(null);
@@ -280,8 +281,14 @@ export const Gantt: any = (props: any) => {
     if (wrapperRef.current) {
       const width = wrapperRef.current.offsetWidth - taskListWidth;
       setSvgContainerWidth(width);
+    } else {
+      const container = document.querySelector('.gantt-view-container') as HTMLDivElement;
+      if (container) {
+        const width = (container.offsetWidth - 2 - 2) * rightSize - taskListWidth;
+        setSvgContainerWidth(width);
+      }
     }
-  }, [wrapperRef, taskListWidth]);
+  }, [wrapperRef, rightSize, taskListWidth]);
   useEffect(() => {
     const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
     //如果到底部 scrollY
@@ -478,10 +485,6 @@ export const Gantt: any = (props: any) => {
     const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
     const scrollBar = hasScrollX > 0 ? 10 : 0;
     onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
-    if (wrapperRef.current) {
-      const width = wrapperRef.current.offsetWidth - taskListWidth;
-      setSvgContainerWidth(width);
-    }
   };
   const gridProps: GridProps = {
     columnWidth,
@@ -583,13 +586,13 @@ export const Gantt: any = (props: any) => {
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
-          <ReflexElement className="left-pane" flex={leftSize} onStopResize={handerResize}>
+          <ReflexElement className="left-pane">
             <div className="wrapper" ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>
           <ReflexSplitter />
-          <ReflexElement className="right-pane">
+          <ReflexElement  className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt
                 gridProps={gridProps}

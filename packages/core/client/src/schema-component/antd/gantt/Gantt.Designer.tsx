@@ -168,8 +168,8 @@ export const GanttDesigner = () => {
             type: 'object',
             title: t('设置面板属性'),
             properties: {
-              leftSize: {
-                'title':'左侧宽度',
+              rightSize: {
+                'title':'右侧宽度',
                 'x-component': 'Percent',
                 'x-decorator': 'FormItem'
               },
@@ -178,12 +178,12 @@ export const GanttDesigner = () => {
         }
         initialValues={
           {
-            leftSize:  fieldSchema['x-decorator-props'].leftSize
+            rightSize:  fieldSchema['x-decorator-props'].rightSize
           }
         }
-        onSubmit={({ leftSize }) => {
-          field.decoratorProps.leftSize  =  leftSize;
-          fieldSchema['x-decorator-props']['leftSize'] = leftSize;
+        onSubmit={({ rightSize }) => {
+          field.decoratorProps.rightSize  =  rightSize;
+          fieldSchema['x-decorator-props']['rightSize'] = rightSize;
           dn.emit('patch', {
             schema: {
               ['x-uid']: fieldSchema['x-uid'],
