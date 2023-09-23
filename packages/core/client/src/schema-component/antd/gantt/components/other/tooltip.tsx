@@ -1,10 +1,12 @@
-import { cx } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 import React, { useEffect, useRef, useState } from 'react';
 import { getYmd } from '../../helpers/other-helper';
 import { BarTask } from '../../types/bar-task';
 import { Task } from '../../types/public-types';
 import useStyles from './style';
-
+import { Col, Row, Space, Statistic } from 'antd';
+import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
+import { useToken } from '../../../__builtins__';
 export type TooltipProps = {
   task: BarTask;
   arrowIndent: number;
@@ -66,7 +68,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         const tooltipLeftmostPoint = tooltipWidth + newRelatedX;
         const fullChartWidth = taskListWidth + svgContainerWidth;
         if (tooltipLeftmostPoint > fullChartWidth) {
-          newRelatedX = task.x1 + taskListWidth - arrowIndent * 1.5 - scrollX - tooltipWidth;   
+          newRelatedX = task.x1 + taskListWidth - arrowIndent * 1.5 - scrollX - tooltipWidth;
         }
         if (newRelatedX < taskListWidth) {
           newRelatedX = svgContainerWidth + taskListWidth - tooltipWidth;
@@ -112,23 +114,93 @@ export const StandardTooltipContent: React.FC<{
   fontFamily: string;
 }> = ({ task, fontSize, fontFamily }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
-
+  const { token } = useToken();
   const style = {
     fontSize,
     fontFamily,
   };
   return wrapSSR(
     <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
-      <b style={{ fontSize: fontSize }}>
-        {task.name}: {getYmd(task.start)} ~ {getYmd(task.end)}
-      </b>
-      {task.end.getTime() - task.start.getTime() !== 0 && (
-        <p className="tooltipDefaultContainerParagraph">{`期限: ${
-          Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-        } 天`}</p>
-      )}
-
-      <p className="tooltipDefaultContainerParagraph">{!!task.progress && `Progress: ${task.progress}%`}</p>
+      <div
+        className={css`
+          fontsize: ${fontSize};
+          minwidth: 300px;
+        `}
+      >
+        <div style={{ marginBottom: 8, fontSize: '1.1em' }}>
+          <strong>{task.name}</strong>
+        </div>
+        <div>
+          <Row gutter={[16, 8]}>
+            <Col span={12}>
+              <Statistic
+                title={
+                  <Space>
+                    <CalendarOutlined
+                      style={{
+                        color: token.colorTextTertiary,
+                      }}
+                    />
+                    <span>开始日期</span>
+                  </Space>
+                }
+                valueStyle={{
+                  // color: '#3f8600',
+                  fontSize: fontSize,
+                }}
+                value={getYmd(task.start)}
+              />
+            </Col>
+            <Col span={12}>
+              <Statistic
+                title={
+                  <Space>
+                    <CarryOutOutlined
+                      style={{
+                        color: token.colorTextTertiary,
+                      }}
+                    />
+                    <span>结束日期</span>
+                  </Space>
+                }
+                value={getYmd(task.end)}
+                valueStyle={{
+                  // color: '#3f8600',
+                  fontSize: fontSize,
+                }}
+              />
+            </Col>
+            <Col span={12}>
+              <Statistic
+                title="时长"
+                value={Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10}
+                precision={1}
+                valueStyle={{
+                  // color: '#3f8600',
+                  fontSize: fontSize,
+                  fontWeight: 'bold',
+                }}
+                suffix="天"
+              />
+            </Col>
+            <Col span={12}>
+              {!!task.progress && (
+                <Statistic
+                  title="进度"
+                  value={task.progress}
+                  precision={2}
+                  valueStyle={{
+                    // color: '#3f8600',
+                    fontSize: fontSize,
+                    fontWeight: 'bold',
+                  }}
+                  suffix="%"
+                />
+              )}
+            </Col>
+          </Row>
+        </div>
+      </div>
     </div>,
   );
 };
