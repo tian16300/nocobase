@@ -170,7 +170,7 @@ export const StandardTooltipContent: React.FC<{
                 }}
               />
             </Col>
-            <Col span={12}>
+            {(task.start && task.end && <Col span={12}>
               <Statistic
                 title="时长"
                 value={Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10}
@@ -182,7 +182,7 @@ export const StandardTooltipContent: React.FC<{
                 }}
                 suffix="天"
               />
-            </Col>
+            </Col>)}
             <Col span={12}>
               {!!task.progress && (
                 <Statistic

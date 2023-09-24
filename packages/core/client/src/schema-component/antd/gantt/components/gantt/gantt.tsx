@@ -81,8 +81,8 @@ export const Gantt: any = (props: any) => {
     barBackgroundSelectedColor = token.colorPrimary,
     projectProgressColor = token.colorPrimary,
     projectProgressSelectedColor = token.colorPrimary,
-    projectBackgroundColor = token.colorPrimary,
-    projectBackgroundSelectedColor = token.colorPrimary,
+    projectBackgroundColor = token.colorInfo,
+    projectBackgroundSelectedColor = token.colorInfoActive,
     milestoneBackgroundColor = '#f1c453',
     milestoneBackgroundSelectedColor = '#f29e4c',
     rtl = false,
@@ -110,7 +110,7 @@ export const Gantt: any = (props: any) => {
     tasks,
     expandAndCollapseAll,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
-    rightSize,
+    rightSize
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -121,7 +121,6 @@ export const Gantt: any = (props: any) => {
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
   const wrapperRef = useRef<HTMLDivElement>(null); 
-  const rightPaneRef = useRef<HTMLDivElement>(null); 
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
   const verticalGanttContainerRef = useRef<HTMLDivElement>(null);

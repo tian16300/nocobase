@@ -20,10 +20,10 @@ export const convertToBarTasks = (
   projectBackgroundColor: string,
   projectBackgroundSelectedColor: string,
   milestoneBackgroundColor: string,
-  milestoneBackgroundSelectedColor: string,
+  milestoneBackgroundSelectedColor: string
 ) => {
   let barTasks = tasks.map((t, i) => {
-    return convertToBarTask(
+    const bar  =  convertToBarTask(
       t,
       i,
       dates,
@@ -42,8 +42,9 @@ export const convertToBarTasks = (
       projectBackgroundColor,
       projectBackgroundSelectedColor,
       milestoneBackgroundColor,
-      milestoneBackgroundSelectedColor,
-    );
+      milestoneBackgroundSelectedColor
+    )
+    return bar;
   });
 
   // set dependencies
@@ -55,6 +56,9 @@ export const convertToBarTasks = (
     }
     return task;
   });
+
+  
+  console.log('convertToBarTask barTasks', barTasks);
 
   return barTasks;
 };

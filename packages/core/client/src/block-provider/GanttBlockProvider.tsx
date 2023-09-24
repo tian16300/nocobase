@@ -4,11 +4,47 @@ import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
-import { useAssociationNames, useProps } from '..';
+import { useAssociationNames, useProps, useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
 
 export const GanttBlockContext = createContext<any>({});
+const findParentsId = (treeData, id) => {
+  if (treeData.length == 0) return;
+  for (let i = 0; i < treeData.length; i++) {
+    if (treeData[i].id == id) {
+      return [];
+    } else {
+      if (treeData[i].children) {
+        let res = findParentsId(treeData[i].children, id);
+        if (res !== undefined) {
+          return res.concat(treeData[i].id+'').reverse();
+        }
+      }
+    }
+  }
+};
+function setParentsId(childId, orgList) {
+  const result = findParentsId(orgList, childId).concat(childId+'')
+  return result || []
+}
 
+function getParentsId(childId, orgList) {
+  const result = findParentsId(orgList, childId)
+  return result || []
+}
+const getItemColor = (item, token)=>{
+   const colorName = item.color || item.status?.color;
+   if(colorName){
+    if(colorName.indexOf('#')!==-1){
+      return colorName;
+    }else{
+      return token['color'+[(colorName[0] as string).toLocaleUpperCase()+colorName.slice(1,colorName.length)]]
+    }
+
+   }
+   return null;
+
+};
 const formatData = (
   data = [],
   fieldNames,
@@ -16,6 +52,8 @@ const formatData = (
   projectId: any = undefined,
   hideChildren = false,
   checkPermassion?: (any) => boolean,
+  treeData = data,
+  token = {}
 ) => {
   data.forEach((item: any) => {
     const disable = checkPermassion(item);
@@ -23,23 +61,28 @@ const formatData = (
     if (item.children && item.children.length) {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
+      const startIdx = tasks.length;
       tasks.push({
+        index: startIdx,
         start: new Date(start ?? undefined),
         end: new Date(end ?? undefined),
         name: getValuesByPath(item, fieldNames.title) || '',
         id: item.id + '',
-        type: 'project',
+        type: 'task',
         progress: percent > 100 ? 100 : percent || 0,
         hideChildren: hideChildren,
         project: projectId,
-        color: item.color,
+        color: getItemColor(item, token),
         isDisabled: disable,
+        dependencies: (item.dependencies||[]).map(({id})=>{ return id+''})
       });
-      formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion);
+      formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion, treeData, token);
     } else {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
+      const startIdx = tasks.length;
       tasks.push({
+        index: startIdx,
         start: start ? new Date(start) : undefined,
         end: new Date(end || start),
         name: getValuesByPath(item, fieldNames.title) || '',
@@ -47,8 +90,9 @@ const formatData = (
         type: fieldNames.end ? 'task' : 'milestone',
         progress: percent > 100 ? 100 : percent || 0,
         project: projectId,
-        color: item.color,
+        color: getItemColor(item, token),
         isDisabled: disable,
+        dependencies:   (item.dependencies||[]).map(({id})=>{ return id+''})
       });
     }
   });
@@ -61,6 +105,7 @@ const InternalGanttBlockProvider = (props) => {
   // if (service.loading) {
   //   return <Spin />;
   // }
+  const {token} = useToken();
   return (
     <GanttBlockContext.Provider
       value={{
@@ -70,6 +115,7 @@ const InternalGanttBlockProvider = (props) => {
         fieldNames,
         timeRange,
         rightSize,
+        token
       }}
     >
       {props.children}
@@ -78,13 +124,13 @@ const InternalGanttBlockProvider = (props) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const { appends } =  useAssociationNames();
+  const { appends } = useAssociationNames();
   const params = {
     filter: props.params.filter,
     tree: true,
     paginate: false,
-    sort: props.fieldNames.start,
-    appends: Array.from(new Set([...(props.params.appends||[]), ...appends])),
+    // sort: props.fieldNames.start,
+    appends: Array.from(new Set([...(props.params.appends || []), ...appends])),
   };
   return (
     // <BlockProvider {...props} params={params}>
@@ -125,7 +171,7 @@ export const useGanttBlockProps = () => {
     ctx.field.data = tasksData;
   };
   const expandAndCollapseAll = (flag) => {
-    const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, flag, checkPermassion);
+    const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, flag, checkPermassion,ctx.service.data?.data, ctx.token);
     setTasks(data);
     ctx.field.data = data;
   };
@@ -139,7 +185,7 @@ export const useGanttBlockProps = () => {
   }, [ctx.rightSize]);
   useEffect(() => {
     if (!ctx?.service?.loading) {
-      const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, false, checkPermassion);
+      const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, false, checkPermassion,ctx.service.data?.data, ctx.token);
       setTasks(data);
       ctx.field.data = data;
     }
