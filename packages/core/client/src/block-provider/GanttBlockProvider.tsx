@@ -4,7 +4,7 @@ import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection } from '../collection-manager/hooks';
 import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
-import { useAssociationNames, useProps, useToken } from '..';
+import { useAssociationNames,  useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
 
 export const GanttBlockContext = createContext<any>({});

@@ -1653,10 +1653,14 @@ export const createGanttBlockSchema = (options) => {
       fieldNames: {
         id: 'id',
         ...fieldNames,
+        group:'prjStage.id',
+        milestone: 'prjStage',
+        dependencies: 'dependencies.id'
       },
       params: {
         appends,
         paginate: false,
+        sort: 'start'
       },
       leftSize: 0.3,
       ...others

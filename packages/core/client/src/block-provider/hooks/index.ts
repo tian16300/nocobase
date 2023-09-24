@@ -1111,6 +1111,22 @@ export const useAssociationNames = () => {
   const updateAssociationValues = new Set([]);
   const appends = new Set([]);
   const getAssociationAppends = (schema, str) => {
+    /**
+     * 解决 decorator上的 appends
+     */
+    if (schema['x-decorator-props']?.fieldNames) {
+      Object.values(schema['x-decorator-props']?.fieldNames).forEach((valKeys: string) => {
+        const keys = valKeys.split('.');
+        if (keys.length > 1) {
+          const prefix = schema['x-decorator-props'].resource || schema['x-decorator-props'].collection;
+          const collectionfield = getCollectionJoinField(prefix + '.' + valKeys);
+          if (collectionfield) {
+            const newPath = [...keys.slice(0, keys.length - 1)].join('.');
+            appends.add(newPath);
+          }
+        }
+      });
+    }
     schema?.reduceProperties((pre, s) => {
       const prefix = pre || str;
       const collectionfield = s['x-collection-field'] && getCollectionJoinField(s['x-collection-field']);
@@ -1129,13 +1145,14 @@ export const useAssociationNames = () => {
         /**
          * 兼容字典字段使用
          */
-        if (['Tag'].includes(s['x-component-props']?.mode)) {
-          const label = s['x-component-props']?.fieldNames?.label||'';
-          const labelKeys = label.split('.');
-          if (labelKeys.length > 1) {
-            const newPath = [path, ...labelKeys.slice(0, labelKeys.length - 1)].join('.');
-            appends.add(newPath);
-          }
+        if (s['x-component-props']?.fieldNames) {
+          Object.values(s['x-component-props']?.fieldNames).forEach((valKeys: string) => {
+            const keys = valKeys.split('.');
+            if (keys.length > 1) {
+              const newPath = [path, ...keys.slice(0, keys.length - 1)].join('.');
+              appends.add(newPath);
+            }
+          });
         }
       } else if (
         ![

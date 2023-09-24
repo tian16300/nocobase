@@ -12,6 +12,7 @@ import { EllipsisWithTooltip } from '../input/EllipsisWithTooltip';
 import { useAssociationFieldContext, useFieldNames, useInsertSchema } from './hooks';
 import schema from './schema';
 import { getLabelFormatValue, useLabelUiSchema } from './util';
+import { getValuesByPath } from '@nocobase/utils/client';
 
 interface IEllipsisWithTooltipRef {
   setPopoverVisible: (boolean) => void;
@@ -41,7 +42,7 @@ export const ReadPrettyInternalViewer: React.FC = observer(
     const ellipsisWithTooltipRef = useRef<IEllipsisWithTooltipRef>();
     const renderRecords = () =>
       toArr(props.value).map((record, index, arr) => {
-        const val = toValue(compile(record?.[fieldNames?.label || 'label']), 'N/A');
+        const val = toValue(compile(getValuesByPath(record, fieldNames?.label || 'label')), 'N/A');
         const labelUiSchema = useLabelUiSchema(
           record?.__collection || collectionField?.target,
           fieldNames?.label || 'label',
