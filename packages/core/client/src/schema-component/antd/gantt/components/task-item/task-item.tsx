@@ -27,7 +27,7 @@ export type TaskItemProps = {
 
 export const TaskItem: React.FC<TaskItemProps> = (props) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
-  const { task, arrowIndent, isDelete, taskHeight, isSelected, rtl, onEventStart } = {
+  const { task, arrowIndent, isDelete, taskHeight, isSelected, rtl, onEventStart, taskBar ={} } = {
     ...props,
   };
   const textRef = useRef<SVGTextElement>(null);
@@ -40,7 +40,14 @@ export const TaskItem: React.FC<TaskItemProps> = (props) => {
         setTaskItem(<Milestone {...props} />);
         break;
       case 'project':
-        setTaskItem(<Project {...props} />);
+        setTaskItem(
+          <>
+            <Project {...props} {...task.projectBar} task={task.projectBar}></Project>
+            <Bar {...props} task={{...task,type:'task',typeInternal:'task'}}  />
+            
+            {/* <Bar {...props} task={task.taskBar} /> */}
+          </>,
+        );
         break;
       case 'smalltask':
         setTaskItem(<BarSmall {...props} />);
@@ -98,7 +105,7 @@ export const TaskItem: React.FC<TaskItemProps> = (props) => {
       }}
     >
       {taskItem}
-      <text
+      {/* <text
         x={isProjectBar ? task.x1 : getX()}
         y={isProjectBar ? task.y - 8 : isTextInside ? task.y + taskHeight * 0.5 : task.y + taskHeight * 0.65}
         className={isProjectBar ? cx('projectLabel') : isTextInside ? cx('barLabel') : cx('barLabelOutside')}
@@ -107,6 +114,17 @@ export const TaskItem: React.FC<TaskItemProps> = (props) => {
         {isProjectBar && getYmd(task.start) && getYmd(task.end)
           ? `${task.name}:  ${getYmd(task.start)} ~ ${getYmd(task.end)}`
           : task.name}
+      </text> */}
+      <text
+        x={getX()}
+        y={false ? task.y - 8 : isTextInside ? task.y + taskHeight * 0.5 : task.y + taskHeight * 0.65}
+        className={isTextInside ? cx(isProjectBar ? 'projectLabel' : 'barLabel') : cx('barLabelOutside')}
+        ref={textRef}
+      >
+        {/* {isProjectBar && getYmd(task.start) && getYmd(task.end)
+          ? `${task.name}:  ${getYmd(task.start)} ~ ${getYmd(task.end)}`
+          : task.name} */}
+        {task.name}
       </text>
     </g>,
   );

@@ -7,7 +7,7 @@ export const projectWrapper = css`
 
 export const projectBackground = css`
   user-select: none;
-  opacity: 0.6;
+  opacity: 1;
 `;
 
 export const projectTop = css`

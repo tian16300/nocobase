@@ -107,7 +107,23 @@ const convertToBarTask = (
         dates,
         columnWidth,
         rowHeight,
-        taskHeight * 0.5,
+        taskHeight,
+        barCornerRadius,
+        handleWidth,
+        rtl,
+        projectProgressColor,
+        projectProgressSelectedColor,
+        projectBackgroundColor,
+        projectBackgroundSelectedColor,
+      );
+      const prjTask = {...task, ...task.projectItem} as Task;
+      barTask.projectBar = convertToBar(
+        prjTask,
+        index,
+        dates,
+        columnWidth,
+        rowHeight,
+        taskHeight,
         barCornerRadius,
         handleWidth,
         rtl,
@@ -171,7 +187,7 @@ const convertToBar = (
   const [progressWidth, progressX] = progressWithByParams(x1, x2, task.progress, rtl);
   const y =
     task.type === 'project'
-      ? taskYCoordinate(index, rowHeight, taskHeight) + 8
+      ? taskYCoordinate(index, rowHeight, taskHeight)
       : taskYCoordinate(index, rowHeight, taskHeight);
   const hideChildren = task.type === 'project' ? task.hideChildren : undefined;
 

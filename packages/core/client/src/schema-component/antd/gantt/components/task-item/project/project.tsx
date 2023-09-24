@@ -9,26 +9,54 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
   const projectWith = task.x2 - task.x1;
 
   return (
-    <g tabIndex={0} className={cx(projectWrapper)}>
-      <rect
-        fill={task.color || barColor}
-        x={task.x1}
-        width={projectWith}
-        y={task.y}
-        height={task.height}
-        rx={task.barCornerRadius}
-        ry={task.barCornerRadius}
-        className={cx(projectBackground)}
-      />
-      <rect
-        x={task.progressX}
-        width={task.progressWidth}
-        y={task.y}
-        height={task.height}
-        ry={task.barCornerRadius}
-        rx={task.barCornerRadius}
-        fill={task.color || processColor}
-      />
-    </g>
+    <>
+      <defs>
+        <pattern
+          id={"prj-"+task.id}
+          width="10"
+          height="10"
+          patternTransform="rotate(45 0 0)"
+          patternUnits="userSpaceOnUse"
+        >
+          <line
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="10"
+            style={{
+              stroke: task.color || barColor,
+              strokeWidth: 1,
+              strokeOpacity:0.6
+            }}
+          />
+        </pattern>
+      </defs>
+
+      <g tabIndex={0} className={cx(projectWrapper)}>
+        <rect
+          // fill={task.color || barColor}
+          fill={`url(#${'prj-'+task.id})`}
+          x={task.x1}
+          width={projectWith}
+          y={task.y}
+          height={task.height}
+          rx={task.barCornerRadius}
+          ry={task.barCornerRadius}
+          className={cx(projectBackground)}
+          stroke={task.color || barColor}
+          strokeWidth={1}
+        />
+        <rect
+          x={task.progressX}
+          width={task.progressWidth}
+          y={task.y}
+          height={task.height}
+          ry={task.barCornerRadius}
+          rx={task.barCornerRadius}
+          // fill={task.color || processColor}
+          fill={`url(#${'prj-'+task.id})`}
+        />
+      </g>
+    </>
   );
 };

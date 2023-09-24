@@ -20,8 +20,10 @@ const useStyles = genStyleHook('nb-gantt-task-item', (token) => {
 
       '.projectLabel': {
         fill: '#130d0d',
-        fontWeight: 500,
-        fontSize: '0.9em',
+        // stroke:'white',
+        // strokeWidth: 4,
+        fontWeight: 600,
+        // fontSize: '0.9em',
         dominantBaseline: 'central',
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',

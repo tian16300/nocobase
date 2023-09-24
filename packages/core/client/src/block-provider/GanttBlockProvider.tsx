@@ -17,33 +17,76 @@ const findParentsId = (treeData, id) => {
       if (treeData[i].children) {
         let res = findParentsId(treeData[i].children, id);
         if (res !== undefined) {
-          return res.concat(treeData[i].id+'').reverse();
+          return res.concat(treeData[i].id + '').reverse();
         }
       }
     }
   }
 };
 function setParentsId(childId, orgList) {
-  const result = findParentsId(orgList, childId).concat(childId+'')
-  return result || []
+  const result = findParentsId(orgList, childId).concat(childId + '');
+  return result || [];
 }
 
 function getParentsId(childId, orgList) {
-  const result = findParentsId(orgList, childId)
-  return result || []
+  const result = findParentsId(orgList, childId);
+  return result || [];
 }
-const getItemColor = (item, token)=>{
-   const colorName = item.color || item.status?.color;
-   if(colorName){
-    if(colorName.indexOf('#')!==-1){
+const getItemColor = (item, token) => {
+  const colorName = item.color || item.status?.color;
+  if (colorName) {
+    if (colorName.indexOf('#') !== -1) {
       return colorName;
-    }else{
-      return token['color'+[(colorName[0] as string).toLocaleUpperCase()+colorName.slice(1,colorName.length)]]
+    } else {
+      return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
     }
+  }
+  return null;
+};
+const getMinStart = (item) => {
+  const start = item.start ? new Date(item.start) : undefined;
+};
 
-   }
-   return null;
+const findItemMinStart = (item, cStart) => {
+  const start = item.start ? new Date(item.start) : null;
+  if (cStart && start) {
+    if (start.getTime() <= cStart.getTime()) {
+      cStart =  start;
+    }
+  } else if (start) {
+    cStart = start;
+  }
+  return cStart;
+};
+const findItemMaxEnd = (item, cEnd) => {
+  const end = item.end ? new Date(item.end) : null;
+  if (cEnd && end) {
+    if (end.getTime() >= cEnd.getTime()) {
+      cEnd =  end;
+    }
+  } else if (end) {
+    cEnd = end;
+  }
+  return cEnd;
+};
 
+const findMinStart = (item, cStart) => {
+  item.children.forEach((child)=>{
+    cStart = findItemMinStart(child, cStart);
+    if(child.children && child.children.length){
+      cStart = findMinStart(child, cStart);
+    }
+  });
+  return cStart;
+};
+const findMaxEnd = (item, cEnd) => {
+  item.children.forEach((child)=>{
+    cEnd = findItemMaxEnd(child, cEnd);
+    if(child.children && child.children.length){
+      cEnd = findMinStart(child, cEnd);
+    }
+  });
+  return cEnd;
 };
 const formatData = (
   data = [],
@@ -53,7 +96,7 @@ const formatData = (
   hideChildren = false,
   checkPermassion?: (any) => boolean,
   treeData = data,
-  token = {}
+  token = {},
 ) => {
   data.forEach((item: any) => {
     const disable = checkPermassion(item);
@@ -64,17 +107,29 @@ const formatData = (
       const startIdx = tasks.length;
       tasks.push({
         index: startIdx,
-        start: new Date(start ?? undefined),
-        end: new Date(end ?? undefined),
+        start:start?new Date(start):undefined,
+        end: end?new Date(end):undefined,
+        progress: percent > 100 ? 100 : percent || 0,
+        // 获取子任务 及自己 start的最小值
+        // start: new Date(start ?? undefined),       
         name: getValuesByPath(item, fieldNames.title) || '',
         id: item.id + '',
-        type: 'task',
-        progress: percent > 100 ? 100 : percent || 0,
+        type: 'project',
+        // progress: percent > 100 ? 100 : percent || 0,
         hideChildren: hideChildren,
         project: projectId,
         color: getItemColor(item, token),
         isDisabled: disable,
-        dependencies: (item.dependencies||[]).map(({id})=>{ return id+''})
+        dependencies: (item.dependencies || []).map(({ id }) => {
+          return id + '';
+        }),
+        projectItem:{
+          // type:'project',
+          start: findMinStart(item, start?new Date(start):undefined),
+          // 获取子任务 及自己 end的最大值
+          // end: new Date(end ?? undefined),
+          end: findMaxEnd(item, end?new Date(end):undefined),
+        },
       });
       formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion, treeData, token);
     } else {
@@ -92,7 +147,9 @@ const formatData = (
         project: projectId,
         color: getItemColor(item, token),
         isDisabled: disable,
-        dependencies:   (item.dependencies||[]).map(({id})=>{ return id+''})
+        dependencies: (item.dependencies || []).map(({ id }) => {
+          return id + '';
+        }),
       });
     }
   });
@@ -105,7 +162,7 @@ const InternalGanttBlockProvider = (props) => {
   // if (service.loading) {
   //   return <Spin />;
   // }
-  const {token} = useToken();
+  const { token } = useToken();
   return (
     <GanttBlockContext.Provider
       value={{
@@ -115,7 +172,7 @@ const InternalGanttBlockProvider = (props) => {
         fieldNames,
         timeRange,
         rightSize,
-        token
+        token,
       }}
     >
       {props.children}
@@ -171,7 +228,16 @@ export const useGanttBlockProps = () => {
     ctx.field.data = tasksData;
   };
   const expandAndCollapseAll = (flag) => {
-    const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, flag, checkPermassion,ctx.service.data?.data, ctx.token);
+    const data = formatData(
+      ctx.service.data?.data,
+      ctx.fieldNames,
+      [],
+      undefined,
+      flag,
+      checkPermassion,
+      ctx.service.data?.data,
+      ctx.token,
+    );
     setTasks(data);
     ctx.field.data = data;
   };
@@ -185,7 +251,16 @@ export const useGanttBlockProps = () => {
   }, [ctx.rightSize]);
   useEffect(() => {
     if (!ctx?.service?.loading) {
-      const data = formatData(ctx.service.data?.data, ctx.fieldNames, [], undefined, false, checkPermassion,ctx.service.data?.data, ctx.token);
+      const data = formatData(
+        ctx.service.data?.data,
+        ctx.fieldNames,
+        [],
+        undefined,
+        false,
+        checkPermassion,
+        ctx.service.data?.data,
+        ctx.token,
+      );
       setTasks(data);
       ctx.field.data = data;
     }
