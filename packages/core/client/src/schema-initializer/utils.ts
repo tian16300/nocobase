@@ -1739,7 +1739,7 @@ export const createGanttBlockSchema = (options) => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("View record") }}',
+                title: '{{ t("任务详情") }}',
                 properties: {
                   tabs: {
                     type: 'void',
@@ -1767,7 +1767,46 @@ export const createGanttBlockSchema = (options) => {
                 },
               },
             },
-          },
+          },          
+          milestone: {
+            type: 'void',
+            'x-component': 'Gantt.Event',
+            properties: {
+              drawer: {
+                type: 'void',
+                'x-component': 'Action.Drawer',
+                'x-component-props': {
+                  className: 'nb-action-popup',
+                },
+                title: '{{ t("阶段详情") }}',
+                properties: {
+                  tabs: {
+                    type: 'void',
+                    'x-component': 'Tabs',
+                    'x-component-props': {},
+                    'x-initializer': 'TabPaneInitializers',
+                    properties: {
+                      tab1: {
+                        type: 'void',
+                        title: '{{t("Details")}}',
+                        'x-component': 'Tabs.TabPane',
+                        'x-designer': 'Tabs.Designer',
+                        'x-component-props': {},
+                        properties: {
+                          grid: {
+                            type: 'void',
+                            'x-component': 'Grid',
+                            'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }
+          }
         },
       },
     },

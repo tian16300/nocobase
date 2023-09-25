@@ -8,7 +8,7 @@ import { useAPIClient } from '../../../../../api-client';
 import { useCurrentAppInfo } from '../../../../../appInfo';
 import { useBlockRequestContext, useGanttBlockContext, useTableBlockContext } from '../../../../../block-provider';
 import { RecordProvider } from '../../../../../record-provider';
-import { useDesignable } from '../../../../../schema-component';
+import { useDesignable} from '../../../../../schema-component';
 import { useToken } from '../../../__builtins__';
 import { ActionContextProvider } from '../../../action';
 import { convertToBarTasks } from '../../helpers/bar-helper';
@@ -42,6 +42,7 @@ const GanttRecordViewer = (props) => {
   const { visible, setVisible, record } = props;
   const form = useMemo(() => createForm(), [record]);
   const fieldSchema = useFieldSchema();
+
   const eventSchema: Schema = fieldSchema.properties.detail;
   const close = useCallback(() => {
     setVisible(false);
@@ -110,7 +111,7 @@ export const Gantt: any = (props: any) => {
     tasks,
     expandAndCollapseAll,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
-    rightSize
+    rightSize,
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -120,7 +121,7 @@ export const Gantt: any = (props: any) => {
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
-  const wrapperRef = useRef<HTMLDivElement>(null); 
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
   const verticalGanttContainerRef = useRef<HTMLDivElement>(null);
@@ -151,8 +152,9 @@ export const Gantt: any = (props: any) => {
   const ganttFullHeight = barTasks.length * rowHeight;
 
   useEffect(() => {
-    tableCtx.field.onExpandClick = handleTableExpanderClick;
-    tableCtx.field.onRowSelect = handleRowSelect;
+    /* table ctx expandClick */
+    // tableCtx.field.onExpandClick = handleTableExpanderClick;
+    // tableCtx.field.onRowSelect = handleRowSelect;
   }, []);
   useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
@@ -459,6 +461,7 @@ export const Gantt: any = (props: any) => {
     await service?.refresh();
   };
   const handleBarClick = (data) => {
+    const { type = 'task' } = data;
     const flattenTree = (treeData) => {
       return treeData.reduce((acc, node) => {
         if (node.children) {
@@ -473,8 +476,16 @@ export const Gantt: any = (props: any) => {
     if (!recordData) {
       return;
     }
-    setRecord(recordData);
-    setVisible(true);
+    if (type == 'task') {
+   
+      setRecord(recordData);
+      setVisible(true);
+    }else if(type == 'project'){
+      //如果是里程碑的话 则链接到
+
+
+      
+    }
   };
   const handerResize = ({ domElement, component }) => {
     // console.log();
@@ -529,23 +540,24 @@ export const Gantt: any = (props: any) => {
     onClick: handleBarClick,
     onDelete,
   };
-  const hasAction = Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0;
+  
+  const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
+  const hasAction = Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 || designable;
   return wrapSSR(
     <div
       className={cx(
         componentCls,
         hashId,
         css`
-          height: 100%;
-          min-height: 800px;
+          height: ${fixedBlock?'100%':'800px'};
           .ant-table-container::after {
             box-shadow: none !important;
           }
           .ant-table-row {
             height: ${tableRowHeight}px;
           }
-          .left-pane{
-             overflow:hidden;
+          .left-pane {
+            overflow: hidden;
           }
           .wrapper,
           .ganttVerticalContainer {
@@ -567,7 +579,8 @@ export const Gantt: any = (props: any) => {
           }
           .ant-table-wrapper {
             height: 100%;
-            .ant-table,.ant-table-container{
+            .ant-table,
+            .ant-table-container {
               height: 100%;
             }
           }
@@ -591,7 +604,7 @@ export const Gantt: any = (props: any) => {
             </div>
           </ReflexElement>
           <ReflexSplitter />
-          <ReflexElement  className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
+          <ReflexElement className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt
                 gridProps={gridProps}
