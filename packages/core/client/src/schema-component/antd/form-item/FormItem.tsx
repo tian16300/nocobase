@@ -223,6 +223,8 @@ FormItem.Designer = function Designer() {
   const showFieldMode = isAssociationField && fieldModeOptions && !isTableField;
   const showModeSelect = showFieldMode && isPickerMode;
   const isDateField = ['datetime', 'createdAt', 'updatedAt'].includes(collectionField?.interface);
+  const isAttachmentField =
+    ['attachment'].includes(collectionField?.interface) || targetCollection?.template === 'file';
 
   return (
     <GeneralSchemaDesigner>
@@ -715,20 +717,21 @@ FormItem.Designer = function Designer() {
             const fieldNames = {
               ...collectionField?.uiSchema?.['x-component-props']?.['fieldNames'],
               ...field.componentProps.fieldNames,
-              label:value
+              label: value,
             };
             fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
             fieldSchema['x-component-props']['fieldNames'] = fieldNames;
             fieldSchema['x-component-props']['service'] = fieldSchema['x-component-props']['service'] || {};
-            fieldSchema['x-component-props']['service']['params'] = fieldSchema['x-component-props']['service']['params'] || {};
+            fieldSchema['x-component-props']['service']['params'] =
+              fieldSchema['x-component-props']['service']['params'] || {};
             fieldSchema['x-component-props']['service']['params'] = {
               ...fieldSchema['x-component-props']['service']['params'],
-              appends
+              appends,
             };
             schema['x-component-props'] = fieldSchema['x-component-props'];
             field.componentProps.fieldNames = fieldSchema['x-component-props'].fieldNames;
-            field.componentProps.service = field.componentProps.service ||{};
-            field.componentProps.service.params =  fieldSchema['x-component-props']['service']['params'];
+            field.componentProps.service = field.componentProps.service || {};
+            field.componentProps.service.params = fieldSchema['x-component-props']['service']['params'];
             dn.emit('patch', {
               schema,
             });
@@ -737,6 +740,33 @@ FormItem.Designer = function Designer() {
         />
       )}
       {isDateField && <SchemaSettings.DataFormat fieldSchema={fieldSchema} />}
+
+      {isAttachmentField && field.readPretty && (
+        <SchemaSettings.SelectItem
+          key="size"
+          title={t('Size')}
+          options={[
+            { label: t('Large'), value: 'large' },
+            { label: t('Default'), value: 'default' },
+            { label: t('Small'), value: 'small' },
+          ]}
+          value={field?.componentProps?.size || 'default'}
+          onChange={(size) => {
+            const schema = {
+              ['x-uid']: fieldSchema['x-uid'],
+            };
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props']['size'] = size;
+            schema['x-component-props'] = fieldSchema['x-component-props'];
+            field.componentProps = field.componentProps || {};
+            field.componentProps.size = size;
+            dn.emit('patch', {
+              schema,
+            });
+            dn.refresh();
+          }}
+        />
+      )}
 
       {isAssociationField && ['Tag'].includes(fieldMode) && (
         <SchemaSettings.SelectItem
@@ -777,11 +807,6 @@ FormItem.Designer = function Designer() {
 
 export function isFileCollection(collection: Collection) {
   return collection?.template === 'file';
-}
-
-function extractFirstPart(path) {
-  const firstDotIndex = path.indexOf('.');
-  return firstDotIndex !== -1 ? path.slice(0, firstDotIndex) : path;
 }
 
 FormItem.FilterFormDesigner = FilterFormDesigner;

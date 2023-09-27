@@ -17,10 +17,11 @@ const recursiveParent = (schema: Schema) => {
 const useRelationFields = () => {
   const fieldSchema = useFieldSchema();
   const { getCollectionFields } = useCollectionManager();
+  const collection = useCollection();
   let fields = [];
 
   if (fieldSchema['x-initializer']) {
-    fields = useCollection().fields;
+    fields = collection.fields;
   } else {
     const collection = recursiveParent(fieldSchema.parent);
     if (collection) {
@@ -28,7 +29,9 @@ const useRelationFields = () => {
     }
   }
   const relationFields = fields
-    .filter((field) => ['linkTo', 'subTable', 'o2m', 'm2m', 'obo', 'oho', 'o2o', 'm2o', 'dic'].includes(field.interface))
+    .filter((field) =>
+      ['linkTo', 'subTable', 'o2m', 'm2m', 'obo', 'oho', 'o2o', 'm2o', 'dic'].includes(field.interface),
+    )
     .map((field) => {
       if (['hasOne', 'belongsTo'].includes(field.type)) {
         return {
@@ -66,7 +69,6 @@ const useRelationFields = () => {
               title: '{{t("Table")}}',
               field,
               component: 'RecordAssociationBlockInitializer',
-
             },
             {
               key: `${field.name}_details`,
@@ -191,76 +193,17 @@ export const RecordBlockInitializers = (props: any) => {
   const hasFormChildCollection = formChildrenCollections?.length > 0;
   const detailChildrenCollections = getChildrenCollections(collection.name, true);
   const hasDetailChildCollection = detailChildrenCollections?.length > 0;
-  const modifyFlag = (collection as any).template !== 'view' || collection?.writableView;
-  const items: any = [
-    {
-      type: 'itemGroup',
-      title: '{{t("Current record blocks")}}',
-      children: [
-        hasDetailChildCollection
-          ? {
-            key: 'details',
-            type: 'subMenu',
-            title: '{{t("Details")}}',
-            children: useDetailCollections({
-              ...props,
-              childrenCollections: detailChildrenCollections,
-              collection,
-            }),
-          }
-          : {
-            key: 'details',
-            type: 'item',
-            title: '{{t("Details")}}',
-            component: 'RecordReadPrettyFormBlockInitializer',
-            actionInitializers,
-          },
-        hasFormChildCollection
-          ? {
-            key: 'form',
-            type: 'subMenu',
-            title: '{{t("Form")}}',
-            children: useFormCollections({
-              ...props,
-              childrenCollections: formChildrenCollections,
-              collection,
-            }),
-          }
-          : modifyFlag && {
-            key: 'form',
-            type: 'item',
-            title: '{{t("Form")}}',
-            component: 'RecordFormBlockInitializer',
-          },
-      ],
-    },
-    {
-      type: 'itemGroup',
-      title: '{{t("Relationship blocks")}}',
-      children: useRelationFields(),
-    },
-    {
-      type: 'itemGroup',
-      title: '{{t("Other blocks")}}',
-      children: [
-        {
-          key: 'markdown',
-          type: 'item',
-          title: '{{t("Markdown")}}',
-          component: 'MarkdownBlockInitializer',
-        },
-        {
-          key: 'auditLogs',
-          type: 'item',
-          title: '{{t("Audit logs")}}',
-          component: 'AuditLogsBlockInitializer',
-        },
-      ],
-    },
-  ];
-  if (typeof useHookItems == 'function') {
-    useHookItems(items);
-  }
+  const modifyFlag = (collection.template !== 'view' || collection?.writableView) && collection.template !== 'sql';
+  const detailChildren = useDetailCollections({
+    ...props,
+    childrenCollections: detailChildrenCollections,
+    collection,
+  });
+  const formChildren = useFormCollections({
+    ...props,
+    childrenCollections: formChildrenCollections,
+    collection,
+  });
 
   return (
     <SchemaInitializer.Button
@@ -269,19 +212,73 @@ export const RecordBlockInitializers = (props: any) => {
       component={component}
       title={component ? null : t('Add block')}
       icon={'PlusOutlined'}
-      items={items}
+      items={[
+        {
+          type: 'itemGroup',
+          title: '{{t("Current record blocks")}}',
+          children: [
+            hasDetailChildCollection
+              ? {
+                  key: 'details',
+                  type: 'subMenu',
+                  title: '{{t("Details")}}',
+                  children: detailChildren,
+                }
+              : {
+                  key: 'details',
+                  type: 'item',
+                  title: '{{t("Details")}}',
+                  component: 'RecordReadPrettyFormBlockInitializer',
+                  actionInitializers,
+                },
+            hasFormChildCollection
+              ? {
+                  key: 'form',
+                  type: 'subMenu',
+                  title: '{{t("Form")}}',
+                  children: formChildren,
+                }
+              : modifyFlag && {
+                  key: 'form',
+                  type: 'item',
+                  title: '{{t("Form")}}',
+                  component: 'RecordFormBlockInitializer',
+                },
+          ],
+        },
+        {
+          type: 'itemGroup',
+          title: '{{t("Relationship blocks")}}',
+          children: useRelationFields(),
+        },
+        {
+          type: 'itemGroup',
+          title: '{{t("Other blocks")}}',
+          children: [
+            {
+              key: 'markdown',
+              type: 'item',
+              title: '{{t("Markdown")}}',
+              component: 'MarkdownBlockInitializer',
+            },
+            {
+              key: 'auditLogs',
+              type: 'item',
+              title: '{{t("Audit logs")}}',
+              component: 'AuditLogsBlockInitializer',
+            },
+          ],
+        },
+      ]}
     />
   );
 };
-
 
 // export const RecordBlockInitializers = (props: any) => {
 //   return (
 //     <RecordBlockInitializerProvider {...props}></RecordBlockInitializerProvider>
 //   );
 // };
-
-
 
 // export const RecordBlockInitializerContext = createContext({});
 
@@ -374,7 +371,6 @@ export const RecordBlockInitializers = (props: any) => {
 //   );
 // };
 
-
 // export const RecordBlockInitializerInnerProvider = () => {
 //   const { t } = useTranslation();
 //   const { items, insertPosition, component } = useRecordBlockInitializerContext();
@@ -389,5 +385,3 @@ export const RecordBlockInitializers = (props: any) => {
 //     />
 //   );
 // };
-
-
