@@ -389,13 +389,13 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
       },
       table: {
         type: 'array',
-        'x-decorator': 'div',
-        'x-decorator-props': {
-          style: {
-            float: 'left',
-            maxWidth: '35%',
-          },
-        },
+        // 'x-decorator': 'div',
+        // 'x-decorator-props': {
+        //   style: {
+        //     float: 'left',
+        //     maxWidth: '35%',
+        //   },
+        // },
         'x-initializer': 'TableColumnInitializers',
         'x-component': 'TableV2',
         'x-component-props': {
@@ -407,6 +407,67 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
           pagination: false,
         },
         properties: {
+          [uid()]: {
+            type: 'void',
+            'x-decorator': 'TableV2.Column.Decorator',
+            'x-designer': 'TableV2.Column.Designer',
+            'x-component': 'TableV2.Column',
+            properties: {
+              prjStage: {
+                'x-collection-field': 'task.prjStage',
+                'x-component': 'CollectionField',
+                'x-component-props': {
+                  ellipsis: true,
+                  size: 'small',
+                  fieldNames: {
+                    label: 'stage.label',
+                    value: 'id',
+                  },
+                },
+                'x-read-pretty': true,
+                'x-decorator': null,
+                'x-decorator-props': {
+                  labelStyle: {
+                    display: 'none',
+                  },
+                },
+                properties: {
+                  [uid()]: {
+                    type: 'void',
+                    title: '{{ t("View record") }}',
+                    'x-component': 'AssociationField.Viewer',
+                    'x-component-props': {
+                      className: 'nb-action-popup',
+                    },
+                    properties: {
+                      tabs: {
+                        type: 'void',
+                        'x-component': 'Tabs',
+                        'x-component-props': {},
+                        'x-initializer': 'TabPaneInitializers',
+                        properties: {
+                          tab1: {
+                            type: 'void',
+                            title: '{{t("Details")}}',
+                            'x-component': 'Tabs.TabPane',
+                            'x-designer': 'Tabs.Designer',
+                            'x-component-props': {},
+                            properties: {
+                              grid: {
+                                type: 'void',
+                                'x-component': 'Grid',
+                                'x-initializer': 'RecordBlockInitializers',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           actions: {
             type: 'void',
             title: '{{ t("Actions") }}',
@@ -473,50 +534,80 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
   return schema;
 };
 export const createPrjWorkPlanShema = () => {
+  const groupsFields = ['prjStage', 'user'];
   const comp = 'PrjWorkPlan';
-  // return {
-  //   type: 'void',
-  //   'x-decorator': `${comp}.Decorator`,
-  //   'x-decorator-props': {
-  //     collection: 'prj_plan',
-  //     resource: 'prj_plan',
-  //     action: 'list',
-  //     fieldNames: {
-  //       id: 'id',
-  //       start: 'start',
-  //       range: 'day',
-  //       title: 'stage',
-  //       end: 'end',
-  //     },
-  //     params: '{{useWorkPlanGanttParams}}',
-  //   },
-  //   'x-component': `${comp}.Wrap`,
-  //   'x-designer': `${comp}.Designer`,
-  //   properties: {
-  //     [uid()]: {
-  //       type: 'void',
-  //       'x-component': `${comp}.Form`,
-  //       'x-component-props': {
-  //         useProps: `{{ use${comp}Form}}`,
-  //       },
-  //     },
-  //     [uid()]: {
-  //       type: 'void',
-  //       'x-component': `div`,
-  //       'x-component-props': {
-  //         className: css`
-  //           height: 880px;
-  //         `,
-  //       },
-  //       properties: {
-  //         [uid()]: createPrjWorkPlanGanttBlockSchema({}),
-  //       },
-  //     },
-  //   },
-  // };
+  const groups = {};
+  groupsFields.forEach((key) => {
+    groups[key] = {
+      type: 'void',
+      'x-component': 'CollectionField',
+      'x-collection-field': 'task.' + key,
+      properties: {
+        [uid()]: {
+          type: 'void',
+          'x-component': 'Gantt.Event',
+          properties: {
+            drawer: {
+              type: 'void',
+              'x-component': 'Action.Drawer',
+              'x-component-props': {
+                className: 'nb-action-popup',
+              },
+              title: '{{ t("详情") }}',
+              properties: {
+                tabs: {
+                  type: 'void',
+                  'x-component': 'Tabs',
+                  'x-component-props': {},
+                  'x-initializer': 'TabPaneInitializers',
+                  properties: {
+                    tab1: {
+                      type: 'void',
+                      title: '{{t("Details")}}',
+                      'x-component': 'Tabs.TabPane',
+                      'x-designer': 'Tabs.Designer',
+                      'x-component-props': {},
+                      properties: {
+                        grid: {
+                          type: 'void',
+                          'x-component': 'Grid',
+                          'x-initializer': 'RecordBlockInitializers',
+                          properties: {},
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  });
   return {
     type: 'void',
     'x-decorator': `${comp}.Decorator`,
+    'x-decorator-props': {
+      collection: 'task',
+      resource: 'task',
+      action: 'list',
+      fieldNames: {
+        id: 'id',
+        title: 'title',
+        start: 'start',
+        range: 'day',
+        end: 'end',
+        dependencies: 'dependencies.id',
+      },
+      params: {
+        // appends: ['stage', 'status', 'task'],
+        paginate: false,
+        sort: 'id',
+      },
+      rightSize: 0.7,
+      preProcessData: '{{usePrjWorkPlanProcessData}}',
+    },
     'x-component': `${comp}.Wrap`,
     'x-designer': `${comp}.Designer`,
     properties: {
@@ -529,7 +620,11 @@ export const createPrjWorkPlanShema = () => {
       },
       view: {
         type: 'void',
-        'x-component': `${comp}.View`,
+        'x-component': `Gantt`,
+        'x-component-props': {
+          height: 'calc(100vh - 52px - 40px - 24px * 2 - 10px - 24px * 2 - 52px - 44px - 46px - 16px)',
+          useProps: '{{ useGanttBlockProps }}',
+        },
         properties: {
           toolBar: {
             type: 'void',
@@ -540,18 +635,18 @@ export const createPrjWorkPlanShema = () => {
               },
             },
             'x-initializer': 'GanttActionInitializers',
+            properties: {},
           },
           table: {
             type: 'array',
-            // 'x-decorator': 'div',
-            'x-initializer': 'StageColumnInitializers',
-            'x-component': `TableV2`,
+            'x-initializer': 'TableColumnInitializers',
+            'x-component': 'TableV2',
             'x-component-props': {
               rowKey: 'id',
               rowSelection: {
                 type: 'checkbox',
               },
-              useProps: '{{ useStageTableBlockProps }}',
+              useProps: '{{ useTableBlockProps }}',
               pagination: false,
             },
             properties: {
@@ -571,46 +666,12 @@ export const createPrjWorkPlanShema = () => {
                     'x-component-props': {
                       split: '',
                     },
+                    properties: {},
                   },
                 },
-              }
-            }
-          }, 
-          // expandTable: {
-          //   type: 'array',
-          //   'x-decorator': 'div',
-          //   'x-initializer': 'TaskColumnInitializers',
-          //   'x-component': `TableV2`,
-          //   'x-component-props': {
-          //     rowKey: 'id',
-          //     rowSelection: {
-          //       type: 'checkbox',
-          //     },
-          //     useProps: '{{ useTaskTableBlockProps }}',
-          //     pagination: false,
-          //   },
-          //   properties: {
-          //     actions: {
-          //       type: 'void',
-          //       title: '{{ t("Actions") }}',
-          //       'x-action-column': 'actions',
-          //       'x-decorator': 'TableV2.Column.ActionBar',
-          //       'x-component': 'TableV2.Column',
-          //       'x-designer': 'TableV2.ActionColumnDesigner',
-          //       'x-initializer': 'TableActionColumnInitializers',
-          //       properties: {
-          //         actions: {
-          //           type: 'void',
-          //           'x-decorator': 'DndContext',
-          //           'x-component': 'Space',
-          //           'x-component-props': {
-          //             split: '',
-          //           },
-          //         },
-          //       },
-          //     },
-          //   }
-          // },        
+              },
+            },
+          },
           detail: {
             type: 'void',
             'x-component': 'Gantt.Event',
@@ -621,7 +682,7 @@ export const createPrjWorkPlanShema = () => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("View record") }}',
+                title: '{{ t("任务详情") }}',
                 properties: {
                   tabs: {
                     type: 'void',
@@ -640,6 +701,7 @@ export const createPrjWorkPlanShema = () => {
                             type: 'void',
                             'x-component': 'Grid',
                             'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
                           },
                         },
                       },
@@ -649,6 +711,7 @@ export const createPrjWorkPlanShema = () => {
               },
             },
           },
+          ...groups,
         },
       },
     },

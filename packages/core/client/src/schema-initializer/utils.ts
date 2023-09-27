@@ -1653,17 +1653,26 @@ export const createGanttBlockSchema = (options) => {
       fieldNames: {
         id: 'id',
         ...fieldNames,
-        group:'prjStage.id',
+        group: 'prjStage.id',
         milestone: 'prjStage',
-        dependencies: 'dependencies.id'
+        project: 'task',
+        dependencies: 'dependencies.id',
       },
       params: {
-        appends,
+        appends: ['stage', 'status', 'task'],
         paginate: false,
-        sort: 'start'
+        sort: 'id',
       },
+      // group: {
+      //   collection: 'prj_plan',
+      //   resource: 'prj_plan',
+      //   action: 'list',
+      //   paginate: false,
+      //   sort: 'id',
+      //   appends: ['stage', 'status', 'task'],
+      // },
       leftSize: 0.3,
-      ...others
+      ...others,
     },
     'x-designer': 'Gantt.Designer',
     'x-component': 'CardItem',
@@ -1694,8 +1703,12 @@ export const createGanttBlockSchema = (options) => {
             //   //   float: 'left',
             //   //   maxWidth: '35%',
             //   // },
+            //   // block: 'prj_plan',
+            //   // expandedRowRender: {
+            //   //   name: 'expandedRowRender',
+            //   //   field: 'prj_plan.task',
+            //   // },
             // },
-
             'x-initializer': 'TableColumnInitializers',
             'x-component': 'TableV2',
             'x-component-props': {
@@ -1767,7 +1780,7 @@ export const createGanttBlockSchema = (options) => {
                 },
               },
             },
-          },          
+          },
           milestone: {
             type: 'void',
             'x-component': 'Gantt.Event',
@@ -1805,8 +1818,47 @@ export const createGanttBlockSchema = (options) => {
                   },
                 },
               },
-            }
-          }
+            },
+          },
+          project: {
+            type: 'void',
+            'x-component': 'Gantt.Event',
+            properties: {
+              drawer: {
+                type: 'void',
+                'x-component': 'Action.Drawer',
+                'x-component-props': {
+                  className: 'nb-action-popup',
+                },
+                title: '{{ t("详情") }}',
+                properties: {
+                  tabs: {
+                    type: 'void',
+                    'x-component': 'Tabs',
+                    'x-component-props': {},
+                    'x-initializer': 'TabPaneInitializers',
+                    properties: {
+                      tab1: {
+                        type: 'void',
+                        title: '{{t("Details")}}',
+                        'x-component': 'Tabs.TabPane',
+                        'x-designer': 'Tabs.Designer',
+                        'x-component-props': {},
+                        properties: {
+                          grid: {
+                            type: 'void',
+                            'x-component': 'Grid',
+                            'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },

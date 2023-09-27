@@ -8,6 +8,7 @@ import {
   TableBlockProvider,
   useAsyncData,
   useBlockRequestContext,
+  useGanttBlockContext,
 } from '@nocobase/client';
 import { connect, observer, useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
@@ -48,7 +49,7 @@ export const PrjWorkPlanProvider = (props) => {
   const options: any = {
     collection: 'prj_plan',
     resource: 'prj_plan',
-    action: 'list'
+    action: 'list',
     // fieldNames: {
     //   id: 'id',
     //   title: 'stage',
@@ -71,7 +72,7 @@ export const PrjWorkPlanProvider = (props) => {
     //   },
     // },
   };
-  const appends =  ['stage', 'status'];
+  const appends = ['stage', 'status'];
 
   // Object.assign(props, ...options);
   // props.params= options.params;
@@ -94,11 +95,11 @@ export const PrjWorkPlanProvider = (props) => {
     // sort: 'stage_dicId',
     // , sort: props.fieldNames.start
   };
-  const taskOptions: any = {
-    collection: 'task',
-    resource: 'task',
-    action: 'list',
-  };
+  // const taskOptions: any = {
+  //   collection: 'task',
+  //   resource: 'task',
+  //   action: 'list',
+  // };
   useEffect(() => {
     params.filter = {
       $and: [
@@ -116,13 +117,19 @@ export const PrjWorkPlanProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <BlockProvider block="prj-plan" {...options} params={{...params,appends}}>
-        <TableBlockProvider block="prj-task" {...taskOptions} params={params}>
-          <PrjWorkPlanProviderInner {...props} />
-        </TableBlockProvider>
+      <BlockProvider block="prj-plan" {...options} params={{ ...params, appends }}>
+        <GanttBlockProvider {...props} params={params}>
+          <PrjWorkPlanInnerProvider {...props}></PrjWorkPlanInnerProvider>
+        </GanttBlockProvider>
       </BlockProvider>
     </>
   );
+};
+const PrjWorkPlanInnerProvider = (props) => {
+  const ctx = useGanttBlockContext();
+  const field = useField();
+  useEffect(() => {}, []);
+  return <PrjWorkProviderContext.Provider value={{ ...ctx, field }}>{props.children}</PrjWorkProviderContext.Provider>;
 };
 const PrjWorkFormProvider = connect((props) => {
   const { service } = useDataSelectBlockContext();

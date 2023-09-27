@@ -119,12 +119,30 @@ export const StandardTooltipContent: React.FC<{
     fontSize,
     fontFamily,
   };
+  const { type } = task;
+  const isProject = type == 'project';
+  let projectBar = null;
+  const duration =
+    task.start && task.end
+      ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+      : null;
+  let prjDuration = null;
+
+  if (isProject) {
+    projectBar = (task as any).projectBar;
+    console.log(task);
+
+    prjDuration =
+      projectBar.start && projectBar.end
+        ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+        : null;
+  }
   return wrapSSR(
     <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
       <div
         className={css`
           fontsize: ${fontSize};
-          minwidth: 300px;
+          minwidth: 500px;
         `}
       >
         <div style={{ marginBottom: 8, fontSize: '1.1em' }}>
@@ -132,7 +150,7 @@ export const StandardTooltipContent: React.FC<{
         </div>
         <div>
           <Row gutter={[16, 8]}>
-            <Col span={12}>
+            <Col span={8}>
               <Statistic
                 title={
                   <Space>
@@ -141,7 +159,7 @@ export const StandardTooltipContent: React.FC<{
                         color: token.colorTextTertiary,
                       }}
                     />
-                    <span>开始日期</span>
+                    <span>{isProject ? '计划开始' : '开始日期'}</span>
                   </Space>
                 }
                 valueStyle={{
@@ -151,7 +169,7 @@ export const StandardTooltipContent: React.FC<{
                 value={getYmd(task.start)}
               />
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Statistic
                 title={
                   <Space>
@@ -160,7 +178,7 @@ export const StandardTooltipContent: React.FC<{
                         color: token.colorTextTertiary,
                       }}
                     />
-                    <span>结束日期</span>
+                    <span>{isProject ? '计划结束' : '结束日期'}</span>
                   </Space>
                 }
                 value={getYmd(task.end)}
@@ -170,20 +188,81 @@ export const StandardTooltipContent: React.FC<{
                 }}
               />
             </Col>
-            {(task.start && task.end && <Col span={12}>
+            <Col span={8}>
               <Statistic
-                title="时长"
-                value={Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10}
+                title={isProject ? '计划天数' : '天数'}
+                value={duration ? duration : '--'}
                 precision={1}
                 valueStyle={{
                   // color: '#3f8600',
                   fontSize: fontSize,
                   fontWeight: 'bold',
                 }}
-                suffix="天"
+                suffix={duration ? '天' : ''}
               />
-            </Col>)}
-            <Col span={12}>
+            </Col>
+            {isProject && projectBar ? (
+              <>
+                <Col span={8}>
+                  <Statistic
+                    title={
+                      <Space>
+                        <CalendarOutlined
+                          style={{
+                            color: token.colorTextTertiary,
+                          }}
+                        />
+                        <span>开始日期</span>
+                      </Space>
+                    }
+                    valueStyle={{
+                      // color: '#3f8600',
+                      fontSize: fontSize,
+                    }}
+                    value={getYmd(projectBar.start)}
+                  />
+                </Col>
+                <Col span={8}>
+                  <Statistic
+                    title={
+                      <Space>
+                        <CarryOutOutlined
+                          style={{
+                            color: token.colorTextTertiary,
+                          }}
+                        />
+                        <span>结束日期</span>
+                      </Space>
+                    }
+                    value={getYmd(projectBar.end)}
+                    valueStyle={{
+                      // color: '#3f8600',
+                      fontSize: fontSize,
+                    }}
+                  />
+                </Col>
+                {projectBar.start && projectBar.end ? (
+                  <Col span={8}>
+                    <Statistic
+                      title="天数"
+                      value={prjDuration ? prjDuration : '--'}
+                      precision={1}
+                      valueStyle={{
+                        // color: '#3f8600',
+                        fontSize: fontSize,
+                        fontWeight: 'bold',
+                      }}
+                      suffix={prjDuration ? '天' : ''}
+                    />
+                  </Col>
+                ) : (
+                  <></>
+                )}
+              </>
+            ) : (
+              <></>
+            )}
+            <Col span={8}>
               {!!task.progress && (
                 <Statistic
                   title="进度"

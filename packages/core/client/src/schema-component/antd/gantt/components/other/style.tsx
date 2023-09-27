@@ -44,6 +44,8 @@ const useStyles = genStyleHook('nb-grid-other', (token) => {
           marginBottom: token.marginXXS + (token.marginXS - token.marginXXS),
           color: token.colorText,
         },
+        minWidth: 300,
+        whiteSpace:'nowrap'
       },
 
       '&.tooltipDetailsContainer': {

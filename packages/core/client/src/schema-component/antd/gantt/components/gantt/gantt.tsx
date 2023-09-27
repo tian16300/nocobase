@@ -6,9 +6,15 @@ import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useStat
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
 import { useCurrentAppInfo } from '../../../../../appInfo';
-import { useBlockRequestContext, useGanttBlockContext, useTableBlockContext } from '../../../../../block-provider';
+import {
+  BlockAssociationContext,
+  WithoutTableFieldResource,
+  useBlockRequestContext,
+  useGanttBlockContext,
+  useTableBlockContext,
+} from '../../../../../block-provider';
 import { RecordProvider } from '../../../../../record-provider';
-import { useDesignable} from '../../../../../schema-component';
+import { FormProvider, useDesignable } from '../../../../../schema-component';
 import { useToken } from '../../../__builtins__';
 import { ActionContextProvider } from '../../../action';
 import { convertToBarTasks } from '../../helpers/bar-helper';
@@ -30,6 +36,7 @@ import { useProps } from '../../../../hooks';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
+import { CollectionProvider, useCollectionManager } from '@nocobase/client';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 35 ? Math.floor(clientWidth / dataSetLength) + 20 : 35;
@@ -39,23 +46,58 @@ export const DeleteEventContext = React.createContext({
   close: () => {},
 });
 const GanttRecordViewer = (props) => {
-  const { visible, setVisible, record } = props;
+  const { visible, setVisible, record = {} } = props;
   const form = useMemo(() => createForm(), [record]);
+  const {isGroup,groupType} = record;
+  
   const fieldSchema = useFieldSchema();
-
-  const eventSchema: Schema = fieldSchema.properties.detail;
+  // const schema =
+  // const eventSchema: Schema = fieldSchema.properties[recordType];
   const close = useCallback(() => {
     setVisible(false);
   }, []);
+  const eventSchema = useMemo(() => {
+    let schema = null;
+    if(isGroup && groupType){
+      schema = fieldSchema?.properties[groupType].mapProperties((temp)=>{
+        return temp['x-component'] == 'Gantt.Event'?temp:false;
+     })[0];
+    }else if(!isGroup){
+      schema = fieldSchema?.properties['detail'];
+    }
+    return schema;
+  }, [fieldSchema,record]);
 
+  const { getCollectionField } = useCollectionManager();
+  const {resource, fieldNames} = useGanttBlockContext();
+  const isTask = !isGroup;
+  const isCollectionField = isGroup && groupType;
+  const collectionField = isCollectionField?getCollectionField(`${resource}.${groupType}`): null;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible }}>
-          <RecordProvider record={record}>
-            <RecursionField schema={eventSchema} name={eventSchema.name} />
-          </RecordProvider>
-        </ActionContextProvider>
+        {isTask && (
+          <ActionContextProvider value={{ visible, setVisible }}>
+            <RecordProvider record={record}>
+              <RecursionField schema={eventSchema as Schema} name={eventSchema.name} />
+            </RecordProvider>
+          </ActionContextProvider>
+        )}
+        {collectionField && (
+          <CollectionProvider name={collectionField?.target ?? collectionField?.targetCollection}>
+            <ActionContextProvider value={{ visible, setVisible }}>
+              <RecordProvider record={record[groupType]}>
+                <RecordProvider record={record}>
+                  <WithoutTableFieldResource.Provider value={true}>
+                    <FormProvider>
+                      <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
+                    </FormProvider>
+                  </WithoutTableFieldResource.Provider>
+                </RecordProvider>
+              </RecordProvider>
+            </ActionContextProvider>
+          </CollectionProvider>
+        )}
       </DeleteEventContext.Provider>
     )
   );
@@ -105,13 +147,15 @@ export const Gantt: any = (props: any) => {
   } = props;
   // const { onExpanderClick, tasks, expandAndCollapseAll } = useProps();
   const {
-    fieldNames,
+    fieldNames = {},
     onExpanderClick,
     onResize,
     tasks,
     expandAndCollapseAll,
+    height,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
+    preProcessData = (data)=>{ return data}
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -130,6 +174,8 @@ export const Gantt: any = (props: any) => {
     return { viewMode, dates: seedDates(startDate, endDate, viewMode) };
   });
   const [visible, setVisible] = useState(false);
+  const [recordType, setRecordType] = useState('detail');
+  const [isGroup, setIsGroup] = useState(false);
   const [record, setRecord] = useState<any>({});
   const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(undefined);
   const [taskListWidth, setTaskListWidth] = useState(0);
@@ -151,10 +197,13 @@ export const Gantt: any = (props: any) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const ganttFullHeight = barTasks.length * rowHeight;
 
+  
+
   useEffect(() => {
     /* table ctx expandClick */
-    // tableCtx.field.onExpandClick = handleTableExpanderClick;
-    // tableCtx.field.onRowSelect = handleRowSelect;
+    tableCtx.field.onExpandClick = handleTableExpanderClick;
+    tableCtx.field.onRowSelect = handleRowSelect;
+    tableCtx.field.onRecordClick = handleBarClick;
   }, []);
   useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
@@ -430,7 +479,7 @@ export const Gantt: any = (props: any) => {
     setSelectedTask(newSelectedTask);
   };
   const handleTableExpanderClick = (expanded: boolean, record: any) => {
-    const task = ctx?.field?.data.find((v: any) => v.id === record.id + '');
+    const task = ctx?.field?.data.find((v: any) => v.rowKey === record.rowKey + '');
     if (onExpanderClick && record.children.length) {
       onExpanderClick({ ...task, hideChildren: !expanded });
     }
@@ -460,8 +509,8 @@ export const Gantt: any = (props: any) => {
     message.success(t('Saved successfully'));
     await service?.refresh();
   };
-  const handleBarClick = (data) => {
-    const { type = 'task' } = data;
+  const handleBarClick = (data, treeData?) => {
+    const { type = 'task', isGroup, groupType } = data;
     const flattenTree = (treeData) => {
       return treeData.reduce((acc, node) => {
         if (node.children) {
@@ -471,21 +520,15 @@ export const Gantt: any = (props: any) => {
         }
       }, []);
     };
-    const flattenedData = flattenTree(service?.data?.data);
-    const recordData = flattenedData?.find((item) => item.id === +data.id);
+    const flattenedData = flattenTree(treeData?treeData:preProcessData(service?.data?.data));
+    const recordData = flattenedData?.find((item) =>  item.rowKey === data.rowKey);
     if (!recordData) {
       return;
     }
-    if (type == 'task') {
-   
-      setRecord(recordData);
-      setVisible(true);
-    }else if(type == 'project'){
-      //如果是里程碑的话 则链接到
-
-
-      
-    }
+    // setIsGroup(isGroup?true:false);
+    // setRecordType(isGroup?groupType:'detail');
+    setRecord(recordData);
+    setVisible(true);
   };
   const handerResize = ({ domElement, component }) => {
     // console.log();
@@ -540,7 +583,7 @@ export const Gantt: any = (props: any) => {
     onClick: handleBarClick,
     onDelete,
   };
-  
+
   const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
   const hasAction = Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 || designable;
   return wrapSSR(
@@ -549,7 +592,7 @@ export const Gantt: any = (props: any) => {
         componentCls,
         hashId,
         css`
-          height: ${fixedBlock?'100%':'800px'};
+          height: ${height?height:(fixedBlock ? '100%' : '800px')};
           .ant-table-container::after {
             box-shadow: none !important;
           }
@@ -577,6 +620,9 @@ export const Gantt: any = (props: any) => {
             background-color: transparent;
             // width: 1px;
           }
+          .wrapper div[block]{
+            height: 100%;
+          }
           .ant-table-wrapper {
             height: 100%;
             .ant-table,
@@ -594,7 +640,7 @@ export const Gantt: any = (props: any) => {
         `,
       )}
     >
-      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} />
+      <GanttRecordViewer visible={visible} setVisible={setVisible} isGroup={isGroup} recordType={recordType} record={record} />
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">

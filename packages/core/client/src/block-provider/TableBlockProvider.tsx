@@ -28,11 +28,12 @@ interface Props {
   rowKey?: string;
   childrenColumnName: any;
   fieldNames?: any;
-  height?: any
+  height?: any;
+  preProcessData?: any;
 }
 
 const InternalTableBlockProvider = (props: Props) => {
-  const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, height , ...others } = props;
+  const { params, preProcessData, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, height , ...others } = props;
   const field: any = useField();
   const { resource, service, __parent } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
@@ -60,6 +61,7 @@ const InternalTableBlockProvider = (props: Props) => {
           expandFlag,
           childrenColumnName,
           allIncludesChildren,
+          preProcessData,
           setExpandFlag: () => setExpandFlag(!expandFlag),
         }}
       >
@@ -115,13 +117,14 @@ export const useTableBlockProps = () => {
   const field = useField<ArrayField>();
   const fieldSchema = useFieldSchema();
   const ctx = useTableBlockContext();
+  const preProcessData = ctx.preProcessData || ((data: any) => data||[]);
   const globalSort = fieldSchema.parent?.['x-decorator-props']?.['params']?.['sort'];
   const { getDataBlocks } = useFilterBlock();
 
   useEffect(() => {
     if (!ctx?.service?.loading) {
       field.value = [];
-      field.value = ctx?.service?.data?.data;
+      field.value = preProcessData(ctx?.service?.data?.data);
       field.data = field.data || {};
       field.data.selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
       field.componentProps.pagination = field.componentProps.pagination || {};

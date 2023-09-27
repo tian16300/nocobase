@@ -1,13 +1,37 @@
 import { css } from '@emotion/css';
 import { ArrayField, Field } from '@formily/core';
 import { RecursionField, Schema, observer, useField, useFieldSchema } from '@formily/react';
-import { RecordIndexProvider, RecordProvider, SchemaComponent, useCollectionManager, useCompile, useRecord, useRequest, useSchemaInitializer } from '@nocobase/client';
-import { Table, TableColumnProps } from 'antd';
+import {
+  AssociationField,
+  CollectionField,
+  CollectionProvider,
+  FormProvider,
+  IField,
+  RecordIndexProvider,
+  RecordLink,
+  RecordProvider,
+  SchemaComponent,
+  SchemaComponentOptions,
+  Table,
+  WithoutTableFieldResource,
+  useCollectionManager,
+  useCompile,
+  useRecord,
+  useRequest,
+  useSchemaInitializer,
+  useTableBlockContext,
+  useToken,
+} from '@nocobase/client';
+import { uid } from '@nocobase/utils';
+import { getValuesByPath } from '@nocobase/utils/client';
 import { default as classNames } from 'classnames';
+import dayjs from 'dayjs';
 import { findIndex } from 'lodash';
-import React, { useState } from 'react';
+import getValueByPath from 'packages/plugins/@nocobase/plugin-theme-editor/src/client/antd-token-previewer/utils/getValueByPath';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+// import { Input, Space, Tag, theme, Tooltip } from 'antd';
+import { Button, Space } from 'antd';
 const isColumnComponent = (schema: Schema) => {
   return schema['x-component']?.endsWith('.Column') > -1;
 };
@@ -68,206 +92,274 @@ interface CategorizeDataItem {
   name: string;
   data: Array<any>;
 }
-
+const PrjStageRecordViewer = (props) => {
+  const { getCollectionField } = useCollectionManager();
+  const fieldSchema = useFieldSchema();
+  const { record } = props;
+  const resourceName = 'task';
+  const isGroup = record.isGroup;
+  const groupField = record.groupType;
+  const fieldName = 'status';
+  const collectionFieldName = [resourceName, fieldName].join('.');
+  const def = record[fieldName];
+  const collectionField = getCollectionField(collectionFieldName);
+  const schema = {
+    type: 'string',
+    'x-collection-field': collectionFieldName,
+    'x-component': 'CollectionField',
+    'x-component-props': {
+      ellipsis: true,
+      size: 'small',
+      fieldNames: {
+        label: 'label',
+        value: 'id',
+      },
+      service: {
+        params: {
+          sort: 'id',
+        },
+      },
+      mode: 'Select',
+    },
+    'x-decorator': null,
+    'x-decorator-props': {
+      labelStyle: {
+        display: 'none',
+      },
+    },
+    default: def,
+  };
+  return (
+    <>
+      {!isGroup && collectionField && (
+        <CollectionProvider name={collectionField?.target ?? collectionField?.targetCollection}>
+          <RecordProvider record={record[record.fieldName]}>
+            <RecordProvider record={record}>
+              <WithoutTableFieldResource.Provider value={true}>
+                <FormProvider>
+                  <RecursionField schema={schema} name={record.groupType} />
+                </FormProvider>
+              </WithoutTableFieldResource.Provider>
+            </RecordProvider>
+          </RecordProvider>
+        </CollectionProvider>
+      )}
+    </>
+  );
+};
+const TaskRecordViewer = (props) => {
+  const fieldSchema = useFieldSchema();
+  const { record } = props;
+  const schema = {
+    type: 'string',
+    'x-collection-field': 'task.prjStage',
+    'x-component': 'CollectionField',
+    'x-component-props': {
+      ellipsis: true,
+      size: 'small',
+      fieldNames: {
+        label: 'stage.label',
+        value: 'id',
+      },
+      service: {
+        params: {
+          appends: 'stage',
+          sort: 'id',
+        },
+      },
+      mode: 'Select',
+    },
+    'x-decorator': null,
+    'x-decorator-props': {
+      labelStyle: {
+        display: 'none',
+      },
+    },
+    default: record['prjStage'],
+  };
+  return (
+    <>
+      <CollectionProvider name={'prj_plan'}>
+        <RecordProvider record={record['prjStage']}>
+          <RecordProvider record={record}>
+            <WithoutTableFieldResource.Provider value={true}>
+              <FormProvider>
+                <RecursionField schema={schema} name={'prjStage'} />
+              </FormProvider>
+            </WithoutTableFieldResource.Provider>
+          </RecordProvider>
+        </RecordProvider>
+      </CollectionProvider>
+    </>
+  );
+};
 export const PrjWorkPlanTable: React.FC<any> = observer(
   (props) => {
-    const sortKeyArr: Array<CategorizeKey> = ['primaryAndForeignKey', 'relation', 'basic', 'systemInfo'];
-    const field = useField<ArrayField>();
-    const { name } = useRecord();
-    const { t } = useTranslation();
-    const compile = useCompile();
-    const { getInterface, getInheritCollections, getCollection, getCurrentCollectionFields, getInheritedFields } =
-      useCollectionManager();
+    const { token } = useToken();
+    const { pagination: pagination1, useProps, onChange, ...others1 } = props;
+    const { pagination: pagination2, onClickRow, ...others2 } = useProps?.() || {};
     const {
+      dragSort = false,
       showIndex = true,
-      useSelectedRowKeys = useDef,
-      useDataSource = useDefDataSource,
-      onChange,
+      onRowSelectionChange,
+      onChange: onTableChange,
+      rowSelection,
+      rowKey,
+      required,
+      onExpand,
       ...others
-    } = props;
-    const [selectedRowKeys, setSelectedRowKeys] = useSelectedRowKeys();
-    const [categorizeData, setCategorizeData] = useState<Array<CategorizeDataItem>>([]);
-    const [expandedKeys, setExpendedKeys] = useState(selectedRowKeys);
-    const inherits = getInheritCollections(name);
-    useDataSource({
-      onSuccess(data) {
-        field.value = data?.data || [];
-        const tmpData: Array<CategorizeDataItem> = [];
-        const categorizeMap = new Map<CategorizeKey, any>();
-        const addCategorizeVal = (categorizeKey: CategorizeKey, val) => {
-          let fieldArr = categorizeMap.get(categorizeKey);
-          if (!fieldArr) {
-            fieldArr = [];
-          }
-          fieldArr.push(val);
-          categorizeMap.set(categorizeKey, fieldArr);
-        };
-        field.value.forEach((item) => {
-          const itemInterface = getInterface(item?.interface);
-          if (item?.primaryKey || item.isForeignKey) {
-            addCategorizeVal('primaryAndForeignKey', item);
-            return;
-          }
-          const group = itemInterface?.group as CategorizeKey;
-          switch (group) {
-            case 'systemInfo':
-            case 'relation':
-              addCategorizeVal(group, item);
-              break;
-            default:
-              addCategorizeVal('basic', item);
-          }
-        });
-        if (inherits) {
-          inherits.forEach((v) => {
-            sortKeyArr.push(v);
-            const parentCollection = getCollection(v);
-            parentCollection.fields.map((k) => {
-              if (k.interface) {
-                addCategorizeVal(v, new Proxy(k, {}));
-                field.value.push(new Proxy(k, {}));
-              }
-            });
-          });
-        }
-        sortKeyArr.forEach((key) => {
-          if (categorizeMap.get(key)?.length > 0) {
-            const parentCollection = getCollection(key);
-            tmpData.push({
-              key,
-              name:
-                t(CategorizeKeyNameMap.get(key)) ||
-                t(`Parent collection fields`) + `(${compile(parentCollection.title)})`,
-              data: categorizeMap.get(key),
-            });
-          }
-        });
-        setExpendedKeys(sortKeyArr);
-        setCategorizeData(tmpData);
-      },
-    });
-    const useTableColumns = () => {
-      const schema = useFieldSchema();
-      const { exists, render } = useSchemaInitializer(schema['x-initializer']);
-      const columns = schema
-        .reduceProperties((buf, s) => {
-          if (isColumnComponent(s)) {
-            return buf.concat([s]);
-          }
-        }, [])
-        .map((s: Schema) => {
-          return {
-            title: <RecursionField name={s.name} schema={s} onlyRenderSelf />,
-            dataIndex: s.name,
-            key: s.name,
-            render: (v, record) => {
-              const index = findIndex(field.value, record);
-              return (
-                <RecordIndexProvider index={index}>
-                  <RecordProvider record={record}>
-                    <RecursionField schema={s} name={index} onlyRenderProperties />
-                  </RecordProvider>
-                </RecordIndexProvider>
-              );
-            },
-          } as TableColumnProps<any>;
-        });
-      if (!exists) {
-        return columns;
-      }
-      return columns.concat({
-        title: render(),
-        dataIndex: 'TABLE_COLUMN_INITIALIZER',
-        key: 'TABLE_COLUMN_INITIALIZER',
-      });
-    };
+    } = { ...others1, ...others2 } as any;
+    const field: IField = useField();
 
-    const ExpandedRowRender = (record: CategorizeDataItem, index, indent, expanded) => {
-      const columns = useTableColumns();
-      if (!props.loading) {
-        if (inherits.includes(record.key)) {
-          columns.pop();
-          columns.push({
-            // title: <RecursionField name={'column4'} schema={overridingSchema as Schema} onlyRenderSelf />,
-            title:'33333',
-            dataIndex: 'column4',
-            key: 'column4',
-            render: (v, record) => {
-              const index = findIndex(field.value, record);
-              return (
-                // <RecordIndexProvider index={index}>
-                //   <RecordProvider record={record}>
-                //     <SchemaComponent
-                //       scope={{ currentCollection: name }}
-                //       schema={overridingSchema as Schema}
-                //       name={index}
-                //       onlyRenderProperties
-                //     />
-                //   </RecordProvider>
-                // </RecordIndexProvider>
-                <span>13333</span>
-              );
-            },
-          });
-        }
-        const restProps = {
-          rowSelection:
-            props.rowSelection && !inherits.includes(record.key)
-              ? {
-                  type: 'checkbox',
-                  selectedRowKeys,
-                  onChange(selectedRowKeys: any[]) {
-                    setSelectedRowKeys(selectedRowKeys);
-                  },
-                  ...props.rowSelection,
-                }
-              : undefined,
-        };
-        return (
-          <Table
-            {...others}
-            {...restProps}
-            components={components}
-            showHeader={true}
-            columns={columns}
-            dataSource={record.data}
-            pagination={false}
-          />
-        );
-      }
-    };
+    const tableCtx = useTableBlockContext();
+    const onRecordClick = useMemo(() => {
+      return tableCtx.field.onRecordClick;
+    }, []);
+    const dataSource = field?.value?.slice?.()?.filter?.(Boolean) || [];
+    const fieldSchema = useFieldSchema();
+    const { expandFlag, allIncludesChildren } = tableCtx;
+
+    const [expandedKeys, setExpandesKeys] = useState([]);
+
+    // useEffect(() => {
+    //   if (expandFlag) {
+    //     setExpandesKeys(allIncludesChildren);
+    //   } else {
+    //     setExpandesKeys([]);
+    //   }
+    // }, [expandFlag, allIncludesChildren]);
+
+    const columns = [
+      // {
+      //   title: '序号',
+
+      //   key: 'index',
+      //   render: (text, record, index: number) => {
+      //     /**
+      //      *
+      //      */
+      //     return <>{index + 1}</>;
+      //   },
+      // },
+      {
+        title: '分组',
+        // dataIndex: 'prjStage',
+        key: 'title',
+        width: 240,
+        render: (text, record, index) => {
+          const { type } = record as any;
+          const isRecordLink = !record.isGroup || (record.isGroup && record.groupType);
+          return (
+            <>
+              <div
+                className={css`
+                  // display: flex;
+                  // flex-direction: column;
+                  // height: 100%;
+                  .ant-btn.ant-btn-lg {
+                    padding-top: 0 !important;
+                    padding-bottom: 0 !important;
+                    height: auto;
+                  }
+                `}
+              >
+                {/* {isMilestone && <PrjStageRecordViewer record={record}></PrjStageRecordViewer>}
+                {isTask && record?.name} */}
+                {isRecordLink && (
+                  <Button
+                    type="link"
+                    size="large"
+                    onClick={() => {
+                      if (typeof onRecordClick == 'function') {
+                        onRecordClick(
+                          {
+                            ...record,
+                          },
+                          dataSource,
+                        );
+                      }
+                    }}
+                  >
+                    {record?.title}
+                  </Button>
+                )}
+                {!isRecordLink && <Button type="text"  size="large">{record?.title}</Button>}
+              </div>
+            </>
+          );
+        },
+      },
+      // {
+      //   title: '状态',
+      //   // dataIndex: 'prjStage',
+      //   key: 'title',
+      //   width: 200,
+      //   render: (text, record, index) => {
+      //     const { isGroup, groupType } = record as any;
+      //     const isTaskSatus = !isGroup;
+      //     return (
+      //       <>
+      //         <div
+      //           className={css`
+      //             display: flex;
+      //             flex-direction: column;
+      //             height: 100%;
+      //           `}
+      //         >
+      //           {isTaskSatus && <PrjStageRecordViewer record={record}></PrjStageRecordViewer>}
+      //         </div>
+      //       </>
+      //     );
+      //   },
+      // },
+      // {
+      //   title: '任务名称',
+      //   dataIndex: 'title',
+      //   key: 'title',
+      //   // render: (text, record, index) => {
+      //   //   /**
+      //   //    *
+      //   //    */
+      //   //   return { text };
+      //   // },
+      // },
+      // { title: '负责人', dataIndex: 'title', key: 'title' },
+      {
+        title: '开始时间',
+        dataIndex: 'start',
+        key: 'start',
+        width: 160,
+        render: (text, record, index) => {
+          /**
+           *
+           */
+          return <>{text ? dayjs(text).format('YYYY-MM-DD') : ''}</>;
+        },
+      },
+      {
+        title: '结束时间',
+        dataIndex: 'end',
+        key: 'end',
+        width: 160,
+        render: (text, record, index) => {
+          return <>{text ? dayjs(text).format('YYYY-MM-DD') : ''}</>;
+        },
+      },
+    ];
     return (
-      <div
-        className={css`
-          .ant-table {
-            overflow-x: auto;
-            overflow-y: hidden;
-          }
-        `}
-      >
-        <Table
-          showHeader={false}
-          loading={props?.loading}
-          columns={groupColumns}
-          dataSource={categorizeData}
-          pagination={false}
-          expandable={{
-            expandedRowRender: ExpandedRowRender,
-            expandedRowKeys: expandedKeys,
-          }}
-          onExpand={(expanded, record) => {
-            let keys = [];
-            if (expanded) {
-              keys = expandedKeys.concat([record.key]);
-            } else {
-              keys = expandedKeys.filter((v) => {
-                return v !== record.key;
-              });
-            }
-            setExpendedKeys(keys);
-          }}
-        />
-      </div>
+      <Table
+        columns={columns}
+        dataSource={dataSource}
+        pagination={false}
+        //  expandable={{
+        //   onExpand: (flag, record) => {
+        //     const newKeys = flag ? [...expandedKeys, record.id] : expandedKeys.filter((i) => record.id !== i);
+        //     setExpandesKeys(newKeys);
+        //     onExpand?.(flag, record);
+        //   },
+        //   expandedRowKeys: expandedKeys,
+        // }}
+      />
     );
   },
   { displayName: 'PrjWorkPlanTable' },

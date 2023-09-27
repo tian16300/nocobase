@@ -1124,13 +1124,15 @@ export const useAssociationNames = () => {
      */
     if (schema['x-decorator-props']?.fieldNames) {
       Object.values(schema['x-decorator-props']?.fieldNames).forEach((valKeys: string) => {
-        const keys = valKeys.split('.');
-        if (keys.length > 1) {
-          const prefix = schema['x-decorator-props'].resource || schema['x-decorator-props'].collection;
-          const collectionfield = getCollectionJoinField(prefix + '.' + valKeys);
-          if (collectionfield) {
-            const newPath = [...keys.slice(0, keys.length - 1)].join('.');
-            appends.add(newPath);
+        if (typeof valKeys == 'string') {
+          const keys = valKeys.split('.');
+          if (keys.length > 1) {
+            const prefix = schema['x-decorator-props'].resource || schema['x-decorator-props'].collection;
+            const collectionfield = getCollectionJoinField(prefix + '.' + valKeys);
+            if (collectionfield) {
+              const newPath = [...keys.slice(0, keys.length - 1)].join('.');
+              appends.add(newPath);
+            }
           }
         }
       });

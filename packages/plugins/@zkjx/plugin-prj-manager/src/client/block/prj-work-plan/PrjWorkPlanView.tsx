@@ -1,17 +1,21 @@
 import React, { useCallback, useEffect } from 'react';
 import { observer } from '@formily/react';
-import { ActionBar, Gantt, SchemaComponent, SchemaComponentProvider, css } from '@nocobase/client';
-import {
-  SelectTable,
-} from '@formily/antd-v5'
+import { ActionBar, Gantt, SchemaComponent, SchemaComponentProvider, css, useGanttBlockProps } from '@nocobase/client';
+import { SelectTable } from '@formily/antd-v5';
 
 import { RecursionField, Schema, useFieldSchema } from '@formily/react';
+import { uid } from '@nocobase/utils';
 
 // import {
 //   GanttComponent, Inject,
 //   Edit, Toolbar, ContextMenu, Selection
 // } from '@syncfusion/ej2-react-gantt';
-
+const usePrjWorkPlanGanttBlockProps = () => {
+  const props = useGanttBlockProps();
+  return {
+    ...props,
+  };
+};
 export const PrjWorkPlanView = observer(() => {
   let data = [
     {
@@ -53,7 +57,7 @@ export const PrjWorkPlanView = observer(() => {
     child: 'subtasks',
   };
   // const properties = useFieldSchema();
-  
+
   const fieldSchema = useFieldSchema();
 
   const props = {
@@ -87,52 +91,21 @@ export const PrjWorkPlanView = observer(() => {
     ],
   };
   const schema = {
-    type: 'object',
-    properties: {
-      tasks: {
-        type: 'void',
-        'x-component': 'Gantt',
-        'x-component-props': {
-          useProps: () => {
-            return {
-              fieldNames: {
-                id: 'id',
-                start: 'start',
-                range: 'day',
-                title: 'name',
-                end: 'end',
-              },
-              onExpandClick:()=>{
-
-              },
-              expandAndCollapseAll:()=>{
-
-              }
-            };
-          },
-          tasks: [
-            {
-              start: new Date(2020, 0, 1),
-              end: new Date(2020, 2, 2),
-              name: 'Redesign website',
-              id: 'Task 0',
-              progress: 45,
-              type: 'task',
-            },
-          ],
-        },
-        properties: fieldSchema.properties
-      }
-    }
+    type: 'void',
+    'x-component': 'Gantt',
+    'x-component-props': {
+      useProps: usePrjWorkPlanGanttBlockProps,
+    },
+    properties: fieldSchema.properties,
   };
 
   return (
     // <GanttComponent dataSource={data} treeColumnIndex={1} taskFields={taskSettings}></GanttComponent>
     <>
-     {/* <SchemaComponentProvider components={{ SelectTable, Gantt }} >
+      {/* <SchemaComponentProvider components={{ SelectTable, Gantt }} >
       
     </SchemaComponentProvider> */}
-    <SchemaComponent schema={schema} />
+      <SchemaComponent schema={schema} />
     </>
   );
 });
