@@ -1,5 +1,4 @@
 import { css, cx } from '@emotion/css';
-import { createForm } from '@formily/core';
 import { RecursionField, Schema, useFieldSchema } from '@formily/react';
 import { message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -7,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
 import { useCurrentAppInfo } from '../../../../../appInfo';
 import {
-  BlockAssociationContext,
   WithoutTableFieldResource,
   useBlockRequestContext,
   useGanttBlockContext,
@@ -36,7 +34,7 @@ import { useProps } from '../../../../hooks';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
-import { CollectionProvider, useCollectionManager } from '@nocobase/client';
+import { CollectionProvider } from '@nocobase/client';
 import { useEventListener } from 'ahooks';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
@@ -49,15 +47,14 @@ export const DeleteEventContext = React.createContext({
 const GanttRecordViewer = (props) => {
   const { groupField, rowKey } = useGanttBlockContext();
   const { visible, setVisible, record = {} } = props;
-  const { isGroup } = record;
+  const { id, isGroup } = record;
 
   const fieldSchema = useFieldSchema();
   const close = useCallback(() => {
     setVisible(false);
-  }, [setVisible]);
+  }, []);
   const eventSchema = useMemo(() => {
     let schema = null;
-    const { isGroup } = record;
 
     if (isGroup && 'others' !== record[rowKey]?.toString()) {
       const groupType = groupField.name as string;
@@ -68,7 +65,7 @@ const GanttRecordViewer = (props) => {
       schema = fieldSchema?.properties['detail'];
     }
     return schema;
-  }, [fieldSchema, record, groupField, rowKey]);
+  }, [fieldSchema, record]);
 
   const isTask = !isGroup;
   const isCollectionField = isGroup && 'others' !== record[rowKey]?.toString();
@@ -198,8 +195,21 @@ export const Gantt: any = (props: any) => {
   const tbodyRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
+    /* table ctx expandClick */
+    tableCtx.field.onExpandClick = handleTableExpanderClick;
+    tableCtx.field.onRowSelect = handleRowSelect;
+    tableCtx.field.onRecordClick = handleBarClick;
+  }, []);
+  useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
-  }, [expandFlag, expandAndCollapseAll]);
+  }, [expandFlag]);
+  useEffect(() => {
+    tbodyRef.current = tableWrapperRef?.current?.querySelector('.ant-table-body');
+    return () => {
+      tbodyRef.current = null;
+    };
+  }, [tableWrapperRef, tbodyRef]);
+
   // task change events
   useEffect(() => {
     let filteredTasks: Task[];
@@ -262,8 +272,6 @@ export const Gantt: any = (props: any) => {
     milestoneBackgroundSelectedColor,
     rtl,
     scrollX,
-    onExpanderClick,
-    ctx,
   ]);
 
   useEffect(() => {
@@ -313,7 +321,7 @@ export const Gantt: any = (props: any) => {
       setBarTasks(barTasks.map((t) => (t[rowKey]?.toString() !== failedTask[rowKey]?.toString() ? t : failedTask)));
       setFailedTask(null);
     }
-  }, [failedTask, barTasks, rowKey]);
+  }, [failedTask, barTasks]);
 
   useEffect(() => {
     if (!listCellWidth) {
@@ -349,48 +357,6 @@ export const Gantt: any = (props: any) => {
     }
   }, [ganttHeight, tasks, headerHeight, rowHeight]);
 
-  const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
-    //设置table的 滚动
-    if (scrollY !== event.currentTarget.scrollTop && !ignoreScrollEvent) {
-      const scrollTop = event.currentTarget.scrollTop;
-      setScrollY(scrollTop);
-      setIgnoreScrollEvent(true);
-      const isTablebody = event.currentTarget.classList.contains('.ant-table-body');
-      if (!isTablebody) {
-        setTBodyScrollY(scrollTop);
-      }
-    } else {
-      setIgnoreScrollEvent(false);
-    }
-  };
-  const setTBodyScrollY = (scrollTop: number) => {
-    const tbody = tbodyRef.current || tableWrapperRef?.current?.querySelector('.ant-table-body');
-    tbody.scrollTop = scrollTop;
-  };
-
-  const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
-    if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
-      setScrollX(event.currentTarget.scrollLeft);
-      setIgnoreScrollEvent(true);
-    } else {
-      setIgnoreScrollEvent(false);
-    }
-  };
-
-  useEffect(() => {
-    tbodyRef.current = tableWrapperRef?.current?.querySelector('.ant-table-body');
-    return () => {
-      tbodyRef.current = null;
-    };
-  }, [tableWrapperRef, tbodyRef]);
-  /**
-   * table 滚动控制右侧
-   */
-  useEventListener('scroll', handleScrollY, {
-    target: tableWrapperRef?.current?.querySelector('.ant-table-body'),
-    passive: false,
-  });
-
   // scroll events
   useEffect(() => {
     const handleWheel = (event: WheelEvent) => {
@@ -417,9 +383,9 @@ export const Gantt: any = (props: any) => {
           event.preventDefault();
         }
       }
-
       setIgnoreScrollEvent(true);
     };
+
     // subscribe if scroll is necessary
     wrapperRef.current?.addEventListener('wheel', handleWheel, {
       passive: false,
@@ -427,7 +393,40 @@ export const Gantt: any = (props: any) => {
     return () => {
       wrapperRef.current?.removeEventListener('wheel', handleWheel);
     };
-  }, [wrapperRef, tbodyRef, scrollY, scrollX, ganttHeight, svgWidth, rtl, ganttFullHeight]);
+  }, [wrapperRef, scrollY, scrollX, ganttHeight, svgWidth, rtl, ganttFullHeight]);
+
+  const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
+    //设置table的 滚动
+    if (scrollY !== event.currentTarget.scrollTop && !ignoreScrollEvent) {
+      const scrollTop = event.currentTarget.scrollTop;
+      setScrollY(scrollTop);
+      const isTablebody = event.currentTarget.classList.contains('.ant-table-body');
+      if (!isTablebody) {
+        setTBodyScrollY(scrollTop);
+      }
+      setIgnoreScrollEvent(true);
+    } else {
+      setIgnoreScrollEvent(false);
+    }
+  };
+
+  const setTBodyScrollY = (scrollTop: number) => {
+    const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
+    if (tbody) tbody.scrollTop = scrollTop;
+  };
+
+  useEventListener('scroll', handleScrollY, {
+    target: tableWrapperRef?.current?.querySelector('.ant-table-body'),
+    passive: false,
+  });
+  const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
+    if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
+      setScrollX(event.currentTarget.scrollLeft);
+      setIgnoreScrollEvent(true);
+    } else {
+      setIgnoreScrollEvent(false);
+    }
+  };
 
   /**
    * Handles arrow keys events and transform it to new scroll
@@ -525,8 +524,8 @@ export const Gantt: any = (props: any) => {
     message.success(t('Saved successfully'));
     await service?.refresh();
   };
-  const handleBarClick = (data, _ctx?) => {
-    // const { type = 'task', isGroup, groupType } = data;
+  const handleBarClick = (data, treeData?) => {
+    const { type = 'task', isGroup, groupType } = data;
     const flattenTree = (treeData) => {
       return treeData.reduce((acc, node) => {
         if (node.children) {
@@ -536,8 +535,7 @@ export const Gantt: any = (props: any) => {
         }
       }, []);
     };
-    const context = _ctx || ctx;
-    const flattenedData = flattenTree(context.preProcessData(context.service?.data?.data, context));
+    const flattenedData = flattenTree(treeData ? treeData : ctx.preProcessData(service?.data?.data, ctx));
     const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
     if (!recordData) {
       return;
@@ -547,13 +545,6 @@ export const Gantt: any = (props: any) => {
     setRecord(recordData);
     setVisible(true);
   };
-
-  useEffect(() => {
-    /* table ctx expandClick */
-    tableCtx.field.onExpandClick = handleTableExpanderClick;
-    tableCtx.field.onRowSelect = handleRowSelect;
-    tableCtx.field.onRecordClick = handleBarClick;
-  }, [tableCtx?.field, handleTableExpanderClick, handleRowSelect, handleBarClick]);
   const handerResize = ({ domElement, component }) => {
     // console.log();
     const hasScrollX =
@@ -671,7 +662,7 @@ export const Gantt: any = (props: any) => {
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
           <ReflexElement className="left-pane">
-            <div className="wrapper" ref={tableWrapperRef} tabIndex={0} onKeyDown={handleKeyDown}>
+            <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>
