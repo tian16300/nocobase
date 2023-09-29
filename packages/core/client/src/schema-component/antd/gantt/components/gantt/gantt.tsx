@@ -37,6 +37,7 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
 import { CollectionProvider, useCollectionManager } from '@nocobase/client';
+import { useEventListener } from 'ahooks';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 35 ? Math.floor(clientWidth / dataSetLength) + 20 : 35;
@@ -46,41 +47,44 @@ export const DeleteEventContext = React.createContext({
   close: () => {},
 });
 const GanttRecordViewer = (props) => {
-  const { groupField, rowKey} = useGanttBlockContext();
+  const { groupField, rowKey } = useGanttBlockContext();
   const { visible, setVisible, record = {} } = props;
-  const {id,isGroup} = record;
-  
+  const { isGroup } = record;
+
   const fieldSchema = useFieldSchema();
-   const close = useCallback(() => {
+  const close = useCallback(() => {
     setVisible(false);
-  }, []);
+  }, [setVisible]);
   const eventSchema = useMemo(() => {
     let schema = null;
+    const { isGroup } = record;
 
-    if(isGroup && 'others'!== record[rowKey]?.toString()){
+    if (isGroup && 'others' !== record[rowKey]?.toString()) {
       const groupType = groupField.name as string;
-      schema = fieldSchema?.properties[groupType].mapProperties((temp)=>{
-        return temp['x-component'] == 'Gantt.Event'?temp:false;
-     })[0];
-    }else if(!isGroup){
+      schema = fieldSchema?.properties[groupType].mapProperties((temp) => {
+        return temp['x-component'] == 'Gantt.Event' ? temp : false;
+      })[0];
+    } else if (!isGroup) {
       schema = fieldSchema?.properties['detail'];
     }
     return schema;
-  }, [fieldSchema,record]);
-  
+  }, [fieldSchema, record, groupField, rowKey]);
+
   const isTask = !isGroup;
-  const isCollectionField = isGroup && 'others'!== record[rowKey]?.toString();
+  const isCollectionField = isGroup && 'others' !== record[rowKey]?.toString();
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-      <ActionContextProvider value={{ visible, setVisible }}>
-        {isTask ? (
+        <ActionContextProvider value={{ visible, setVisible }}>
+          {isTask ? (
             <RecordProvider record={record}>
               <RecursionField schema={eventSchema as Schema} name={eventSchema.name} />
             </RecordProvider>
-        ):<></>}
-        {isCollectionField?(
-          <CollectionProvider name={record.__collection}>
+          ) : (
+            <></>
+          )}
+          {isCollectionField ? (
+            <CollectionProvider name={record.__collection}>
               <RecordProvider record={record}>
                 <RecordProvider record={{}}>
                   <WithoutTableFieldResource.Provider value={true}>
@@ -90,8 +94,10 @@ const GanttRecordViewer = (props) => {
                   </WithoutTableFieldResource.Provider>
                 </RecordProvider>
               </RecordProvider>
-          </CollectionProvider>
-        ):(<></>)}
+            </CollectionProvider>
+          ) : (
+            <></>
+          )}
         </ActionContextProvider>
       </DeleteEventContext.Provider>
     )
@@ -149,14 +155,14 @@ export const Gantt: any = (props: any) => {
     expandAndCollapseAll,
     height,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
-    rightSize
+    rightSize,
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
   const locale = appInfo.data?.lang;
   const tableCtx = useTableBlockContext();
-  const {rowKey = 'id'} = ctx; 
+  const { rowKey = 'id' } = ctx;
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
@@ -189,18 +195,11 @@ export const Gantt: any = (props: any) => {
   const { expandFlag } = tableCtx;
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const ganttFullHeight = barTasks.length * rowHeight;
+  const tbodyRef = useRef<HTMLDivElement>();
 
-  
-
-  useEffect(() => {
-    /* table ctx expandClick */
-    tableCtx.field.onExpandClick = handleTableExpanderClick;
-    tableCtx.field.onRowSelect = handleRowSelect;
-    tableCtx.field.onRecordClick = handleBarClick;
-  }, []);
   useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
-  }, [expandFlag]);
+  }, [expandFlag, expandAndCollapseAll]);
   // task change events
   useEffect(() => {
     let filteredTasks: Task[];
@@ -239,7 +238,7 @@ export const Gantt: any = (props: any) => {
         projectBackgroundSelectedColor,
         milestoneBackgroundColor,
         milestoneBackgroundSelectedColor,
-        ctx
+        ctx,
       ),
     );
   }, [
@@ -263,6 +262,8 @@ export const Gantt: any = (props: any) => {
     milestoneBackgroundSelectedColor,
     rtl,
     scrollX,
+    onExpanderClick,
+    ctx,
   ]);
 
   useEffect(() => {
@@ -298,7 +299,9 @@ export const Gantt: any = (props: any) => {
             prevStateTask.progress !== changedTask.progress)
         ) {
           // actions for change
-          const newTaskList = barTasks.map((t) => (t[rowKey]?.toString() === changedTask[rowKey]?.toString() ? changedTask : t));
+          const newTaskList = barTasks.map((t) =>
+            t[rowKey]?.toString() === changedTask[rowKey]?.toString() ? changedTask : t,
+          );
           setBarTasks(newTaskList);
         }
       }
@@ -310,7 +313,7 @@ export const Gantt: any = (props: any) => {
       setBarTasks(barTasks.map((t) => (t[rowKey]?.toString() !== failedTask[rowKey]?.toString() ? t : failedTask)));
       setFailedTask(null);
     }
-  }, [failedTask, barTasks]);
+  }, [failedTask, barTasks, rowKey]);
 
   useEffect(() => {
     if (!listCellWidth) {
@@ -333,13 +336,6 @@ export const Gantt: any = (props: any) => {
       }
     }
   }, [wrapperRef, rightSize, taskListWidth]);
-  useEffect(() => {
-    const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
-    //如果到底部 scrollY
-    if (tbody) {
-      tbody.scrollTop = scrollY;
-    }
-  }, [scrollY]);
 
   useEffect(() => {
     const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
@@ -352,6 +348,48 @@ export const Gantt: any = (props: any) => {
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
   }, [ganttHeight, tasks, headerHeight, rowHeight]);
+
+  const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
+    //设置table的 滚动
+    if (scrollY !== event.currentTarget.scrollTop && !ignoreScrollEvent) {
+      const scrollTop = event.currentTarget.scrollTop;
+      setScrollY(scrollTop);
+      setIgnoreScrollEvent(true);
+      const isTablebody = event.currentTarget.classList.contains('.ant-table-body');
+      if (!isTablebody) {
+        setTBodyScrollY(scrollTop);
+      }
+    } else {
+      setIgnoreScrollEvent(false);
+    }
+  };
+  const setTBodyScrollY = (scrollTop: number) => {
+    const tbody = tbodyRef.current || tableWrapperRef?.current?.querySelector('.ant-table-body');
+    tbody.scrollTop = scrollTop;
+  };
+
+  const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
+    if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
+      setScrollX(event.currentTarget.scrollLeft);
+      setIgnoreScrollEvent(true);
+    } else {
+      setIgnoreScrollEvent(false);
+    }
+  };
+
+  useEffect(() => {
+    tbodyRef.current = tableWrapperRef?.current?.querySelector('.ant-table-body');
+    return () => {
+      tbodyRef.current = null;
+    };
+  }, [tableWrapperRef, tbodyRef]);
+  /**
+   * table 滚动控制右侧
+   */
+  useEventListener('scroll', handleScrollY, {
+    target: tableWrapperRef?.current?.querySelector('.ant-table-body'),
+    passive: false,
+  });
 
   // scroll events
   useEffect(() => {
@@ -375,13 +413,13 @@ export const Gantt: any = (props: any) => {
         }
         if (newScrollY !== scrollY) {
           setScrollY(newScrollY);
+          setTBodyScrollY(newScrollY);
           event.preventDefault();
         }
       }
 
       setIgnoreScrollEvent(true);
     };
-
     // subscribe if scroll is necessary
     wrapperRef.current?.addEventListener('wheel', handleWheel, {
       passive: false,
@@ -389,26 +427,7 @@ export const Gantt: any = (props: any) => {
     return () => {
       wrapperRef.current?.removeEventListener('wheel', handleWheel);
     };
-  }, [wrapperRef, scrollY, scrollX, ganttHeight, svgWidth, rtl, ganttFullHeight]);
-
-  const handleScrollY = (event: SyntheticEvent<HTMLDivElement>) => {
-    //设置table的 滚动
-    if (scrollY !== event.currentTarget.scrollTop && !ignoreScrollEvent) {
-      setScrollY(event.currentTarget.scrollTop);
-      setIgnoreScrollEvent(true);
-    } else {
-      setIgnoreScrollEvent(false);
-    }
-  };
-
-  const handleScrollX = (event: SyntheticEvent<HTMLDivElement>) => {
-    if (scrollX !== event.currentTarget.scrollLeft && !ignoreScrollEvent) {
-      setScrollX(event.currentTarget.scrollLeft);
-      setIgnoreScrollEvent(true);
-    } else {
-      setIgnoreScrollEvent(false);
-    }
-  };
+  }, [wrapperRef, tbodyRef, scrollY, scrollX, ganttHeight, svgWidth, rtl, ganttFullHeight]);
 
   /**
    * Handles arrow keys events and transform it to new scroll
@@ -452,6 +471,7 @@ export const Gantt: any = (props: any) => {
         newScrollY = ganttFullHeight - ganttHeight;
       }
       setScrollY(newScrollY);
+      setTBodyScrollY(newScrollY);
     }
     setIgnoreScrollEvent(true);
   };
@@ -461,7 +481,9 @@ export const Gantt: any = (props: any) => {
    */
   const handleSelectedTask = (taskId: string) => {
     const newSelectedTask = barTasks.find((t) => t[rowKey]?.toString() === taskId);
-    const oldSelectedTask = barTasks.find((t) => !!selectedTask && t[rowKey]?.toString() === selectedTask[rowKey]?.toString());
+    const oldSelectedTask = barTasks.find(
+      (t) => !!selectedTask && t[rowKey]?.toString() === selectedTask[rowKey]?.toString(),
+    );
     if (onSelect) {
       if (oldSelectedTask) {
         onSelect(oldSelectedTask, false);
@@ -473,7 +495,7 @@ export const Gantt: any = (props: any) => {
     setSelectedTask(newSelectedTask);
   };
   const handleTableExpanderClick = (expanded: boolean, record: any) => {
-    const task = ctx?.field?.data.find((v: any) => v[rowKey]?.toString() === record[rowKey]?.toString());    
+    const task = ctx?.field?.data.find((v: any) => v[rowKey]?.toString() === record[rowKey]?.toString());
     if (onExpanderClick && record.children.length) {
       onExpanderClick({ ...task, hideChildren: !expanded });
     }
@@ -503,8 +525,8 @@ export const Gantt: any = (props: any) => {
     message.success(t('Saved successfully'));
     await service?.refresh();
   };
-  const handleBarClick = (data, treeData?) => {
-    const { type = 'task', isGroup, groupType } = data;
+  const handleBarClick = (data, _ctx?) => {
+    // const { type = 'task', isGroup, groupType } = data;
     const flattenTree = (treeData) => {
       return treeData.reduce((acc, node) => {
         if (node.children) {
@@ -514,8 +536,9 @@ export const Gantt: any = (props: any) => {
         }
       }, []);
     };
-    const flattenedData = flattenTree(treeData?treeData:ctx.preProcessData(service?.data?.data,ctx));
-    const recordData = flattenedData?.find((item) =>  item.rowKey === data.rowKey);
+    const context = _ctx || ctx;
+    const flattenedData = flattenTree(context.preProcessData(context.service?.data?.data, context));
+    const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
     if (!recordData) {
       return;
     }
@@ -524,6 +547,13 @@ export const Gantt: any = (props: any) => {
     setRecord(recordData);
     setVisible(true);
   };
+
+  useEffect(() => {
+    /* table ctx expandClick */
+    tableCtx.field.onExpandClick = handleTableExpanderClick;
+    tableCtx.field.onRowSelect = handleRowSelect;
+    tableCtx.field.onRecordClick = handleBarClick;
+  }, [tableCtx?.field, handleTableExpanderClick, handleRowSelect, handleBarClick]);
   const handerResize = ({ domElement, component }) => {
     // console.log();
     const hasScrollX =
@@ -542,7 +572,7 @@ export const Gantt: any = (props: any) => {
     todayColor,
     rtl,
     selectedRowKeys,
-    rowKey
+    rowKey,
   };
   const calendarProps: CalendarProps = {
     dateSetup,
@@ -577,7 +607,7 @@ export const Gantt: any = (props: any) => {
     onDoubleClick,
     onClick: handleBarClick,
     onDelete,
-    rowKey
+    rowKey,
   };
 
   const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
@@ -588,7 +618,7 @@ export const Gantt: any = (props: any) => {
         componentCls,
         hashId,
         css`
-          height: ${height?height:(fixedBlock ? '100%' : '800px')};
+          height: ${height ? height : fixedBlock ? '100%' : '800px'};
           .ant-table-container::after {
             box-shadow: none !important;
           }
@@ -616,7 +646,7 @@ export const Gantt: any = (props: any) => {
             background-color: transparent;
             // width: 1px;
           }
-          .wrapper div[block]{
+          .wrapper div[block] {
             height: 100%;
           }
           .ant-table-wrapper {
@@ -627,7 +657,7 @@ export const Gantt: any = (props: any) => {
             }
           }
           .ant-table-body {
-            overflow-y: hidden !important;
+            // overflow-y: hidden !important;
             min-height: calc(100% - ${headerHeight}px);
           }
           .gantt-horizontal-scoll {
@@ -641,7 +671,7 @@ export const Gantt: any = (props: any) => {
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
           <ReflexElement className="left-pane">
-            <div className="wrapper" ref={tableWrapperRef}>
+            <div className="wrapper" ref={tableWrapperRef} tabIndex={0} onKeyDown={handleKeyDown}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>

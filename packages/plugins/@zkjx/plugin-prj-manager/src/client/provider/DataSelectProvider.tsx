@@ -11,10 +11,8 @@ import {
   useFormSelectBlockProps,
   useFormSelectOptionsProps,
   usePrjWorkPlanDecoratorProps,
-  usePrjWorkPlanGanttBlockProps,
   usePrjWorkPlanProcessData,
   usePrjWorkPlanTableBlockProps,
-  useTaskTableBlockProps,
 } from '../block/index';
 import { PrjRecordBlockInitializers } from '../initializers';
 
@@ -38,9 +36,7 @@ export const DataSelectProvider: React.FC = (props) => {
         useDataSelectTabsProps,
         usePrjWorkPlanDecoratorProps,
         usePrjWorkPlanTableBlockProps,
-        usePrjWorkPlanGanttBlockProps,
-        useTaskTableBlockProps,
-        usePrjWorkPlanProcessData
+        usePrjWorkPlanProcessData,
       }}
       components={{
         PrjRecordBlockInitializers,

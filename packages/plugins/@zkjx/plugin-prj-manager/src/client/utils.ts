@@ -568,7 +568,6 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
           },
         },
       },
-
     },
   };
   return schema;
@@ -638,15 +637,14 @@ export const createPrjWorkPlanShema = () => {
         start: 'start',
         range: 'day',
         end: 'end',
-        dependencies: 'dependencies.id',
+        // dependencies: 'dependencies.id',
       },
       params: {
-        // appends: ['stage', 'status', 'task'],
+        appends: ['prjStage', 'user', 'dependencies'],
         paginate: false,
         sort: 'id',
       },
       rightSize: 0.7,
-      preProcessData: '{{usePrjWorkPlanProcessData}}',
     },
     'x-component': `${comp}.Wrap`,
     'x-designer': `${comp}.Designer`,
@@ -679,37 +677,15 @@ export const createPrjWorkPlanShema = () => {
           },
           table: {
             type: 'array',
-            'x-initializer': 'TableColumnInitializers',
-            'x-component': 'TableV2',
+            // 'x-initializer': 'TableColumnInitializers',
+            'x-component': `${comp}.Table`,
             'x-component-props': {
-              rowKey: 'id',
+              rowKey: 'rowKey',
               rowSelection: {
                 type: 'checkbox',
               },
-              useProps: '{{ useTableBlockProps }}',
               pagination: false,
-            },
-            properties: {
-              actions: {
-                type: 'void',
-                title: '{{ t("Actions") }}',
-                'x-action-column': 'actions',
-                'x-decorator': 'TableV2.Column.ActionBar',
-                'x-component': 'TableV2.Column',
-                'x-designer': 'TableV2.ActionColumnDesigner',
-                'x-initializer': 'TableActionColumnInitializers',
-                properties: {
-                  actions: {
-                    type: 'void',
-                    'x-decorator': 'DndContext',
-                    'x-component': 'Space',
-                    'x-component-props': {
-                      split: '',
-                    },
-                    properties: {},
-                  },
-                },
-              },
+              useProps: '{{usePrjWorkPlanTableBlockProps}}',
             },
           },
           detail: {

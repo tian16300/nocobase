@@ -33,45 +33,30 @@ export const PrjWorkPlanForm = (props: any) => {
               minColumns: 4,
             },
             properties: {
-              '[start, end]': {
-                title: '日期范围',
-                'x-decorator': 'FormItem',
-                'x-decorator-props':{
-                  gridSpan:3
-                },
-                'x-component': 'DatePicker.RangePicker',
-                'x-component-props': {
-                  showTime: false,
-                },
-                type: 'string',
-              },
-              'sort': {
+              sort: {
                 title: '排序',
                 'x-decorator': 'FormItem',
-                'x-decorator-props':{
-                  gridSpan:1
+                'x-decorator-props': {
+                  gridSpan: 1,
                 },
                 'x-component': 'Select',
                 'x-component-props': {
-                  'multiple': false
+                  multiple: false,
                 },
-                enum: sortFields
+                enum: sortFields,
               },
-              'groupBy': {
-                'title': '分组',
+              groupField: {
+                title: '分组',
                 'x-decorator': 'FormItem',
-                'x-decorator-props':{
-                  gridSpan:1
+                'x-decorator-props': {
+                  gridSpan: 1,
                 },
                 'x-component': 'Select',
                 'x-component-props': {
-                  'multiple': false
+                  multiple: false,
                 },
-                enum: groupFields
-
-              }
-
-
+                enum: groupFields,
+              },
             },
           },
         },

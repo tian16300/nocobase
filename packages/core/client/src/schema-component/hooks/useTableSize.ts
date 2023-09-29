@@ -7,6 +7,7 @@ export const useTableSize = () => {
 
   const calcTableSize = useCallback(() => {
     if (!elementRef.current) return;
+    console.log('calcTableSize');
     const clientRect = elementRef.current.getBoundingClientRect();
     const tableHeight = Math.ceil(clientRect?.height || 0);
     const headerHeight = elementRef.current.querySelector('.ant-table-header')?.getBoundingClientRect().height || 0;
@@ -26,6 +27,5 @@ export const useTableSize = () => {
   };
 
   useEventListener('resize', calcTableSize);
-
   return { height, width, tableSizeRefCallback };
 };
