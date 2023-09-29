@@ -24,19 +24,11 @@ import {
   useTableSize,
   useToken,
 } from '@nocobase/client';
-import { uid } from '@nocobase/utils';
-import { getValuesByPath } from '@nocobase/utils/client';
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
-import { findIndex } from 'lodash';
-import getValueByPath from 'packages/plugins/@nocobase/plugin-theme-editor/src/client/antd-token-previewer/utils/getValueByPath';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 // import { Input, Space, Tag, theme, Tooltip } from 'antd';
-import { Button, Space, Table, Tag } from 'antd';
-const isColumnComponent = (schema: Schema) => {
-  return schema['x-component']?.endsWith('.Column') > -1;
-};
+import { Table, Tag } from 'antd';
 
 export const components = {
   body: {
@@ -74,127 +66,6 @@ const useDefDataSource = (options, props) => {
   }, options);
 };
 
-const groupColumns = [
-  {
-    dataIndex: 'name',
-    key: 'name',
-  },
-];
-
-type CategorizeKey = 'primaryAndForeignKey' | 'relation' | 'systemInfo' | 'basic';
-const CategorizeKeyNameMap = new Map<CategorizeKey, string>([
-  ['primaryAndForeignKey', 'PK & FK fields'],
-  ['relation', 'Association fields'],
-  ['systemInfo', 'System fields'],
-  ['basic', 'General fields'],
-]);
-
-interface CategorizeDataItem {
-  key: CategorizeKey;
-  name: string;
-  data: Array<any>;
-}
-const PrjStageRecordViewer = (props) => {
-  const { getCollectionField } = useCollectionManager();
-  const fieldSchema = useFieldSchema();
-  const { record } = props;
-  const resourceName = 'task';
-  const isGroup = record.isGroup;
-  const groupField = record.groupType;
-  const fieldName = 'status';
-  const collectionFieldName = [resourceName, fieldName].join('.');
-  const def = record[fieldName];
-  const collectionField = getCollectionField(collectionFieldName);
-  const schema = {
-    type: 'string',
-    'x-collection-field': collectionFieldName,
-    'x-component': 'CollectionField',
-    'x-component-props': {
-      ellipsis: true,
-      size: 'small',
-      fieldNames: {
-        label: 'label',
-        value: 'id',
-      },
-      service: {
-        params: {
-          sort: 'id',
-        },
-      },
-      mode: 'Select',
-    },
-    'x-decorator': null,
-    'x-decorator-props': {
-      labelStyle: {
-        display: 'none',
-      },
-    },
-    default: def,
-  };
-  return (
-    <>
-      {!isGroup && collectionField && (
-        <CollectionProvider name={collectionField?.target ?? collectionField?.targetCollection}>
-          <RecordProvider record={record[record.fieldName]}>
-            <RecordProvider record={record}>
-              <WithoutTableFieldResource.Provider value={true}>
-                <FormProvider>
-                  <RecursionField schema={schema} name={record.groupType} />
-                </FormProvider>
-              </WithoutTableFieldResource.Provider>
-            </RecordProvider>
-          </RecordProvider>
-        </CollectionProvider>
-      )}
-    </>
-  );
-};
-const TaskRecordViewer = (props) => {
-  const fieldSchema = useFieldSchema();
-  const { record } = props;
-  const schema = {
-    type: 'string',
-    'x-collection-field': 'task.prjStage',
-    'x-component': 'CollectionField',
-    'x-component-props': {
-      ellipsis: true,
-      size: 'small',
-      fieldNames: {
-        label: 'stage.label',
-        value: 'id',
-      },
-      service: {
-        params: {
-          appends: 'stage',
-          sort: 'id',
-        },
-      },
-      mode: 'Select',
-    },
-    'x-decorator': null,
-    'x-decorator-props': {
-      labelStyle: {
-        display: 'none',
-      },
-    },
-    default: record['prjStage'],
-  };
-  return (
-    <>
-      <CollectionProvider name={'prj_plan'}>
-        <RecordProvider record={record['prjStage']}>
-          <RecordProvider record={record}>
-            <WithoutTableFieldResource.Provider value={true}>
-              <FormProvider>
-                <RecursionField schema={schema} name={'prjStage'} />
-              </FormProvider>
-            </WithoutTableFieldResource.Provider>
-          </RecordProvider>
-        </RecordProvider>
-      </CollectionProvider>
-    </>
-  );
-};
 export const PrjWorkPlanTable: React.FC<any> = observer(
   (props) => {
     const { token } = useToken();
@@ -215,10 +86,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
 
     const tableCtx = useTableBlockContext();
     const ctx = useGanttBlockContext();
-    // const onRecordClick = useMemo(() => {
-    //   return tableCtx.field.onRecordClick;
-    // }, []);
-    const fieldSchema = useFieldSchema();
     const { expandFlag, allIncludesChildren } = tableCtx;
     const [expandedKeys, setExpandesKeys] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>(field?.data?.selectedRowKeys || []);
@@ -233,9 +100,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       onRow = (record) => {
         return {
           onClick: (e) => {
-            // if (isPortalInBody(e.target)) {
-            //   return;
-            // }
             onClickRow(record, setSelectedRow, selectedRow);
           },
         };
@@ -273,6 +137,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         ? {
             type: 'checkbox',
             selectedRowKeys: selectedRowKeys,
+            width: 70,
             onChange(selectedRowKeys: any[], selectedRows: any[]) {
               field.data = field.data || {};
               field.data.selectedRowKeys = selectedRowKeys;
@@ -280,19 +145,14 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
               onRowSelectionChange?.(selectedRowKeys, selectedRows);
             },
             renderCell: (checked, record, index, originNode) => {
-              // if (!dragSort && !showIndex) {
-              //   return originNode;
-              // }
-              // const current = props?.pagination?.current;
-              // const pageSize = props?.pagination?.pageSize || 20;
-              // if (current) {
-              //   index = index + (current - 1) * pageSize + 1;
-              // } else {
-              //   index = index + 1;
-              // }
-              // if (record.__index) {
-              //   index = extractIndex(record.__index);
-              // }
+              const arr = record.__index.split('.');
+              const index1 = Number(arr[0]).valueOf() + 1;
+              let indexStr = index1 + '';
+              if (arr.length > 1) {
+                const index2 = Number(arr[1]).valueOf() + 1;
+                indexStr = [index1, index2].join('.');
+              }
+
               return (
                 <div
                   className={classNames(
@@ -300,10 +160,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
                     css`
                       position: relative;
                       display: flex;
-                      float: left;
                       align-items: center;
                       justify-content: space-evenly;
                       padding-right: 8px;
+                      width: 100%;
                       .nb-table-index {
                         opacity: 0;
                       }
@@ -334,11 +194,12 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
                         position: relative;
                         display: flex;
                         align-items: center;
-                        justify-content: space-evenly;
+                        justify-content: flex-start;
+                        width: 100%;
                       `,
                     )}
                   >
-                    {/* {showIndex && <TableIndex index={index} />} */}
+                    <div className="nb-table-index">{indexStr}</div>
                   </div>
                   {isRowSelect && (
                     <div
@@ -389,40 +250,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         key: 'title',
         render: (v, record, index) => {
           return (
-            <div
-              className="ant-description-input"
-              // className={css`
-              //   display:inline-block;
-              //   .ant-btn {
-              //     padding: 0;
-              //     margin-top: -6px;
-              //     text-align: left;
-              //     height: 21px;
-              //     line-height:21px;
-              //     width:
-              //     // > span {
-              //     //   display: block;
-              //     //   overflow: hidden;
-              //     //   overflow-wrap: break-word;
-              //     //   text-overflow: ellipsis;
-              //     //   white-space: nowrap;
-              //     //   word-break: break-all;
-              //     // }
-              //   }
-              // `}
-            >
-              {/* <Button
-                type="link"
-                size="middle"
-                onClick={() => {
-                  const onRecordClick = tableCtx?.field?.onRecordClick;
-                  if (typeof onRecordClick == 'function') {
-                    onRecordClick(record, ctx);
-                  }
-                }}
-              >
-              
-              </Button> */}
+            <div className="ant-description-input">
               <EllipsisWithTooltip ellipsis>
                 <a
                   href="javascript:void(0)"
@@ -473,8 +301,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         width: 120,
         dataIndex: 'start',
         key: 'start',
-        render: (v, record, index) => {
-          const collection = record.__collection;
+        render: (v) => {
           return v ? dayjs(v).format('YYYY-MM-DD') : '';
         },
       },
@@ -483,7 +310,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         width: 120,
         dataIndex: 'end',
         key: 'end',
-        render: (v, record, index) => {
+        render: (v) => {
           return v ? dayjs(v).format('YYYY-MM-DD') : '';
         },
       },
@@ -521,7 +348,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
             onChange={(pagination, filters, sorter, extra) => {
               onTableChange?.(pagination, filters, sorter, extra);
             }}
-            // onRow={onRow}
+            onRow={onRow}
             rowClassName={(record) => (selectedRow.includes(record[rowKey]) ? highlightRow : '')}
             tableLayout={'auto'}
             scroll={scroll}
