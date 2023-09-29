@@ -50,7 +50,6 @@ const useTableColumns = (props) => {
       }, []);
       const dataIndex = collectionFields?.length > 0 ? collectionFields[0].name : s.name;
       //如果是字典 key 则为外键
-
       return {
         title: <RecursionField name={s.name} schema={s} onlyRenderSelf />,
         dataIndex,
@@ -524,7 +523,7 @@ export const Table: any = observer(
             columns={columns}
             expandable={{
               onExpand: (flag, record) => {
-                const newKeys = flag ? [...expandedKeys, record.id] : expandedKeys.filter((i) => record.id !== i);
+                const newKeys = flag ? [...expandedKeys, record[rowKey]] : expandedKeys.filter((i) => record[rowKey] !== i);
                 setExpandesKeys(newKeys);
                 onExpand?.(flag, record);
               },

@@ -1575,7 +1575,7 @@ export const createGanttBlockSchema = (options) => {
         dependencies: 'dependencies.id',
       },
       params: {
-        appends: ['stage', 'status', 'task'],
+        // appends: ['stage', 'status', 'task'],
         paginate: false,
         sort: 'id',
       },

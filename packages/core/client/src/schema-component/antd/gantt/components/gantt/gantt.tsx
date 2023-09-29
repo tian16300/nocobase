@@ -46,19 +46,19 @@ export const DeleteEventContext = React.createContext({
   close: () => {},
 });
 const GanttRecordViewer = (props) => {
+  const { groupField, rowKey} = useGanttBlockContext();
   const { visible, setVisible, record = {} } = props;
-  const form = useMemo(() => createForm(), [record]);
-  const {isGroup,groupType} = record;
+  const {id,isGroup} = record;
   
   const fieldSchema = useFieldSchema();
-  // const schema =
-  // const eventSchema: Schema = fieldSchema.properties[recordType];
-  const close = useCallback(() => {
+   const close = useCallback(() => {
     setVisible(false);
   }, []);
   const eventSchema = useMemo(() => {
     let schema = null;
-    if(isGroup && groupType){
+
+    if(isGroup && 'others'!== record[rowKey]?.toString()){
+      const groupType = groupField.name as string;
       schema = fieldSchema?.properties[groupType].mapProperties((temp)=>{
         return temp['x-component'] == 'Gantt.Event'?temp:false;
      })[0];
@@ -67,27 +67,22 @@ const GanttRecordViewer = (props) => {
     }
     return schema;
   }, [fieldSchema,record]);
-
-  const { getCollectionField } = useCollectionManager();
-  const {resource, fieldNames} = useGanttBlockContext();
+  
   const isTask = !isGroup;
-  const isCollectionField = isGroup && groupType;
-  const collectionField = isCollectionField?getCollectionField(`${resource}.${groupType}`): null;
+  const isCollectionField = isGroup && 'others'!== record[rowKey]?.toString();
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        {isTask && (
-          <ActionContextProvider value={{ visible, setVisible }}>
+      <ActionContextProvider value={{ visible, setVisible }}>
+        {isTask ? (
             <RecordProvider record={record}>
               <RecursionField schema={eventSchema as Schema} name={eventSchema.name} />
             </RecordProvider>
-          </ActionContextProvider>
-        )}
-        {collectionField && (
-          <CollectionProvider name={collectionField?.target ?? collectionField?.targetCollection}>
-            <ActionContextProvider value={{ visible, setVisible }}>
-              <RecordProvider record={record[groupType]}>
-                <RecordProvider record={record}>
+        ):<></>}
+        {isCollectionField?(
+          <CollectionProvider name={record.__collection}>
+              <RecordProvider record={record}>
+                <RecordProvider record={{}}>
                   <WithoutTableFieldResource.Provider value={true}>
                     <FormProvider>
                       <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
@@ -95,9 +90,9 @@ const GanttRecordViewer = (props) => {
                   </WithoutTableFieldResource.Provider>
                 </RecordProvider>
               </RecordProvider>
-            </ActionContextProvider>
           </CollectionProvider>
-        )}
+        ):(<></>)}
+        </ActionContextProvider>
       </DeleteEventContext.Provider>
     )
   );
@@ -154,14 +149,14 @@ export const Gantt: any = (props: any) => {
     expandAndCollapseAll,
     height,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
-    rightSize,
-    preProcessData = (data)=>{ return data}
+    rightSize
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
   const locale = appInfo.data?.lang;
   const tableCtx = useTableBlockContext();
+  const {rowKey = 'id'} = ctx; 
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const viewMode = fieldNames.range || 'day';
@@ -174,8 +169,6 @@ export const Gantt: any = (props: any) => {
     return { viewMode, dates: seedDates(startDate, endDate, viewMode) };
   });
   const [visible, setVisible] = useState(false);
-  const [recordType, setRecordType] = useState('detail');
-  const [isGroup, setIsGroup] = useState(false);
   const [record, setRecord] = useState<any>({});
   const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(undefined);
   const [taskListWidth, setTaskListWidth] = useState(0);
@@ -212,7 +205,7 @@ export const Gantt: any = (props: any) => {
   useEffect(() => {
     let filteredTasks: Task[];
     if (onExpanderClick) {
-      filteredTasks = removeHiddenTasks(tasks);
+      filteredTasks = removeHiddenTasks(tasks, ctx);
     } else {
       filteredTasks = tasks;
     }
@@ -246,6 +239,7 @@ export const Gantt: any = (props: any) => {
         projectBackgroundSelectedColor,
         milestoneBackgroundColor,
         milestoneBackgroundSelectedColor,
+        ctx
       ),
     );
   }, [
@@ -294,9 +288,9 @@ export const Gantt: any = (props: any) => {
     if (changedTask) {
       if (action === 'delete') {
         setGanttEvent({ action: '' });
-        setBarTasks(barTasks.filter((t) => t.id !== changedTask.id));
+        setBarTasks(barTasks.filter((t) => t[rowKey]?.toString() !== changedTask[rowKey]?.toString()));
       } else if (action === 'move' || action === 'end' || action === 'start' || action === 'progress') {
-        const prevStateTask = barTasks.find((t) => t.id === changedTask.id);
+        const prevStateTask = barTasks.find((t) => t[rowKey]?.toString() === changedTask[rowKey]?.toString());
         if (
           prevStateTask &&
           (prevStateTask.start.getTime() !== changedTask.start.getTime() ||
@@ -304,7 +298,7 @@ export const Gantt: any = (props: any) => {
             prevStateTask.progress !== changedTask.progress)
         ) {
           // actions for change
-          const newTaskList = barTasks.map((t) => (t.id === changedTask.id ? changedTask : t));
+          const newTaskList = barTasks.map((t) => (t[rowKey]?.toString() === changedTask[rowKey]?.toString() ? changedTask : t));
           setBarTasks(newTaskList);
         }
       }
@@ -313,7 +307,7 @@ export const Gantt: any = (props: any) => {
 
   useEffect(() => {
     if (failedTask) {
-      setBarTasks(barTasks.map((t) => (t.id !== failedTask.id ? t : failedTask)));
+      setBarTasks(barTasks.map((t) => (t[rowKey]?.toString() !== failedTask[rowKey]?.toString() ? t : failedTask)));
       setFailedTask(null);
     }
   }, [failedTask, barTasks]);
@@ -466,8 +460,8 @@ export const Gantt: any = (props: any) => {
    * Task select event
    */
   const handleSelectedTask = (taskId: string) => {
-    const newSelectedTask = barTasks.find((t) => t.id === taskId);
-    const oldSelectedTask = barTasks.find((t) => !!selectedTask && t.id === selectedTask.id);
+    const newSelectedTask = barTasks.find((t) => t[rowKey]?.toString() === taskId);
+    const oldSelectedTask = barTasks.find((t) => !!selectedTask && t[rowKey]?.toString() === selectedTask[rowKey]?.toString());
     if (onSelect) {
       if (oldSelectedTask) {
         onSelect(oldSelectedTask, false);
@@ -479,7 +473,7 @@ export const Gantt: any = (props: any) => {
     setSelectedTask(newSelectedTask);
   };
   const handleTableExpanderClick = (expanded: boolean, record: any) => {
-    const task = ctx?.field?.data.find((v: any) => v.rowKey === record.rowKey + '');
+    const task = ctx?.field?.data.find((v: any) => v[rowKey]?.toString() === record[rowKey]?.toString());    
     if (onExpanderClick && record.children.length) {
       onExpanderClick({ ...task, hideChildren: !expanded });
     }
@@ -520,7 +514,7 @@ export const Gantt: any = (props: any) => {
         }
       }, []);
     };
-    const flattenedData = flattenTree(treeData?treeData:preProcessData(service?.data?.data));
+    const flattenedData = flattenTree(treeData?treeData:ctx.preProcessData(service?.data?.data,ctx));
     const recordData = flattenedData?.find((item) =>  item.rowKey === data.rowKey);
     if (!recordData) {
       return;
@@ -548,6 +542,7 @@ export const Gantt: any = (props: any) => {
     todayColor,
     rtl,
     selectedRowKeys,
+    rowKey
   };
   const calendarProps: CalendarProps = {
     dateSetup,
@@ -582,6 +577,7 @@ export const Gantt: any = (props: any) => {
     onDoubleClick,
     onClick: handleBarClick,
     onDelete,
+    rowKey
   };
 
   const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
@@ -640,7 +636,7 @@ export const Gantt: any = (props: any) => {
         `,
       )}
     >
-      <GanttRecordViewer visible={visible} setVisible={setVisible} isGroup={isGroup} recordType={recordType} record={record} />
+      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} />
       <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
@@ -660,6 +656,7 @@ export const Gantt: any = (props: any) => {
                 scrollY={scrollY}
                 scrollX={scrollX}
                 ref={verticalGanttContainerRef}
+                rowKey={ctx.rowKey}
               />
               {ganttEvent.changedTask && (
                 <Tooltip

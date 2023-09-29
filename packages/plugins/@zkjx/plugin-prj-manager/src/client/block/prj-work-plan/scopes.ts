@@ -39,7 +39,8 @@ const compPlanTask = (plans, tasks = []) => {
 const flattenTree = (treeData = [], callback?) => {
   return treeData.reduce((acc, node) => {
     if (node.children) {
-      return acc.concat([node, ...flattenTree(node.children, callback)]);
+      const {children,...others} = node;
+      return acc.concat([{...others}, ...flattenTree(children, callback)]);
     } else {
       if (typeof callback == 'function') {
         callback(node);
@@ -48,61 +49,85 @@ const flattenTree = (treeData = [], callback?) => {
     }
   }, []);
 };
-const preProcessData = (data) => {
-  const group = 'prjStage';
-  const titleMap = {
-    prjStage: 'stage.label',
-    user: 'nickname',
-  };
-  /**
-   * 树重新组成
-   */
-  const list = flattenTree(data, (node) => {
-
-    node.rowKey = 'task_' + node.id;
+const transformTaskData = (list, ctx) => {
+  const resourceName = ctx.collection || ctx.resource;
+  const groupField = ctx.groupField;
+  return list.map((node) => {
+    const { id, children = [], dependencies =[], ...others } = node;
+    return {
+      id,
+      ...others,
+      __collection: resourceName,
+      __fieldName: null,
+      rowKey: [resourceName, id].join('_'),
+      groupRowKey: node[groupField.name]
+        ? [[groupField.target], node[groupField.name][groupField.targetKey]].join('_')
+        : 'others',
+      dependencies: transformTaskData(dependencies, ctx),
+      children: transformTaskData(children, ctx)
+    };
   });
-  /* 打平 树 */
-  const sGroups = {};
-  const groups = list.group((record) => {
-    const groupRecord = record[group];
-    if (groupRecord) {
-      const title = getValuesByPath(groupRecord, titleMap[group]);      
-      let key = [group,groupRecord.id].join('.')
-      sGroups[key] = {
-        ...groupRecord,
-        title: title,
-        rowKey: group + '_' + groupRecord.id,
-        isGroup: true,
-        groupType: group,
-      };
-    }
-    const groupKey = groupRecord ? [group,groupRecord.id].join('.') : 'others';
-    return groupKey;
-  });
-  const nList = [];
-  Object.keys(groups).forEach((key) => {
-    const group = sGroups[key];
-    nList.push({
-      ...(group
-        ? group
-        : {
-            id: 'others',
-            isGroup: true,
-            rowKey: 'others',
-            groupType:null,
-            title: '其他'
-          }),
-      children: groups[key].map((task)=>{
-        const {children,...others} = task;
-         return {
-          ...others
-         }
-      }),
+};
+const preProcessData = (data, ctx) => {
+  const _groups = ctx.groups;
+  const groupField = ctx.groupField;
+  const resourceName = ctx.collection || ctx.resource;
+  if (
+    !_groups.filter(({ rowKey }) => {
+      return rowKey == 'others';
+    }).length
+  ) {
+    _groups.push({
+      rowKey: 'others',
+      title: '其他',
     });
+  }
+  const groups = _groups.map((record, index) => {
+    const { id, ...others } = record;
+    return {
+      ...others,
+      id,
+      isGroup: true,
+      __collection: id ? groupField.target : null,
+      __fieldName: id ? groupField.name : null,
+      rowKey: id ? [groupField.target, id].join('_') : record.rowKey,
+      title: id ? getValuesByPath(record, groupField.title) : record.title,
+      __index: index + '',
+    };
   });
-  debugger;
+  let list: any[] = [];
+  if(data && data.length){
+    const treeData = transformTaskData(data, ctx);
+    list = list.concat(flattenTree(treeData));
+  }
+  const groupList = (list as any).group((data) => {
+    return data.groupRowKey;
+  });
 
-  return nList;
+  groups.forEach((item, index1) => {
+    const children = groupList[item.rowKey]?.map((node, index2) => {
+      return {
+        ...node,
+        __index: [index1, index2].join('.'),
+      };
+    });
+    item.children = children;
+  });
+  // groups.push({
+  //   id:'others',
+  //   isGroup:true,
+  //   rowKey:'others',
+  //   __resource:null,
+  //   title:'其他',
+  //   children:groupList['others']
+  // });
+  /** 重新更新 record __index */
+  // let __index = -1;
+  // flattenTree(groups,(node)=>{
+  //   ++__index;
+  //    node.__index = __index;
+  // })
+  return groups;
 };
 export const usePrjWorkPlanProcessData = preProcessData;
 export const usePrjWorkPlanTableBlockProps = () => {
@@ -115,7 +140,7 @@ export const usePrjWorkPlanTableBlockProps = () => {
   useEffect(() => {
     if (!ctx?.service?.loading) {
       field.value = [];
-      field.value = preProcessData(ctx?.service?.data?.data);
+      field.value = preProcessData(ctx?.service?.data?.data, ctx);
       field.data = field.data || {};
       field.data.selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
       field.componentProps.pagination = field.componentProps.pagination || {};
@@ -316,7 +341,7 @@ const formatData = (
         },
         isGroup: item.isGroup,
         groupType: item.groupType,
-        rowKey: item.rowKey
+        rowKey: item.rowKey,
       });
       formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion, treeData, token);
     } else {
@@ -339,7 +364,7 @@ const formatData = (
         }),
         isGroup: item.isGroup,
         groupType: item.groupType,
-        rowKey: item.rowKey
+        rowKey: item.rowKey,
       });
     }
   });
@@ -371,13 +396,13 @@ export const usePrjWorkPlanGanttBlockProps = () => {
   };
   const expandAndCollapseAll = (flag) => {
     const data = formatData(
-      preProcessData(ctx.service.data?.data),
+      preProcessData(ctx.service.data?.data, ctx),
       ctx.fieldNames,
       [],
       undefined,
       flag,
       checkPermassion,
-      preProcessData(ctx.service.data?.data),
+      preProcessData(ctx.service.data?.data, ctx),
       ctx.token,
     );
     setTasks(data);
@@ -395,13 +420,13 @@ export const usePrjWorkPlanGanttBlockProps = () => {
     if (!ctx?.service?.loading) {
       let data;
       data = formatData(
-        preProcessData(ctx.service.data?.data),
+        preProcessData(ctx.service.data?.data, ctx),
         ctx.fieldNames,
         [],
         undefined,
         false,
         checkPermassion,
-        preProcessData(ctx.service.data?.data),
+        preProcessData(ctx.service.data?.data, ctx),
         ctx.token,
       );
       if (data) {
@@ -421,7 +446,7 @@ export const usePrjWorkPlanGanttBlockProps = () => {
     hasScroll,
     rightSize,
     preProcessData,
-    height:'calc(100vh - 52px - 40px - 24px * 2 - 10px - 24px * 2 - 52px - 44px - 46px - 16px)',
+    height: 'calc(100vh - 52px - 40px - 24px * 2 - 10px - 24px * 2 - 52px - 44px - 46px - 16px)',
   };
 };
 

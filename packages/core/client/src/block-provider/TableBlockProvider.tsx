@@ -9,13 +9,13 @@ import { mergeFilter } from './SharedFilterProvider';
 import { findFilterTargets } from './hooks';
 
 export const TableBlockContext = createContext<any>({});
-export function getIdsWithChildren(nodes) {
+export function getIdsWithChildren(nodes, rowKey) {
   const ids = [];
   if (nodes) {
     for (const node of nodes) {
       if (node?.children && node.children.length > 0) {
-        ids.push(node.id);
-        ids.push(...getIdsWithChildren(node?.children));
+        ids.push(node[rowKey]);
+        ids.push(...getIdsWithChildren(node?.children, rowKey));
       }
     }
   }
@@ -33,7 +33,9 @@ interface Props {
 }
 
 const InternalTableBlockProvider = (props: Props) => {
-  const { params, preProcessData, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, height , ...others } = props;
+  const { params, showIndex, dragSort, rowKey = 'id', preProcessData = (data,props)=>{
+    return data;
+  }, childrenColumnName, fieldNames, height , ...others } = props;
   const field: any = useField();
   const { resource, service, __parent } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
@@ -41,10 +43,11 @@ const InternalTableBlockProvider = (props: Props) => {
   const [expandFlag, setExpandFlag] = useState(fieldNames ? true : false);
   const allIncludesChildren = useMemo(() => {
     if (treeTable !== false) {
-      const keys = getIdsWithChildren(service?.data?.data);
+      const keys = getIdsWithChildren(preProcessData(service?.data?.data, props), rowKey);
       return keys || [];
     }
   }, [service?.loading]);
+
   return (
     <FixedBlockWrapper>
       <TableBlockContext.Provider
@@ -117,14 +120,14 @@ export const useTableBlockProps = () => {
   const field = useField<ArrayField>();
   const fieldSchema = useFieldSchema();
   const ctx = useTableBlockContext();
-  const preProcessData = ctx.preProcessData || ((data: any) => data||[]);
+  const preProcessData = ctx.preProcessData || ((data: any, ctx) => data||[]);
   const globalSort = fieldSchema.parent?.['x-decorator-props']?.['params']?.['sort'];
   const { getDataBlocks } = useFilterBlock();
 
   useEffect(() => {
     if (!ctx?.service?.loading) {
       field.value = [];
-      field.value = preProcessData(ctx?.service?.data?.data);
+      field.value = preProcessData(ctx?.service?.data?.data, ctx);
       field.data = field.data || {};
       field.data.selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
       field.componentProps.pagination = field.componentProps.pagination || {};
@@ -147,7 +150,6 @@ export const useTableBlockProps = () => {
           }
         : false,
     onRowSelectionChange(selectedRowKeys) {
-      console.log(selectedRowKeys);
       ctx.field.data = ctx?.field?.data || {};
       ctx.field.data.selectedRowKeys = selectedRowKeys;
       ctx?.field?.onRowSelect?.(selectedRowKeys);

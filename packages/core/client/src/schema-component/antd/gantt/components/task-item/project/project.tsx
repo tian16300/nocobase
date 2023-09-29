@@ -3,7 +3,7 @@ import React from 'react';
 import { TaskItemProps } from '../task-item';
 import { projectBackground, projectWrapper } from './style';
 
-export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
+export const Project: React.FC<TaskItemProps> = ({ task, isSelected, rowKey }) => {
   const barColor = isSelected ? task.styles.backgroundSelectedColor : task.styles.backgroundColor;
   const processColor = isSelected ? task.styles.progressSelectedColor : task.styles.progressColor;
   const projectWith = task.x2 - task.x1;
@@ -12,7 +12,7 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
     <>
       <defs>
         <pattern
-          id={"prj-"+task.id}
+          id={"prj-"+task[rowKey]?.toString()}
           width="10"
           height="10"
           patternTransform="rotate(45 0 0)"
@@ -35,7 +35,7 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
       <g tabIndex={0} className={cx(projectWrapper)}>
         <rect
           // fill={task.color || barColor}
-          fill={`url(#${'prj-'+task.id})`}
+          fill={`url(#${'prj-'+task[rowKey]?.toString()})`}
           x={task.x1}
           width={projectWith}
           y={task.y}
@@ -54,7 +54,7 @@ export const Project: React.FC<TaskItemProps> = ({ task, isSelected }) => {
           ry={task.barCornerRadius}
           rx={task.barCornerRadius}
           // fill={task.color || processColor}
-          fill={`url(#${'prj-'+task.id})`}
+          fill={`url(#${'prj-'+task[rowKey]?.toString()})`}
         />
       </g>
     </>

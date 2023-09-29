@@ -11,9 +11,10 @@ export type TaskGanttProps = {
   scrollY: number;
   scrollX: number;
   ref: any;
+  rowKey: string;
 };
 export const TaskGantt: React.FC<TaskGanttProps> = forwardRef(
-  ({ gridProps, calendarProps, barProps, ganttHeight, scrollY, scrollX }, ref: any) => {
+  ({ gridProps, calendarProps, barProps, ganttHeight, scrollY, scrollX, rowKey }, ref: any) => {
     const ganttSVGRef = useRef<SVGSVGElement>(null);
     const horizontalContainerRef = useRef<HTMLDivElement>(null);
     const newBarProps = { ...barProps, svg: ganttSVGRef };
@@ -54,8 +55,8 @@ export const TaskGantt: React.FC<TaskGanttProps> = forwardRef(
             ref={ganttSVGRef}
             className="ganttBody"
           >
-            <Grid {...gridProps} />
-            <TaskGanttContent {...newBarProps} />
+            <Grid {...gridProps} rowKey={rowKey} />
+            <TaskGanttContent {...newBarProps} rowKey={rowKey} />
           </svg>
         </div>
       </div>

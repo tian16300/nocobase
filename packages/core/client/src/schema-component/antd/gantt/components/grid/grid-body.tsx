@@ -13,7 +13,8 @@ export type GridBodyProps = {
   columnWidth: number;
   todayColor: string;
   rtl: boolean;
-  selectedRowKeys: any[];
+  selectedRowKeys: any[];  
+  rowKey?: string;
 };
 const empty = [{ id: uid() }, { id: uid() }, { id: uid() }];
 export const GridBody: React.FC<GridBodyProps> = ({
@@ -25,6 +26,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
   todayColor,
   rtl,
   selectedRowKeys,
+  rowKey
 }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
 
@@ -37,17 +39,17 @@ export const GridBody: React.FC<GridBodyProps> = ({
   for (const task of data) {
     gridRows.push(
       <rect
-        key={'Row' + task.id}
+        key={'Row' + (task[rowKey])?.toString()}
         x="0"
         y={y}
         width={svgWidth}
         height={rowHeight}
-        className={selectedRowKeys?.includes(+task.id) ? cx('gridHeightRow') : cx('gridRow')}
+        className={selectedRowKeys?.includes((task[rowKey])?.toString()) ? cx('gridHeightRow') : cx('gridRow')}
       />,
     );
     rowLines.push(
       <line
-        key={'RowLine' + task.id}
+        key={'RowLine' + task[rowKey]}
         x="0"
         y1={y + rowHeight}
         x2={svgWidth}

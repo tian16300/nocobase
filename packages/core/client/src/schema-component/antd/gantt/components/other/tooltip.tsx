@@ -130,8 +130,6 @@ export const StandardTooltipContent: React.FC<{
 
   if (isProject) {
     projectBar = (task as any).projectBar;
-    console.log(task);
-
     prjDuration =
       projectBar.start && projectBar.end
         ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10

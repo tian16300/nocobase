@@ -28,6 +28,7 @@ export type TaskGanttContentProps = {
   setGanttEvent: (value: GanttEvent) => void;
   setFailedTask: (value: BarTask | null) => void;
   setSelectedTask: (taskId: string) => void;
+  rowKey: string;
 } & EventOption;
 
 export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
@@ -53,6 +54,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   onDoubleClick,
   onClick,
   onDelete,
+  rowKey
 }) => {
   const point = svg?.current?.createSVGPoint();
   const [xStep, setXStep] = useState(0);
@@ -185,7 +187,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   ) => {
     if (!event) {
       if (action === 'select') {
-        setSelectedTask(task.id);
+        setSelectedTask(task[rowKey]?.toString());
       }
     }
     // Keyboard events
@@ -264,7 +266,7 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
           return task.barChildren.map((child) => {
             return (
               <Arrow
-                key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
+                key={`Arrow from ${task[rowKey]?.toString()} to ${tasks[child.index][rowKey]?.toString()}`}
                 taskFrom={task}
                 taskTo={tasks[child.index]}
                 rowHeight={rowHeight}
@@ -287,8 +289,8 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
               isDateChangeable={!!onDateChange && !task.isDisabled}
               isDelete={!task.isDisabled}
               onEventStart={handleBarEvent}
-              key={task.id}
-              isSelected={!!selectedTask && task.id === selectedTask.id}
+              key={task[rowKey]?.toString()}
+              isSelected={!!selectedTask && task[rowKey]?.toString() === selectedTask[rowKey]?.toString()}
               rtl={rtl}
             />
           );

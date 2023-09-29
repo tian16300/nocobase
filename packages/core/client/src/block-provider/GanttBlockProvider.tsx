@@ -96,7 +96,8 @@ const formatData = (
   hideChildren = false,
   checkPermassion?: (any) => boolean,
   treeData = data,
-  token = {},
+  ctx: any = {}
+  
 ) => {
   data.forEach((item: any) => {
     const disable = checkPermassion(item);
@@ -105,7 +106,7 @@ const formatData = (
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
-      const {isGroup,groupType,rowKey} = item;
+      const {isGroup,groupRowKey,rowKey} = item;
       tasks.push({
         index: startIdx,
         start: start ? new Date(start) : undefined,
@@ -119,10 +120,10 @@ const formatData = (
         // progress: percent > 100 ? 100 : percent || 0,
         hideChildren: hideChildren,
         project: projectId,
-        color: getItemColor(item, token),
+        color: getItemColor(item, ctx.token),
         isDisabled: disable,
-        dependencies: (item.dependencies || []).map(({ id }) => {
-          return id + '';
+        dependencies: (item.dependencies || []).map((record) => {
+          return record[ctx.rowKey];
         }),
         projectItem: {
           // type:'project',
@@ -132,15 +133,15 @@ const formatData = (
           end: findMaxEnd(item, end ? new Date(end) : undefined),
         },
         isGroup,
-        groupType,
-        rowKey
+        rowKey,
+        groupRowKey
       });
-      formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion, treeData, token);
+      formatData(item.children, fieldNames, tasks, item[ctx.rowKey]+'', hideChildren, checkPermassion, treeData, ctx);
     } else {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
-      const {isGroup,groupType,rowKey} = item;
+      const {isGroup,groupRowKey,rowKey} = item;
       tasks.push({
         index: startIdx,
         start: start ? new Date(start) : undefined,
@@ -150,13 +151,13 @@ const formatData = (
         type: fieldNames.end ? 'task' : 'milestone',
         progress: percent > 100 ? 100 : percent || 0,
         project: projectId,
-        color: getItemColor(item, token),
+        color: getItemColor(item, ctx.token),
         isDisabled: disable,
-        dependencies: (item.dependencies || []).map(({ id }) => {
-          return id + '';
+        dependencies: (item.dependencies || []).map((record) => {
+          return record[ctx.rowKey];
         }),
         isGroup,
-        groupType,
+        groupRowKey,
         rowKey
       });
     }
@@ -234,7 +235,9 @@ const formatGroupData = (
   // return tasks;
 };
 const InternalGanttBlockProvider = (props) => {
-  const { fieldNames, timeRange, resource, rightSize, preProcessData } = props;
+  const { fieldNames, timeRange, resource, rightSize,rowKey = 'id', preProcessData = (data, props)=>{
+    return data;
+  }, ...others } = props;
   const field = useField();
   const { service } = useBlockRequestContext();
   // if (service.loading) {
@@ -244,6 +247,8 @@ const InternalGanttBlockProvider = (props) => {
   return (
     <GanttBlockContext.Provider
       value={{
+        ...others,
+        rowKey,
         field,
         service,
         resource,
@@ -298,23 +303,24 @@ export const useGanttBlockProps = () => {
   const headerHeight = document.querySelector('.ant-table-thead')?.clientHeight || 0;
   const [ganttHeight, setGanttHeight] = useState<any>(`calc(100% - ${headerHeight}px)`);
   const [hasScroll, setHasScroll] = useState<any>(false);
+  const {rowkey = 'id'} = ctx;
 
   const onExpanderClick = (task: any) => {
     const data = ctx.field.data;
-    const tasksData = data.map((t: any) => (t.rowkey === task.rowkey ? task : t));
+    const tasksData = data.map((t: any) => (task[rowkey] === t[rowkey] ? task : t));
     setTasks(tasksData);
     ctx.field.data = tasksData;
   };
   const expandAndCollapseAll = (flag) => {
     const data = formatData(
-      preProcessData(ctx.service.data?.data),
+      preProcessData(ctx.service.data?.data, ctx),
       ctx.fieldNames,
       [],
       undefined,
       flag,
       checkPermassion,
-      preProcessData(ctx.service.data?.data),
-      ctx.token,
+      preProcessData(ctx.service.data?.data, ctx),
+      ctx
     );
     setTasks(data);
     ctx.field.data = data;
@@ -331,14 +337,14 @@ export const useGanttBlockProps = () => {
     if (!ctx?.service?.loading) {
       let data;
       data = formatData(
-        preProcessData(ctx.service.data?.data),
+        preProcessData(ctx.service.data?.data, ctx),
         ctx.fieldNames,
         [],
         undefined,
         false,
         checkPermassion,
-        preProcessData(ctx.service.data?.data),
-        ctx.token,
+        preProcessData(ctx.service.data?.data, ctx),
+        ctx
       );
       if (data) {
         setTasks(data);
