@@ -524,8 +524,8 @@ export const Gantt: any = (props: any) => {
     message.success(t('Saved successfully'));
     await service?.refresh();
   };
-  const handleBarClick = (data, treeData?) => {
-    const { type = 'task', isGroup, groupType } = data;
+  const handleBarClick = (data, _ctx?) => {
+    // const { type = 'task', isGroup, groupType } = data;
     const flattenTree = (treeData) => {
       return treeData.reduce((acc, node) => {
         if (node.children) {
@@ -535,7 +535,8 @@ export const Gantt: any = (props: any) => {
         }
       }, []);
     };
-    const flattenedData = flattenTree(treeData ? treeData : ctx.preProcessData(service?.data?.data, ctx));
+    const ctxProps = _ctx || ctx;
+    const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
     const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
     if (!recordData) {
       return;
