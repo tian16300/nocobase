@@ -36,7 +36,6 @@ const transformTaskData = (list, ctx) => {
 const preProcessData = (data, ctx) => {
   const _groups = ctx.groups;
   const groupField = ctx.groupField;
-  const resourceName = ctx.collection || ctx.resource;
   if (
     !_groups.filter(({ rowKey }) => {
       return rowKey == 'others';
@@ -49,7 +48,7 @@ const preProcessData = (data, ctx) => {
   }
   const groups = _groups.map((record, index) => {
     const { id, ...others } = record;
-    return {
+    const groupItem = {
       ...others,
       id,
       isGroup: true,
@@ -58,7 +57,11 @@ const preProcessData = (data, ctx) => {
       rowKey: id ? [groupField.target, id].join('_') : record.rowKey,
       title: id ? getValuesByPath(record, groupField.title) : record.title,
       __index: index + '',
-    };
+    }
+    if(id){
+      groupItem['fieldCtx'] = groupField;
+    }
+    return groupItem;
   });
   let list: any[] = [];
   if (data && data.length) {

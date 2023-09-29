@@ -6,6 +6,7 @@ import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { useAssociationNames, useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
+import { pick } from 'lodash';
 
 export const GanttBlockContext = createContext<any>({});
 const findParentsId = (treeData, id) => {
@@ -102,11 +103,11 @@ const formatData = (
   data.forEach((item: any) => {
     const disable = checkPermassion(item);
     const percent = item[fieldNames.progress] * 100;
+    const itemValues = pick(item,['isGroup','groupRowKey','rowKey', 'fieldCtx']);
     if (item.children && item.children.length) {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
-      const {isGroup,groupRowKey,rowKey} = item;
       tasks.push({
         index: startIdx,
         start: start ? new Date(start) : undefined,
@@ -132,16 +133,13 @@ const formatData = (
           // end: new Date(end ?? undefined),
           end: findMaxEnd(item, end ? new Date(end) : undefined),
         },
-        isGroup,
-        rowKey,
-        groupRowKey
+        ...itemValues
       });
       formatData(item.children, fieldNames, tasks, item[ctx.rowKey]+'', hideChildren, checkPermassion, treeData, ctx);
     } else {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
-      const {isGroup,groupRowKey,rowKey} = item;
       tasks.push({
         index: startIdx,
         start: start ? new Date(start) : undefined,
@@ -156,9 +154,7 @@ const formatData = (
         dependencies: (item.dependencies || []).map((record) => {
           return record[ctx.rowKey];
         }),
-        isGroup,
-        groupRowKey,
-        rowKey
+        ...itemValues
       });
     }
   });

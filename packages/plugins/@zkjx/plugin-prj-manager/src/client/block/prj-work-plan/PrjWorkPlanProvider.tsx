@@ -23,9 +23,9 @@ const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
 const PrjWorkPlanProviderInner = (props) => {
-  const { fieldNames, timeRange, resource } = props;
+  const { fieldNames, timeRange } = props;
   const field = useField();
-  const { service, parent } = useBlockRequestContext();
+  const { resource, service, __parent } = useBlockRequestContext();
 
   return (
     <GanttBlockContext.Provider
@@ -93,7 +93,7 @@ export const PrjWorkPlanProvider = (props) => {
     },
     tree: true,
     paginate: false,
-    sort:'id'
+    sort: 'id',
     // sort: 'stage_dicId',
     // , sort: props.fieldNames.start
   };
@@ -102,7 +102,7 @@ export const PrjWorkPlanProvider = (props) => {
   //   resource: 'task',
   //   action: 'list',
   // };
-  const preProcessData = usePrjWorkPlanProcessData
+  const preProcessData = usePrjWorkPlanProcessData;
   useEffect(() => {
     params.filter = {
       $and: [
@@ -126,13 +126,13 @@ export const PrjWorkPlanProvider = (props) => {
     </>
   );
 };
-const PrjWorkPlanGanttProvider = (props)=>{
+const PrjWorkPlanGanttProvider = (props) => {
   const { record, service } = useDataSelectBlockContext();
   const ctx = useBlockRequestContext();
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
-  if(ctx.service.loading){
+  if (ctx.service.loading) {
     return null;
   }
   const params = {
@@ -152,19 +152,24 @@ const PrjWorkPlanGanttProvider = (props)=>{
     // sort: 'stage_dicId',
     // , sort: props.fieldNames.start
   };
-  const [parentData,setParentData]= useState([]);
+  const [parentData, setParentData] = useState([]);
   const groupField = {
-    name:'prjStage',
-    target:'prj_plan',
-    sourceKey:'id',
+    name: 'prjStage',
+    target: 'prj_plan',
+    sourceKey: 'id',
     targetKey: 'id',
-    title:'stage.label'
- }
-  useEffect(()=>{
-    if(ctx.service?.data?.data){
+    title: 'stage.label',
+    blockCtx: {
+      resource: ctx.resource,
+      service: ctx.service,
+    },
+  };
+
+  useEffect(() => {
+    if (ctx.service?.data?.data) {
       setParentData(ctx.service?.data?.data);
     }
-  },[ctx.service?.data?.data])
+  }, [ctx.service?.data?.data]);
   useEffect(() => {
     params.filter = {
       $and: [
@@ -182,24 +187,27 @@ const PrjWorkPlanGanttProvider = (props)=>{
   /* 获取项目任务 */
   return (
     <>
-        <GanttBlockProvider {...props} params={params} groupField={groupField} groups={parentData} rowKey='rowKey'>
-          <PrjWorkPlanInnerProvider {...props} groups={parentData}></PrjWorkPlanInnerProvider>
-        </GanttBlockProvider>
+      <GanttBlockProvider {...props} params={params} groupField={groupField} groups={parentData} rowKey="rowKey">
+        <PrjWorkPlanInnerProvider {...props} groups={parentData}></PrjWorkPlanInnerProvider>
+      </GanttBlockProvider>
     </>
   );
-
 };
 const PrjWorkPlanInnerProvider = (props) => {
-  const {groups} = props;
-  const {__parent} = useBlockRequestContext();
+  const { groups } = props;
+  const { __parent } = useBlockRequestContext();
   const ctx = useGanttBlockContext();
-  const field:IField = useField();
-  if(ctx.service.loading || __parent.service.loading){
+  const field: IField = useField();
+  if (ctx.service.loading || __parent.service.loading) {
     field.loading = true;
-  }else{
+  } else {
     field.loading = false;
   }
-  return <PrjWorkProviderContext.Provider value={{ ...ctx, field,groups }}>{props.children}</PrjWorkProviderContext.Provider>;
+  return (
+    <PrjWorkProviderContext.Provider value={{ ...ctx, field, groups }}>
+      {props.children}
+    </PrjWorkProviderContext.Provider>
+  );
 };
 const PrjWorkFormProvider = connect((props) => {
   const { service } = useDataSelectBlockContext();

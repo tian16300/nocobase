@@ -31,7 +31,9 @@ export interface Task {
   dependencies?: string[];
   hideChildren?: boolean;
   displayOrder?: number;
-  projectItem?: any
+  projectItem?: any;
+  isGroup?:boolean;
+  fieldCtx?: any;
 }
 
 export interface EventOption {

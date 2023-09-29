@@ -503,26 +503,39 @@ export const Gantt: any = (props: any) => {
   const handleRowSelect = (keys) => {
     setSelectedRowKeys(keys);
   };
+  const saveTaskResource = async (task, params)=>{
+    if(!task.isGroup){ 
+      await resource.update(params);
+      message.success(t('Saved successfully'));
+      await service?.refresh();
+    }else if(task.id && task.fieldCtx && task.fieldCtx.blockCtx){
+      const blockCtx = task.fieldCtx.blockCtx
+      const _resource = blockCtx.resource;
+      const _service = blockCtx.service;
+      await _resource.update(params);
+      message.success(t('Saved successfully'));
+      await _service?.refresh();
+    }
+  }
   const handleProgressChange = async (task: Task) => {
-    await resource.update({
+    const param = {
       filterByTk: task.id,
       values: {
         [fieldNames.progress]: task.progress / 100,
       },
-    });
-    message.success(t('Saved successfully'));
-    await service?.refresh();
+    }
+    await saveTaskResource(task,param);
   };
+ 
   const handleTaskChange = async (task: Task) => {
-    await resource.update({
+    const param = {
       filterByTk: task.id,
       values: {
         [fieldNames.start]: task.start,
         [fieldNames.end]: task.end,
       },
-    });
-    message.success(t('Saved successfully'));
-    await service?.refresh();
+    };
+    await saveTaskResource(task,param);
   };
   const handleBarClick = (data, _ctx?) => {
     // const { type = 'task', isGroup, groupType } = data;
