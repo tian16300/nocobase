@@ -1,25 +1,14 @@
 import { css } from '@emotion/css';
-import { ArrayField, Field } from '@formily/core';
-import { RecursionField, Schema, observer, useField, useFieldSchema } from '@formily/react';
+import { Field } from '@formily/core';
+import { observer, useField } from '@formily/react';
 import {
-  AssociationField,
-  CollectionField,
-  CollectionProvider,
   EllipsisWithTooltip,
-  FormProvider,
   IField,
-  RecordIndexProvider,
-  RecordLink,
-  RecordProvider,
-  SchemaComponent,
-  SchemaComponentOptions,
-  WithoutTableFieldResource,
-  useCollectionManager,
+  useBlockRequestContext,
+  useCollection,
   useCompile,
   useGanttBlockContext,
-  useRecord,
   useRequest,
-  useSchemaInitializer,
   useTableBlockContext,
   useTableSize,
   useToken,
@@ -27,8 +16,10 @@ import {
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react';
-// import { Input, Space, Tag, theme, Tooltip } from 'antd';
-import { Table, Tag } from 'antd';
+import { EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Table, Tag, Dropdown, App } from 'antd';
+import { useAuthTranslation } from '../../locale';
 
 export const components = {
   body: {
@@ -92,7 +83,9 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const [selectedRow, setSelectedRow] = useState([]);
     const dataSource = field?.value?.slice?.()?.filter?.(Boolean) || [];
     const isRowSelect = rowSelection?.type !== 'none';
-    const compile = useCompile();
+    const blockCtx = useBlockRequestContext();
+    const { t } = useAuthTranslation();
+    const { modal } = App.useApp();
     let onRow = null,
       highlightRow = '';
 
@@ -233,36 +226,85 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         y: tableHeight,
       };
     }, [tableHeight]);
+
+    const renderItems = (record) => {
+      const isGroup = record.isGroup;
+      const addChildLabel = isGroup ? '添加任务' : '添加子任务';
+      const items: MenuProps['items'] = [
+        {
+          label: '编辑',
+          icon: <EditOutlined />,
+          key: '1',
+          onClick: () => {
+            const onRecordClick = tableCtx?.field?.onRecordClick;
+            if (typeof onRecordClick == 'function') {
+              onRecordClick(record, ctx);
+            }
+          },
+        },
+        {
+          label: addChildLabel,
+          key: '2',
+          icon: <PlusCircleOutlined />,
+          onClick: () => {},
+        },
+      ];
+      /**
+       * 任务 允许删除
+       */
+      if (!isGroup) {
+        items.push({
+          label: '删除',
+          icon: <DeleteOutlined />,
+          key: '3',
+          onClick: () => {
+            const { resource, service } = blockCtx;
+            const onOk = async () => {
+              await resource.destroy({
+                filterByTk: record.id,
+              });
+              await service?.refresh();
+            };
+            const confirm = {
+              title: t('Delete record'),
+              content: t('Are you sure you want to delete it?'),
+            };
+            if (confirm) {
+              modal.confirm({
+                ...confirm,
+                onOk,
+              });
+            }
+          },
+        });
+      }
+
+      return items;
+    };
     const columns: any = [
-      // {
-      //   title: '序号',
-      //   width: 100,
-      //   dataIndex: '__index',
-      //   key: '__index',
-      //   render:(v, record,index)=>{
-      //     return v;
-      //   }
-      // },
       {
         title: '分组',
         width: 200,
         dataIndex: 'title',
         key: 'title',
         render: (v, record, index) => {
+          const menus = renderItems(record);
           return (
             <div className="ant-description-input">
               <EllipsisWithTooltip ellipsis>
-                <a
-                  href="javascript:void(0)"
-                  onClick={() => {
-                    const onRecordClick = tableCtx?.field?.onRecordClick;
-                    if (typeof onRecordClick == 'function') {
-                      onRecordClick(record, ctx);
-                    }
-                  }}
-                >
-                  {compile(v)}
-                </a>
+                <Dropdown menu={{ items: menus }} trigger={['contextMenu']}>
+                  <a
+                    href="javascript:void(0)"
+                    onClick={() => {
+                      const onRecordClick = tableCtx?.field?.onRecordClick;
+                      if (typeof onRecordClick == 'function') {
+                        onRecordClick(record, ctx);
+                      }
+                    }}
+                  >
+                    {t(v)}
+                  </a>
+                </Dropdown>
               </EllipsisWithTooltip>
             </div>
           );
