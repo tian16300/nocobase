@@ -25,7 +25,7 @@ export const Sortable = (props: any) => {
   const { component, overStyle, style, children, openMode, ...others } = props;
   const { token } = useToken();
   const { draggable, droppable } = useContext(SortableContext);
-  const { isOver, setNodeRef} = droppable;
+  const { isOver, setNodeRef } = droppable;
   const droppableStyle = { ...style };
 
   if (isOver && draggable?.active?.id !== droppable?.over?.id) {
@@ -94,12 +94,7 @@ export const SortableItem: React.FC<SortableItemProps> = observer(
 
 export const DragHandler: React.FC = (props) => {
   const { draggable } = useContext(SortableContext);
-  const { isDragging, attributes, listeners, setNodeRef, transform } = draggable;
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
+  const { attributes, listeners, setNodeRef } = draggable;
 
   return (
     <div
@@ -119,8 +114,6 @@ export const DragHandler: React.FC = (props) => {
           zIndex: 1,
           // backgroundColor: '#333',
           lineHeight: 0,
-          height: 2,
-          width: 2,
           fontSize: 0,
           display: 'inline-block',
         }}

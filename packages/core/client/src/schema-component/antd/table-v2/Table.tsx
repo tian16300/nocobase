@@ -307,6 +307,7 @@ export const Table: any = observer(
                   const toIndex = e.over?.data.current?.sortable?.index;
                   const from = field.value[fromIndex] || e.active;
                   const to = field.value[toIndex] || e.over;
+                  field.move(fromIndex, toIndex);
                   onRowDragEnd({ from, to });
                 }}
               >
@@ -523,7 +524,9 @@ export const Table: any = observer(
             columns={columns}
             expandable={{
               onExpand: (flag, record) => {
-                const newKeys = flag ? [...expandedKeys, record[rowKey]] : expandedKeys.filter((i) => record[rowKey] !== i);
+                const newKeys = flag
+                  ? [...expandedKeys, record[rowKey]]
+                  : expandedKeys.filter((i) => record[rowKey] !== i);
                 setExpandesKeys(newKeys);
                 onExpand?.(flag, record);
               },
