@@ -23,12 +23,12 @@ export const useCollectionManager = () => {
     return inheritedFields.filter(Boolean);
   };
 
-  const getCollectionFields = (name: any): CollectionFieldOptions[] => {
+  const getCollectionFields = (name: any, hasForeignKey?): CollectionFieldOptions[] => {
     const collection = getCollection(name);
     const currentFields = collection?.fields || [];
     const inheritedFields = getInheritedFields(name);
     const totalFields = unionBy(currentFields?.concat(inheritedFields) || [], 'name').filter((v: any) => {
-      return !v.isForeignKey;
+      return hasForeignKey?true:!v.isForeignKey;
     });
     return totalFields;
   };

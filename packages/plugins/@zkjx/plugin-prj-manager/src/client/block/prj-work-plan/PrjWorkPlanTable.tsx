@@ -4,6 +4,7 @@ import { observer, useField } from '@formily/react';
 import {
   EllipsisWithTooltip,
   IField,
+  Icon,
   useBlockRequestContext,
   useCollection,
   useCompile,
@@ -334,8 +335,13 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         dataIndex: 'status',
         key: 'status',
         render: (v, record, index) => {
-          // const collection = record.__collection;
-          return v?.label;
+          return v ? (
+            <Tag icon={<Icon type={v.icon} />} color={v.color}>
+              {v.label}
+            </Tag>
+          ) : (
+            ''
+          );
         },
       },
       {

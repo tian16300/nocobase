@@ -29,6 +29,9 @@ const supportsType = [
 const useVariableTypes = (currentCollection, excludes = []) => {
   const { getCollectionFields, getInterface, getCollection } = useCollectionManager();
   const collection = getCollection(currentCollection);
+  /**
+   * 包含外键
+   */
   const fields = getCollectionFields(currentCollection);
   return [
     {
@@ -36,6 +39,9 @@ const useVariableTypes = (currentCollection, excludes = []) => {
       value: currentCollection,
       options() {
         const field2option = (field, depth) => {
+          /**
+           * 支持外键
+           */
           if (!field.interface || !supportsType.filter((v) => !excludes.includes(v)).includes(field.interface)) {
             return;
           }
@@ -50,9 +56,9 @@ const useVariableTypes = (currentCollection, excludes = []) => {
             schema: field?.uiSchema,
             value: field.name,
           };
-          if (field.target && depth > 1) {
-            return;
-          }
+          // if (field.target && depth > 1) {
+          //   return;
+          // }
           if (depth > 1) {
             return option;
           }
@@ -60,7 +66,7 @@ const useVariableTypes = (currentCollection, excludes = []) => {
             option['children'] = children;
           }
           if (nested) {
-            const targetFields = getCollectionFields(field.target);
+            const targetFields = getCollectionFields(field.target, true);
             const options = getOptions(targetFields, depth + 1).filter(Boolean);
             option['children'] = option['children'] || [];
             option['children'].push(...options);
@@ -97,6 +103,7 @@ const useVariableTypes = (currentCollection, excludes = []) => {
 export function useVariableOptions(collectionName, excludes?) {
   const compile = useCompile();
   const options = useVariableTypes(collectionName, excludes).map((item) => {
+
     const options = typeof item.options === 'function' ? item.options() : item.options;
     return {
       label: compile(item.title),
