@@ -142,13 +142,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
             },
             renderCell: (checked, record, index, originNode) => {
               const arr = record.__index.split('.');
-              const index1 = Number(arr[0]).valueOf() + 1;
-              let indexStr = index1 + '';
-              if (arr.length > 1) {
-                const index2 = Number(arr[1]).valueOf() + 1;
-                indexStr = [index1, index2].join('.');
-              }
-
+              const arr1 = arr.map((value)=>{
+                return Number(value).valueOf() + 1;
+              });
+              const  indexStr = arr1.join('.');
               return (
                 <div
                   className={classNames(
@@ -229,64 +226,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         y: tableHeight,
       };
     }, [tableHeight]);
-
-    const addChildSchema = {
-      [uid()]:{
-        "type": "void",
-      "title": "添加子任务",
-      "x-action": "create",
-      "x-designer": "Action.Designer",
-      "x-component": "Action.Link",
-      // "x-visible": "{{treeTable}}",
-      "x-component-props": {
-          "icon": "PlusOutlined",
-          "openMode": "drawer",
-          "type": "primary",
-          "addChild": true
-      },
-      "properties": {
-          "drawer": {
-              "type": "void",
-              "title": "添加子任务",
-              "x-component": "Action.Container",
-              "x-component-props": {
-                  "className": "nb-action-popup"
-              },
-              "properties": {
-                  "tabs": {
-                      "type": "void",
-                      "x-component": "Tabs",
-                      "x-component-props": {},
-                      "x-initializer": "TabPaneInitializersForCreateFormBlock",
-                      "properties": {
-                          "tab1": {
-                              "type": "void",
-                              "title": "新增",
-                              "x-component": "Tabs.TabPane",
-                              "x-designer": "Tabs.Designer",
-                              "x-component-props": {},
-                              "properties": {
-                                  "grid": {
-                                      "type": "void",
-                                      "x-component": "Grid",
-                                      "x-initializer": "CreateFormBlockInitializers",
-                                      "properties": {}
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      },
-      "x-decorator": "ACLActionProvider",
-      "x-designer-props": {
-          "linkageAction": true
-      }}
-      
-  };
-   
-
     const renderItems = (record) => {
       const isGroup = record.isGroup;
       const addChildLabel = isGroup ? '添加任务' : '添加子任务';

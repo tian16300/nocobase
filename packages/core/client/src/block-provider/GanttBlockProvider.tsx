@@ -181,6 +181,37 @@ const transformData = (list, ctx) => {
     };
   });
 };
+const addIndex = (children, parentIndex)=>{
+  if(children){
+   children.forEach((child, index) => {
+      child.__index = [parentIndex, index].join('.');
+      if (child.children) {
+        addIndex(child.children, child.__index);
+      }
+    });
+  }
+};
+const toTreeData = (children, parentIndex) => {
+  if (children) {
+    const list = [];
+    children.forEach((child, index) => {
+      if (child.parentId) {
+        const parent = children.filter(({ id }) => {
+          return id == child.parentId;
+        })[0];
+        if (parent) {
+          parent.children = parent.children || [];
+          parent.children.push(child);
+        }
+      }else{
+        list.push(child);
+      }
+    });
+    addIndex(list, parentIndex);
+    return list;
+  }
+  return children;
+};
 const flattenTree = (treeData = [], callback?) => {
   return treeData.reduce((acc, node) => {
     if (node.children) {
@@ -216,6 +247,8 @@ export const groupData = (data, group, ctx)=>{
       });
       const newData = Object.keys(groupListObj).map((key, index1) => {
         const value = key ? groupValuesMap.get(key) : {};
+        const __index = index1 + '';
+        const children = toTreeData(groupListObj[key], __index)
         return {
           ...value,
           rowKey: key,
@@ -224,13 +257,8 @@ export const groupData = (data, group, ctx)=>{
           fieldCtx: {
             ...groupField,
           },
-          __index: index1 + '',
-          children: groupListObj[key].map((item, index2) => {
-            return {
-              ...item,
-              __index: [index1, index2].join('.'),
-            };
-          }),
+          __index: __index,
+          children: children,
         };
       });
       return newData;
