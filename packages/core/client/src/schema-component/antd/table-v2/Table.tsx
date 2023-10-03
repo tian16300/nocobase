@@ -13,8 +13,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DndContext, useDesignable, useTableSize } from '../..';
 import {
+  CollectionProvider,
   RecordIndexProvider,
   RecordProvider,
+  useCollection,
+  useCollectionManager,
   useSchemaInitializer,
   useTableBlockContext,
   useTableSelectorContext,
@@ -32,6 +35,8 @@ const useArrayField = (props) => {
 const useTableColumns = (props) => {
   const field = useArrayField(props);
   const schema = useFieldSchema();
+  const { name } = useCollection();
+  const {getCollectionField} = useCollectionManager();
   const { schemaInWhitelist } = useACLFieldWhitelist();
   const { designable } = useDesignable();
   const { exists, render } = useSchemaInitializer(schema['x-initializer']);
@@ -49,6 +54,10 @@ const useTableColumns = (props) => {
         }
       }, []);
       const dataIndex = collectionFields?.length > 0 ? collectionFields[0].name : s.name;
+      let collectionName = name;
+      if(collectionFields?.length > 0 ){
+         collectionName = getCollectionField(collectionFields[0]['x-collection-field']).target || name;
+      }
       //如果是字典 key 则为外键
       return {
         title: <RecursionField name={s.name} schema={s} onlyRenderSelf />,
@@ -60,17 +69,19 @@ const useTableColumns = (props) => {
         render: (v, record) => {
           const index = field.value?.indexOf(record);
           return (
-            <RecordIndexProvider index={record.__index || index}>
-              <RecordProvider record={record}>
-                <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
-                  <RecursionField
-                    basePath={field.address.concat(record.__index || index)}
-                    schema={s}
-                    onlyRenderProperties
-                  />
-                </ColumnFieldProvider>
-              </RecordProvider>
-            </RecordIndexProvider>
+            <CollectionProvider name={collectionName || record.__collection}>
+              <RecordIndexProvider index={record.__index || index}>
+                <RecordProvider record={record}>
+                  <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
+                    <RecursionField
+                      basePath={field.address.concat(record.__index || index)}
+                      schema={s}
+                      onlyRenderProperties
+                    />
+                  </ColumnFieldProvider>
+                </RecordProvider>
+              </RecordIndexProvider>
+             </CollectionProvider>
           );
         },
       } as TableColumnProps<any>;

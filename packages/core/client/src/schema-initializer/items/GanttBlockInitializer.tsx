@@ -62,7 +62,7 @@ export const GanttBlockInitializer = (props) => {
               value: field.name,
             };
           });
-        const group = collectionFields.filter((field)=>{
+        const groups = collectionFields.filter((field)=>{
           return ['m2o','dic'].includes(field.interface) && 'parent' !== field.name;
         }).map((field) => {
           const isDicField = ['dic'].includes(field.interface);
@@ -160,7 +160,7 @@ export const GanttBlockInitializer = (props) => {
               ...values,
             },
             fields:{
-              group,
+              groups,
               sort,
               range
             },

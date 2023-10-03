@@ -1575,7 +1575,6 @@ export const createGanttBlockSchema = (options) => {
         sort: 'id',
       },
       leftSize: 0.3,
-      groups:[],
       sort: fieldNames.start,
       fields,
       ...others,
@@ -1604,16 +1603,15 @@ export const createGanttBlockSchema = (options) => {
                 },
                 properties: {
                   groups: {
-                    type: 'array',
+                    type: 'string',
                     title: '分组',
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props':{
                       'allowClear': false,
-                      'multiple':true
+                      'multiple':false
                     },
-                    'enum':fields.group,
-                    'default':[]
+                    'enum':fields.groups
                   },
                   sort: {
                     type: 'string',

@@ -51,7 +51,7 @@ export const ReadPrettyInternalViewer: React.FC = observer(
           ? transformNestedData(record)
               .map((o) => getValuesByPath(o, fieldNames?.label || 'label'))
               .join(' / ')
-          : record?.[fieldNames?.label || 'label'];
+          : getValuesByPath(record, fieldNames?.label || 'label');
         const val = toValue(compile(label), 'N/A');
         const labelUiSchema = useLabelUiSchema(
           record?.__collection || collectionField?.target,

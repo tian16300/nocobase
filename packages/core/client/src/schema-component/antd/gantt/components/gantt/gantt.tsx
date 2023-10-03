@@ -36,7 +36,7 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { CollectionProvider } from '@nocobase/client';
 import { useEventListener } from 'ahooks';
-import { createForm,  onFieldValueChange } from '@formily/core';
+import { createForm, onFieldValueChange } from '@formily/core';
 import { uid } from '@nocobase/utils';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
@@ -109,47 +109,31 @@ const GanttRecordViewer = (props) => {
     } else if (!isGroup && isCreate) {
       schema = fieldSchema?.properties['createTask'];
       schema['x-component-props'] = {
-        inheritsKeys: Object.keys(record).filter((key)=>{
-          return !/^__+/.test(key)
-        })
+        inheritsKeys: Object.keys(record).filter((key) => {
+          return !/^__+/.test(key);
+        }),
       };
     } else if (!isGroup && !isCreate) {
       schema = fieldSchema?.properties['detail'];
     }
     return schema;
   }, [fieldSchema, record]);
-
-  const isTaskUpdate = !isGroup && !isCreate;
-  const isTaskCreate = !isGroup && isCreate;
   const isCollectionField = isGroup;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
         <ActionContextProvider value={{ visible, setVisible }} fieldSchema={eventSchema as Schema}>
-          {isTaskUpdate ? (
+          <CollectionProvider name={record.__collection}>
             <RecordProvider record={record}>
-              <RecursionField onlyRenderProperties schema={eventSchema as Schema} name={eventSchema.name} />
-            </RecordProvider>
-          ) : isTaskCreate ? (
-            // <CollectionProvider name={record.__collection}>
-              <RecordProvider record={record}>
-                 <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
-              </RecordProvider>
-            // </CollectionProvider>
-          ) : (
-            <></>
-          )}
-          {isCollectionField ? (
-            <CollectionProvider name={record.__collection}>
-              <RecordProvider record={record}>
+              {isCollectionField ? (
                 <WithoutTableFieldResource.Provider value={true}>
                   <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
                 </WithoutTableFieldResource.Provider>
-              </RecordProvider>
-            </CollectionProvider>
-          ) : (
-            <></>
-          )}
+              ) : (
+                <RecursionField onlyRenderProperties schema={eventSchema as Schema} name={eventSchema.name} />
+              )}
+            </RecordProvider>
+          </CollectionProvider>
         </ActionContextProvider>
       </DeleteEventContext.Provider>
     )
