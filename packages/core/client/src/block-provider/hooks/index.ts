@@ -1170,6 +1170,14 @@ export const useAssociationNames = () => {
             }
           });
         }
+         /**
+         * 设置默认值字段
+         */
+         if (s['x-component-props']?.inheritsKeys) {
+          Object.values(s['x-component-props']?.inheritsKeys).forEach((name: string) => {
+            appends.add(name);
+          });
+        }
       } else if (
         ![
           'ActionBar',

@@ -823,6 +823,133 @@ function WorkflowConfig() {
   );
 }
 
+const SetInheriteFields = (props) => {
+  const {collectionName} = props;
+  const { dn } = useDesignable();
+  const { t } = useTranslation();
+  const field = useField();
+  const fieldSchema = useFieldSchema();
+  const { name } = useCollection();
+  const { collectionList, getEnableFieldTree, getOnLoadData, getOnCheck } = useCollectionState(name);
+  const inheritValues = cloneDeep(fieldSchema['x-component-props'].inheritsKeys || []);
+  const record = useRecord();
+  const useSelectAllFields = (form) => {
+    return {
+      async run() {
+        form.query('inheritsKeys').take((f) => {
+          const selectFields = getAllkeys(f.componentProps.treeData, []);
+          f.componentProps.defaultCheckedKeys = selectFields;
+          f.setInitialValue(selectFields);
+          f?.onCheck(selectFields);
+        });
+      },
+    };
+  };
+  return (
+    <SchemaSettings.ModalItem
+      title={t('设置默认值')}
+      components={{ Tree }}
+      scope={{
+        getEnableFieldTree,
+        collectionName: collectionName || record?.__collection || name,
+        currentCollection: collectionName || record?.__collection || name,
+        getOnLoadData,
+        getOnCheck,
+        treeData: fieldSchema['x-component-props']?.treeData,
+      }}
+      schema={
+        {
+          type: 'object',
+          title: t('设置默认值'),
+          properties: {
+            collection: {
+              type: 'string',
+              title: '{{ t("Target collection") }}',
+              required: true,
+              description: t('If collection inherits, choose inherited collections as templates'),
+              default: '{{ collectionName }}',
+              'x-display': collectionList.length > 1 ? 'visible' : 'hidden',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              'x-component-props': {
+                options: collectionList,
+              },
+            },
+            selectAll: {
+              type: 'void',
+              title: '{{ t("Select all") }}',
+              'x-component': 'Action.Link',
+              'x-component-props': {
+                type: 'primary',
+                style: { float: 'right', position: 'relative', zIndex: 1200 },
+                useAction: () => {
+                  const from = useForm();
+                  return useSelectAllFields(from);
+                },
+              },
+            },
+            fieldKeys: {
+              type: 'array',
+              title: '{{ t("Data fields") }}',
+              required: true,
+              description: t('Only the selected fields will be used as the initialization data for the form'),
+              'x-decorator': 'FormItem',
+              'x-component': Tree,
+              'x-component-props': {
+                defaultCheckedKeys: inheritValues,
+                treeData: [],
+                checkable: true,
+                checkStrictly: true,
+                selectable: false,
+                loadData: '{{ getOnLoadData($self) }}',
+                onCheck: '{{ getOnCheck($self) }}',
+                rootStyle: {
+                  padding: '8px 0',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '2px',
+                  maxHeight: '30vh',
+                  overflow: 'auto',
+                  margin: '2px 0',
+                },
+              },
+              'x-reactions': [
+                {
+                  dependencies: ['.collection'],
+                  fulfill: {
+                    state: {
+                      disabled: '{{ !$deps[0] }}',
+                      componentProps: {
+                        treeData: '{{ getEnableFieldTree($deps[0], $self,treeData) }}',
+                      },
+                    },
+                  },
+                },
+              ],
+              default: inheritValues
+            },
+          },
+        } as ISchema
+      }
+      onSubmit={({ fieldKeys, treeData }) => {
+        const fields = Array.isArray(fieldKeys) ? fieldKeys : fieldKeys.checked || [];
+        field.componentProps.inheritsKeys = fields;
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props'].inheritsKeys = fields;
+        fieldSchema['x-component-props']
+        fieldSchema['x-component-props'].treeData = treeData;
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            'x-component-props': {
+              ...fieldSchema['x-component-props'],
+            },
+          },
+        });
+        dn.refresh();
+      }}
+    />
+  );
+};
 export const ActionDesigner = (props) => {
   const { modalTip, linkageAction, ...restProps } = props;
   const fieldSchema = useFieldSchema();
@@ -837,11 +964,12 @@ export const ActionDesigner = (props) => {
   const isChildCollectionAction = getChildrenCollections(name).length > 0 && fieldSchema['x-action'] === 'create';
   const isDraggable = fieldSchema?.parent['x-component'] !== 'CollectionField';
   const isDuplicateAction = fieldSchema['x-action'] === 'duplicate';
-
+  const isAddChildAction = fieldSchema['x-component-props']?.addChild;
   return (
     <GeneralSchemaDesigner {...restProps} disableInitializer draggable={isDraggable}>
       <MenuGroup>
         <ButtonEditor />
+        {isAddChildAction && <SetInheriteFields collectionName={name} />}
         {fieldSchema['x-action'] === 'submit' &&
           fieldSchema.parent?.['x-initializer'] === 'CreateFormActionInitializers' && <SaveMode />}
         {isLinkageAction && <SchemaSettings.LinkageRules collectionName={name} />}

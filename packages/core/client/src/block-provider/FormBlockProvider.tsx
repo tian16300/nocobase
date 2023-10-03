@@ -8,6 +8,7 @@ import { RecordProvider, useRecord } from '../record-provider';
 import { useActionContext, useDesignable } from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
 import { BlockProvider, useBlockRequestContext, useFilterByTk } from './BlockProvider';
+import { getValuesByPath } from '@nocobase/utils/client';
 
 export const FormBlockContext = createContext<any>({});
 
@@ -108,7 +109,6 @@ export const useFormBlockProps = () => {
   const { fieldSchema } = useActionContext();
   const addChild = fieldSchema?.['x-component-props']?.addChild;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys||[];
-  console.log('useFormBlockProps', ctx);
   useEffect(() => {
     if (addChild) {
       ctx.form?.query('parent').take((field) => {
@@ -119,14 +119,11 @@ export const useFormBlockProps = () => {
     if (inheritsKeys) {
       inheritsKeys.forEach(key => {
         ctx.form?.query(key).take((field) => {
-          field.disabled = true;
           const value = record[key];
-          if(typeof value == 'object'){
-            field.value = value;
+          if(value && typeof value == 'object'){
+            field.disabled = true;
+            field.value = new Proxy({ ...value }, {});
           }
-          // else{
-          //   field.value = value;
-          // }
         });
       });
     }
