@@ -1,13 +1,11 @@
 import { css } from '@emotion/css';
 import { Field } from '@formily/core';
-import { observer, useField } from '@formily/react';
+import {  observer, useField } from '@formily/react';
 import {
   EllipsisWithTooltip,
   IField,
   Icon,
   useBlockRequestContext,
-  useCollection,
-  useCompile,
   useGanttBlockContext,
   useRequest,
   useTableBlockContext,
@@ -21,6 +19,9 @@ import { EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/ic
 import type { MenuProps } from 'antd';
 import { Table, Tag, Dropdown, App } from 'antd';
 import { useAuthTranslation } from '../../locale';
+import { pick } from 'lodash';
+import { uid } from '@nocobase/utils';
+import { useDataSelectBlockContext } from '..';
 
 export const components = {
   body: {
@@ -87,6 +88,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const blockCtx = useBlockRequestContext();
     const { t } = useAuthTranslation();
     const { modal } = App.useApp();
+    const { record: prjRecord } = useDataSelectBlockContext();
     let onRow = null,
       highlightRow = '';
 
@@ -228,9 +230,67 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       };
     }, [tableHeight]);
 
+    const addChildSchema = {
+      [uid()]:{
+        "type": "void",
+      "title": "添加子任务",
+      "x-action": "create",
+      "x-designer": "Action.Designer",
+      "x-component": "Action.Link",
+      // "x-visible": "{{treeTable}}",
+      "x-component-props": {
+          "icon": "PlusOutlined",
+          "openMode": "drawer",
+          "type": "primary",
+          "addChild": true
+      },
+      "properties": {
+          "drawer": {
+              "type": "void",
+              "title": "添加子任务",
+              "x-component": "Action.Container",
+              "x-component-props": {
+                  "className": "nb-action-popup"
+              },
+              "properties": {
+                  "tabs": {
+                      "type": "void",
+                      "x-component": "Tabs",
+                      "x-component-props": {},
+                      "x-initializer": "TabPaneInitializersForCreateFormBlock",
+                      "properties": {
+                          "tab1": {
+                              "type": "void",
+                              "title": "新增",
+                              "x-component": "Tabs.TabPane",
+                              "x-designer": "Tabs.Designer",
+                              "x-component-props": {},
+                              "properties": {
+                                  "grid": {
+                                      "type": "void",
+                                      "x-component": "Grid",
+                                      "x-initializer": "CreateFormBlockInitializers",
+                                      "properties": {}
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      },
+      "x-decorator": "ACLActionProvider",
+      "x-designer-props": {
+          "linkageAction": true
+      }}
+      
+  };
+   
+
     const renderItems = (record) => {
       const isGroup = record.isGroup;
       const addChildLabel = isGroup ? '添加任务' : '添加子任务';
+     
       const items: MenuProps['items'] = [
         {
           label: '编辑',
@@ -247,7 +307,27 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           label: addChildLabel,
           key: '2',
           icon: <PlusCircleOutlined />,
-          onClick: () => {},
+          onClick: () => {
+            const newRecord:any = {
+              __collection:'task'
+            };
+            newRecord['prj'] = prjRecord;
+            if(!isGroup){
+              //任务则赋值 项目 项目阶段 父任务
+              newRecord.parent = {
+                ...record
+              }
+              newRecord.prjStage = record.prjStage
+            }else{
+              newRecord[record.fieldCtx.name] = {
+                ...pick(record,['id','stage','nickname', 'label'])
+              }
+            }
+            const onRecordClick = tableCtx?.field?.onRecordClick;
+            if (typeof onRecordClick == 'function') {
+              onRecordClick(newRecord, ctx, true);
+            }
+          },
         },
       ];
       /**

@@ -88,7 +88,7 @@ function getFormValues(filterByTk, field, form, fieldNames, getField, resource) 
         }
       }
       const items = form.values[key];
-      if (['linkTo', 'm2o', 'm2m'].includes(collectionField.interface)) {
+      if (['linkTo', 'm2o', 'm2m', 'dic'].includes(collectionField.interface)) {
         const targetKey = collectionField.targetKey || 'id';
         if (resource instanceof TableFieldResource) {
           if (Array.isArray(items)) {

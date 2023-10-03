@@ -14,12 +14,13 @@ type Props = SelectProps<any, any> & {
   multiple: boolean;
   rawOptions: any[];
   fieldNames: FieldNames;
+  allowClear?:boolean;
 };
 
 const isEmptyObject = (val: any) => !isValid(val) || (typeof val === 'object' && Object.keys(val).length === 0);
 
 const ObjectSelect = (props: Props) => {
-  const { value, options, onChange, fieldNames, mode, loading, rawOptions, defaultValue, ...others } = props;
+  const { value, options, onChange, fieldNames, mode, loading, rawOptions, defaultValue, allowClear = true, ...others } = props;
   const toValue = (v: any) => {
     if (isEmptyObject(v)) {
       return;
@@ -45,7 +46,7 @@ const ObjectSelect = (props: Props) => {
     <AntdSelect
       value={toValue(value)}
       defaultValue={toValue(defaultValue)}
-      allowClear
+      allowClear={allowClear}
       labelInValue
       notFoundContent={loading ? <Spin /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
       options={options}
@@ -80,7 +81,7 @@ const filterOption = (input, option) => (option?.label ?? '').toLowerCase().incl
 
 const InternalSelect = connect(
   (props: Props) => {
-    const { objectValue, loading, value, rawOptions, defaultValue, ...others } = props;
+    const { objectValue, loading, value, rawOptions, defaultValue, allowClear, ...others } = props;
     let mode: any = props.multiple ? 'multiple' : props.mode;
     if (mode && !['multiple', 'tags'].includes(mode)) {
       mode = undefined;
@@ -110,7 +111,7 @@ const InternalSelect = connect(
       <AntdSelect
         showSearch
         filterOption={filterOption}
-        allowClear
+        allowClear={allowClear}
         popupMatchSelectWidth={false}
         notFoundContent={loading ? <Spin /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
         value={toValue(value)}

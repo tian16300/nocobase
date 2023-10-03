@@ -1,38 +1,14 @@
 import { useField } from '@formily/react';
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useACLRoleContext } from '../acl/ACLProvider';
-import { useCollection } from '../collection-manager/hooks';
-import { BlockProvider, useBlockRequestContext } from './BlockProvider';
+import { useCollection, useCollectionManager } from '../collection-manager/hooks';
+import { useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { useAssociationNames, useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
 import { pick } from 'lodash';
 
 export const GanttBlockContext = createContext<any>({});
-const findParentsId = (treeData, id) => {
-  if (treeData.length == 0) return;
-  for (let i = 0; i < treeData.length; i++) {
-    if (treeData[i].id == id) {
-      return [];
-    } else {
-      if (treeData[i].children) {
-        let res = findParentsId(treeData[i].children, id);
-        if (res !== undefined) {
-          return res.concat(treeData[i].id + '').reverse();
-        }
-      }
-    }
-  }
-};
-function setParentsId(childId, orgList) {
-  const result = findParentsId(orgList, childId).concat(childId + '');
-  return result || [];
-}
-
-function getParentsId(childId, orgList) {
-  const result = findParentsId(orgList, childId);
-  return result || [];
-}
 const getItemColor = (item, token) => {
   const colorName = item.color || item.status?.color;
   if (colorName) {
@@ -43,9 +19,6 @@ const getItemColor = (item, token) => {
     }
   }
   return null;
-};
-const getMinStart = (item) => {
-  const start = item.start ? new Date(item.start) : undefined;
 };
 
 const findItemMinStart = (item, cStart) => {
@@ -97,13 +70,12 @@ const formatData = (
   hideChildren = false,
   checkPermassion?: (any) => boolean,
   treeData = data,
-  ctx: any = {}
-  
+  ctx: any = {},
 ) => {
   data.forEach((item: any) => {
     const disable = checkPermassion(item);
     const percent = item[fieldNames.progress] * 100;
-    const itemValues = pick(item,['isGroup','groupRowKey','rowKey', 'fieldCtx']);
+    const itemValues = pick(item, ['isGroup', 'groupRowKey', 'rowKey', 'fieldCtx']);
     if (item.children && item.children.length) {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
@@ -133,9 +105,9 @@ const formatData = (
           // end: new Date(end ?? undefined),
           end: findMaxEnd(item, end ? new Date(end) : undefined),
         },
-        ...itemValues
+        ...itemValues,
       });
-      formatData(item.children, fieldNames, tasks, item[ctx.rowKey]+'', hideChildren, checkPermassion, treeData, ctx);
+      formatData(item.children, fieldNames, tasks, item[ctx.rowKey] + '', hideChildren, checkPermassion, treeData, ctx);
     } else {
       const start = getValuesByPath(item, fieldNames.start);
       const end = getValuesByPath(item, fieldNames.end);
@@ -154,91 +126,27 @@ const formatData = (
         dependencies: (item.dependencies || []).map((record) => {
           return record[ctx.rowKey];
         }),
-        ...itemValues
+        ...itemValues,
       });
     }
   });
   return tasks;
 };
 
-const formatGroupData = (
-  groups = [],
-  data = [],
-  fieldNames,
-  tasks: any[] = [],
-  projectId: any = undefined,
-  hideChildren = false,
-  checkPermassion?: (any) => boolean,
-  treeData = data,
-  token = {},
-) => {
-   
-  // data.forEach((item: any) => {
-  //   const disable = checkPermassion(item);
-  //   const percent = item[fieldNames.progress] * 100;
-  //   if (item.children && item.children.length) {
-  //     const start = getValuesByPath(item, fieldNames.start);
-  //     const end = getValuesByPath(item, fieldNames.end);
-  //     const startIdx = tasks.length;
-  //     tasks.push({
-  //       index: startIdx,
-  //       start: start ? new Date(start) : undefined,
-  //       end: end ? new Date(end) : undefined,
-  //       progress: percent > 100 ? 100 : percent || 0,
-  //       // 获取子任务 及自己 start的最小值
-  //       // start: new Date(start ?? undefined),
-  //       name: getValuesByPath(item, fieldNames.title) || '',
-  //       id: item.id + '',
-  //       type: 'project',
-  //       // progress: percent > 100 ? 100 : percent || 0,
-  //       hideChildren: hideChildren,
-  //       project: projectId,
-  //       color: getItemColor(item, token),
-  //       isDisabled: disable,
-  //       dependencies: (item.dependencies || []).map(({ id }) => {
-  //         return id + '';
-  //       }),
-  //       projectItem: {
-  //         // type:'project',
-  //         start: findMinStart(item, start ? new Date(start) : undefined),
-  //         // 获取子任务 及自己 end的最大值
-  //         // end: new Date(end ?? undefined),
-  //         end: findMaxEnd(item, end ? new Date(end) : undefined),
-  //       },
-  //     });
-  //     formatData(item.children, fieldNames, tasks, item.id + '', hideChildren, checkPermassion, treeData, token);
-  //   } else {
-  //     const start = getValuesByPath(item, fieldNames.start);
-  //     const end = getValuesByPath(item, fieldNames.end);
-  //     const startIdx = tasks.length;
-  //     tasks.push({
-  //       index: startIdx,
-  //       start: start ? new Date(start) : undefined,
-  //       end: new Date(end || start),
-  //       name: getValuesByPath(item, fieldNames.title) || '',
-  //       id: item.id + '',
-  //       type: fieldNames.end ? 'task' : 'milestone',
-  //       progress: percent > 100 ? 100 : percent || 0,
-  //       project: projectId,
-  //       color: getItemColor(item, token),
-  //       isDisabled: disable,
-  //       dependencies: (item.dependencies || []).map(({ id }) => {
-  //         return id + '';
-  //       }),
-  //     });
-  //   }
-  // });
-  // return tasks;
-};
 const InternalGanttBlockProvider = (props) => {
-  const { fieldNames, timeRange, resource, rightSize,rowKey = 'id', preProcessData = (data, props)=>{
-    return data;
-  }, ...others } = props;
+  const {
+    fieldNames,
+    timeRange,
+    resource,
+    rightSize,
+    rowKey = 'id',
+    preProcessData = (data, props) => {
+      return data;
+    },
+    ...others
+  } = props;
   const field = useField();
   const { service } = useBlockRequestContext();
-  // if (service.loading) {
-  //   return <Spin />;
-  // }
   const { token } = useToken();
   return (
     <GanttBlockContext.Provider
@@ -252,27 +160,205 @@ const InternalGanttBlockProvider = (props) => {
         timeRange,
         rightSize,
         token,
-        preProcessData
+        preProcessData,
       }}
     >
       {props.children}
     </GanttBlockContext.Provider>
   );
 };
+const transformData = (list, ctx) => {
+  const resourceName = ctx.collection || ctx.resource;
+  return list.map((node) => {
+    const { id, children = [], dependencies = [], ...others } = node;
+    return {
+      id,
+      ...others,
+      __collection: resourceName,
+      rowKey: [resourceName, id].join('_'),
+      dependencies:transformData(dependencies, ctx),
+      children: transformData(children, ctx),
+    };
+  });
+};
+const flattenTree = (treeData = [], callback?) => {
+  return treeData.reduce((acc, node) => {
+    if (node.children) {
+      const { children, ...others } = node;
+      return acc.concat([{ ...others }, ...flattenTree(children, callback)]);
+    } else {
+      if (typeof callback == 'function') {
+        callback(node);
+      }
+      return acc.concat(node);
+    }
+  }, []);
+};
+export const groupData = (data, group, ctx)=>{
+  const fields = ctx.fields;
+  if (data && data.length) {
+    if (group) {
+      let list: any[] = [];
+      const treeData = transformData(data, ctx);
+      list = list.concat(flattenTree(treeData));
+      const groupName = group;
+      const groupField = ctx.groupField || fields.filter((field) => {
+        return field.name == groupName;
+      })[0];
+      const groupValuesMap = new Map();
+      const groupListObj = (list as any).group((record) => {
+        const groupFieldValue = record[groupName];
+        if (groupFieldValue) {
+          record.groupRowKey = [groupField.target, groupFieldValue[groupField.targetKey]].join('_');
+          groupValuesMap.set(record.groupRowKey, groupFieldValue);
+        }
+        return record.groupRowKey;
+      });
+      const newData = Object.keys(groupListObj).map((key, index1) => {
+        const value = key ? groupValuesMap.get(key) : {};
+        return {
+          ...value,
+          rowKey: key,
+          isGroup: true,
+          __collection:groupField.target,
+          fieldCtx: {
+            ...groupField,
+          },
+          __index: index1 + '',
+          children: groupListObj[key].map((item, index2) => {
+            return {
+              ...item,
+              __index: [index1, index2].join('.'),
+            };
+          }),
+        };
+      });
+      return newData;
+    } else {
+      return data;
+    }
+  }
+  return data;
+
+}
+export const processDataToGroups = (data, ctx) => {
+  const fields = ctx.fields;
+  const _groups = ctx.groups;
+  if (data && data.length) {
+    if (_groups && _groups.length) {
+      let list: any[] = [];
+      const treeData = transformData(data, ctx);
+      list = list.concat(flattenTree(treeData));
+      const groupName = _groups[0];
+      const groupField = fields.filter((field) => {
+        return field.name == groupName;
+      })[0];
+      const groupValuesMap = new Map();
+      const groupListObj = (list as any).group((record) => {
+        const groupFieldValue = record[groupName];
+        if (groupFieldValue) {
+          record.groupRowKey = [groupField.target, groupFieldValue[groupField.targetKey]].join('_');
+          groupValuesMap.set(record.groupRowKey, groupFieldValue);
+        }
+        return record.groupRowKey;
+      });
+      const newData = Object.keys(groupListObj).map((key, index1) => {
+        const value = key ? groupValuesMap.get(key) : {};
+        return {
+          [groupName]: value,
+          isGroup: true,
+          fieldCtx: {
+            ...groupField,
+          },
+          __index: index1 + '',
+          rowKey: key,
+          __collection: groupField.target,
+          children: groupListObj[key].map((item, index2) => {
+            return {
+              ...item,
+              __index: [index1, index2].join('.'),
+            };
+          }),
+        };
+      });
+      ctx.setRowKey('rowKey');
+      return newData;
+    } else {
+      ctx.setRowKey('id');
+      return data;
+    }
+  }
+  return data;
+};
 
 export const GanttBlockProvider = (props) => {
-  const { appends } = useAssociationNames();
-  const params = {
-    filter: props.params.filter,
-    // tree: true,
-    tree: true,
-    paginate: false,
-    // sort: props.fieldNames.start,
-    appends: Array.from(new Set([...(props.params.appends || []), ...appends])),
-  };
+  const { collection, fields, ...others } = props;
+  const { getCollectionFields } = useCollectionManager();
+  const names = Array.from(
+    new Set(
+      [...(fields?.groups || []), ...(fields?.sort || [])].map(({ value }) => {
+        return value;
+      }),
+    ),
+  );
+  const _fields = getCollectionFields(collection).filter((field) => {
+    return names.includes(field.name);
+  });
+  const range = props.timeRange || props?.fieldNames?.range || 'day';
+  const [timeRange, setTimeRange] = useState(range);
+  const preProcessData = props.preProcessData || processDataToGroups;
+  const [sort, setSort] = useState(props.sort);
+  const [rowKey, setRowKey] = useState(props.rowKey || 'id');
+  const filter = useMemo(() => {
+    return props.params.filter;
+  }, [props]);
+  const params = useMemo(() => {
+    const sortField: any = _fields.filter((field) => {
+      return field.name == sort;
+    })[0];
+    const sortName = ['dic'].includes(sortField?.interface) ? sortField.foreignKey : sortField.name;
+    const { appends } = useAssociationNames();
+    if (['dic'].includes(sortField.interface)) {
+      appends.push(sortField.name);
+    }
+    if (fields?.group) {
+      fields?.group.forEach((field) => {
+        appends.push(field.name);
+      });
+    }
+    const _appends = Array.from(new Set([...(props.params.appends || []), ...appends]));
+    return {
+      filter: filter,
+      sort: sortName,
+      tree: true,
+      paginate: false,
+      appends: _appends
+    };
+    
+  }, [filter, sort]);
   return (
-    <TableBlockProvider {...props} params={params}>
-      <InternalGanttBlockProvider {...props} />
+    <TableBlockProvider
+      {...others}
+      collection={collection}
+      fields={_fields}
+      params={params}
+      preProcessData={preProcessData}
+      rowKey={rowKey}
+      setRowKey={setRowKey}
+      runWhenParamsChanged
+    >
+      <InternalGanttBlockProvider
+        {...others}
+        collection={collection}
+        sort={sort}
+        fields={_fields}
+        setSort={setSort}
+        timeRange={timeRange}
+        setTimeRange={setTimeRange}
+        preProcessData={preProcessData}
+        rowKey={rowKey}
+        setRowKey={setRowKey}
+      />
     </TableBlockProvider>
   );
 };
@@ -283,7 +369,7 @@ export const useGanttBlockContext = () => {
 
 export const useGanttBlockProps = () => {
   const ctx = useGanttBlockContext();
-  const preProcessData = ctx.preProcessData || ((data: any) => data||[]);
+  const preProcessData = ctx.preProcessData || ((data: any) => data || []);
   const [tasks, setTasks] = useState<any>([]);
   const [rightSize, setRightSize] = useState<any>(ctx.rightSize);
   const { getPrimaryKey, name, template, writableView } = useCollection();
@@ -299,11 +385,12 @@ export const useGanttBlockProps = () => {
   const headerHeight = document.querySelector('.ant-table-thead')?.clientHeight || 0;
   const [ganttHeight, setGanttHeight] = useState<any>(`calc(100% - ${headerHeight}px)`);
   const [hasScroll, setHasScroll] = useState<any>(false);
-  const {rowkey = 'id'} = ctx;
+  const { rowkey = 'id' } = ctx;
 
   const onExpanderClick = (task: any) => {
     const data = ctx.field.data;
     const tasksData = data.map((t: any) => (task[rowkey] === t[rowkey] ? task : t));
+    debugger;
     setTasks(tasksData);
     ctx.field.data = tasksData;
   };
@@ -316,7 +403,7 @@ export const useGanttBlockProps = () => {
       flag,
       checkPermassion,
       preProcessData(ctx.service.data?.data, ctx),
-      ctx
+      ctx,
     );
     setTasks(data);
     ctx.field.data = data;
@@ -340,7 +427,7 @@ export const useGanttBlockProps = () => {
         false,
         checkPermassion,
         preProcessData(ctx.service.data?.data, ctx),
-        ctx
+        ctx,
       );
       if (data) {
         setTasks(data);
@@ -358,5 +445,12 @@ export const useGanttBlockProps = () => {
     onResize,
     hasScroll,
     rightSize,
+  };
+};
+
+export const useGanttBlockFormItemProps = () => {
+  const field = useField();
+  return {
+    options: [],
   };
 };

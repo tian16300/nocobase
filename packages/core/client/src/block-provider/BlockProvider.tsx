@@ -391,11 +391,10 @@ export const useParamsFromRecord = () => {
       result[key] = record[key];
       return result;
     }, {});
-
   const obj = {
     filterByTk: filterByTk,
   };
-  if (record.__collection && !['oho', 'm2o', 'obo'].includes(collectionField?.interface)) {
+  if (record.__collection && !['oho', 'm2o', 'obo', 'dic'].includes(collectionField?.interface)) {
     obj['targetCollection'] = record.__collection;
   }
   if (!filterByTk) {

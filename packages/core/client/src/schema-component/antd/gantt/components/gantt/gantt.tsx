@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
-import { RecursionField, Schema, useFieldSchema } from '@formily/react';
-import { message } from 'antd';
+import { RecursionField, Schema, connect, useField, useFieldSchema } from '@formily/react';
+import { Col, Row, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
@@ -36,6 +36,8 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { CollectionProvider } from '@nocobase/client';
 import { useEventListener } from 'ahooks';
+import { createForm,  onFieldValueChange } from '@formily/core';
+import { uid } from '@nocobase/utils';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 35 ? Math.floor(clientWidth / dataSetLength) + 20 : 35;
@@ -44,52 +46,105 @@ const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
 export const DeleteEventContext = React.createContext({
   close: () => {},
 });
-const GanttRecordViewer = (props) => {
-  const { groupField, rowKey } = useGanttBlockContext();
-  const { visible, setVisible, record = {} } = props;
-  const { id, isGroup } = record;
 
+export const GanttForm = () => {
+  const { group, sort, timeRange, setGroup, setSort, setTimeRange } = useGanttBlockContext();
+  const fieldSchema = useFieldSchema();
+  const form = createForm({});
+  useEffect(() => {
+    const values = {
+      group: group,
+      sort: sort,
+      range: timeRange,
+    };
+    form.setValues(values);
+    const id = uid();
+    form.addEffects(id, (form) => {
+      onFieldValueChange('group', (field) => {
+        const value = field.value;
+        if (value) {
+          setGroup(value);
+        }
+      });
+      onFieldValueChange('sort', (field) => {
+        const value = field.value;
+        if (value) {
+          setSort(value);
+        }
+      });
+      onFieldValueChange('range', (field) => {
+        const value = field.value;
+        if (value && value !== timeRange) {
+          setTimeRange(value);
+        }
+      });
+    });
+
+    return () => {
+      form.removeEffects(id);
+    };
+  }, [form, fieldSchema]);
+  return (
+    <FormProvider form={form}>
+      <RecursionField schema={fieldSchema.properties.form} onlyRenderProperties />
+    </FormProvider>
+  );
+};
+
+const GanttRecordViewer = (props) => {
+  const { visible, setVisible, record = {}, isCreate = false } = props;
+  const { isGroup } = record;
   const fieldSchema = useFieldSchema();
   const close = useCallback(() => {
     setVisible(false);
   }, []);
   const eventSchema = useMemo(() => {
     let schema = null;
-
-    if (isGroup && 'others' !== record[rowKey]?.toString()) {
+    if (isGroup) {
+      const groupField = record.fieldCtx;
       const groupType = groupField.name as string;
       schema = fieldSchema?.properties[groupType].mapProperties((temp) => {
         return temp['x-component'] == 'Gantt.Event' ? temp : false;
       })[0];
-    } else if (!isGroup) {
+    } else if (!isGroup && isCreate) {
+      schema = fieldSchema?.properties['createTask'];
+      schema['x-component-props'] = {
+        inheritsKeys: Object.keys(record).filter((key)=>{
+          return !/^__+/.test(key)
+        })
+      };
+    } else if (!isGroup && !isCreate) {
       schema = fieldSchema?.properties['detail'];
     }
     return schema;
   }, [fieldSchema, record]);
 
-  const isTask = !isGroup;
-  const isCollectionField = isGroup && 'others' !== record[rowKey]?.toString();
+  const isTaskUpdate = !isGroup && !isCreate;
+  const isTaskCreate = !isGroup && isCreate;
+  const isCollectionField = isGroup;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible }}>
-          {isTask ? (
+        <ActionContextProvider value={{ visible, setVisible }} fieldSchema={eventSchema as Schema}>
+          {isTaskUpdate ? (
             <RecordProvider record={record}>
-              <RecursionField schema={eventSchema as Schema} name={eventSchema.name} />
+              <RecursionField onlyRenderProperties schema={eventSchema as Schema} name={eventSchema.name} />
             </RecordProvider>
+          ) : isTaskCreate ? (
+            // <CollectionProvider name={record.__collection}>
+              <RecordProvider record={record}>
+                 <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
+              </RecordProvider>
+            // </CollectionProvider>
           ) : (
             <></>
           )}
           {isCollectionField ? (
             <CollectionProvider name={record.__collection}>
               <RecordProvider record={record}>
-                <RecordProvider record={{}}>
-                  <WithoutTableFieldResource.Provider value={true}>
-                    <FormProvider>
-                      <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
-                    </FormProvider>
-                  </WithoutTableFieldResource.Provider>
-                </RecordProvider>
+                <WithoutTableFieldResource.Provider value={true}>
+                  <RecursionField onlyRenderProperties schema={eventSchema} name={eventSchema.name} />
+                </WithoutTableFieldResource.Provider>
               </RecordProvider>
             </CollectionProvider>
           ) : (
@@ -153,6 +208,7 @@ export const Gantt: any = (props: any) => {
     height,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
+    timeRange,
   } = useProps(props);
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
@@ -162,7 +218,8 @@ export const Gantt: any = (props: any) => {
   const { rowKey = 'id' } = ctx;
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
-  const viewMode = fieldNames.range || 'day';
+  // const [viewMode, setViewMode] = useState(fieldNames.range || 'day');
+  const viewMode = timeRange;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
@@ -173,6 +230,7 @@ export const Gantt: any = (props: any) => {
   });
   const [visible, setVisible] = useState(false);
   const [record, setRecord] = useState<any>({});
+  const [isCreate, setIsCreate] = useState<any>(false);
   const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(undefined);
   const [taskListWidth, setTaskListWidth] = useState(0);
   const [svgContainerWidth, setSvgContainerWidth] = useState(0);
@@ -503,30 +561,30 @@ export const Gantt: any = (props: any) => {
   const handleRowSelect = (keys) => {
     setSelectedRowKeys(keys);
   };
-  const saveTaskResource = async (task, params)=>{
-    if(!task.isGroup){ 
+  const saveTaskResource = async (task, params) => {
+    if (!task.isGroup) {
       await resource.update(params);
       message.success(t('Saved successfully'));
       await service?.refresh();
-    }else if(task.id && task.fieldCtx && task.fieldCtx.blockCtx){
-      const blockCtx = task.fieldCtx.blockCtx
+    } else if (task.id && task.fieldCtx && task.fieldCtx.blockCtx) {
+      const blockCtx = task.fieldCtx.blockCtx;
       const _resource = blockCtx.resource;
       const _service = blockCtx.service;
       await _resource.update(params);
       message.success(t('Saved successfully'));
       await _service?.refresh();
     }
-  }
+  };
   const handleProgressChange = async (task: Task) => {
     const param = {
       filterByTk: task.id,
       values: {
         [fieldNames.progress]: task.progress / 100,
       },
-    }
-    await saveTaskResource(task,param);
+    };
+    await saveTaskResource(task, param);
   };
- 
+
   const handleTaskChange = async (task: Task) => {
     const param = {
       filterByTk: task.id,
@@ -535,29 +593,34 @@ export const Gantt: any = (props: any) => {
         [fieldNames.end]: task.end,
       },
     };
-    await saveTaskResource(task,param);
+    await saveTaskResource(task, param);
   };
-  const handleBarClick = (data, _ctx?) => {
-    // const { type = 'task', isGroup, groupType } = data;
-    const flattenTree = (treeData) => {
-      return treeData.reduce((acc, node) => {
-        if (node.children) {
-          return acc.concat([node, ...flattenTree(node.children)]);
-        } else {
-          return acc.concat(node);
-        }
-      }, []);
-    };
-    const ctxProps = _ctx || ctx;
-    const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
-    const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
-    if (!recordData) {
-      return;
+  const handleBarClick = (data, _ctx?, isCreate?) => {
+    const _isCreate = isCreate;
+    setIsCreate(_isCreate);
+    if (!_isCreate) {
+      const flattenTree = (treeData) => {
+        return treeData.reduce((acc, node) => {
+          if (node.children) {
+            return acc.concat([node, ...flattenTree(node.children)]);
+          } else {
+            return acc.concat(node);
+          }
+        }, []);
+      };
+      const ctxProps = _ctx || ctx;
+      const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
+      const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
+      if (!recordData) {
+        return;
+      }
+      setRecord(recordData);
+      setVisible(true);
+    } else {
+      debugger;
+      setRecord(data);
+      setVisible(true);
     }
-    // setIsGroup(isGroup?true:false);
-    // setRecordType(isGroup?groupType:'detail');
-    setRecord(recordData);
-    setVisible(true);
   };
   const handerResize = ({ domElement, component }) => {
     // console.log();
@@ -671,8 +734,33 @@ export const Gantt: any = (props: any) => {
         `,
       )}
     >
-      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} />
-      <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
+      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} isCreate={isCreate} />
+      <div>
+        <Row>
+          <Col
+            flex="660px"
+            className={css`
+              .ant-formily-layout {
+                .nb-form-item {
+                  display: inline-flex;
+                  margin-right: 8px;
+                  &:last-child {
+                    margin-right: 0;
+                  }
+                }
+                .ant-formily-item-control {
+                  width: 140px;
+                }
+              }
+            `}
+          >
+            <GanttForm {...props} />
+          </Col>
+          <Col flex="auto">
+            <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
+          </Col>
+        </Row>
+      </div>
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
           <ReflexElement className="left-pane">

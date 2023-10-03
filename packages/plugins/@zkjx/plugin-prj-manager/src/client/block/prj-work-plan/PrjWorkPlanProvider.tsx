@@ -1,132 +1,132 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  AsyncDataProvider,
   BlockProvider,
-  GanttBlockContext,
   GanttBlockProvider,
   IField,
-  TableBlockProvider,
-  useAsyncData,
   useBlockRequestContext,
+  useCollectionManager,
   useGanttBlockContext,
 } from '@nocobase/client';
-import { connect, observer, useField } from '@formily/react';
+import { connect,  useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
 import { createForm, onFormReact } from '@formily/core';
 import { usePrjWorkPlanFormDefValue } from './hooks';
-import { dayjs } from '@nocobase/utils';
-// import Card from 'packages/core/client/src/board/Card';
-import { Card } from 'antd';
 import { usePrjWorkPlanProcessData } from './scopes';
 
 const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
-const PrjWorkPlanProviderInner = (props) => {
-  const { fieldNames, timeRange } = props;
-  const field = useField();
-  const { resource, service, __parent } = useBlockRequestContext();
-
-  return (
-    <GanttBlockContext.Provider
-      value={{
-        field,
-        service,
-        resource,
-        fieldNames,
-        timeRange,
-      }}
-    >
-      {props.children}
-    </GanttBlockContext.Provider>
-  );
-};
 export const PrjWorkPlanProvider = (props) => {
+  const [group, setGroup] = useState(props.group);
+  const { getCollectionField } = useCollectionManager();
   const { record, service } = useDataSelectBlockContext();
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
-  // const [recordId, setRecordId] = useState(record.id);
-  const options: any = {
-    collection: 'prj_plan',
-    resource: 'prj_plan',
-    action: 'list',
-    // fieldNames: {
-    //   id: 'id',
-    //   title: 'stage',
-    //   start: 'start',
-    //   end: 'end',
-    //   range: 'day',
-    // },
-    // params: {
-    //   paginate: false,
-    //   filter: {
-    //     $and: [
-    //       {
-    //         prj: {
-    //           id: {
-    //             $eq: record.id,
-    //           },
-    //         },
-    //       },
-    //     ],
-    //   },
-    // },
-  };
-  const appends = ['stage', 'status'];
+  const collection = props.resource || props.collection;
 
-  // Object.assign(props, ...options);
-  // props.params= options.params;
-
-  // return <GanttBlockProvider {...props} params={options.params}></GanttBlockProvider>;
-  const params = {
-    filter: {
-      $and: [
-        {
-          prj: {
-            id: {
-              $eq: record.id,
-            },
-          },
-        },
-      ],
-    },
-    tree: true,
-    paginate: false,
-    sort: 'id',
-    // sort: 'stage_dicId',
-    // , sort: props.fieldNames.start
+  const groupCollectionField = getCollectionField([collection,group].join('.'));
+  const { target } = groupCollectionField;
+  const defaultSort = (a, b) => {
+    return a.id - b.id;
   };
-  // const taskOptions: any = {
-  //   collection: 'task',
-  //   resource: 'task',
-  //   action: 'list',
-  // };
-  const preProcessData = usePrjWorkPlanProcessData;
-  useEffect(() => {
-    params.filter = {
-      $and: [
-        {
-          prj: {
-            id: {
-              $eq: record.id,
-            },
-          },
-        },
-      ],
+  const groupField = useMemo(()=>{
+    const groupCollectionField = getCollectionField([collection,group].join('.'));
+    const obj = {
+      ...groupCollectionField
     };
-  }, [record.id]);
+    if (target == 'prj_plan') {
+      obj.title = 'stage.label';
+      obj.sort = defaultSort;
+    } else if (target == 'users') {
+      obj.title = 'nickname';
+      obj.sort = (a, b) => {
+        const aChildLen = (a.children || []).length;
+        const bChildLen = (b.children || []).length;
+        return bChildLen - aChildLen;
+      };
+    } else if (target == 'dicItem') {
+      obj.title = 'label';
+      obj.sort = defaultSort;
+    }
+
+    return obj;
+
+  },[collection,group]);
+  const options = useMemo(()=>{
+    const { target } = groupCollectionField;
+    return {
+      collection: target,
+      resource: target,
+      action: 'list',
+    }
+  },[groupField]);
+ 
+  const params = useMemo(()=>{
+    const {target} = groupField;
+    let obj:any = {
+      filter: {},
+      paginate: false,
+    };
+    if (target == 'prj_plan') {
+      obj.sort = 'id';
+      obj.appends = ['prj','stage', 'status'];
+      obj.filter = {
+        $and: [
+          {
+            prj: {
+              id: {
+                $eq: record.id,
+              },
+            },
+          },
+        ],
+      };
+    } else if (target == 'users') {
+      obj.appends = [];
+      obj.filter = {};
+    } else if (target == 'dicItem') {
+      const dicCode = groupField.dicCode;
+      obj.filter = {
+        $and: [
+          {
+            dic: {
+              code: {
+                $eq: dicCode,
+              },
+            },
+          },
+        ],
+      };
+      obj.appends = [];
+    }
+    return obj;
+  },[groupField, record.id]);
+  const preProcessData = usePrjWorkPlanProcessData;
   /* 首先获取 项目阶段 */
   /* 获取项目任务 */
   return (
     <>
-      <BlockProvider block="prj-plan" {...options} params={{ ...params, appends }} preProcessData={preProcessData}>
-        <PrjWorkPlanGanttProvider {...props} preProcessData={preProcessData}></PrjWorkPlanGanttProvider>
+      <BlockProvider
+        block="prj-group"
+        {...options}
+        params={params}
+        runWhenParamsChanged
+      >
+        <PrjWorkPlanGanttProvider
+          {...props}
+          groupField={groupField}
+          group={group}
+          setGroup={setGroup}
+          preProcessData={preProcessData}
+        ></PrjWorkPlanGanttProvider>
       </BlockProvider>
     </>
   );
 };
 const PrjWorkPlanGanttProvider = (props) => {
+  const { sort, groupField, ...others } = props;
+
   const { record, service } = useDataSelectBlockContext();
   const ctx = useBlockRequestContext();
   if (!service || service.loading || !record || !record.id) {
@@ -149,16 +149,12 @@ const PrjWorkPlanGanttProvider = (props) => {
     },
     tree: true,
     paginate: false,
-    // sort: 'stage_dicId',
-    // , sort: props.fieldNames.start
+    sort: sort,
+    appends: ['prj','prjStage','prjStage.stage','user','status','dependencies'],
   };
   const [parentData, setParentData] = useState([]);
-  const groupField = {
-    name: 'prjStage',
-    target: 'prj_plan',
-    sourceKey: 'id',
-    targetKey: 'id',
-    title: 'stage.label',
+  const groupFieldCtx = {
+    ...groupField,
     blockCtx: {
       resource: ctx.resource,
       service: ctx.service,
@@ -187,7 +183,7 @@ const PrjWorkPlanGanttProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <GanttBlockProvider {...props} params={params} groupField={groupField} groups={parentData} rowKey="rowKey">
+      <GanttBlockProvider {...others} params={params} sort={sort} groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey">
         <PrjWorkPlanInnerProvider {...props} groups={parentData}></PrjWorkPlanInnerProvider>
       </GanttBlockProvider>
     </>

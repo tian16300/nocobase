@@ -83,7 +83,7 @@ export default {
                 "x-component-props": {
                     "multiple": false,
                     "fieldNames": {
-                        "label": "id",
+                        "label": "stage.label",
                         "value": "id"
                     }
                 },

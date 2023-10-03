@@ -1557,7 +1557,7 @@ export const createCalendarBlockSchema = (options) => {
 };
 
 export const createGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames, appends, ...others } = options;
+  const { collection, resource, fieldNames, fields, appends, ...others } = options;
   const schema: ISchema = {
     type: 'void',
     'x-acl-action': `${resource || collection}:list`,
@@ -1568,26 +1568,16 @@ export const createGanttBlockSchema = (options) => {
       action: 'list',
       fieldNames: {
         id: 'id',
-        ...fieldNames,
-        group: 'prjStage.id',
-        milestone: 'prjStage',
-        project: 'task',
-        dependencies: 'dependencies.id',
+        ...fieldNames
       },
       params: {
-        // appends: ['stage', 'status', 'task'],
         paginate: false,
         sort: 'id',
       },
-      // group: {
-      //   collection: 'prj_plan',
-      //   resource: 'prj_plan',
-      //   action: 'list',
-      //   paginate: false,
-      //   sort: 'id',
-      //   appends: ['stage', 'status', 'task'],
-      // },
       leftSize: 0.3,
+      groups:[],
+      sort: fieldNames.start,
+      fields,
       ...others,
     },
     'x-designer': 'Gantt.Designer',
@@ -1600,6 +1590,59 @@ export const createGanttBlockSchema = (options) => {
           useProps: '{{ useGanttBlockProps }}',
         },
         properties: {
+          form:{
+            type: 'object',
+            properties: {
+              layout: {
+                type: 'void',
+                'x-component': 'FormLayout',
+                'x-component-props': {
+                  size:'default',
+                  layout: 'inline',
+                  labelWidth: 60,
+                  wrapperWidth: 120
+                },
+                properties: {
+                  groups: {
+                    type: 'array',
+                    title: '分组',
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props':{
+                      'allowClear': false,
+                      'multiple':true
+                    },
+                    'enum':fields.group,
+                    'default':[]
+                  },
+                  sort: {
+                    type: 'string',
+                    title: '排序',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props':{
+                      'allowClear': false
+                    },
+                    'enum':fields.sort,
+                    'default':'start'
+                  },
+                  range:{
+                    type: 'string',
+                    title: '时间范围',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props':{
+                      'allowClear': false
+                    },
+                    'enum':fields.range,
+                    'default': fieldNames?.range || 'day'
+                  }
+                }
+              }
+            }
+          },
           toolBar: {
             type: 'void',
             'x-component': 'ActionBar',
@@ -1613,18 +1656,6 @@ export const createGanttBlockSchema = (options) => {
           },
           table: {
             type: 'array',
-            // 'x-decorator': 'div',
-            // 'x-decorator-props': {
-            //   // style: {
-            //   //   float: 'left',
-            //   //   maxWidth: '35%',
-            //   // },
-            //   // block: 'prj_plan',
-            //   // expandedRowRender: {
-            //   //   name: 'expandedRowRender',
-            //   //   field: 'prj_plan.task',
-            //   // },
-            // },
             'x-initializer': 'TableColumnInitializers',
             'x-component': 'TableV2',
             'x-component-props': {
@@ -1669,84 +1700,6 @@ export const createGanttBlockSchema = (options) => {
                   className: 'nb-action-popup',
                 },
                 title: '{{ t("任务详情") }}',
-                properties: {
-                  tabs: {
-                    type: 'void',
-                    'x-component': 'Tabs',
-                    'x-component-props': {},
-                    'x-initializer': 'TabPaneInitializers',
-                    properties: {
-                      tab1: {
-                        type: 'void',
-                        title: '{{t("Details")}}',
-                        'x-component': 'Tabs.TabPane',
-                        'x-designer': 'Tabs.Designer',
-                        'x-component-props': {},
-                        properties: {
-                          grid: {
-                            type: 'void',
-                            'x-component': 'Grid',
-                            'x-initializer': 'RecordBlockInitializers',
-                            properties: {},
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          milestone: {
-            type: 'void',
-            'x-component': 'Gantt.Event',
-            properties: {
-              drawer: {
-                type: 'void',
-                'x-component': 'Action.Drawer',
-                'x-component-props': {
-                  className: 'nb-action-popup',
-                },
-                title: '{{ t("阶段详情") }}',
-                properties: {
-                  tabs: {
-                    type: 'void',
-                    'x-component': 'Tabs',
-                    'x-component-props': {},
-                    'x-initializer': 'TabPaneInitializers',
-                    properties: {
-                      tab1: {
-                        type: 'void',
-                        title: '{{t("Details")}}',
-                        'x-component': 'Tabs.TabPane',
-                        'x-designer': 'Tabs.Designer',
-                        'x-component-props': {},
-                        properties: {
-                          grid: {
-                            type: 'void',
-                            'x-component': 'Grid',
-                            'x-initializer': 'RecordBlockInitializers',
-                            properties: {},
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          project: {
-            type: 'void',
-            'x-component': 'Gantt.Event',
-            properties: {
-              drawer: {
-                type: 'void',
-                'x-component': 'Action.Drawer',
-                'x-component-props': {
-                  className: 'nb-action-popup',
-                },
-                title: '{{ t("详情") }}',
                 properties: {
                   tabs: {
                     type: 'void',

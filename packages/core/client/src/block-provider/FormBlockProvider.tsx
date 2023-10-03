@@ -1,7 +1,7 @@
 import { createForm } from '@formily/core';
 import { RecursionField, Schema, useField, useFieldSchema } from '@formily/react';
 import { Spin } from 'antd';
-import { isEmpty } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useCollection } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
@@ -11,7 +11,7 @@ import { BlockProvider, useBlockRequestContext, useFilterByTk } from './BlockPro
 
 export const FormBlockContext = createContext<any>({});
 
-const InternalFormBlockProvider = (props) => {
+export const InternalFormBlockProvider = (props) => {
   const { action, readPretty, params } = props;
   const field = useField();
   const form = useMemo(
@@ -30,7 +30,6 @@ const InternalFormBlockProvider = (props) => {
   // } else {
   //   record = useRecord();
   // }
-  console.log('--InternalFormBlockProvider---', record);
 
   if (service.loading && Object.keys(form?.initialValues)?.length === 0 && action) {
     return <Spin />;
@@ -108,11 +107,27 @@ export const useFormBlockProps = () => {
   const record = useRecord();
   const { fieldSchema } = useActionContext();
   const addChild = fieldSchema?.['x-component-props']?.addChild;
+  const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys||[];
+  console.log('useFormBlockProps', ctx);
   useEffect(() => {
     if (addChild) {
       ctx.form?.query('parent').take((field) => {
         field.disabled = true;
         field.value = new Proxy({ ...record }, {});
+      });
+    }
+    if (inheritsKeys) {
+      inheritsKeys.forEach(key => {
+        ctx.form?.query(key).take((field) => {
+          field.disabled = true;
+          const value = record[key];
+          if(typeof value == 'object'){
+            field.value = value;
+          }
+          // else{
+          //   field.value = value;
+          // }
+        });
       });
     }
   });

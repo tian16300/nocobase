@@ -62,6 +62,35 @@ export const GanttBlockInitializer = (props) => {
               value: field.name,
             };
           });
+        const group = collectionFields.filter((field)=>{
+          return ['m2o','dic'].includes(field.interface) && 'parent' !== field.name;
+        }).map((field) => {
+          const isDicField = ['dic'].includes(field.interface);
+          return {
+            label: field?.uiSchema?.title,
+            value: field.name,
+          };
+        });
+        const sort =  collectionFields.filter((field)=>{
+          return 'date' == field.type || ['dic'].includes(field.interface);
+        }).map((field) => {
+          // const isDicField = ['dic'].includes(field.interface);
+          return {
+            label: field?.uiSchema?.title,
+            value: field.name,
+          };
+        });
+        const range =   [
+          // { label: '{{t("Hour")}}', value: 'hour', color: 'orange' },
+          // { label: '{{t("Quarter of day")}}', value: 'quarterDay', color: 'default' },
+          // { label: '{{t("Half of day")}}', value: 'halfDay', color: 'blue' },
+          { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
+          { label: '{{t("Week")}}', value: 'week', color: 'pule' },
+          { label: '{{t("Month")}}', value: 'month', color: 'green' },
+          { label: '{{t("QuarterYear")}}', value: 'quarterYear', color: 'red' },
+          // { label: '{{t("半年")}}', value: 'halfYear', color: 'red' },
+          { label: '{{t("Year")}}', value: 'year', color: 'green' },
+        ];
         const values = await FormDialog(
           t('Create gantt block'),
           () => {
@@ -101,16 +130,7 @@ export const GanttBlockInitializer = (props) => {
                         },
                         range: {
                           title: t('Time scale'),
-                          enum: [
-                            { label: '{{t("Hour")}}', value: 'hour', color: 'orange' },
-                            { label: '{{t("Quarter of day")}}', value: 'quarterDay', color: 'default' },
-                            { label: '{{t("Half of day")}}', value: 'halfDay', color: 'blue' },
-                            { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
-                            { label: '{{t("Week")}}', value: 'week', color: 'pule' },
-                            { label: '{{t("Month")}}', value: 'month', color: 'green' },
-                            { label: '{{t("Year")}}', value: 'year', color: 'green' },
-                            { label: '{{t("QuarterYear")}}', value: 'quarterYear', color: 'red' },
-                          ],
+                          enum: range,
                           default: 'day',
                           'x-component': 'Select',
                           'x-decorator': 'FormItem',
@@ -138,6 +158,11 @@ export const GanttBlockInitializer = (props) => {
             collection: item.name,
             fieldNames: {
               ...values,
+            },
+            fields:{
+              group,
+              sort,
+              range
             },
             appends: appends
           }),

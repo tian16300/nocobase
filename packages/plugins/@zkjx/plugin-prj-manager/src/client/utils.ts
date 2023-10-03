@@ -389,13 +389,6 @@ export const createPrjWorkPlanGanttBlockSchema = (options) => {
       },
       table: {
         type: 'array',
-        // 'x-decorator': 'div',
-        // 'x-decorator-props': {
-        //   style: {
-        //     float: 'left',
-        //     maxWidth: '35%',
-        //   },
-        // },
         'x-initializer': 'TableColumnInitializers',
         'x-component': 'TableV2',
         'x-component-props': {
@@ -585,6 +578,8 @@ export const createPrjWorkPlanShema = () => {
         [uid()]: {
           type: 'void',
           'x-component': 'Gantt.Event',
+          'x-decorator': 'ACLActionProvider',
+          'x-acl-action': 'update',
           properties: {
             drawer: {
               type: 'void',
@@ -624,6 +619,25 @@ export const createPrjWorkPlanShema = () => {
       },
     };
   });
+  const fields = {
+    groups: [
+      { label: '项目阶段', value: 'prjStage' },
+      { label: '负责人', value: 'user' },
+      { label: '状态', value: 'status' },
+    ],
+    sort: [
+      { label: '开始时间', value: 'start' },
+      { label: '截止时间', value: 'end' },
+      { label: '任务状态', value: 'status' },
+    ],
+    range: [
+      { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
+      { label: '{{t("Week")}}', value: 'week', color: 'pule' },
+      { label: '{{t("Month")}}', value: 'month', color: 'green' },
+      { label: '{{t("QuarterYear")}}', value: 'quarterYear', color: 'red' },
+      { label: '{{t("Year")}}', value: 'year', color: 'green' },
+    ],
+  };
   return {
     type: 'void',
     'x-decorator': `${comp}.Decorator`,
@@ -637,7 +651,6 @@ export const createPrjWorkPlanShema = () => {
         start: 'start',
         range: 'day',
         end: 'end',
-        // dependencies: 'dependencies.id',
       },
       params: {
         appends: ['prjStage', 'user', 'dependencies'],
@@ -645,17 +658,13 @@ export const createPrjWorkPlanShema = () => {
         sort: 'id',
       },
       rightSize: 0.7,
+      group: 'prjStage',
+      sort: 'start',
+      fields,
     },
     'x-component': `${comp}.Wrap`,
     'x-designer': `${comp}.Designer`,
     properties: {
-      form: {
-        type: 'void',
-        'x-component': `${comp}.Form`,
-        'x-component-props': {
-          useProps: `{{ use${comp}Form}}`,
-        },
-      },
       view: {
         type: 'void',
         'x-component': `Gantt`,
@@ -664,6 +673,60 @@ export const createPrjWorkPlanShema = () => {
           useProps: '{{ useGanttBlockProps }}',
         },
         properties: {
+          form: {
+            type: 'object',
+            properties: {
+              layout: {
+                type: 'void',
+                'x-component': 'FormLayout',
+                'x-component-props': {
+                  size: 'default',
+                  layout: 'inline',
+                  labelWidth: 60,
+                  wrapperWidth: 120,
+                },
+                properties: {
+                  group: {
+                    type: 'string',
+                    title: '分组',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props': {
+                      allowClear: false,
+                      multiple: false,
+                    },
+                    enum: fields.groups,
+                    default: 'prjStage',
+                  },
+                  sort: {
+                    type: 'string',
+                    title: '排序',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props': {
+                      allowClear: false,
+                    },
+                    enum: fields.sort,
+                    default: 'start',
+                  },
+                  range: {
+                    type: 'string',
+                    title: '时间范围',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props': {
+                      allowClear: false,
+                    },
+                    enum: fields.range,
+                    default: 'day',
+                  },
+                },
+              },
+            },
+          },
           toolBar: {
             type: 'void',
             'x-component': 'ActionBar',
@@ -677,7 +740,6 @@ export const createPrjWorkPlanShema = () => {
           },
           table: {
             type: 'array',
-            // 'x-initializer': 'TableColumnInitializers',
             'x-component': `${comp}.Table`,
             'x-component-props': {
               rowKey: 'rowKey',
@@ -691,6 +753,8 @@ export const createPrjWorkPlanShema = () => {
           detail: {
             type: 'void',
             'x-component': 'Gantt.Event',
+            'x-decorator': 'ACLActionProvider',
+            'x-acl-action': 'update',
             properties: {
               drawer: {
                 type: 'void',
@@ -717,6 +781,47 @@ export const createPrjWorkPlanShema = () => {
                             type: 'void',
                             'x-component': 'Grid',
                             'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          createTask: {
+            type: 'void',
+            'x-component': 'Gantt.Event',
+            'x-decorator': 'ACLActionProvider',
+            'x-acl-action': 'create',
+            properties: {
+              drawer: {
+                type: 'void',
+                title: '{{ t("Add record") }}',
+                'x-component': 'Action.Drawer',
+                'x-component-props': {
+                  className: 'nb-action-popup',
+                },
+                properties: {
+                  tabs: {
+                    type: 'void',
+                    'x-component': 'Tabs',
+                    'x-component-props': {},
+                    'x-initializer': 'TabPaneInitializersForCreateFormBlock',
+                    properties: {
+                      tab1: {
+                        type: 'void',
+                        title: '{{t("Add new")}}',
+                        'x-component': 'Tabs.TabPane',
+                        'x-designer': 'Tabs.Designer',
+                        'x-component-props': {},
+                        properties: {
+                          grid: {
+                            type: 'void',
+                            'x-component': 'Grid',
+                            'x-initializer': 'CreateFormBlockInitializers',
                             properties: {},
                           },
                         },

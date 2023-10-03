@@ -33,7 +33,7 @@ export const useFieldComponentOptions = () => {
           { label: t('Subtable'), value: 'TableField' },
           { label: t('Select'), value: 'AssociationSelect' },
         ];
-
+      case 'dic':
       case 'm2o':
       case 'm2m':
       case 'linkTo':
