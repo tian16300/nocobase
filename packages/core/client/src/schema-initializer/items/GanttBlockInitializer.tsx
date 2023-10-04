@@ -107,6 +107,12 @@ export const GanttBlockInitializer = (props) => {
                           'x-component': 'Select',
                           'x-decorator': 'FormItem',
                         },
+                        group: {
+                          title: t('默认分组'),
+                          enum: groups,
+                          'x-component': 'Select',
+                          'x-decorator': 'FormItem',
+                        },
                         start: {
                           title: t('Start date field'),
                           enum: dateFields,

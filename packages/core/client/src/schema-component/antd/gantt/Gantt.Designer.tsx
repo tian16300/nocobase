@@ -33,7 +33,19 @@ const useTitleFields=()=>{
       };
     });
   return options;
-
+}
+const useGroupFields=()=>{
+  const compile = useCompile();
+  const { fields } = useCollection();
+  const options = fields
+    ?.filter((field) => (['m2o','dic'].includes(field.interface) && 'parent' !== field.name))
+    ?.map((field) => {
+      return {
+        label: compile(field?.uiSchema?.title),
+        value: field.name,
+      };
+    });
+  return options;
 }
 
 export const GanttDesigner = () => {
@@ -49,6 +61,7 @@ export const GanttDesigner = () => {
   const defaultFilter = fieldSchema?.['x-decorator-props']?.params?.filter || {};
   const fieldNames = fieldSchema?.['x-decorator-props']?.['fieldNames'] || {};
   const defaultResource = fieldSchema?.['x-decorator-props']?.resource;
+  const groupValue = fieldSchema?.['x-decorator-props']?.['group'];
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
       <SchemaSettings.BlockTitleItem />
@@ -64,6 +77,24 @@ export const GanttDesigner = () => {
           fieldSchema['x-decorator-props']['params'] = fieldNames;
           // Select切换option后value未按照预期切换，固增加以下代码
           fieldSchema['x-decorator-props']['fieldNames'] = fieldNames;
+          service.refresh();
+          dn.emit('patch', {
+            schema: {
+              ['x-uid']: fieldSchema['x-uid'],
+              'x-decorator-props': field.decoratorProps,
+            },
+          });
+          dn.refresh();
+        }}
+      />
+      <SchemaSettings.SelectItem
+        title={t('默认分组')}
+        value={groupValue}
+        options={useGroupFields()}
+        onChange={(group) => {
+          field.decoratorProps.group = group;
+          fieldSchema['x-decorator-props']['group'] = group;
+          // Select切换option后value未按照预期切换，固增加以下代码
           service.refresh();
           dn.emit('patch', {
             schema: {

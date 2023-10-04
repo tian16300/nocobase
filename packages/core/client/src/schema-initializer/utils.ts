@@ -1576,6 +1576,7 @@ export const createGanttBlockSchema = (options) => {
       },
       leftSize: 0.3,
       sort: fieldNames.start,
+      group: fieldNames.group,
       fields,
       ...others,
     },
@@ -1611,7 +1612,8 @@ export const createGanttBlockSchema = (options) => {
                       'allowClear': false,
                       'multiple':false
                     },
-                    'enum':fields.groups
+                    'enum':fields.groups,
+                    'default':fieldNames.group
                   },
                   sort: {
                     type: 'string',
@@ -1623,7 +1625,7 @@ export const createGanttBlockSchema = (options) => {
                       'allowClear': false
                     },
                     'enum':fields.sort,
-                    'default':'start'
+                    'default':fieldNames.start
                   },
                   range:{
                     type: 'string',

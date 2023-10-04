@@ -1,11 +1,14 @@
 import { groupData, useTableBlockProps } from '@nocobase/client';
 import { getValuesByPath } from '@nocobase/utils/client';
 
-
-const addIndex = (children, parentIndex)=>{
-  if(children){
-   children.forEach((child, index) => {
-      child.__index = [parentIndex, index].filter((value)=>{ return value!= null}).join('.');
+const addIndex = (children, parentIndex) => {
+  if (children) {
+    children.forEach((child, index) => {
+      child.__index = [parentIndex, index]
+        .filter((value) => {
+          return value != null;
+        })
+        .join('.');
       if (child.children) {
         addIndex(child.children, child.__index);
       }
@@ -24,7 +27,7 @@ const toTreeData = (children, parentIndex) => {
           parent.children = parent.children || [];
           parent.children.push(child);
         }
-      }else{
+      } else {
         list.push(child);
       }
     });

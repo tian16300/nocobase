@@ -330,7 +330,7 @@ export const processDataToGroups = (data, ctx) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const { collection, fields, groupData, ...others } = props;
+  const { collection, fields, ...others } = props;
   const { getCollectionFields } = useCollectionManager();
   const names = Array.from(
     new Set(
@@ -377,7 +377,7 @@ export const GanttBlockProvider = (props) => {
   return (
     <TableBlockProvider
       {...others}
-      r data-testid="gantt-block"
+      data-testid="gantt-block"
       group={props.group || group}
       setGroup={props.setGroup || setGroup}
       collection={collection}

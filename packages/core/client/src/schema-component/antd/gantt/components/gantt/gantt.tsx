@@ -34,7 +34,7 @@ import { useProps } from '../../../../hooks';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
-import { CollectionProvider } from '@nocobase/client';
+import { CollectionProvider, useCollection } from '@nocobase/client';
 import { useEventListener } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
 import { uid } from '@nocobase/utils';
@@ -96,6 +96,7 @@ const GanttRecordViewer = (props) => {
   const { visible, setVisible, record = {}, isCreate = false } = props;
   const { isGroup } = record;
   const fieldSchema = useFieldSchema();
+  const { name } = useCollection();
   const close = useCallback(() => {
     setVisible(false);
   }, []);
@@ -120,11 +121,12 @@ const GanttRecordViewer = (props) => {
     return schema;
   }, [fieldSchema, record]);
   const isCollectionField = isGroup;
+  const collectionName = record.__collection || name;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
         <ActionContextProvider value={{ visible, setVisible }} fieldSchema={eventSchema as Schema}>
-          <CollectionProvider name={record.__collection}>
+          <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
                 <WithoutTableFieldResource.Provider value={true}>

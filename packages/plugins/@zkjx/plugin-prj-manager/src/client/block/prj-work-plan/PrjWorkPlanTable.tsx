@@ -363,24 +363,24 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           );
         },
       },
-      {
-        title: '开始日期',
-        width: 120,
-        dataIndex: 'start',
-        key: 'start',
-        render: (v) => {
-          return v ? dayjs(v).format('YYYY-MM-DD') : '';
-        },
-      },
-      {
-        title: '结束日期',
-        width: 120,
-        dataIndex: 'end',
-        key: 'end',
-        render: (v) => {
-          return v ? dayjs(v).format('YYYY-MM-DD') : '';
-        },
-      },
+      // {
+      //   title: '开始日期',
+      //   width: 120,
+      //   dataIndex: 'start',
+      //   key: 'start',
+      //   render: (v) => {
+      //     return v ? dayjs(v).format('YYYY-MM-DD') : '';
+      //   },
+      // },
+      // {
+      //   title: '结束日期',
+      //   width: 120,
+      //   dataIndex: 'end',
+      //   key: 'end',
+      //   render: (v) => {
+      //     return v ? dayjs(v).format('YYYY-MM-DD') : '';
+      //   },
+      // },
     ];
     return (
       <>

@@ -12,6 +12,7 @@ import { useDataSelectBlockContext } from '../data-select';
 import { createForm, onFormReact } from '@formily/core';
 import { usePrjWorkPlanFormDefValue } from './hooks';
 import { usePrjWorkPlanProcessData } from './scopes';
+import { Field } from '@nocobase/database';
 
 const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
@@ -125,6 +126,7 @@ export const PrjWorkPlanProvider = (props) => {
   );
 };
 const PrjWorkPlanGanttProvider = (props) => {
+  const field = useField<Field>();
   const { sort, groupField, ...others } = props;
 
   const { record, service } = useDataSelectBlockContext();
@@ -132,7 +134,8 @@ const PrjWorkPlanGanttProvider = (props) => {
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
-  if (ctx.service.loading) {
+  field.loading = ctx.service.loading;
+  if(ctx.service.loading){
     return null;
   }
   const params = {
@@ -162,10 +165,10 @@ const PrjWorkPlanGanttProvider = (props) => {
   };
 
   useEffect(() => {
-    if (ctx.service?.data?.data) {
+    if (!ctx.service?.loading) {
       setParentData(ctx.service?.data?.data);
     }
-  }, [ctx.service?.data?.data]);
+  }, [ctx.service?.loading]);
   useEffect(() => {
     params.filter = {
       $and: [
