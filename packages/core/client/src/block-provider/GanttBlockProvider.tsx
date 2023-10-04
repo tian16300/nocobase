@@ -140,6 +140,7 @@ const InternalGanttBlockProvider = (props) => {
     resource,
     rightSize,
     rowKey = 'id',
+    group,
     preProcessData = (data, props) => {
       return data;
     },
@@ -148,10 +149,18 @@ const InternalGanttBlockProvider = (props) => {
   const field = useField();
   const { service } = useBlockRequestContext();
   const { token } = useToken();
+  // useEffect(()=>{
+  //   if(group){
+  //     service?.refresh();
+  //     console.log('InternalGanttBlockProvider group 变化',group);
+  //   }
+  // },[group, service]);
+
   return (
     <GanttBlockContext.Provider
       value={{
         ...others,
+        group,
         rowKey,
         field,
         service,
@@ -176,14 +185,14 @@ const transformData = (list, ctx) => {
       ...others,
       __collection: resourceName,
       rowKey: [resourceName, id].join('_'),
-      dependencies:transformData(dependencies, ctx),
+      dependencies: transformData(dependencies, ctx),
       children: transformData(children, ctx),
     };
   });
 };
-const addIndex = (children, parentIndex)=>{
-  if(children){
-   children.forEach((child, index) => {
+const addIndex = (children, parentIndex) => {
+  if (children) {
+    children.forEach((child, index) => {
       child.__index = [parentIndex, index].join('.');
       if (child.children) {
         addIndex(child.children, child.__index);
@@ -203,7 +212,7 @@ const toTreeData = (children, parentIndex) => {
           parent.children = parent.children || [];
           parent.children.push(child);
         }
-      }else{
+      } else {
         list.push(child);
       }
     });
@@ -225,7 +234,7 @@ const flattenTree = (treeData = [], callback?) => {
     }
   }, []);
 };
-export const groupData = (data, group, ctx)=>{
+export const groupData = (data, group, ctx) => {
   const fields = ctx.fields;
   if (data && data.length) {
     if (group) {
@@ -233,9 +242,11 @@ export const groupData = (data, group, ctx)=>{
       const treeData = transformData(data, ctx);
       list = list.concat(flattenTree(treeData));
       const groupName = group;
-      const groupField = ctx.groupField || fields.filter((field) => {
-        return field.name == groupName;
-      })[0];
+      const groupField =
+        ctx.groupField ||
+        fields.filter((field) => {
+          return field.name == groupName;
+        })[0];
       const groupValuesMap = new Map();
       const groupListObj = (list as any).group((record) => {
         const groupFieldValue = record[groupName];
@@ -248,12 +259,12 @@ export const groupData = (data, group, ctx)=>{
       const newData = Object.keys(groupListObj).map((key, index1) => {
         const value = key ? groupValuesMap.get(key) : {};
         const __index = index1 + '';
-        const children = toTreeData(groupListObj[key], __index)
+        const children = toTreeData(groupListObj[key], __index);
         return {
           ...value,
           rowKey: key,
           isGroup: true,
-          __collection:groupField.target,
+          __collection: groupField.target,
           fieldCtx: {
             ...groupField,
           },
@@ -267,17 +278,16 @@ export const groupData = (data, group, ctx)=>{
     }
   }
   return data;
-
-}
+};
 export const processDataToGroups = (data, ctx) => {
   const fields = ctx.fields;
-  const _groups = ctx.groups;
+  const _group = ctx.group;
   if (data && data.length) {
-    if (_groups && _groups.length) {
+    if (_group) {
       let list: any[] = [];
       const treeData = transformData(data, ctx);
       list = list.concat(flattenTree(treeData));
-      const groupName = _groups[0];
+      const groupName = _group;
       const groupField = fields.filter((field) => {
         return field.name == groupName;
       })[0];
@@ -320,7 +330,7 @@ export const processDataToGroups = (data, ctx) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const { collection, fields, ...others } = props;
+  const { collection, fields, groupData, ...others } = props;
   const { getCollectionFields } = useCollectionManager();
   const names = Array.from(
     new Set(
@@ -337,6 +347,7 @@ export const GanttBlockProvider = (props) => {
   const preProcessData = props.preProcessData || processDataToGroups;
   const [sort, setSort] = useState(props.sort);
   const [rowKey, setRowKey] = useState(props.rowKey || 'id');
+  const [group, setGroup] = useState(props.group);
   const filter = useMemo(() => {
     return props.params.filter;
   }, [props]);
@@ -349,8 +360,8 @@ export const GanttBlockProvider = (props) => {
     if (['dic'].includes(sortField.interface)) {
       appends.push(sortField.name);
     }
-    if (fields?.group) {
-      fields?.group.forEach((field) => {
+    if (fields?.groups) {
+      fields?.groups.forEach((field) => {
         appends.push(field.name);
       });
     }
@@ -360,13 +371,14 @@ export const GanttBlockProvider = (props) => {
       sort: sortName,
       tree: true,
       paginate: false,
-      appends: _appends
+      appends: _appends,
     };
-    
   }, [filter, sort]);
   return (
     <TableBlockProvider
       {...others}
+      group={props.group || group}
+      setGroup={props.setGroup || setGroup}
       collection={collection}
       fields={_fields}
       params={params}
@@ -377,6 +389,8 @@ export const GanttBlockProvider = (props) => {
     >
       <InternalGanttBlockProvider
         {...others}
+        group={props.group || group}
+        setGroup={props.setGroup || setGroup}
         collection={collection}
         sort={sort}
         fields={_fields}
@@ -418,7 +432,6 @@ export const useGanttBlockProps = () => {
   const onExpanderClick = (task: any) => {
     const data = ctx.field.data;
     const tasksData = data.map((t: any) => (task[rowkey] === t[rowkey] ? task : t));
-    debugger;
     setTasks(tasksData);
     ctx.field.data = tasksData;
   };

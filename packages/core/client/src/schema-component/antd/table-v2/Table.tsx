@@ -69,8 +69,7 @@ const useTableColumns = (props) => {
         render: (v, record) => {
           const index = field.value?.indexOf(record);
           return (
-            <CollectionProvider name={collectionName || record.__collection}>
-              <RecordIndexProvider index={record.__index || index}>
+          <RecordIndexProvider index={record.__index || index}>
                 <RecordProvider record={record}>
                   <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
                     <RecursionField
@@ -81,7 +80,6 @@ const useTableColumns = (props) => {
                   </ColumnFieldProvider>
                 </RecordProvider>
               </RecordIndexProvider>
-             </CollectionProvider>
           );
         },
       } as TableColumnProps<any>;

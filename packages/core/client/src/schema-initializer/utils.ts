@@ -1602,7 +1602,7 @@ export const createGanttBlockSchema = (options) => {
                   wrapperWidth: 120
                 },
                 properties: {
-                  groups: {
+                  group: {
                     type: 'string',
                     title: '分组',
                     'x-decorator': 'FormItem',

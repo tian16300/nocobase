@@ -51,15 +51,16 @@ export const GanttForm = () => {
   const { group, sort, timeRange, setGroup, setSort, setTimeRange } = useGanttBlockContext();
   const fieldSchema = useFieldSchema();
   const form = createForm({});
-  useEffect(() => {
-    const values = {
-      group: group,
-      sort: sort,
-      range: timeRange,
-    };
-    form.setValues(values);
+  useEffect(() => {    
     const id = uid();
     form.addEffects(id, (form) => {
+      debugger;
+      const values = {
+        group: group,
+        sort: sort,
+        range: timeRange,
+      };
+      form.setValues(values);
       onFieldValueChange('group', (field) => {
         const value = field.value;
         if (value) {
