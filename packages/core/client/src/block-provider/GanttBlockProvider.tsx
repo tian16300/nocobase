@@ -346,7 +346,7 @@ export const GanttBlockProvider = (props) => {
   const [timeRange, setTimeRange] = useState(range);
   const preProcessData = props.preProcessData || processDataToGroups;
   const [sort, setSort] = useState(props.sort);
-  const [rowKey, setRowKey] = useState(props.rowKey || 'id');
+  const [rowKey, setRowKey] = useState(props.rowKey || (props.group?'rowKey':'id'));
   const [group, setGroup] = useState(props.group);
   const filter = useMemo(() => {
     return props.params.filter;

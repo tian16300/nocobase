@@ -70,7 +70,8 @@ export const TableActionInitializers = {
             const schema = useFieldSchema();
             const collection = useCollection();
             const { treeTable } = schema?.parent?.['x-decorator-props'] || {};
-            return collection.tree && treeTable !== false;
+            const { group } = schema?.parent?.parent?.['x-decorator-props'] || {};
+            return (collection.tree && treeTable !== false) || (group && group != '');
           },
         },
       ],
