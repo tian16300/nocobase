@@ -113,6 +113,13 @@ export const GanttBlockInitializer = (props) => {
                           'x-component': 'Select',
                           'x-decorator': 'FormItem',
                         },
+                        sort: {
+                          title: t('默认排序'),
+                          enum: sort,
+                          'x-component': 'Select',
+                          'x-decorator': 'FormItem',
+                          default: 'start',
+                        },
                         start: {
                           title: t('Start date field'),
                           enum: dateFields,

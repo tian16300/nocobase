@@ -604,7 +604,6 @@ export const Gantt: any = (props: any) => {
       setRecord(recordData);
       setVisible(true);
     } else {
-      debugger;
       setRecord(data);
       setVisible(true);
     }

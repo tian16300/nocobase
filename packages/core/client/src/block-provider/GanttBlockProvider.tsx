@@ -242,6 +242,7 @@ export const groupData = (data, group, ctx) => {
       const treeData = transformData(data, ctx);
       list = list.concat(flattenTree(treeData));
       const groupName = group;
+      // const titleFieldName = ctx?.fieldNames?.title;
       const groupField =
         ctx.groupField ||
         fields.filter((field) => {
@@ -280,53 +281,8 @@ export const groupData = (data, group, ctx) => {
   return data;
 };
 export const processDataToGroups = (data, ctx) => {
-  const fields = ctx.fields;
   const _group = ctx.group;
-  if (data && data.length) {
-    if (_group) {
-      let list: any[] = [];
-      const treeData = transformData(data, ctx);
-      list = list.concat(flattenTree(treeData));
-      const groupName = _group;
-      const groupField = fields.filter((field) => {
-        return field.name == groupName;
-      })[0];
-      const groupValuesMap = new Map();
-      const groupListObj = (list as any).group((record) => {
-        const groupFieldValue = record[groupName];
-        if (groupFieldValue) {
-          record.groupRowKey = [groupField.target, groupFieldValue[groupField.targetKey]].join('_');
-          groupValuesMap.set(record.groupRowKey, groupFieldValue);
-        }
-        return record.groupRowKey;
-      });
-      const newData = Object.keys(groupListObj).map((key, index1) => {
-        const value = key ? groupValuesMap.get(key) : {};
-        return {
-          [groupName]: value,
-          isGroup: true,
-          fieldCtx: {
-            ...groupField,
-          },
-          __index: index1 + '',
-          rowKey: key,
-          __collection: groupField.target,
-          children: groupListObj[key].map((item, index2) => {
-            return {
-              ...item,
-              __index: [index1, index2].join('.'),
-            };
-          }),
-        };
-      });
-      ctx.setRowKey('rowKey');
-      return newData;
-    } else {
-      ctx.setRowKey('id');
-      return data;
-    }
-  }
-  return data;
+  return  groupData(data, _group, ctx)
 };
 
 export const GanttBlockProvider = (props) => {
