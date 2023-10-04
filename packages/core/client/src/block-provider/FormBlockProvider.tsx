@@ -92,7 +92,7 @@ export const FormBlockProvider = (props) => {
   const params = { ...props.params };
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
-      <BlockProvider {...props} block={'form'} params={params} runWhenParamsChanged>
+      <BlockProvider data-testid={props['data-testid'] || 'form-block'} {...props} params={params} runWhenParamsChanged>
         <InternalFormBlockProvider {...props} />
       </BlockProvider>
     )

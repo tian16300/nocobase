@@ -377,6 +377,7 @@ export const GanttBlockProvider = (props) => {
   return (
     <TableBlockProvider
       {...others}
+      r data-testid="gantt-block"
       group={props.group || group}
       setGroup={props.setGroup || setGroup}
       collection={collection}
