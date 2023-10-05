@@ -1,4 +1,14 @@
-import { DeleteOutlined, MenuOutlined } from '@ant-design/icons';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  CopyOutlined,
+  DashOutlined,
+  DeleteOutlined,
+  MenuOutlined,
+  MinusCircleOutlined,
+  PlusCircleOutlined,
+  VerticalAlignTopOutlined,
+} from '@ant-design/icons';
 import { TinyColor } from '@ctrl/tinycolor';
 import { SortableContext, SortableContextProps, useSortable } from '@dnd-kit/sortable';
 import { css } from '@emotion/css';
@@ -7,7 +17,7 @@ import { spliceArrayState } from '@formily/core/esm/shared/internals';
 import { RecursionField, Schema, observer, useField, useFieldSchema } from '@formily/react';
 import { action, reaction } from '@formily/reactive';
 import { useMemoizedFn } from 'ahooks';
-import { Table as AntdTable, TableColumnProps } from 'antd';
+import { Table as AntdTable, Button, Dropdown, Space, TableColumnProps, Tooltip } from 'antd';
 import { default as classNames, default as cls } from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +46,7 @@ const useTableColumns = (props) => {
   const field = useArrayField(props);
   const schema = useFieldSchema();
   const { name } = useCollection();
-  const {getCollectionField} = useCollectionManager();
+  const { getCollectionField } = useCollectionManager();
   const { schemaInWhitelist } = useACLFieldWhitelist();
   const { designable } = useDesignable();
   const { exists, render } = useSchemaInitializer(schema['x-initializer']);
@@ -55,8 +65,8 @@ const useTableColumns = (props) => {
       }, []);
       const dataIndex = collectionFields?.length > 0 ? collectionFields[0].name : s.name;
       let collectionName = name;
-      if(collectionFields?.length > 0 ){
-         collectionName = getCollectionField(collectionFields[0]['x-collection-field']).target || name;
+      if (collectionFields?.length > 0) {
+        collectionName = getCollectionField(collectionFields[0]['x-collection-field']).target || name;
       }
       //如果是字典 key 则为外键
       return {
@@ -69,17 +79,17 @@ const useTableColumns = (props) => {
         render: (v, record) => {
           const index = field.value?.indexOf(record);
           return (
-          <RecordIndexProvider index={record.__index || index}>
-                <RecordProvider record={record}>
-                  <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
-                    <RecursionField
-                      basePath={field.address.concat(record.__index || index)}
-                      schema={s}
-                      onlyRenderProperties
-                    />
-                  </ColumnFieldProvider>
-                </RecordProvider>
-              </RecordIndexProvider>
+            <RecordIndexProvider index={record.__index || index}>
+              <RecordProvider record={record}>
+                <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
+                  <RecursionField
+                    basePath={field.address.concat(record.__index || index)}
+                    schema={s}
+                    onlyRenderProperties
+                  />
+                </ColumnFieldProvider>
+              </RecordProvider>
+            </RecordIndexProvider>
           );
         },
       } as TableColumnProps<any>;
@@ -94,30 +104,131 @@ const useTableColumns = (props) => {
     key: 'TABLE_COLUMN_INITIALIZER',
     render: designable ? () => <div style={{ minWidth: 300 }} /> : null,
   });
+  const TableRecordAction: React.FC<{ record: any; index: number }> = (props) => {
+    const { record, index } = props;
+    const handleRemove = () => {
+      action(() => {
+        spliceArrayState(field as any, {
+          startIndex: index,
+          deleteCount: 1,
+        });
+        field.value.splice(index, 1);
+        return field.onInput(field.value);
+      });
+    };
+    const handleAddNext = (record) => {
+      action(() => {
+        const { id, ...others } = record;
+        const item = { ...others };
+        field.value.splice(index + 1, 0, item);
+        return field.onInput(field.value);
+      });
+    };
+    const handlers = {
+      remove: handleRemove,
+      addNext: () => {
+        handleAddNext({});
+      },
+      copy: () => {
+        handleAddNext(record);
+      },
+      moveUp: () => {
+        action(() => {
+          const fieldData = field.value;
+          if (index != 0) {
+            fieldData[index] = fieldData.splice(index - 1, 1, fieldData[index])[0];
+          } else {
+            fieldData.push(fieldData.shift());
+          }
+          return field.onInput(field.value);
+        });
+      },
+      moveDown: () => {
+        action(() => {
+          const fieldData = field.value;
+          if (index != fieldData.length - 1) {
+            fieldData[index] = fieldData.splice(index + 1, 1, fieldData[index])[0];
+          } else {
+            fieldData.unshift(fieldData.splice(index, 1)[0]);
+          }
+          return field.onInput(field.value);
+        });
+      },
+      toFirst: () => {
+        action(() => {
+          const fieldData = field.value;
+          if (index != 0) {
+            fieldData.unshift(fieldData.splice(index, 1)[0]);
+          }
+          return field.onInput(field.value);
+        });
+      },
+    };
+    const items = [
+      {
+        key: 'copy',
+        label: '复制',
+        icon: <CopyOutlined />,
+      },
+      {
+        key: 'toFirst',
+        label: '置顶',
+        icon: <VerticalAlignTopOutlined />,
+        disabled: index == 0,
+      },
+      {
+        key: 'moveUp',
+        label: '上移',
+        icon: <ArrowUpOutlined />,
+        disabled: index == 0,
+      },
+      {
+        key: 'moveDown',
+        label: '下移',
+        icon: <ArrowDownOutlined />,
+        disabled: index == field.value.length - 1,
+      },
+    ].map((item) => {
+      return {
+        ...item,
+        onClick: handlers[item.key],
+      };
+    });
+    return (
+      <>
+        <Tooltip title="删除">
+          <Button type="text" size="small" onClick={handlers['remove']}>
+            <MinusCircleOutlined />
+          </Button>
+        </Tooltip>
+        <Tooltip title="增加下一条">
+          <Button type="text" size="small" onClick={handlers['addNext']}>
+            <PlusCircleOutlined />
+          </Button>
+        </Tooltip>
+        <Tooltip title="更多">
+          <Dropdown menu={{ items }} trigger={['click']}>
+            <Button type="text" size="small">
+              <DashOutlined />
+            </Button>
+          </Dropdown>
+        </Tooltip>
+      </>
+    );
+  };
 
   if (props.showDel) {
+    /**
+     * 增加 上移 下移  复制  添加
+     */
     tableColumns.push({
       title: '',
       key: 'delete',
-      width: 60,
+      width: 120,
       align: 'center',
       fixed: 'right',
       render: (v, record, index) => {
-        return (
-          <DeleteOutlined
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              action(() => {
-                spliceArrayState(field as any, {
-                  startIndex: index,
-                  deleteCount: 1,
-                });
-                field.value.splice(index, 1);
-                return field.onInput(field.value);
-              });
-            }}
-          />
-        );
+        return <TableRecordAction index={index} record={record} />;
       },
     });
   }
