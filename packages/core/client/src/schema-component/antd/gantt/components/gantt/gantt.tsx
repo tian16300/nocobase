@@ -54,7 +54,6 @@ export const GanttForm = () => {
   useEffect(() => {    
     const id = uid();
     form.addEffects(id, (form) => {
-      debugger;
       const values = {
         group: group,
         sort: sort,
