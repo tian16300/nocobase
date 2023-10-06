@@ -18,6 +18,7 @@ export type TaskItemProps = {
   isDelete: boolean;
   isSelected: boolean;
   rtl: boolean;
+  rowKey?: string;
   onEventStart: (
     action: GanttContentMoveAction,
     selectedTask: BarTask,

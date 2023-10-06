@@ -14,7 +14,7 @@ export const ValueDynamicComponent = (props) => {
   const { t } = useTranslation();
   const scope = useVariableOptions(collectionName);
   return (
-    <Space.Compact compact>
+    <Space.Compact>
       <Select
         data-testid="antd-select"
         value={mode}
