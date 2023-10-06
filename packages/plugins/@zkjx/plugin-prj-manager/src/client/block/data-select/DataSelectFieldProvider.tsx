@@ -74,7 +74,20 @@ const schemaForEach = (schema, callback) => {
   });
 };
 const InnerRecordProvider = (props) => {
-  return <>{props.children}</>;
+  return (
+    <div
+      className={css`
+        .ant-tabs-tabpane {
+          &,
+          & .ant-nb-gantt {
+            height: calc(100vh - 50px - 52px - 24px * 2 - 24px * 2 - 52px - 46px - 16px);
+          }
+        }
+      `}
+    >
+      {props.children}
+    </div>
+  );
 };
 const isExistInSchema = (uid, fieldSchema) => {
   if (fieldSchema['x-uid'] == uid) {
