@@ -109,75 +109,7 @@ export default {
                 "x-read-pretty": true
             }
         },
-        {
-            "name": "createdAt",
-            "interface": "createdAt",
-            "type": "date",
-            "field": "createdAt",
-            "uiSchema": {
-                "type": "datetime",
-                "title": "{{t(\"Created at\")}}",
-                "x-component": "DatePicker",
-                "x-component-props": {},
-                "x-read-pretty": true
-            }
-        },
-        {
-            "name": "createdBy",
-            "interface": "createdBy",
-            "type": "belongsTo",
-            "collectionName": "task",
-            "target": "users",
-            "foreignKey": "createdById",
-            "uiSchema": {
-                "type": "object",
-                "title": "{{t(\"Created by\")}}",
-                "x-component": "AssociationField",
-                "x-component-props": {
-                    "fieldNames": {
-                        "value": "id",
-                        "label": "nickname"
-                    }
-                },
-                "x-read-pretty": true
-            },
-            "targetKey": "id"
-        },
-        {
-            "type": "date",
-            "name": "updatedAt",
-            "interface": "updatedAt",
-            "collectionName": "task",
-            "field": "updatedAt",
-            "uiSchema": {
-                "type": "string",
-                "title": "{{t(\"Last updated at\")}}",
-                "x-component": "DatePicker",
-                "x-component-props": {},
-                "x-read-pretty": true
-            }
-        },
-        {
-            "type": "belongsTo",
-            "name": "updatedBy",
-            "interface": "updatedBy",
-            "collectionName": "task",
-            "target": "users",
-            "foreignKey": "updatedById",
-            "uiSchema": {
-                "type": "object",
-                "title": "{{t(\"Last updated by\")}}",
-                "x-component": "AssociationField",
-                "x-component-props": {
-                    "fieldNames": {
-                        "value": "id",
-                        "label": "nickname"
-                    }
-                },
-                "x-read-pretty": true
-            },
-            "targetKey": "id"
-        },
+        
         {
             "name": "title",
             "interface": "input",
@@ -221,6 +153,44 @@ export default {
             },
             "target": "prj",
             "targetKey": "id"
+        },
+        {
+            "name": "taskDepId",
+            "type": "bigInt",
+            "interface": "integer",
+            "collectionName": "task",
+            "isForeignKey": true,
+            "uiSchema": {
+                "type": "number",
+                "title": "taskDepId",
+                "x-component": "InputNumber",
+                "x-read-pretty": true
+            }
+        },
+        //前置任务
+        {
+            interface: 'm2m',
+            type: 'belongsToMany',
+            name: 'dependencies',
+            target: 'task',
+            foreignKey: 'taskDepId',
+            otherKey: 'taskId',
+            onDelete: 'CASCADE',
+            sourceKey: 'id',
+            targetKey: 'id',
+            through: 'tasks_dependencies',
+            uiSchema: {
+                type: 'array',
+                title: '前置任务',
+                'x-component': 'AssociationField',
+                'x-component-props': {
+                    multiple: true,
+                    fieldNames: {
+                        label: 'title',
+                        value: 'id',
+                    },
+                },
+            }
         },
         //任务状态
         {
@@ -449,6 +419,75 @@ export default {
                 "x-component": "Input.TextArea",
                 "title": "备注说明"
             }
+        },
+        {
+            "name": "createdAt",
+            "interface": "createdAt",
+            "type": "date",
+            "field": "createdAt",
+            "uiSchema": {
+                "type": "datetime",
+                "title": "{{t(\"Created at\")}}",
+                "x-component": "DatePicker",
+                "x-component-props": {},
+                "x-read-pretty": true
+            }
+        },
+        {
+            "name": "createdBy",
+            "interface": "createdBy",
+            "type": "belongsTo",
+            "collectionName": "task",
+            "target": "users",
+            "foreignKey": "createdById",
+            "uiSchema": {
+                "type": "object",
+                "title": "{{t(\"Created by\")}}",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "fieldNames": {
+                        "value": "id",
+                        "label": "nickname"
+                    }
+                },
+                "x-read-pretty": true
+            },
+            "targetKey": "id"
+        },
+        {
+            "type": "date",
+            "name": "updatedAt",
+            "interface": "updatedAt",
+            "collectionName": "task",
+            "field": "updatedAt",
+            "uiSchema": {
+                "type": "string",
+                "title": "{{t(\"Last updated at\")}}",
+                "x-component": "DatePicker",
+                "x-component-props": {},
+                "x-read-pretty": true
+            }
+        },
+        {
+            "type": "belongsTo",
+            "name": "updatedBy",
+            "interface": "updatedBy",
+            "collectionName": "task",
+            "target": "users",
+            "foreignKey": "updatedById",
+            "uiSchema": {
+                "type": "object",
+                "title": "{{t(\"Last updated by\")}}",
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "fieldNames": {
+                        "value": "id",
+                        "label": "nickname"
+                    }
+                },
+                "x-read-pretty": true
+            },
+            "targetKey": "id"
         }
     ],
     "logging": true,

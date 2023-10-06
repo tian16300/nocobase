@@ -113,12 +113,15 @@ export const ConfigurationTable = () => {
       if (isAutoCreateAndThrough) {
         return false;
       }
+      if(!item.autoCreate && item.isThrough){
+        return true;
+      }
       if (isFieldInherits && item.template === 'view') {
         return false;
       }
       const templateIncluded = !targetScope?.template || targetScope.template.includes(item.template);
       const nameIncluded = !targetScope?.[field.props?.name] || targetScope[field.props.name].includes(item.name);
-      return templateIncluded && nameIncluded;
+      return (templateIncluded && nameIncluded);
     });
     return filteredItems.map((item) => ({
       label: compile(item.title),

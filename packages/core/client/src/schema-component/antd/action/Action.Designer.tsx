@@ -15,6 +15,7 @@ import { useCollectionState } from '../../../schema-settings/DataTemplates/hooks
 import { useSyncFromForm } from '../../../schema-settings/DataTemplates/utils';
 import { useLinkageAction } from './hooks';
 import { requestSettingsSchema } from './utils';
+import { css } from '@emotion/css';
 
 const Tree = connect(
   AntdTree,

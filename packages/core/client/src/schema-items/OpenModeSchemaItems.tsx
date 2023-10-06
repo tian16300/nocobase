@@ -90,7 +90,7 @@ export const OpenModeSchemaItems: React.FC<Options> = (options) => {
         <SchemaSettings.Item>
           <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
             {/* {t('链接地址')} */}
-            <Space.Compact size="small" style={{ width: '100%' }}>
+            <Space.Compact size="middle" style={{ width: '400px' }}>
               <Input ref={toRef} placeholder="链接地址..." defaultValue={fieldSchema?.['x-component-props']?.['to']} />
               <Button
                 type="primary"

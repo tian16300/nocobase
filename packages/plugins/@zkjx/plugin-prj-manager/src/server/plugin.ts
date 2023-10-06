@@ -2,9 +2,11 @@ import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
 import dicRecords from './dicRecords';
 import { generatePlan } from './actions/plan';
+import { namespace } from '../preset';
 export class PluginPrjManagerServer extends Plugin {
-  afterAdd() {}
+  afterAdd() {
 
+  }
   beforeLoad() {
     this.app.db.on(`dicItem.afterSync`, async (model, options) => {
       const dic = this.app.db.getCollection('dic')?.existsInDb();
@@ -14,6 +16,8 @@ export class PluginPrjManagerServer extends Plugin {
     this.bindSync([
       'prj',
       'prj_plan',
+      'prj_plan_history',
+      'prj_plan_version',
       'prj_stages_files',
       'prjs_files',
       'prjs_users',
@@ -23,14 +27,21 @@ export class PluginPrjManagerServer extends Plugin {
       'reportPlan',
       'report_target',
       'task',
+      'tasks_dependencies',
       'task_hour',
     ]);
+    /* 更新 周报保存数据后 更新项目活跃 */
+    this.app.db.on('report.afterSaveWithAssociations',async ()=>{
+      /* 保存周报后 更新数据 */
+       await this.updatePrjActiveCount();
+
+    });
   }
   bindSync(names) {
     names.forEach((name) => {
       this.app.db.on(`${name}.afterSync`, async (model, options) => {
         const collectionName = name;
-        const collection = this.db.getCollection(collectionName);
+        // const collection = this.db.getCollection(collectionName);
         const repo = this.db.getRepository<any>('collections');
         const result = await repo.findOne({
           filter: {
@@ -39,23 +50,6 @@ export class PluginPrjManagerServer extends Plugin {
         });
         if (!result) {
           await repo.db2cm(collectionName);
-        } else {
-          // const fields = [];
-          // for (const [name, field] of collection.fields) {
-          //   fields.push({
-          //     name,
-          //     ...field.options,
-          //   });
-          // }
-          // const upRes = await repo.update({
-          //   filter: {
-          //     name: collectionName,
-          //   },
-          //   values: {
-          //     fields,
-          //     from: 'db2cm',
-          //   },
-          // });
         }
       });
     });
@@ -78,6 +72,13 @@ export class PluginPrjManagerServer extends Plugin {
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/task'),
     });
+    this.db.addMigrations({
+      namespace: namespace,
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
     //注册actions
     this.app.resourcer.registerActionHandlers({
       'prj:generatePlan': generatePlan,
@@ -86,6 +87,8 @@ export class PluginPrjManagerServer extends Plugin {
       [
         'prj',
         'prj_plan',
+        'prj_plan_history',
+        'prj_plan_version',
         'reportSetting',
         'report',
         'reportDetail',
@@ -96,7 +99,7 @@ export class PluginPrjManagerServer extends Plugin {
       ],
       'loggedIn',
     );
-    this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users'], 'public');
+    this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {
@@ -122,6 +125,9 @@ export class PluginPrjManagerServer extends Plugin {
   async afterDisable() {}
 
   async remove() {}
+  async updatePrjActiveCount(){
+    console.log('更新项目活跃 数据');
+  }
 }
 
 export default PluginPrjManagerServer;

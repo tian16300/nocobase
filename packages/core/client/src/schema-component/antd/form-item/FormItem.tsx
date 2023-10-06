@@ -457,6 +457,64 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
+      {showFieldMode && (fieldSchema['x-component-props']['mode'] == 'SubTable') && (
+        <>
+        <SchemaSettings.SwitchItem
+          key="enable-add"
+          title={t('允许新增')}
+          checked={fieldSchema['x-component-props']?.showAdd}
+          onChange={(value) => {
+            const schema = {
+              ['x-uid']: fieldSchema['x-uid'],
+            };
+            field.componentProps.showAdd = value;
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props'].showAdd = value;
+            schema['x-component-props'] = fieldSchema['x-component-props'];
+            dn.emit('patch', {
+              schema,
+            });
+            refresh();
+          }}
+        />
+        <SchemaSettings.SwitchItem
+          key="enable-move"
+          title={t('允许移动')}
+          checked={fieldSchema['x-component-props']?.showMove}
+          onChange={(value) => {
+            const schema = {
+              ['x-uid']: fieldSchema['x-uid'],
+            };
+            field.componentProps.showMove = value;
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props'].showMove = value;
+            schema['x-component-props'] = fieldSchema['x-component-props'];
+            dn.emit('patch', {
+              schema,
+            });
+            refresh();
+          }}
+        />
+        <SchemaSettings.SwitchItem
+          key="enable-remove"
+          title={t('允许删除')}
+          checked={fieldSchema['x-component-props']?.showDel}
+          onChange={(value) => {
+            const schema = {
+              ['x-uid']: fieldSchema['x-uid'],
+            };
+            field.componentProps.showDel = value;
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props'].showDel = value;
+            schema['x-component-props'] = fieldSchema['x-component-props'];
+            dn.emit('patch', {
+              schema,
+            });
+            refresh();
+          }}
+        />
+        </>
+      )}
       {showModeSelect && (
         <SchemaSettings.Item>
           <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>

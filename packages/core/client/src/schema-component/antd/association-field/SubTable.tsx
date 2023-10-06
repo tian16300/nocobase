@@ -29,6 +29,9 @@ export const SubTable: any = observer(
       });
     };
     field.move = move;
+    const showMove = field?.componentProps?.showMove && field.editable;
+    const showDel = field?.componentProps?.showDel && field.editable;
+    const showAdd = field?.componentProps?.showAdd && field.editable;
     return (
       <div
         className={css`
@@ -72,12 +75,14 @@ export const SubTable: any = observer(
           size={'small'}
           field={field}
           showIndex
-          dragSort={field.editable}
-          showDel={field.editable}
+          dragSort={showMove}
+          showMove={showMove}
+          showDel={showDel}
+          showAdd={showAdd}
           pagination={false}
           rowSelection={{ type: 'none', hideSelectAll: true }}
           footer={() =>
-            field.editable && (
+            showAdd && (
               <Button
                 type={'text'}
                 block

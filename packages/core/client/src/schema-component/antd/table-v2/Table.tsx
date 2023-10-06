@@ -104,8 +104,8 @@ const useTableColumns = (props) => {
     key: 'TABLE_COLUMN_INITIALIZER',
     render: designable ? () => <div style={{ minWidth: 300 }} /> : null,
   });
-  const TableRecordAction: React.FC<{ record: any; index: number }> = (props) => {
-    const { record, index } = props;
+  const TableRecordAction: React.FC<{ record: any; index: number; items: any[] }> = (props) => {
+    const { record, index, items } = props;
     const handleRemove = () => {
       action(() => {
         spliceArrayState(field as any, {
@@ -164,71 +164,106 @@ const useTableColumns = (props) => {
         });
       },
     };
-    const items = [
-      {
-        key: 'copy',
-        label: '复制',
-        icon: <CopyOutlined />,
-      },
-      {
-        key: 'toFirst',
-        label: '置顶',
-        icon: <VerticalAlignTopOutlined />,
-        disabled: index == 0,
-      },
-      {
-        key: 'moveUp',
-        label: '上移',
-        icon: <ArrowUpOutlined />,
-        disabled: index == 0,
-      },
-      {
-        key: 'moveDown',
-        label: '下移',
-        icon: <ArrowDownOutlined />,
-        disabled: index == field.value.length - 1,
-      },
-    ].map((item) => {
-      return {
-        ...item,
-        onClick: handlers[item.key],
-      };
-    });
+    const _items = items
+      .filter(({ key }) => {
+        if (index == 0) {
+          return !['toFirst', 'moveUp'].includes(key);
+        }
+        if (index == field.value.length - 1) return !['moveDown'].includes(key);
+        return true;
+      })
+      .map((item) => {
+        return {
+          ...item,
+          onClick: handlers[item.key],
+        };
+      });
+    const actions = _items.slice(0, 2).map((temp) => (
+      <Tooltip key={temp.key} title={temp.label}>
+        <Button type="text" size="small" onClick={temp.onClick}>
+          {temp.icon}
+        </Button>
+      </Tooltip>
+    ));
     return (
       <>
-        <Tooltip title="删除">
-          <Button type="text" size="small" onClick={handlers['remove']}>
-            <MinusCircleOutlined />
-          </Button>
-        </Tooltip>
-        <Tooltip title="增加下一条">
-          <Button type="text" size="small" onClick={handlers['addNext']}>
-            <PlusCircleOutlined />
-          </Button>
-        </Tooltip>
-        <Tooltip title="更多">
-          <Dropdown menu={{ items }} trigger={['click']}>
-            <Button type="text" size="small">
-              <DashOutlined />
-            </Button>
-          </Dropdown>
-        </Tooltip>
+        {actions}
+        {_items.length > 2 && (
+          <Tooltip title="更多">
+            <Dropdown menu={{ items: _items.slice(2, _items.length) }} trigger={['click']}>
+              <Button type="text" size="small">
+                <DashOutlined />
+              </Button>
+            </Dropdown>
+          </Tooltip>
+        )}
       </>
     );
   };
+  const includeKeys = [];
+  const showDel = props.showDel;
+  if (showDel) {
+    includeKeys.push('remove');
+  }
+  const showAdd = props.showAdd;
+  if (showAdd) {
+    includeKeys.push('addNext');
+    includeKeys.push('copy');
+  }
+  debugger;
+  const showMove = props.showMove;
+  if (showMove) {
+    includeKeys.push('moveUp');
+    includeKeys.push('toFirst');
+    includeKeys.push('moveDown');
+  }
 
-  if (props.showDel) {
+  const handleItems = [
+    {
+      key: 'remove',
+      label: '删除',
+      icon: <MinusCircleOutlined />,
+    },
+    {
+      key: 'addNext',
+      label: '增加下一条',
+      icon: <PlusCircleOutlined />,
+    },
+    {
+      key: 'copy',
+      label: '复制',
+      icon: <CopyOutlined />,
+    },
+    {
+      key: 'toFirst',
+      label: '置顶',
+      icon: <VerticalAlignTopOutlined />,
+    },
+    {
+      key: 'moveUp',
+      label: '上移',
+      icon: <ArrowUpOutlined />,
+    },
+    {
+      key: 'moveDown',
+      label: '下移',
+      icon: <ArrowDownOutlined />,
+    },
+  ].filter(({ key }) => {
+    return includeKeys.includes(key);
+  });
+  if (handleItems.length > 0) {
     /**
      * 增加 上移 下移  复制  添加
      */
     tableColumns.push({
       title: '',
-      key: 'delete',
-      width: 120,
+      key: 'actions',
+      width: (handleItems.length>3?3:handleItems.length)*36,
       align: 'center',
       fixed: 'right',
       render: (v, record, index) => {
-        return <TableRecordAction index={index} record={record} />;
+        return <TableRecordAction items={handleItems} index={index} record={record} />;
       },
     });
   }
@@ -438,26 +473,28 @@ export const Table: any = observer(
           row: (props) => {
             return <SortableRow {...props}></SortableRow>;
           },
-          cell: (props) => (
-            <td
-              {...props}
-              className={classNames(
-                props.className,
-                css`
-                  max-width: 300px;
-                  // white-space: nowrap;
-                  .nb-read-pretty-input-number {
-                    text-align: right;
-                  }
-                  .ant-color-picker-trigger {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                  }
-                `,
-              )}
-            />
-          ),
+          cell: (props) => {
+            return (
+              <td
+                {...props}
+                className={classNames(
+                  props.className,
+                  css`
+                    max-width: 300px;
+                    // white-space: nowrap;
+                    .nb-read-pretty-input-number {
+                      text-align: right;
+                    }
+                    .ant-color-picker-trigger {
+                      position: absolute;
+                      top: 50%;
+                      transform: translateY(-50%);
+                    }
+                  `,
+                )}
+              />
+            );
+          },
         },
       };
     }, [field, onRowDragEnd, dragSort]);
