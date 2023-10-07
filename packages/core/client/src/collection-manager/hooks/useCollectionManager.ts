@@ -33,6 +33,8 @@ export const useCollectionManager = () => {
     return totalFields;
   };
   const getCollectionField = (name: string) => {
+    if(!name)
+    return;
     const [collectionName, fieldName] = name.split('.');
     if (!fieldName) {
       return;

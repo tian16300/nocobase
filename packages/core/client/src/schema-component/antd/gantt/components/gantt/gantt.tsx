@@ -1,5 +1,5 @@
 import { css, cx } from '@emotion/css';
-import { RecursionField, Schema, connect, useField, useFieldSchema } from '@formily/react';
+import { RecursionField, Schema, connect, mapProps,  useFieldSchema } from '@formily/react';
 import { Col, Row, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,35 +47,46 @@ export const DeleteEventContext = React.createContext({
   close: () => {},
 });
 
-export const GanttForm = () => {
-  const { group, sort, timeRange, setGroup, setSort, setTimeRange } = useGanttBlockContext();
+interface GanttFormCompProps {
+  value: { group: 'string'; sort: 'string'; timeRange: 'string' };
+  setValue: { [key: string]: (value: string) => {} };
+}
+export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormCompProps) => {
+  const { value, setValue } = props;
   const fieldSchema = useFieldSchema();
   const form = createForm({});
-  useEffect(() => {    
+  fieldSchema.properties.form.reduceProperties((pre, schema) => {   
+    schema.reduceProperties((pre, s) => {
+      if (s.name == 'range') {
+        s.default = value?.timeRange || s.default;
+      }
+      if (s.name == 'sort') {
+        s.default = value?.sort || s.default;
+      }
+      if (s.name == 'group') {
+        s.default = value?.group || s.default;
+      }
+    });
+  });
+  useEffect(() => {
     const id = uid();
     form.addEffects(id, (form) => {
-      const values = {
-        group: group,
-        sort: sort,
-        range: timeRange,
-      };
-      form.setValues(values);
       onFieldValueChange('group', (field) => {
         const value = field.value;
         if (value) {
-          setGroup(value);
+          setValue['group'](value);
         }
       });
       onFieldValueChange('sort', (field) => {
         const value = field.value;
         if (value) {
-          setSort(value);
+          setValue['sort'](value);
         }
       });
       onFieldValueChange('range', (field) => {
         const value = field.value;
-        if (value && value !== timeRange) {
-          setTimeRange(value);
+        if (value && value !== value.timeRange) {
+          setValue['timeRange'](value);
         }
       });
     });
@@ -90,6 +101,21 @@ export const GanttForm = () => {
     </FormProvider>
   );
 };
+export const GanttForm = connect(
+  GanttFormComp,
+  mapProps(
+    {
+      value: 'value',
+      setValue: 'setValue',
+    },
+    (props: any, field: any) => {
+      return {
+        ...props,
+        help: field.selfErrors?.length ? field.selfErrors : undefined,
+      };
+    },
+  ),
+);
 
 const GanttRecordViewer = (props) => {
   const { visible, setVisible, record = {}, isCreate = false } = props;
@@ -237,6 +263,16 @@ export const Gantt: any = (props: any) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
+  const formValue = {
+    group: ctx.group,
+    sort: ctx.sort,
+    timeRange: ctx.timeRange,
+  };
+  const setFormValue = {
+    group: ctx.setGroup,
+    sort: ctx.setSort,
+    timeRange: ctx.setTimeRange,
+  };
 
   useEffect(() => {
     /* table ctx expandClick */
@@ -664,7 +700,7 @@ export const Gantt: any = (props: any) => {
   };
 
   const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
-  const hasAction = Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 || designable;
+  const hasAction = Object.keys(fieldSchema?.properties?.form?.properties?.layout?.properties || {}).length > 0 || Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 || designable;
   return wrapSSR(
     <div
       className={cx(
@@ -720,10 +756,10 @@ export const Gantt: any = (props: any) => {
       )}
     >
       <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} isCreate={isCreate} />
-      <div>
+      <div className="gantt-view-form">
         <Row>
           <Col
-            flex="660px"
+            flex="680px"
             className={css`
               .ant-formily-layout {
                 .nb-form-item {
@@ -739,7 +775,7 @@ export const Gantt: any = (props: any) => {
               }
             `}
           >
-            <GanttForm {...props} />
+            <GanttForm value={formValue} setValue={setFormValue} />
           </Col>
           <Col flex="auto">
             <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
