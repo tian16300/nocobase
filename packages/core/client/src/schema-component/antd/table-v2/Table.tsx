@@ -210,7 +210,6 @@ const useTableColumns = (props) => {
     includeKeys.push('addNext');
     includeKeys.push('copy');
   }
-  debugger;
   const showMove = props.showMove;
   if (showMove) {
     includeKeys.push('moveUp');
