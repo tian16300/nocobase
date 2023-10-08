@@ -77,7 +77,7 @@ const InnerRecordProvider = (props) => {
       className={css`
         .ant-tabs-tabpane {
           &,
-          & .ant-nb-gantt {
+          & .ant-nb-gantt, & .prj-work-static-block {
             height: calc(100vh - 50px - 52px - 24px * 2 - 24px * 2 - 52px - 46px - 16px);
           }
         }

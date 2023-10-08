@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { observer } from '@formily/react';
 import { usePrjWorkProviderContext } from './PrjWorkProvider';
 import { Table } from 'antd';
@@ -12,19 +12,6 @@ const formatter = (value: number | null) => {
   return value == null ? '--' : <CountUp end={value} separator="," />;
 };
 
-
-const items = [
-  { key: '1', label: 'Action 1' },
-  { key: '2', label: 'Action 2' },
-];
-
-function sum(arr, key) {
-  var s = 0;
-  for (var i = arr.length - 1; i >= 0; i--) {
-    s += arr[i][key];
-  }
-  return s;
-}
 const countHours = (arr) => {
   let hours = 0,
     ccHours = 0,
@@ -70,6 +57,8 @@ const renderIndex = (val, record, index) => {
 };
 export const PrjWorkStaticView = observer((props) => {
   const ctx = usePrjWorkProviderContext();
+  const chartWrapRef = useRef<HTMLDivElement>();
+  const chartRef = useRef();
 
   const result = useMemo(() => {
     const loading = ctx?.service?.loading;
@@ -164,6 +153,18 @@ export const PrjWorkStaticView = observer((props) => {
       offsetY: -10,
     });
   });
+  const userGroupBarHeight = useCallback(()=>{
+     return chartWrapRef?.current?.clientHeight;
+  },[chartWrapRef]);
+  // useEffect(()=>{
+  //   if(chartRef.current && userGroupBarHeight){
+  //     chartRef.current
+
+  //   }
+  // },[
+  //   userGroupBarHeight,
+  //   chartRef
+  // ]);
   const userGroupBar = {
     plot: Column,
     config: {
@@ -190,7 +191,8 @@ export const PrjWorkStaticView = observer((props) => {
       minColumnWidth: 20,
       maxColumnWidth: 20,
       data: barData,
-      height: 360,
+      // height: userGroupBarHeight,
+      autoFit:true,
       appendPadding: [24, 8, 12, 8],
       legend: {
         layout: 'horizontal',
@@ -246,9 +248,13 @@ export const PrjWorkStaticView = observer((props) => {
 
   return (
     <>
-      {/* <Divider orientation="left">
-        <Title level={5}>工时统计</Title>
-      </Divider> */}
+     <div className={css`
+     height: 100%; .g2plot-wrapper{
+        height: calc(100% - 336px - 32px - 32px*2);
+        > div{
+          height: 100%;
+        }
+     } `}>
       <Row gutter={16}>
         <Col flex="0 1  500px">
           <div
@@ -318,11 +324,10 @@ export const PrjWorkStaticView = observer((props) => {
       <Divider orientation="left">
         <Title level={5}>各成员工时分布</Title>
       </Divider>
-      <Row>
-        <Col span={24}>
-          <G2PlotRenderer {...userGroupBar} />
-        </Col>
-      </Row>
+      <div className='g2plot-wrapper' ref={chartWrapRef}>
+      <G2PlotRenderer ref={chartRef} {...userGroupBar} />
+      </div>
+      </div>
     </>
   );
 });

@@ -352,13 +352,13 @@ export const createBaseComp = (comp) => {
     'x-component': `${comp}.Wrap`,
     'x-designer': `${comp}.Designer`,
     properties: {
-      form: {
-        type: 'void',
-        'x-component': `${comp}.Form`,
-        'x-component-props': {
-          useProps: `{{ use${comp}Form}}`,
-        },
-      },
+      // form: {
+      //   type: 'void',
+      //   'x-component': `${comp}.Form`,
+      //   'x-component-props': {
+      //     useProps: `{{ use${comp}Form}}`,
+      //   },
+      // },
       view: {
         type: 'void',
         'x-component': `${comp}.View`,
