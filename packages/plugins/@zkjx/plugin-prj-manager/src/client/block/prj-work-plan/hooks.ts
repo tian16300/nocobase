@@ -17,7 +17,7 @@ export const usePrjWorkPlanForm = () => {
 };
 
 export const usePrjWorkPlanDecoratorProps = () => {
-  const { record, service } = useDataSelectBlockContext();
+  const { record } = useDataSelectBlockContext();
   return {
     collection: 'prj_plan',
     fieldNames: {

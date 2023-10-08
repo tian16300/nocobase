@@ -45,19 +45,6 @@ export const components = {
   },
 };
 
-const useDef = () => {
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  return [selectedRowKeys, setSelectedRowKeys];
-};
-
-const useDefDataSource = (options, props) => {
-  const field = useField<Field>();
-  return useRequest(() => {
-    return Promise.resolve({
-      data: field.value,
-    });
-  }, options);
-};
 
 export const PrjWorkPlanTable: React.FC<any> = observer(
   (props) => {

@@ -59,9 +59,7 @@ export const useFormSelectOptionsProps = (props) => {
           },
         ],
       };
-      service.loading = true;
       await service.refresh();
-      service.loading = false;
     },
   };
 };
@@ -112,7 +110,7 @@ const InternalDataSelectFieldProvider = (props) => {
   const params = { ...props.params };
   const { service } = useBlockRequestContext();
   const record = useMemo(() => {
-    return service?.data?.data[0];
+    return (service?.data?.data||[])[0];
   }, [service?.data?.data]);
   useEffect(() => {
     const id = uid();

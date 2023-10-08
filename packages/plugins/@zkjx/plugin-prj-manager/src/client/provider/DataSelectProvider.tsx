@@ -4,9 +4,6 @@ import {
   DataSelect,
   PrjWorkPlan,
   PrjWorkStatic,
-  StageColumnInitializers,
-  SubPageAction,
-  TaskColumnInitializers,
   useDataSelectTabsProps,
   useFormSelectBlockProps,
   useFormSelectOptionsProps,
@@ -48,9 +45,7 @@ export const DataSelectProvider: React.FC = (props) => {
       <SchemaInitializerProvider
         initializers={{
           ...initializers,
-          'DataSelect.initializer': DataSelect.initializer,
-          StageColumnInitializers,
-          TaskColumnInitializers,
+          'DataSelect.initializer': DataSelect.initializer
         }}
       >
         {props.children}

@@ -1,41 +1,37 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   BlockProvider,
   GanttBlockProvider,
-  IField,
   useBlockRequestContext,
   useCollectionManager,
-  useGanttBlockContext,
 } from '@nocobase/client';
-import { connect,  useField } from '@formily/react';
+import {  useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
-import { createForm, onFormReact } from '@formily/core';
-import { usePrjWorkPlanFormDefValue } from './hooks';
 import { usePrjWorkPlanProcessData } from './scopes';
 import { Field } from '@nocobase/database';
 
 const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
+
 export const PrjWorkPlanProvider = (props) => {
   const [group, setGroup] = useState(props.group);
   const { getCollectionField } = useCollectionManager();
-  const { record, service } = useDataSelectBlockContext();
+  const { record, service } = useDataSelectBlockContext();  
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
   const collection = props.resource || props.collection;
 
-  const groupCollectionField = getCollectionField([collection,group].join('.'));
-  const { target } = groupCollectionField;
   const defaultSort = (a, b) => {
     return a.id - b.id;
   };
-  const groupField = useMemo(()=>{
+  const getGroupField = (collection,group)=>{
     const groupCollectionField = getCollectionField([collection,group].join('.'));
     const obj = {
       ...groupCollectionField
     };
+    const target = obj.target;
     if (target == 'prj_plan') {
       obj.title = 'stage.label';
       obj.sort = defaultSort;
@@ -50,21 +46,18 @@ export const PrjWorkPlanProvider = (props) => {
       obj.title = 'label';
       obj.sort = defaultSort;
     }
-
     return obj;
 
-  },[collection,group]);
-  const options = useMemo(()=>{
-    const { target } = groupCollectionField;
-    return {
-      collection: target,
-      resource: target,
-      action: 'list',
-    }
-  },[groupField]);
- 
-  const params = useMemo(()=>{
-    const {target} = groupField;
+  };
+  const groupField:any = getGroupField(collection,group);
+  const { target } = groupField;
+  const options = {
+    collection: target,
+    resource: target,
+    action: 'list',
+  }
+  const getBlockParams = (groupField,record)=>{
+    const { target } = groupField;
     let obj:any = {
       filter: {},
       paginate: false,
@@ -74,13 +67,13 @@ export const PrjWorkPlanProvider = (props) => {
       obj.appends = ['prj','stage', 'status'];
       obj.filter = {
         $and: [
-          {
+          record?{
             prj: {
               id: {
-                $eq: record.id,
+                $eq: record.id
               },
             },
-          },
+          }:{},
         ],
       };
     } else if (target == 'users') {
@@ -91,10 +84,8 @@ export const PrjWorkPlanProvider = (props) => {
       obj.filter = {
         $and: [
           {
-            dic: {
-              code: {
-                $eq: dicCode,
-              },
+            dicCode: {
+              $eq: dicCode
             },
           },
         ],
@@ -102,7 +93,8 @@ export const PrjWorkPlanProvider = (props) => {
       obj.appends = [];
     }
     return obj;
-  },[groupField, record.id]);
+  }
+  const params = getBlockParams(groupField,record);
   const preProcessData = usePrjWorkPlanProcessData;
   /* 首先获取 项目阶段 */
   /* 获取项目任务 */
@@ -131,13 +123,10 @@ const PrjWorkPlanGanttProvider = (props) => {
 
   const { record, service } = useDataSelectBlockContext();
   const ctx = useBlockRequestContext();
-  if (!service || service.loading || !record || !record.id) {
+  if (!ctx.service || ctx.service.loading  || !service || service.loading  || !record || !record.id) {
     return null;
   }
   field.loading = ctx.service.loading;
-  if(ctx.service.loading){
-    return null;
-  }
   const params = {
     filter: {
       $and: [
@@ -186,52 +175,10 @@ const PrjWorkPlanGanttProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <GanttBlockProvider {...others} params={params} sort={sort} groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey">
-        <PrjWorkPlanInnerProvider {...props} groups={parentData}></PrjWorkPlanInnerProvider>
-      </GanttBlockProvider>
+      <GanttBlockProvider {...others} params={params} sort={sort} groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey"></GanttBlockProvider>
     </>
   );
 };
-const PrjWorkPlanInnerProvider = (props) => {
-  const { groups } = props;
-  const { __parent } = useBlockRequestContext();
-  const ctx = useGanttBlockContext();
-  const field: IField = useField();
-  if (ctx.service.loading || __parent.service.loading) {
-    field.loading = true;
-  } else {
-    field.loading = false;
-  }
-  return (
-    <PrjWorkProviderContext.Provider value={{ ...ctx, field, groups }}>
-      {props.children}
-    </PrjWorkProviderContext.Provider>
-  );
-};
-const PrjWorkFormProvider = connect((props) => {
-  const { service } = useDataSelectBlockContext();
-  const form = createForm({
-    effects() {
-      const defVal = usePrjWorkPlanFormDefValue();
-      onFormReact((form) => {
-        form.values = defVal;
-      });
-    },
-  });
-  if (service.loading) {
-    return;
-  }
-  return (
-    <PrjWorkFormProviderContext.Provider
-      value={{
-        form: form,
-      }}
-    >
-      {props.children}
-    </PrjWorkFormProviderContext.Provider>
-  );
-});
-
 export const usePrjWorkProviderContext = () => {
   return useContext(PrjWorkProviderContext);
 };
