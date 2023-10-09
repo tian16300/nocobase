@@ -3,6 +3,7 @@ import path from 'path';
 import dicRecords from './dicRecords';
 import { generatePlan } from './actions/plan';
 import { namespace } from '../preset';
+import { hoursCount } from './actions/hours';
 export class PluginPrjManagerServer extends Plugin {
   afterAdd() {
 
@@ -82,6 +83,7 @@ export class PluginPrjManagerServer extends Plugin {
     //注册actions
     this.app.resourcer.registerActionHandlers({
       'prj:generatePlan': generatePlan,
+      'prj:hoursCount':hoursCount
     });
     this.aclAllowList(
       [
@@ -100,6 +102,7 @@ export class PluginPrjManagerServer extends Plugin {
       'loggedIn',
     );
     this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
+    this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {

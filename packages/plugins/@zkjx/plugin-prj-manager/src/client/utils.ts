@@ -100,7 +100,7 @@ export const createDataSelectBlockSchema = (options) => {
                         icon: 'icon',
                         color: 'color',
                       },
-                      mode: 'Tag',
+                      mode: 'Select',
                       ellipsis: true,
                       tagColorField: 'color',
                       tagIconField: 'icon',

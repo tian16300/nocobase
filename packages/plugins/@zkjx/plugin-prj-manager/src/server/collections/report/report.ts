@@ -164,6 +164,18 @@ export default {
             }
         },
         {
+            
+            "name": "isreject",
+            "type": "boolean",
+            "interface": "checkbox",
+            "collectionName": "report",
+            "uiSchema": {
+                "type": "boolean",
+                "x-component": "Checkbox",
+                "title": "可驳回"
+            }
+        },
+        {
             "name": "status",
             "type": "belongsTo",
             "interface": "dic",
