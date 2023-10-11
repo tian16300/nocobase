@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import React, { useState } from 'react';
 import { Input, Select, Space } from 'antd';
 import { css } from '@emotion/css';
 import { useTranslation } from 'react-i18next';
