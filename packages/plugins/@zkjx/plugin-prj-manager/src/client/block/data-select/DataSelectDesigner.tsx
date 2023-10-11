@@ -14,8 +14,8 @@ import {
   useDesignable,
   useSchemaTemplate,
   useSortFields,
-  FilterDynamicComponent,
-  removeNullCondition
+  removeNullCondition,
+  useFormBlockContext
 } from '@nocobase/client';
 import { useDataSelectBlockContext } from './DataSelectFieldProvider';
 
@@ -25,6 +25,7 @@ export const DataSelectDesigner = () => {
   const { getCollectionField, getCollection } = useCollectionManager();
   const field = useField();
   const fieldSchema = useFieldSchema();
+  const { form } = useFormBlockContext();
   const dataSource = useCollectionFilterOptions(name);
   const sortFields = useSortFields(name);
   const { service } = useDataSelectBlockContext();
@@ -49,26 +50,8 @@ export const DataSelectDesigner = () => {
   const template = useSchemaTemplate();
   const collection = useCollection();
   const { dragSort, resource } = field.decoratorProps;
-  const treeCollection = resource?.includes('.')
-    ? getCollection(getCollectionField(resource)?.target)?.tree
-    : !!collection?.tree;
-  const dataScopeSchema = useMemo(() => {
-    return {
-      type: 'object',
-      title: t('Set the data scope'),
-      properties: {
-        filter: {
-          default: defaultFilter,
-          // title: '数据范围',
-          enum: compile(dataSource),
-          'x-component': 'Filter',
-          'x-component-props': {
-            dynamicComponent: (props) => FilterDynamicComponent({ ...props }),
-          },
-        },
-      },
-    } as ISchema;
-  }, [dataSource, defaultFilter]);
+  const collectionField = resource && getCollectionField(resource);
+  const treeCollection = resource?.includes('.') ? getCollection(collectionField?.target)?.tree : !!collection?.tree;
   const onDataScopeSubmit = useCallback(
     ({ filter }) => {
       filter = removeNullCondition(filter);
@@ -88,13 +71,38 @@ export const DataSelectDesigner = () => {
         },
       });
     },
-    [field],
+    [dn, field.decoratorProps, fieldSchema, service],
   );
 
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
       <SchemaSettings.BlockTitleItem />
-      <SchemaSettings.ModalItem title={t('Set the data scope')} schema={dataScopeSchema} onSubmit={onDataScopeSubmit} />
+      {collection?.tree && collectionField?.collectionName === collectionField?.target && (
+        <SchemaSettings.SwitchItem
+          title={t('Tree table')}
+          defaultChecked={true}
+          checked={treeCollection ? field.decoratorProps.treeTable !== false : false}
+          onChange={(flag) => {
+            field.decoratorProps.treeTable = flag;
+            fieldSchema['x-decorator-props'].treeTable = flag;
+            const params = {
+              ...service.params?.[0],
+              tree: flag ? true : null,
+            };
+            dn.emit('patch', {
+              schema: fieldSchema,
+            });
+            dn.refresh();
+            service.run(params);
+          }}
+        />
+      )}
+      <SchemaSettings.DataScope
+        collectionName={name}
+        defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
+        form={form}
+        onSubmit={onDataScopeSubmit}
+      />
       {/* <FixedBlockDesignerItem /> */}
       <SchemaSettings.ModalItem
         title={t('Set default sorting rules')}
