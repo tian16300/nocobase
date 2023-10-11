@@ -45,7 +45,7 @@ const useArrayField = (props) => {
   return (props.field || field) as ArrayField;
 };
 
-const useTableColumns = (props: { showDel?: boolean; isSubTable?: boolean }) => {
+const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMove?:boolean; isSubTable?: boolean }) => {
   const field = useArrayField(props);
   const schema = useFieldSchema();
   const { name } = useCollection();

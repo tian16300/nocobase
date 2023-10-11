@@ -79,12 +79,14 @@ export const SubTable: any = observer(
             size={'small'}
             field={field}
             showIndex
-            dragSort={field.editable}
-            showDel={field.editable}
+            dragSort={showMove}
+            showMove={showMove}
+            showDel={showDel}
+            showAdd={showAdd}
             pagination={false}
             rowSelection={{ type: 'none', hideSelectAll: true }}
             footer={() =>
-              field.editable && (
+              field.editable && showAdd && (
                 <Button
                   type={'text'}
                   block
