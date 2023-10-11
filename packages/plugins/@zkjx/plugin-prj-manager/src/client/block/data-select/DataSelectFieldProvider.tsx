@@ -1,4 +1,4 @@
-import { DetailsBlockProvider, useBlockRequestContext, css } from '@nocobase/client';
+import { DetailsBlockProvider, useBlockRequestContext, css, IField } from '@nocobase/client';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useField, useFieldSchema } from '@formily/react';
 import { mergeFilter } from '@nocobase/client';
@@ -31,10 +31,17 @@ export const useFormSelectBlockProps = () => {
 };
 
 export const useFormSelectOptionsProps = (props) => {
-  const { resource, action, params, service } = useDataSelectBlockContext();
+  const { resource, action, params, service, record } = useDataSelectBlockContext();
   const { filter = [], sort = [] } = params;
+  const field:IField = useField();
+  const schema:IField = useFieldSchema();
+  // schema.default = (record||{})[schema.name];
+  useEffect(()=>{
+    field.value =  (record||{})[schema.name];
+  },[record]);
   return {
     ...props,
+    objectValue: true,
     multiple: false,
     service: {
       resource,
@@ -54,13 +61,14 @@ export const useFormSelectOptionsProps = (props) => {
         $and: [
           {
             id: {
-              $eq: val,
+              $eq: val['id'],
             },
           },
         ],
       };
       await service.refresh();
     },
+    defaultValue:record
   };
 };
 const schemaForEach = (schema, callback) => {
@@ -115,8 +123,8 @@ const InternalDataSelectFieldProvider = (props) => {
   useEffect(() => {
     const id = uid();
     form.addEffects(id, () => {
-      if (!service.loading) {
-        form.setInitialValues(record || {});
+      if (record) {
+        // form.setInitialValues(record || {});
       }
     });
     return () => {
@@ -158,7 +166,7 @@ export const DataSelectFieldProvider = (props) => {
   if (id) {
     filterArr.push({
       id: {
-        $eq: id,
+        $eq: Number(id).valueOf(),
       },
     });
   }

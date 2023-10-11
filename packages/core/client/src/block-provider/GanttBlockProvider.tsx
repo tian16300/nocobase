@@ -399,7 +399,7 @@ export const useGanttBlockProps = () => {
       [],
       undefined,
       flag,
-      checkPermassion,
+      checkPermission,
       preProcessData(ctx.service.data?.data, ctx),
       ctx,
     );
@@ -423,7 +423,7 @@ export const useGanttBlockProps = () => {
         [],
         undefined,
         false,
-        checkPermassion,
+        checkPermission,
         preProcessData(ctx.service.data?.data, ctx),
         ctx,
       );
