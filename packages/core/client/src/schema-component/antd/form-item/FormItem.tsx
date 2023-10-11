@@ -39,7 +39,6 @@ export const FormItem: any = observer(
     const contextVariable = useContextVariable();
     const variables = useVariables();
     const { addActiveFieldName } = useFormActiveFields() || {};
-
     useEffect(() => {
       variables?.registerVariable(contextVariable);
     }, [contextVariable]);
@@ -153,6 +152,7 @@ FormItem.Designer = function Designer() {
   }
   const fieldMode = field?.componentProps?.['mode'] || (isFileField ? 'FileManager' : 'Select');
   const isSelectFieldMode = isAssociationField && fieldMode === 'Select';
+  const isSubTableFieldMode = isAssociationField && fieldMode === 'SubTable';
   const isSubFormMode = fieldSchema['x-component-props']?.mode === 'Nester';
   const isPickerMode = fieldSchema['x-component-props']?.mode === 'Picker';
   const showFieldMode = isAssociationField && fieldModeOptions && !isTableField;
@@ -323,7 +323,7 @@ FormItem.Designer = function Designer() {
         />
       )}
       {isAllowToSetDefaultValue() && <SchemaSettings.DefaultValue />}
-      {isSelectFieldMode && !field.readPretty && (
+      {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && (
         <SchemaSettings.DataScope
           collectionName={collectionField?.target}
           defaultFilter={fieldSchema?.['x-component-props']?.service?.params?.filter || {}}
@@ -357,7 +357,7 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
-      {isSelectFieldMode && !field.readPretty && <SchemaSettings.SortingRule />}
+      {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && <SchemaSettings.SortingRule />}
       {showFieldMode && (
         <SchemaSettings.SelectItem
           key="field-mode"

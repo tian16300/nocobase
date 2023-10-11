@@ -58,7 +58,6 @@ export class TableFieldResource {
   async list(options) {
     this.field.data = this.field.data || {};
     if (this.field.data.changed) {
-      console.log('list.dataSource', this.field.data.dataSource);
       return {
         data: {
           data: this.field.data.dataSource,
@@ -66,7 +65,6 @@ export class TableFieldResource {
       };
     }
     if (!this.sourceId) {
-      console.log('list.sourceId', this.field.data.dataSource);
       this.field.data.dataSource = [];
       return {
         data: {
@@ -75,7 +73,6 @@ export class TableFieldResource {
       };
     }
     const response = await this.resource.list(options);
-    console.log('list', response);
     this.field.data.dataSource = response.data.data;
     return {
       data: {
@@ -85,7 +82,6 @@ export class TableFieldResource {
   }
 
   async get(options) {
-    console.log('get', options);
     const { filterByTk } = options;
     return {
       data: {
@@ -95,21 +91,18 @@ export class TableFieldResource {
   }
 
   async create(options) {
-    console.log('create', options);
     const { values } = options;
     this.field.data.dataSource.push(values);
     this.field.data.changed = true;
   }
 
   async update(options) {
-    console.log('update', options);
     const { filterByTk, values } = options;
     this.field.data.dataSource[filterByTk] = values;
     this.field.data.changed = true;
   }
 
   async destroy(options) {
-    console.log('destroy', options);
     let { filterByTk } = options;
     if (!Array.isArray(filterByTk)) {
       filterByTk = [filterByTk];

@@ -120,17 +120,6 @@ const InternalDataSelectFieldProvider = (props) => {
   const record = useMemo(() => {
     return (service?.data?.data||[])[0];
   }, [service?.data?.data]);
-  useEffect(() => {
-    const id = uid();
-    form.addEffects(id, () => {
-      if (record) {
-        // form.setInitialValues(record || {});
-      }
-    });
-    return () => {
-      form.removeEffects(id);
-    };
-  }, [service?.loading, form, record]);
 
   if (service.loading && !field.loaded) {
     return <Spin />;
@@ -192,8 +181,6 @@ export const DataSelectFieldProvider = (props) => {
       <DetailsBlockProvider
         uid="data-select-field"
         {...props}
-        recordIsDynamic
-        useRecord={useDataSelectBlockRecord}
         params={params}
         runWhenParamsChanged
       >

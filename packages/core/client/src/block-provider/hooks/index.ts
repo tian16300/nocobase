@@ -783,7 +783,6 @@ export const useCustomizeRequestActionProps = () => {
       if (skipValidator !== true && xAction === 'customize:form:request') {
         await form.submit();
       }
-
       const headers = requestSettings['headers'] ? JSON.parse(requestSettings['headers']) : {};
       const params = requestSettings['params'] ? JSON.parse(requestSettings['params']) : {};
       const data = requestSettings['data'] ? JSON.parse(requestSettings['data']) : {};

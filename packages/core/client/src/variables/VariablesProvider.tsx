@@ -50,11 +50,12 @@ const VariablesProvider = ({ children }) => {
    * 3. 如果某个 `key` 不存在，且 `key` 不是一个关联字段，则返回当前值
    */
   const getValue = useCallback(
-    async (variablePath: string) => {
+    async (variablePath: string, params?: any) => {
       const list = variablePath.split('.');
       const variableName = list[0];
       let current = ctxRef.current;
       let collectionName = getFieldPath(variableName);
+      params = params || {};
 
       if (process.env.NODE_ENV !== 'production' && !ctxRef.current[variableName]) {
         throw new Error(`VariablesProvider: ${variableName} is not found`);
@@ -80,6 +81,7 @@ const VariablesProvider = ({ children }) => {
                 const result = api
                   .request({
                     url,
+                    params
                   })
                   .then((data) => {
                     clearRequested(url);
@@ -101,6 +103,7 @@ const VariablesProvider = ({ children }) => {
           } else {
             const waitForData = api.request({
               url,
+              params
             });
             stashRequested(url, waitForData);
             data = await waitForData;
@@ -209,7 +212,7 @@ const VariablesProvider = ({ children }) => {
      * @param localVariables 局部变量，解析完成后会被清除
      * @returns
      */
-    async (str: string, localVariables?: VariableOption | VariableOption[]) => {
+    async (str: string, localVariables?: VariableOption | VariableOption[], params?:any) => {
       if (!isVariable(str)) {
         return str;
       }
@@ -217,7 +220,7 @@ const VariablesProvider = ({ children }) => {
       let value = null;
       await onLocalVariablesReady(localVariables, async () => {
         const path = getPath(str);
-        value = await getValue(path);
+        value = await getValue(path, params);
       });
 
       return uniq(filterEmptyValues(value));
