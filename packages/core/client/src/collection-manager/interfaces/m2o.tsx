@@ -181,5 +181,4 @@ export const m2o: IField = {
       // },
     ],
   },
-  invariable: true,
 };

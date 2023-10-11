@@ -30,6 +30,7 @@ import {
   MenuUnfoldOutlined
 } from '@ant-design/icons';
 import { Button } from 'antd';
+import { VariablesProvider } from '../../../variables';
 
 const { Header, Sider, Content } = Layout;
 const filterByACL = (schema, options) => {
@@ -469,7 +470,9 @@ export const AdminProvider = (props) => {
       <NavigateIfNotSignIn>
         <RemoteSchemaTemplateManagerProvider>
           <RemoteCollectionManagerProvider>
-            <ACLRolesCheckProvider>{props.children}</ACLRolesCheckProvider>
+            <VariablesProvider>
+              <ACLRolesCheckProvider>{props.children}</ACLRolesCheckProvider>
+            </VariablesProvider>
           </RemoteCollectionManagerProvider>
         </RemoteSchemaTemplateManagerProvider>
       </NavigateIfNotSignIn>

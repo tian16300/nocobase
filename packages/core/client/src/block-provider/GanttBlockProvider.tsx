@@ -374,7 +374,7 @@ export const useGanttBlockProps = () => {
   const { getPrimaryKey, name, template, writableView } = useCollection();
   const { parseAction } = useACLRoleContext();
   const primaryKey = getPrimaryKey();
-  const checkPermassion = (record) => {
+  const checkPermission = (record) => {
     const actionPath = `${name}:update`;
     const schema = {};
     const recordPkValue = record?.[primaryKey];

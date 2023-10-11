@@ -205,5 +205,4 @@ export const o2m: IField = {
       // },
     ],
   },
-  invariable: true,
 };

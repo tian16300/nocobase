@@ -30,6 +30,10 @@ interface Props {
   fieldNames?: any;
   height?: any;
   preProcessData?: any;
+  /**
+   * Table 区块的 collection name
+   */
+  collection?: string;
 }
 
 const InternalTableBlockProvider = (props: Props) => {
@@ -101,6 +105,7 @@ export const TableBlockProvider = (props) => {
     }
   }
   const form = useMemo(() => createForm(), [treeTable]);
+
   return (
     <SchemaComponentOptions scope={{ treeTable }}>
       <FormContext.Provider value={form}>

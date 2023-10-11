@@ -879,6 +879,7 @@ export default {
   "Dic Code":"字典编码",
   "DicItem Name":"名称",
   "DicItem Value":"数据值",  
+  'UnSelect all':'取消全选',
   'Determine whether a record exists by the following fields': '通过以下字段判断记录是否存在',
   'Cascade Select': '级联选择',
   Execute: '执行',
