@@ -286,7 +286,7 @@ export const processDataToGroups = (data, ctx) => {
 };
 
 export const GanttBlockProvider = (props) => {
-  const { collection, fields, ...others } = props;
+  const { collection, fields,  ...others } = props;
   const { getCollectionFields } = useCollectionManager();
   const names = Array.from(
     new Set(
@@ -301,9 +301,9 @@ export const GanttBlockProvider = (props) => {
   const range = props.timeRange || props?.fieldNames?.range || 'day';
   const [timeRange, setTimeRange] = useState(range);
   const preProcessData = props.preProcessData || processDataToGroups;
-  const [sort, setSort] = useState(props.sort);
   const [rowKey, setRowKey] = useState(props.rowKey || (props.group?'rowKey':'id'));
   const [group, setGroup] = useState(props.group);
+  const [sort, setSort] = useState(props.sort);
   const filter = useMemo(() => {
     return props.params.filter;
   }, [props]);
@@ -346,12 +346,12 @@ export const GanttBlockProvider = (props) => {
     >
       <InternalGanttBlockProvider
         {...others}
+        sort={sort}
+        setSort={setSort}
         group={props.group || group}
         setGroup={props.setGroup || setGroup}
         collection={collection}
-        sort={sort}
         fields={_fields}
-        setSort={setSort}
         timeRange={timeRange}
         setTimeRange={setTimeRange}
         preProcessData={preProcessData}

@@ -119,7 +119,7 @@ export const PrjWorkPlanProvider = (props) => {
 };
 const PrjWorkPlanGanttProvider = (props) => {
   const field = useField<Field>();
-  const { sort, groupField, ...others } = props;
+  const {  groupField, sort , ...others } = props;
 
   const { record, service } = useDataSelectBlockContext();
   const ctx = useBlockRequestContext();
@@ -175,7 +175,7 @@ const PrjWorkPlanGanttProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <GanttBlockProvider {...others} params={params} sort={sort} groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey"></GanttBlockProvider>
+      <GanttBlockProvider {...others} params={params} sort={sort}  groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey"></GanttBlockProvider>
     </>
   );
 };

@@ -94,7 +94,7 @@ export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormComp
     return () => {
       form.removeEffects(id);
     };
-  }, [form, fieldSchema]);
+  }, [form, fieldSchema, value, setValue]);
   return (
     <FormProvider form={form}>
       <RecursionField schema={fieldSchema.properties.form} onlyRenderProperties />
