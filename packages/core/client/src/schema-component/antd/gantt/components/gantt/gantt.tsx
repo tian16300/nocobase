@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
-import { RecursionField, Schema, connect, mapProps,  useFieldSchema } from '@formily/react';
-import { Col, Row, message } from 'antd';
+import { RecursionField, Schema, connect, mapProps, useFieldSchema } from '@formily/react';
+import { Col, Row,Space, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
@@ -38,6 +38,7 @@ import { CollectionProvider, useCollection } from '@nocobase/client';
 import { useEventListener } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
 import { uid } from '@nocobase/utils';
+import { FullscreenAction } from './FullScreenAction';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 35 ? Math.floor(clientWidth / dataSetLength) + 20 : 35;
@@ -50,12 +51,13 @@ export const DeleteEventContext = React.createContext({
 interface GanttFormCompProps {
   value: { group: 'string'; sort: 'string'; timeRange: 'string' };
   setValue: { [key: string]: (value: string) => {} };
+  getPopupContainer: ()=> HTMLDivElement;
 }
 export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormCompProps) => {
-  const { value, setValue } = props;
+  const { value, setValue, getPopupContainer } = props;
   const fieldSchema = useFieldSchema();
   const form = createForm({});
-  fieldSchema.properties.form.reduceProperties((pre, schema) => {   
+  fieldSchema.properties.form.reduceProperties((pre, schema) => {
     schema.reduceProperties((pre, s) => {
       if (s.name == 'range') {
         s.default = value?.timeRange || s.default;
@@ -66,6 +68,11 @@ export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormComp
       if (s.name == 'group') {
         s.default = value?.group || s.default;
       }
+      if(['range','sort','group'].includes(s.name as string)){        
+        s['x-component-props']=s['x-component-props']||{}
+        s['x-component-props'].getPopupContainer = getPopupContainer;
+      }
+
     });
   });
   useEffect(() => {
@@ -106,7 +113,7 @@ export const GanttForm = connect(
   mapProps(
     {
       value: 'value',
-      setValue: 'setValue',
+      setValue: 'setValue'
     },
     (props: any, field: any) => {
       return {
@@ -118,7 +125,7 @@ export const GanttForm = connect(
 );
 
 const GanttRecordViewer = (props) => {
-  const { visible, setVisible, record = {}, isCreate = false } = props;
+  const { visible, setVisible, record = {}, isCreate = false, getContainer } = props;
   const { isGroup } = record;
   const fieldSchema = useFieldSchema();
   const { name } = useCollection();
@@ -142,6 +149,10 @@ const GanttRecordViewer = (props) => {
       };
     } else if (!isGroup && !isCreate) {
       schema = fieldSchema?.properties['detail'];
+    }
+    if(schema){
+      schema.properties.drawer['x-component-props'] = schema.properties.drawer['x-component-props']||{};
+      schema.properties.drawer['x-component-props'].getContainer = getContainer;
     }
     return schema;
   }, [fieldSchema, record]);
@@ -263,6 +274,11 @@ export const Gantt: any = (props: any) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement>();
+
+  const getPopupContainer = () => {
+    return containerRef.current;
+  }; 
   const formValue = {
     group: ctx.group,
     sort: ctx.sort,
@@ -700,13 +716,22 @@ export const Gantt: any = (props: any) => {
   };
 
   const fixedBlock = fieldSchema?.parent['x-decorator-props']?.fixedBlock;
-  const hasAction = Object.keys(fieldSchema?.properties?.form?.properties?.layout?.properties || {}).length > 0 || Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 || designable;
+  const hasAction =
+    Object.keys(fieldSchema?.properties?.form?.properties?.layout?.properties || {}).length > 0 ||
+    Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 ||
+    designable;
+  // const containerId = 'gantt_'+uid();
   return wrapSSR(
     <div
+      ref={containerRef}
       className={cx(
         componentCls,
         hashId,
         css`
+           background: ${token.colorBgContainer};
+          &:fullscreen{
+            padding:16px;
+          }
           height: ${height ? height : fixedBlock ? '100%' : '800px'};
           .ant-table-container::after {
             box-shadow: none !important;
@@ -755,7 +780,7 @@ export const Gantt: any = (props: any) => {
         `,
       )}
     >
-      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} isCreate={isCreate} />
+      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} isCreate={isCreate} getContainer={getPopupContainer}  />
       <div className="gantt-view-form">
         <Row>
           <Col
@@ -775,10 +800,13 @@ export const Gantt: any = (props: any) => {
               }
             `}
           >
-            <GanttForm value={formValue} setValue={setFormValue} />
+            <GanttForm value={formValue} setValue={setFormValue} getPopupContainer={getPopupContainer}  />
           </Col>
-          <Col flex="auto">
-            <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
+          <Col flex="auto" className={css`text-align:right;`}>
+            <Space>
+              <FullscreenAction containerRef={containerRef}  />
+              <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
+            </Space>
           </Col>
         </Row>
       </div>

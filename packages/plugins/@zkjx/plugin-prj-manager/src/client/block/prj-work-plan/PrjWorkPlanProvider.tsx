@@ -33,8 +33,8 @@ export const PrjWorkPlanProvider = (props) => {
       ...groupCollectionField,
     };
     const target = obj.target;
-    if (target == 'prj_plan') {
-      obj.title = 'stage.label';
+    if (target == 'prj_plan_latest') {
+      obj.title = 'title';
       obj.sort = defaultSort;
     } else if (target == 'users') {
       obj.title = 'nickname';
@@ -62,7 +62,7 @@ export const PrjWorkPlanProvider = (props) => {
       filter: {},
       paginate: false,
     };
-    if (target == 'prj_plan') {
+    if (target == 'prj_plan_latest') {
       obj.sort = 'id';
       obj.appends = ['prj', 'stage', 'status'];
       obj.filter = {

@@ -14,7 +14,7 @@ import {
 } from '@nocobase/client';
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Table, Tag, Dropdown, App } from 'antd';
@@ -76,6 +76,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const { t } = useAuthTranslation();
     const { modal } = App.useApp();
     const { record: prjRecord } = useDataSelectBlockContext();
+    const containerRef = useRef<HTMLDivElement>();
+    const getPopupContainer = ()=>{
+      return containerRef.current;
+    }
     let onRow = null,
       highlightRow = '';
 
@@ -299,7 +303,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           return (
             <div className="ant-description-input">
               <EllipsisWithTooltip ellipsis>
-                <Dropdown menu={{ items: menus }} trigger={['contextMenu']}>
+                <Dropdown menu={{ items: menus }} trigger={['contextMenu']} getPopupContainer={getPopupContainer}>
                   <a
                     href="javascript:void(0)"
                     onClick={() => {
@@ -371,7 +375,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     ];
     return (
       <>
-        <div
+        <div ref={containerRef}
           className={css`
             height: 100%;
             overflow: hidden;

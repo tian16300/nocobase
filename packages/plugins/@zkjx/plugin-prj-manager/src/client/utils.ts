@@ -706,7 +706,7 @@ export const createPrjWorkPlanShema = () => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props': {
-                      allowClear: false,
+                      allowClear: false
                     },
                     enum: fields.sort,
                     default: 'start',
