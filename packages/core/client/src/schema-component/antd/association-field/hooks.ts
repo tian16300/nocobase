@@ -67,7 +67,7 @@ export default function useServiceOptions(props) {
 
     const _run = async () => {
       const result = await parseFilter(mergeFilter([filterFromSchema || service?.params?.filter]));
-      setFieldServiceFilter(removeNullCondition(result));
+      setFieldServiceFilter(result);
     };
     const run = _.debounce(_run, DEBOUNCE_WAIT);
 
@@ -151,13 +151,13 @@ export default function useServiceOptions(props) {
               },
             }
           : null,
-        params?.filter && value?.length
-          ? {
-              [fieldNames?.value]: {
-                ['$in']: value,
-              },
-            }
-          : null,
+        // params?.filter && value?.length
+        //   ? {
+        //       [fieldNames?.value]: {
+        //         ['$in']: value,
+        //       },
+        //     }
+        //   : null,
       ],
       '$or',
     );

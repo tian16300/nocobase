@@ -35,7 +35,7 @@ export class PluginPrjManagerServer extends Plugin {
     /* 更新 周报保存数据后 更新项目活跃 */
     this.app.db.on('report.afterSaveWithAssociations', async () => {
       /* 保存周报后 更新数据 */
-      await this.updatePrjActiveCount();
+      await this.checkPrjActive();
     });
     /* 删除项目历史版本时 移除项目计划历史版本 */
     this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
@@ -117,15 +117,15 @@ export class PluginPrjManagerServer extends Plugin {
     this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
 
-    this.app.on('beforeStart', () => {
-      // 每10分钟执行一次
-      this.timer = setInterval(this.checkPrjActive, 1000 * 60 * 10);
-    });
+    // this.app.on('beforeStart', () => {
+    //   // 每10分钟执行一次
+    //   this.timer = setInterval(this.checkPrjActive, 1000 * 60 * 10);
+    // });
 
-    this.app.on('beforeStop', () => {
-      clearInterval(this.timer);
-      this.timer = null;
-    });
+    // this.app.on('beforeStop', () => {
+    //   clearInterval(this.timer);
+    //   this.timer = null;
+    // });
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {
