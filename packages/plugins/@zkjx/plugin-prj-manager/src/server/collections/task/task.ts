@@ -90,7 +90,7 @@ export default {
                 "title": "项目阶段"
             },
             "interface": "m2o",
-            "target": "prj_plan",            
+            "target": "prj_plan_latest",            
             "targetKey": "id",
             "sourceKey": "id"
         },
