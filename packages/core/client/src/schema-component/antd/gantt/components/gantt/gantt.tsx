@@ -661,9 +661,10 @@ export const Gantt: any = (props: any) => {
   };
   const rightPaneRef = useRef<ReflexElement>();
   const [isFullscreen, setIsFullScreen] = useState(false);
-  const handerResize = () => {
-    const component = rightPaneRef.current;
-    const domElement = (component as any).ref.current;
+  const handerResize = ({domElement, component}:{domElement?, component?}) => {
+     component = component || rightPaneRef.current;
+     domElement = domElement || (component as any)?.ref?.current;
+    if(!domElement) return;
     const hasScrollX =
       tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
       tableWrapperRef.current.querySelector('.ant-table-body')?.clientWidth;
@@ -673,7 +674,7 @@ export const Gantt: any = (props: any) => {
   };
   useEffect(()=>{
     if(rightPaneRef.current){
-      handerResize();
+      handerResize({});
     }
   },[rightSize, isFullscreen])
   const gridProps: GridProps = {
