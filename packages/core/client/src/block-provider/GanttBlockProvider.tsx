@@ -149,12 +149,11 @@ const InternalGanttBlockProvider = (props) => {
   const field = useField();
   const { service } = useBlockRequestContext();
   const { token } = useToken();
-  // useEffect(()=>{
-  //   if(group){
-  //     service?.refresh();
-  //     console.log('InternalGanttBlockProvider group 变化',group);
-  //   }
-  // },[group, service]);
+  useEffect(()=>{
+    if(props.groupData){
+      service?.refresh();
+    }
+  },[JSON.stringify(props.groupData)]);
 
   return (
     <GanttBlockContext.Provider

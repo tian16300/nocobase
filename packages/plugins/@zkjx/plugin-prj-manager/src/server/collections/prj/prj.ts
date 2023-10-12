@@ -175,7 +175,7 @@ export default {
         },
         {
             "foreignKey": "prjId",
-            "onDelete": "SET NULL",
+            "onDelete": "CASCADE",
             "reverseField": {
                 "uiSchema": {
                     "title": "项目",
@@ -206,7 +206,7 @@ export default {
                 "title": "项目计划"
             },
             "interface": "o2m",
-            "target": "prj_plan"
+            "target": "prj_plan_latest"
         },
         //项目类型
         {

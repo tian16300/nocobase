@@ -864,6 +864,7 @@ export const useUpdateActionProps = () => {
   const localVariables = useLocalVariables({ currentForm: form });
   const { getActiveFieldsName } = useFormActiveFields() || {};
 
+
   return {
     async onClick() {
       const {
@@ -911,6 +912,15 @@ export const useUpdateActionProps = () => {
       });
       actionField.data = field.data || {};
       actionField.data.loading = true;
+      const getFormBlockService = (__parent, collectionName)=>{
+         const pColName = __parent.props.collection ||  __parent.props.resource;
+         if(collectionName == pColName){
+          return __parent.service;
+         }else if(__parent.__parent){
+          return getFormBlockService(__parent.__parent, collectionName);
+         }
+         return null;
+      }
       try {
         await resource.update({
           filterByTk,
@@ -927,7 +937,10 @@ export const useUpdateActionProps = () => {
             : undefined,
         });
         actionField.data.loading = false;
-        __parent?.service?.refresh?.();
+        const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource)
+        service?.refresh?.();
+        
+        // __parent?.service?.refresh?.();
         setVisible?.(false);
         if (!onSuccess?.successMessage) {
           return;

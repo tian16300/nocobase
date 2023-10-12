@@ -2,10 +2,12 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import {
   BlockProvider,
   GanttBlockProvider,
+  useAPIClient,
   useBlockRequestContext,
   useCollectionManager,
+  useFilterBlock,
 } from '@nocobase/client';
-import {  useField } from '@formily/react';
+import { useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
 import { usePrjWorkPlanProcessData } from './scopes';
 import { Field } from '@nocobase/database';
@@ -13,11 +15,10 @@ import { Field } from '@nocobase/database';
 const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
-
 export const PrjWorkPlanProvider = (props) => {
   const [group, setGroup] = useState(props.group);
   const { getCollectionField } = useCollectionManager();
-  const { record, service } = useDataSelectBlockContext();  
+  const { record, service } = useDataSelectBlockContext();
   if (!service || service.loading || !record || !record.id) {
     return null;
   }
@@ -26,10 +27,10 @@ export const PrjWorkPlanProvider = (props) => {
   const defaultSort = (a, b) => {
     return a.id - b.id;
   };
-  const getGroupField = (collection,group)=>{
-    const groupCollectionField = getCollectionField([collection,group].join('.'));
+  const getGroupField = (collection, group) => {
+    const groupCollectionField = getCollectionField([collection, group].join('.'));
     const obj = {
-      ...groupCollectionField
+      ...groupCollectionField,
     };
     const target = obj.target;
     if (target == 'prj_plan') {
@@ -47,33 +48,34 @@ export const PrjWorkPlanProvider = (props) => {
       obj.sort = defaultSort;
     }
     return obj;
-
   };
-  const groupField:any = getGroupField(collection,group);
+  const groupField: any = getGroupField(collection, group);
   const { target } = groupField;
   const options = {
     collection: target,
     resource: target,
     action: 'list',
-  }
-  const getBlockParams = (groupField,record)=>{
+  };
+  const getBlockParams = (groupField, record) => {
     const { target } = groupField;
-    let obj:any = {
+    let obj: any = {
       filter: {},
       paginate: false,
     };
     if (target == 'prj_plan') {
       obj.sort = 'id';
-      obj.appends = ['prj','stage', 'status'];
+      obj.appends = ['prj', 'stage', 'status'];
       obj.filter = {
         $and: [
-          record?{
-            prj: {
-              id: {
-                $eq: record.id
-              },
-            },
-          }:{},
+          record
+            ? {
+                prj: {
+                  id: {
+                    $eq: record.id,
+                  },
+                },
+              }
+            : {},
         ],
       };
     } else if (target == 'users') {
@@ -85,7 +87,7 @@ export const PrjWorkPlanProvider = (props) => {
         $and: [
           {
             dicCode: {
-              $eq: dicCode
+              $eq: dicCode,
             },
           },
         ],
@@ -93,19 +95,24 @@ export const PrjWorkPlanProvider = (props) => {
       obj.appends = [];
     }
     return obj;
-  }
-  const params = getBlockParams(groupField,record);
+  };
+  const params = getBlockParams(groupField, record);
   const preProcessData = usePrjWorkPlanProcessData;
+  // const api = useAPIClient();
+  // const data = await api.request({
+  //   ...options,
+  //   params
+  // });
+  // useEffect(() => {
+  //   setGroupData(record.plans);
+  // }, [JSON.stringify(record?.plans)]);
+
   /* 首先获取 项目阶段 */
+
   /* 获取项目任务 */
   return (
     <>
-      <BlockProvider
-        block="prj-group"
-        {...options}
-        params={params}
-        runWhenParamsChanged
-      >
+      <BlockProvider data-testid={target} {...options} params={params} runWhenParamsChanged>
         <PrjWorkPlanGanttProvider
           {...props}
           groupField={groupField}
@@ -119,13 +126,10 @@ export const PrjWorkPlanProvider = (props) => {
 };
 const PrjWorkPlanGanttProvider = (props) => {
   const field = useField<Field>();
-  const {  groupField, sort , ...others } = props;
+  const { groupField, sort, groupData, ...others } = props;
 
   const { record, service } = useDataSelectBlockContext();
   const ctx = useBlockRequestContext();
-  if (!ctx.service || ctx.service.loading  || !service || service.loading  || !record || !record.id) {
-    return null;
-  }
   field.loading = ctx.service.loading;
   const params = {
     filter: {
@@ -142,9 +146,9 @@ const PrjWorkPlanGanttProvider = (props) => {
     tree: true,
     paginate: false,
     sort: sort,
-    appends: ['prj','prjStage','prjStage.stage','user','status','dependencies'],
+    appends: ['prj', 'prjStage', 'prjStage.stage', 'user', 'status', 'dependencies'],
   };
-  const [parentData, setParentData] = useState([]);
+  const [parentData, setParentData] = useState(record.plans);
   const groupFieldCtx = {
     ...groupField,
     blockCtx: {
@@ -175,7 +179,14 @@ const PrjWorkPlanGanttProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <GanttBlockProvider {...others} params={params} sort={sort}  groupField={groupFieldCtx} groupData={parentData} rowKey="rowKey"></GanttBlockProvider>
+      <GanttBlockProvider
+        {...others}
+        params={params}
+        sort={sort}
+        groupField={groupFieldCtx}
+        groupData={parentData}
+        rowKey="rowKey"
+      ></GanttBlockProvider>
     </>
   );
 };

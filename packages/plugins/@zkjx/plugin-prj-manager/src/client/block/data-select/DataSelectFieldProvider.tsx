@@ -49,7 +49,7 @@ export const useFormSelectOptionsProps = (props) => {
       params: {
         filter,
         sort,
-        appends: ['status'],
+        appends: ['status', 'plans'],
       },
     },
     fieldNames: {
@@ -162,6 +162,7 @@ export const DataSelectFieldProvider = (props) => {
   if (filterArr.length > 0) {
     params.filter = mergeFilter(filterArr);
   }
+  params.appends =  Array.from(new Set(params.appends.concat('plans')));
   return (
     <div
       className={css`
