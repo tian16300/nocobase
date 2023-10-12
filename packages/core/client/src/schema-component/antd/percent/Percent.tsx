@@ -21,7 +21,11 @@ export const Percent = connect(
       <Col flex="auto">
         <Slider
           {...props}
-          onChange={handleChange}
+          onChange={(v: any) => {
+            if (onChange) {
+              onChange(toValue(v, (v) => v / 100));
+            }
+          }}
           value={toValue(v, (v) => v / 100)}
         />
       </Col>

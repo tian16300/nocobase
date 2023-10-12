@@ -659,15 +659,23 @@ export const Gantt: any = (props: any) => {
       setVisible(true);
     }
   };
-  const handerResize = ({ domElement, component }) => {
-    // console.log();
+  const rightPaneRef = useRef<ReflexElement>();
+  const [isFullscreen, setIsFullScreen] = useState(false);
+  const handerResize = () => {
+    const component = rightPaneRef.current;
+    const domElement = (component as any).ref.current;
     const hasScrollX =
       tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
-      document.querySelector('.ant-table-body')?.clientWidth;
+      tableWrapperRef.current.querySelector('.ant-table-body')?.clientWidth;
     const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
     const scrollBar = hasScrollX > 0 ? 10 : 0;
     onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
   };
+  useEffect(()=>{
+    if(rightPaneRef.current){
+      handerResize();
+    }
+  },[rightSize, isFullscreen])
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
@@ -804,7 +812,7 @@ export const Gantt: any = (props: any) => {
           </Col>
           <Col flex="auto" className={css`text-align:right;`}>
             <Space>
-              <FullscreenAction containerRef={containerRef}  />
+              <FullscreenAction containerRef={containerRef} setIsFullScreen={setIsFullScreen}  />
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
             </Space>
           </Col>
@@ -812,13 +820,13 @@ export const Gantt: any = (props: any) => {
       </div>
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
-          <ReflexElement className="left-pane">
-            <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
+          <ReflexElement className="left-pane" resizeWidth>
+            <div className="wrapper"  onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>
           <ReflexSplitter />
-          <ReflexElement className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
+          <ReflexElement ref={rightPaneRef} className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt
                 gridProps={gridProps}
