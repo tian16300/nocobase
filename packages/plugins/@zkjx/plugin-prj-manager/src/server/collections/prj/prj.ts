@@ -422,6 +422,24 @@ export default {
             },
             "interface": "o2m",
             "target": "reportDetail"
+        },{
+            "foreignKey": "prjId",
+            "onDelete": "CASCADE",
+            "name": "plan_version",
+            "type": "hasMany",
+            "uiSchema": {
+                "x-component": "AssociationField",
+                "x-component-props": {
+                    "multiple": true,
+                    "fieldNames": {
+                        "label": "id",
+                        "value": "id"
+                    }
+                },
+                "title": "项目计划版本列表"
+            },
+            "interface": "o2m",
+            "target": "prj_plan_version"
         },
         {
             "name": "customerComp",

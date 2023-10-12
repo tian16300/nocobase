@@ -1,5 +1,4 @@
 import { ISchema } from '@formily/react';
-import { css } from '@nocobase/client';
 import { uid } from '@nocobase/utils';
 
 export const createDataSelectBlockSchema = (options) => {
@@ -117,11 +116,7 @@ export const createDataSelectBlockSchema = (options) => {
   };
   const grid = {
     type: 'void',
-    'x-component': 'Grid',
-    // 'x-initializer': 'PrjRecordBlockInitializers',
-    // 'x-initializer-props': {
-    //   isBulkEdit: true,
-    // },
+    'x-component': 'Grid'
   };
 
   const tabs: ISchema = {
