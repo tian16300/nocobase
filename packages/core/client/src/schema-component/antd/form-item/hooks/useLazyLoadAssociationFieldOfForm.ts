@@ -51,9 +51,10 @@ const useLazyLoadAssociationFieldOfForm = () => {
       collectionName: name,
     };
     const variableString = `{{ $nRecord.${schemaName} }}`;
+    const params = field?.componentProps?.service?.params||{};
 
     variables
-      .parseVariable(variableString, recordVariable)
+      .parseVariable(variableString, recordVariable, params)
       .then((value) => {
         field.value = transformVariableValue(value, { targetCollectionField: collectionField });
       })
