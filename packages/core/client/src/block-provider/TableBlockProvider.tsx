@@ -167,10 +167,7 @@ export const useTableBlockProps = () => {
       ctx.service.refresh();
     },
     onChange({ current, pageSize }, filters, sorter) {
-      let sorterKey = sorter.field;
-      if(sorter?.column?.isDicField){
-        sorterKey = sorter?.column?.sorterKey;
-      }
+      let sorterKey = sorter?.column?.sortName || sorter.field;
       const sort = sorter.order
         ? sorter.order === `ascend`
           ? [sorterKey]

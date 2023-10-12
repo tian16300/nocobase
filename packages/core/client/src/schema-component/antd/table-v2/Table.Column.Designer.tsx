@@ -74,6 +74,8 @@ export const TableColumnDesigner = (props) => {
     collectionField?.interface,
   );
   const isDicField = ['dic'].includes(collectionField?.interface);
+  const getSortName = getInterface(collectionField?.interface).sortName || function (field){ return field.name};
+  const sortName = getSortName(collectionField);
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
   const fieldMode = fieldSchema?.['x-component-props']?.['mode'] || 'Select';
   let readOnlyMode = 'editable';
@@ -184,12 +186,13 @@ export const TableColumnDesigner = (props) => {
             columnSchema['x-component-props'] = {
               ...columnSchema['x-component-props'],
               sorter: v,
-              isDicField: isDicField,
+              // isDicField: isDicField,
+              sortName
             };
-            if (isDicField) {
-              columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey;
-              columnSchema['x-component-props']['isDicField'];
-            }
+            // if (isDicField) {
+            //   columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey;
+            //   columnSchema['x-component-props']['isDicField'];
+            // }
             schema['x-component-props'] = columnSchema['x-component-props'];
             field.componentProps.sorter = v;
             dn.emit('patch', {

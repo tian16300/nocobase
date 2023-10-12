@@ -180,5 +180,9 @@ export const m2o: IField = {
       //   },
       // },
     ],
-  },
+  },  
+  sortable: true,
+  sortName:(field)=>{
+    return field.foreignKey;
+  }
 };

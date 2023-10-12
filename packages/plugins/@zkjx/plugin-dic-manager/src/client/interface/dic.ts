@@ -200,5 +200,8 @@ export const dic: IField = {
     }
   },
   invariable: true,
-  titleUsable: true
+  titleUsable: true,
+  sortName:(field)=>{
+    return field.foreignKey;
+  }
 };

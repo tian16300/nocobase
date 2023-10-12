@@ -205,4 +205,8 @@ export const o2m: IField = {
       // },
     ],
   },
+  sortable: true,
+  sortName:(field)=>{
+    return field.foreignKey;
+  }
 };

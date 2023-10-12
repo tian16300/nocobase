@@ -1048,7 +1048,6 @@ SchemaSettings.BlockTitleItem = function BlockTitleItem() {
 SchemaSettings.DefaultSortingRules = function DefaultSortingRules(props) {
   const { sort, sortFields, onSubmit } = props;
   const { t } = useTranslation();
-
   return (
     <SchemaSettings.ModalItem
       title={t('Set default sorting rules')}

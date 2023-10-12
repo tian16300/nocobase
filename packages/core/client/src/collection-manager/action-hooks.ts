@@ -89,8 +89,11 @@ export const useSortFields = (collectionName: string) => {
       return false;
     })
     .map((field: any) => {
+      const getSortName = getInterface(field.interface)?.sortName || function (field:{name:string}){
+        return field.name;
+      };
       return {
-        value: field.name,
+        value: getSortName(field),
         label: field?.uiSchema?.title || field.name,
       };
     });
