@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useToken } from '../style';
+import { useToken } from '../schema-component';
 
 export const PoweredBy = () => {
   const { i18n } = useTranslation();

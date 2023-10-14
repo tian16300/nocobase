@@ -1,4 +1,5 @@
 import { Plugin } from '@nocobase/client';
+import { FormLayout } from '@formily/antd-v5';
 import { DataSelectBlockProvider, PrjPlanCompareBlockProvider } from './provider';
 
 export class PluginPrjManagerClient extends Plugin {
@@ -10,6 +11,7 @@ export class PluginPrjManagerClient extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
+    this.app.addComponent(FormLayout,'FormLayout');
     this.app.addProvider(DataSelectBlockProvider);
     this.app.addProvider(PrjPlanCompareBlockProvider);
   }

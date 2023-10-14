@@ -5,7 +5,7 @@ import { connect, mapProps } from '@formily/react';
 import { useBoolean } from 'ahooks';
 import { Input, Radio, Space } from 'antd';
 import React, { useState } from 'react';
-import { useToken } from '../../';
+import { useToken } from '../../schema-component';
 
 const date = moment();
 

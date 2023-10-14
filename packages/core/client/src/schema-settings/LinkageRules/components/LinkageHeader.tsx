@@ -8,9 +8,8 @@ import cls from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useToken } from '../../../style';
 import { useStyles } from './LinkageHeader.style';
-
+import { useToken } from '../../../schema-component/antd/__builtins__';
 const LinkageRulesTitle = (props) => {
   const array = ArrayBase.useArray();
   const index = ArrayBase.useIndex(props.index);

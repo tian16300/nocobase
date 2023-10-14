@@ -6,7 +6,7 @@ import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrentAppInfo } from '../../appInfo';
 import { RecordProvider, useRecord } from '../../record-provider';
-import { Action, useAttach, useCompile } from '../../schema-component';
+import { Action, useAttach, useCompile, useToken } from '../../schema-component';
 import {
   isDeleteButtonDisabled,
   useBulkDestroyActionAndRefreshCM,
@@ -28,7 +28,6 @@ import { ViewCollectionField } from './ViewInheritedField';
 import { SyncSQLFieldsAction } from './SyncSQLFieldsAction';
 import { Input } from '../../schema-component/antd/input';
 import { Icon } from '../../icon';
-import { useToken } from '../../style';
 
 const indentStyle = css`
   .ant-table {

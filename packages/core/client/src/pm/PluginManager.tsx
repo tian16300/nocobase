@@ -10,11 +10,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { css } from '@emotion/css';
 import { useACLRoleContext } from '../acl/ACLProvider';
 import { useRequest } from '../api-client';
-import { useToken } from '../style';
 import { PluginCard } from './PluginCard';
 import { PluginAddModal } from './PluginForm/modal/PluginAddModal';
 import { useStyles } from './style';
 import { IPluginData } from './types';
+import { useToken } from '../schema-component';
 
 export interface TData {
   data: IPluginData[];
