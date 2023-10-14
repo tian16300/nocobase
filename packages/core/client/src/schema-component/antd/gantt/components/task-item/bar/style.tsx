@@ -17,6 +17,6 @@ export const barWrapper = css`
 
 export const barBackground = css`
   user-select: none;
-  stroke-width: 0;
-  opacity: 0.6;
+  stroke-width: 1;
+  opacity: 1;
 `;

@@ -24,7 +24,8 @@ export const convertToBarTasks = (
   ctx
 ) => {
   let barTasks = tasks.map((t, i) => {
-    const bar  =  convertToBarTask(
+    const {data=[], ...others} = t;
+    const bar = convertToBarTask(
       t,
       i,
       dates,
@@ -44,7 +45,32 @@ export const convertToBarTasks = (
       projectBackgroundSelectedColor,
       milestoneBackgroundColor,
       milestoneBackgroundSelectedColor
-    )
+    );
+    const items  = data.map((item)=>{
+      return convertToBarTask(
+        {...t, ...item},
+        i,
+        dates,
+        columnWidth,
+        rowHeight,
+        taskHeight,
+        barCornerRadius,
+        handleWidth,
+        rtl,
+        barProgressColor,
+        barProgressSelectedColor,
+        barBackgroundColor,
+        barBackgroundSelectedColor,
+        projectProgressColor,
+        projectProgressSelectedColor,
+        projectBackgroundColor,
+        projectBackgroundSelectedColor,
+        milestoneBackgroundColor,
+        milestoneBackgroundSelectedColor
+      )
+    });
+    bar.items =  items;
+    bar.data =  data;
     return bar;
   });
 
@@ -52,7 +78,9 @@ export const convertToBarTasks = (
   barTasks = barTasks.map((task) => {
     const dependencies: string[] = task.dependencies || [];
     for (let j = 0; j < dependencies.length; j++) {
-      const dependence = barTasks.findIndex((value) => { return dependencies[j] === (value as any)[ctx.rowKey]?.toString(); });
+      const dependence = barTasks.findIndex((value) => {
+        return dependencies[j] === (value as any)[ctx.rowKey]?.toString();
+      });
       if (dependence !== -1) barTasks[dependence].barChildren.push(task);
     }
     return task;
@@ -113,22 +141,22 @@ const convertToBarTask = (
         projectBackgroundColor,
         projectBackgroundSelectedColor,
       );
-      const prjTask = {...task, ...task.projectItem} as Task;
-      barTask.projectBar = convertToBar(
-        prjTask,
-        index,
-        dates,
-        columnWidth,
-        rowHeight,
-        taskHeight,
-        barCornerRadius,
-        handleWidth,
-        rtl,
-        projectProgressColor,
-        projectProgressSelectedColor,
-        projectBackgroundColor,
-        projectBackgroundSelectedColor,
-      );
+      // const prjTask = {...task, ...task.projectItem} as Task;
+      // barTask.projectBar = convertToBar(
+      //   prjTask,
+      //   index,
+      //   dates,
+      //   columnWidth,
+      //   rowHeight,
+      //   taskHeight,
+      //   barCornerRadius,
+      //   handleWidth,
+      //   rtl,
+      //   projectProgressColor,
+      //   projectProgressSelectedColor,
+      //   projectBackgroundColor,
+      //   projectBackgroundSelectedColor,
+      // );
       break;
     default:
       barTask = convertToBar(

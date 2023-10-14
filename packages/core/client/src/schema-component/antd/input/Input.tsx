@@ -11,6 +11,7 @@ type ComposedInput = React.FC<InputProps> & {
   TextArea: React.FC<TextAreaProps>;
   URL: React.FC<InputProps>;
   JSON: React.FC<JSONTextAreaProps>;
+  ReadPrettyTextArea: React.FC<TextAreaProps | { ellipsis?: boolean }>;
 };
 
 export const Input: ComposedInput = Object.assign(
@@ -41,6 +42,8 @@ export const Input: ComposedInput = Object.assign(
     URL: connect(AntdInput, mapReadPretty(ReadPretty.URL)),
     JSON: connect(Json, mapReadPretty(ReadPretty.JSON)),
     ReadPretty: ReadPretty.Input,
+    ReadPrettyTextArea:ReadPretty.TextArea
+
   },
 );
 

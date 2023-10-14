@@ -1,5 +1,5 @@
 import { Plugin } from '@nocobase/client';
-import { DataSelectProvider } from './provider';
+import { DataSelectBlockProvider, PrjPlanCompareBlockProvider } from './provider';
 
 export class PluginPrjManagerClient extends Plugin {
   async afterAdd() {
@@ -10,7 +10,8 @@ export class PluginPrjManagerClient extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
-    this.app.addProvider(DataSelectProvider);
+    this.app.addProvider(DataSelectBlockProvider);
+    this.app.addProvider(PrjPlanCompareBlockProvider);
   }
 }
 

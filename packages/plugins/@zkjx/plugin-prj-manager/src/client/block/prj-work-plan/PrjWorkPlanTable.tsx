@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { Field } from '@formily/core';
-import {  observer, useField } from '@formily/react';
+import {  observer, useField, useFieldSchema } from '@formily/react';
 import {
   EllipsisWithTooltip,
   IField,
@@ -15,13 +15,14 @@ import {
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusCircleOutlined, ZoomInOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Table, Tag, Dropdown, App } from 'antd';
 import { useAuthTranslation } from '../../locale';
 import { pick } from 'lodash';
-import { uid } from '@nocobase/utils';
 import { useDataSelectBlockContext } from '..';
+import template from 'lodash/template';
+import { useNavigate} from 'react-router';
 
 export const components = {
   body: {
@@ -60,6 +61,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       rowKey,
       required,
       onExpand,
+      prjStageVersionLink = '',
       ...others
     } = { ...others1, ...others2 } as any;
     const field: IField = useField();
@@ -77,6 +79,8 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const { modal } = App.useApp();
     const { record: prjRecord } = useDataSelectBlockContext();
     const containerRef = useRef<HTMLDivElement>();
+    const  fieldSchema = useFieldSchema();
+    let navigate = useNavigate();
     const getPopupContainer = ()=>{
       return containerRef.current;
     }
@@ -219,8 +223,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     }, [tableHeight]);
     const renderItems = (record) => {
       const isGroup = record.isGroup;
-      const addChildLabel = isGroup ? '添加任务' : '添加子任务';
-     
+      const addChildLabel = isGroup ? '添加任务' : '添加子任务';     
       const items: MenuProps['items'] = [
         {
           label: '编辑',
@@ -239,7 +242,8 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           icon: <PlusCircleOutlined />,
           onClick: () => {
             const newRecord:any = {
-              __collection:'task'
+              __collection:'task',
+              schemaName:'createTask',
             };
             newRecord['prj'] = prjRecord;
             if(!isGroup){
@@ -260,6 +264,22 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           },
         },
       ];
+      /**
+       * 项目阶段链接
+       */
+      if (record.__collection == 'prj_plan_latest') {
+        const to = prjStageVersionLink;
+        const compiled = template(to || '');
+        const toHref = compiled({ record: record || {} });
+        items.push({
+          label: '历史计划',
+          icon: <ZoomInOutlined />,
+          key: '3',
+          onClick: (event) => {
+            navigate(toHref)
+          },
+        });
+      }
       /**
        * 任务 允许删除
        */
@@ -289,6 +309,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           },
         });
       }
+
 
       return items;
     };

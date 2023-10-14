@@ -1577,7 +1577,7 @@ export const createGanttBlockSchema = (options) => {
         paginate: false,
         sort: 'id',
       },
-      leftSize: 0.3,
+      rightSize: 0.7,
       sort: fieldNames?.sort ||  fieldNames?.start || 'start',
       group: fieldNames?.group,
       fields,
@@ -1606,18 +1606,18 @@ export const createGanttBlockSchema = (options) => {
                   wrapperWidth: 120
                 },
                 properties: {
-                  group: {
-                    type: 'string',
-                    title: '分组',
-                    'x-decorator': 'FormItem',
-                    'x-component': 'Select',
-                    'x-component-props':{
-                      'allowClear': false,
-                      'multiple':false
-                    },
-                    'enum':fields.groups,
-                    'default':fieldNames?.group
-                  },
+                  // group: {
+                  //   type: 'string',
+                  //   title: '分组',
+                  //   'x-decorator': 'FormItem',
+                  //   'x-component': 'Select',
+                  //   'x-component-props':{
+                  //     'allowClear': false,
+                  //     'multiple':false
+                  //   },
+                  //   'enum':fields.groups,
+                  //   'default':fieldNames?.group
+                  // },
                   sort: {
                     type: 'string',
                     title: '排序',

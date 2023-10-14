@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
-import { RecursionField, Schema, connect, mapProps, useFieldSchema } from '@formily/react';
-import { Col, Row,Space, message } from 'antd';
+import { ISchema, RecursionField, Schema, connect, mapProps, useFieldSchema } from '@formily/react';
+import { Col, Row, Space, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
@@ -51,7 +51,7 @@ export const DeleteEventContext = React.createContext({
 interface GanttFormCompProps {
   value: { group: 'string'; sort: 'string'; timeRange: 'string' };
   setValue: { [key: string]: (value: string) => {} };
-  getPopupContainer: ()=> HTMLDivElement;
+  getPopupContainer: () => HTMLDivElement;
 }
 export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormCompProps) => {
   const { value, setValue, getPopupContainer } = props;
@@ -68,11 +68,10 @@ export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormComp
       if (s.name == 'group') {
         s.default = value?.group || s.default;
       }
-      if(['range','sort','group'].includes(s.name as string)){        
-        s['x-component-props']=s['x-component-props']||{}
+      if (['Select', 'RemoteSelect'].includes(s['x-component'])) {
+        s['x-component-props'] = s['x-component-props'] || {};
         s['x-component-props'].getPopupContainer = getPopupContainer;
       }
-
     });
   });
   useEffect(() => {
@@ -113,7 +112,7 @@ export const GanttForm = connect(
   mapProps(
     {
       value: 'value',
-      setValue: 'setValue'
+      setValue: 'setValue',
     },
     (props: any, field: any) => {
       return {
@@ -126,37 +125,48 @@ export const GanttForm = connect(
 
 const GanttRecordViewer = (props) => {
   const { visible, setVisible, record = {}, isCreate = false, getContainer } = props;
-  const { isGroup } = record;
+  const { isGroup, schemaName = 'detail' } = record;
   const fieldSchema = useFieldSchema();
   const { name } = useCollection();
   const close = useCallback(() => {
     setVisible(false);
   }, []);
-  const eventSchema = useMemo(() => {
-    let schema = null;
-    if (isGroup) {
-      const groupField = record.fieldCtx;
-      const groupType = groupField.name as string;
-      schema = fieldSchema?.properties[groupType].mapProperties((temp) => {
-        return temp['x-component'] == 'Gantt.Event' ? temp : false;
-      })[0];
-    } else if (!isGroup && isCreate) {
-      schema = fieldSchema?.properties['createTask'];
-      schema['x-component-props'] = {
-        inheritsKeys: Object.keys(record).filter((key) => {
-          return !/^__+/.test(key);
-        }),
-      };
-    } else if (!isGroup && !isCreate) {
-      schema = fieldSchema?.properties['detail'];
-    }
-    if(schema){
-      schema.properties.drawer['x-component-props'] = schema.properties.drawer['x-component-props']||{};
-      schema.properties.drawer['x-component-props'].getContainer = getContainer;
-    }
-    return schema;
-  }, [fieldSchema, record]);
-  const isCollectionField = isGroup;
+  const eventSchema = fieldSchema?.properties[schemaName];
+  if(!isGroup && isCreate){
+    eventSchema['x-component-props'] = {
+      inheritsKeys: Object.keys(record).filter((key) => {
+        return !/^__+/.test(key);
+      }),
+    };
+
+  }
+  if (eventSchema) {
+    eventSchema.properties.drawer['x-component-props'] = eventSchema.properties.drawer['x-component-props'] || {};
+    eventSchema.properties.drawer['x-component-props'].getContainer = getContainer;
+  }
+  // const eventSchema = useMemo(() => {
+  //   let schema:any =  fieldSchema?.properties['detail'];
+  //   if (isGroup) {
+  //     const groupField = record.fieldCtx;
+  //     const groupType = groupField.name as string;
+  //     schema = fieldSchema?.properties[groupType].mapProperties((temp) => {
+  //       return temp['x-component'] == 'Gantt.Event' ? temp : false;
+  //     })[0];
+  //   } else if (!isGroup && isCreate) {
+  //     schema = fieldSchema?.properties['createTask'];
+  //     schema['x-component-props'] = {
+  //       inheritsKeys: Object.keys(record).filter((key) => {
+  //         return !/^__+/.test(key);
+  //       }),
+  //     };
+  //   }
+  //   if (schema) {
+  //     schema.properties.drawer['x-component-props'] = schema.properties.drawer['x-component-props'] || {};
+  //     schema.properties.drawer['x-component-props'].getContainer = getContainer;
+  //   }
+  //   return schema;
+  // }, [fieldSchema, record]);
+  const isCollectionField =  record.__collection;
   const collectionName = record.__collection || name;
   return (
     eventSchema && (
@@ -218,11 +228,6 @@ export const Gantt: any = (props: any) => {
     onClick,
     onDelete,
     onSelect,
-    // hasScroll = false,
-    // useProps,
-  } = props;
-  // const { onExpanderClick, tasks, expandAndCollapseAll } = useProps();
-  const {
     fieldNames = {},
     onExpanderClick,
     onResize,
@@ -232,7 +237,12 @@ export const Gantt: any = (props: any) => {
     ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
     timeRange,
-  } = useProps(props);
+    hasMultiBar = false,
+  } = {
+    ...props,
+    ...useProps(props),
+  } as any;
+
   const ctx = useGanttBlockContext();
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
@@ -277,8 +287,8 @@ export const Gantt: any = (props: any) => {
   const containerRef = useRef<HTMLDivElement>();
 
   const getPopupContainer = () => {
-    return containerRef.current;
-  }; 
+    return isFullscreen ? containerRef.current : document.body;
+  };
   const formValue = {
     group: ctx.group,
     sort: ctx.sort,
@@ -305,6 +315,15 @@ export const Gantt: any = (props: any) => {
       tbodyRef.current = null;
     };
   }, [tableWrapperRef, tbodyRef]);
+  const setPoupContainer = (s: ISchema) => {
+    if (['Select', 'RemoteSelect'].includes(s['x-component'])) {
+      s['x-component-props'] = s['x-component-props'] || {};
+      s['x-component-props'].getPopupContainer = getPopupContainer;
+    }
+  };
+  fieldSchema.properties.toolBar.reduceProperties((pre, s) => {
+    setPoupContainer(s);
+  });
 
   // task change events
   useEffect(() => {
@@ -647,8 +666,18 @@ export const Gantt: any = (props: any) => {
         }, []);
       };
       const ctxProps = _ctx || ctx;
+      const rowKey = ctxProps.rowKey || 'id';
       const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
-      const recordData = flattenedData?.find((item) => item.rowKey === data.rowKey);
+      let recordData = null;
+      if (hasMultiBar) {
+        let allRecords = [];
+        flattenedData.forEach((item) => {
+          allRecords = allRecords.concat(item.data);
+        });
+        recordData = allRecords?.find((item) => item[rowKey] + '' === data[rowKey]+'');
+      } else {
+        recordData = flattenedData?.find((item) => item[rowKey] + '' === data[rowKey]+'');
+      }
       if (!recordData) {
         return;
       }
@@ -661,10 +690,10 @@ export const Gantt: any = (props: any) => {
   };
   const rightPaneRef = useRef<ReflexElement>();
   const [isFullscreen, setIsFullScreen] = useState(false);
-  const handerResize = ({domElement, component}:{domElement?, component?}) => {
-     component = component || rightPaneRef.current;
-     domElement = domElement || (component as any)?.ref?.current;
-    if(!domElement) return;
+  const handerResize = ({ domElement, component }: { domElement?; component? }) => {
+    component = component || rightPaneRef.current;
+    domElement = domElement || (component as any)?.ref?.current;
+    if (!domElement) return;
     const hasScrollX =
       tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
       tableWrapperRef.current.querySelector('.ant-table-body')?.clientWidth;
@@ -672,11 +701,11 @@ export const Gantt: any = (props: any) => {
     const scrollBar = hasScrollX > 0 ? 10 : 0;
     onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
   };
-  useEffect(()=>{
-    if(rightPaneRef.current){
+  useEffect(() => {
+    if (rightPaneRef.current) {
       handerResize({});
     }
-  },[rightSize, isFullscreen])
+  }, [rightSize, isFullscreen]);
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
@@ -737,9 +766,9 @@ export const Gantt: any = (props: any) => {
         componentCls,
         hashId,
         css`
-           background: ${token.colorBgContainer};
-          &:fullscreen{
-            padding:16px;
+          background: ${token.colorBgContainer};
+          &:fullscreen {
+            padding: 16px;
           }
           height: ${height ? height : fixedBlock ? '100%' : '800px'};
           .ant-table-container::after {
@@ -786,10 +815,28 @@ export const Gantt: any = (props: any) => {
           .gantt-horizontal-scoll {
             display: block !important;
           }
+          .gantt-view-form {
+            .ant-formily-item,
+            .nb-action-bar {
+              margin-bottom: 0 !important;
+            }
+            + .gantt-view-container {
+              margin-top: 24px;
+            }
+            .ant-formily-item-control-content-component {
+              min-width: 120px;
+            }
+          }
         `,
       )}
     >
-      <GanttRecordViewer visible={visible} setVisible={setVisible} record={record} isCreate={isCreate} getContainer={getPopupContainer}  />
+      <GanttRecordViewer
+        visible={visible}
+        setVisible={setVisible}
+        record={record}
+        isCreate={isCreate}
+        getContainer={getPopupContainer}
+      />
       <div className="gantt-view-form">
         <Row>
           <Col
@@ -809,11 +856,16 @@ export const Gantt: any = (props: any) => {
               }
             `}
           >
-            <GanttForm value={formValue} setValue={setFormValue} getPopupContainer={getPopupContainer}  />
+            <GanttForm value={formValue} setValue={setFormValue} getPopupContainer={getPopupContainer} />
           </Col>
-          <Col flex="auto" className={css`text-align:right;`}>
+          <Col
+            flex="auto"
+            className={css`
+              text-align: right;
+            `}
+          >
             <Space>
-              <FullscreenAction containerRef={containerRef} setIsFullScreen={setIsFullScreen}  />
+              <FullscreenAction containerRef={containerRef} setIsFullScreen={setIsFullScreen} />
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
             </Space>
           </Col>
@@ -822,12 +874,18 @@ export const Gantt: any = (props: any) => {
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
           <ReflexElement className="left-pane" resizeWidth>
-            <div className="wrapper"  onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
+            <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
           </ReflexElement>
           <ReflexSplitter />
-          <ReflexElement ref={rightPaneRef} className="right-pane" resizeWidth flex={rightSize} onStopResize={handerResize}>
+          <ReflexElement
+            ref={rightPaneRef}
+            className="right-pane"
+            resizeWidth
+            flex={rightSize}
+            onStopResize={handerResize}
+          >
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt
                 gridProps={gridProps}
@@ -838,6 +896,7 @@ export const Gantt: any = (props: any) => {
                 scrollX={scrollX}
                 ref={verticalGanttContainerRef}
                 rowKey={ctx.rowKey}
+                hasMultiBar={hasMultiBar}
               />
               {ganttEvent.changedTask && (
                 <Tooltip

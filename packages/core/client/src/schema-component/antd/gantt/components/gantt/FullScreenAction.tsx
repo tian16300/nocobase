@@ -21,7 +21,6 @@ export const FullscreenAction = forwardRef((props:{containerRef,  setIsFullScree
         onClick={() => {
           toggleFullscreen();
         }}
-        className={css`margin-bottom:24px;`}
       >
         {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
       </Button>

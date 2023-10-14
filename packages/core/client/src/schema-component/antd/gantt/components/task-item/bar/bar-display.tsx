@@ -58,6 +58,7 @@ export const BarDisplay: React.FC<BarDisplayProps> = ({
         ry={barCornerRadius}
         rx={barCornerRadius}
         fill={getBarColor()}
+        stroke={getBarColor()}
         className={cx(barBackground)}
       />
       <rect

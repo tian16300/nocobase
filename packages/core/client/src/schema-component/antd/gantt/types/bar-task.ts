@@ -20,6 +20,7 @@ export interface BarTask extends Task {
     progressSelectedColor: string;
   };
   projectBar?:any;
+  isHiddenTitle?: boolean;
 
 }
 

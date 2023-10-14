@@ -12,9 +12,12 @@ export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token) => {
   const colorName = item.color || item.status?.color;
   if (colorName) {
-    if (colorName.indexOf('#') !== -1) {
+    if (colorName.indexOf('#') !== -1 || colorName.indexOf('rgb') !== -1 || colorName.indexOf('rgba') !== -1) {
       return colorName;
-    } else {
+    } if(colorName.indexOf('-')!==-1){
+      return token[colorName];
+    } 
+    else {
       return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
     }
   }
@@ -62,6 +65,36 @@ const findMaxEnd = (item, cEnd) => {
   });
   return cEnd;
 };
+const getProgressValue = (item, fieldNames) => {
+  let progress = null;
+  if (fieldNames.progress) {
+    const value = item[fieldNames.progress];
+    const percent = value * 100;
+    progress = percent > 100 ? 100 : percent || 0;
+  }
+  return progress;
+};
+const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
+  const disable = checkPermassion(item);
+  const itemValues = pick(item, ['seriesName','title','isHidden','isHiddenTitle','remark','isDiff','isDisabled','type','schemaName','isGroup', 'groupRowKey', 'rowKey', 'fieldCtx']);
+  const start = getValuesByPath(item, fieldNames.start);
+  const end = getValuesByPath(item, fieldNames.end);
+  return {
+    start: start ? new Date(start) : undefined,
+    end: end ? new Date(end) : undefined,
+    // 获取子任务 及自己 start的最小值
+    // start: new Date(start ?? undefined),
+    name: getValuesByPath(item, fieldNames.title) || '',
+    id: item.id + '',
+    color: getItemColor(item, ctx.token),
+    isDisabled: disable,
+    progress:getProgressValue(item, fieldNames),
+    ...itemValues,
+    dependencies: (item.dependencies || []).map((record) => {
+      return record[ctx.rowKey];
+    })
+  };
+};
 const formatData = (
   data = [],
   fieldNames,
@@ -73,60 +106,48 @@ const formatData = (
   ctx: any = {},
 ) => {
   data.forEach((item: any) => {
-    const disable = checkPermassion(item);
-    const percent = item[fieldNames.progress] * 100;
-    const itemValues = pick(item, ['isGroup', 'groupRowKey', 'rowKey', 'fieldCtx']);
     if (item.children && item.children.length) {
-      const start = getValuesByPath(item, fieldNames.start);
-      const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
+      const data = item.data?item.data?.map((item)=>{
+        return {
+          project: projectId,
+          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
+        }
+      }):[
+        {
+           
+          project: projectId,
+          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
+        }
+      ];
       tasks.push({
         index: startIdx,
-        start: start ? new Date(start) : undefined,
-        end: end ? new Date(end) : undefined,
-        progress: percent > 100 ? 100 : percent || 0,
-        // 获取子任务 及自己 start的最小值
-        // start: new Date(start ?? undefined),
-        name: getValuesByPath(item, fieldNames.title) || '',
-        id: item.id + '',
         type: 'project',
-        // progress: percent > 100 ? 100 : percent || 0,
+        ...getTaskItem(item,fieldNames,checkPermassion,ctx),        
         hideChildren: hideChildren,
         project: projectId,
-        color: getItemColor(item, ctx.token),
-        isDisabled: disable,
-        dependencies: (item.dependencies || []).map((record) => {
-          return record[ctx.rowKey];
-        }),
-        projectItem: {
-          // type:'project',
-          start: findMinStart(item, start ? new Date(start) : undefined),
-          // 获取子任务 及自己 end的最大值
-          // end: new Date(end ?? undefined),
-          end: findMaxEnd(item, end ? new Date(end) : undefined),
-        },
-        ...itemValues,
+        data: data,
       });
       formatData(item.children, fieldNames, tasks, item[ctx.rowKey] + '', hideChildren, checkPermassion, treeData, ctx);
     } else {
-      const start = getValuesByPath(item, fieldNames.start);
-      const end = getValuesByPath(item, fieldNames.end);
       const startIdx = tasks.length;
+      const data = item.data?item.data?.map((item)=>{
+        return {
+          project: projectId,
+          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
+        }
+      }):[
+        {
+           
+          project: projectId,
+          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
+        }
+      ];
+
       tasks.push({
         index: startIdx,
-        start: start ? new Date(start) : undefined,
-        end: new Date(end || start),
-        name: getValuesByPath(item, fieldNames.title) || '',
-        id: item.id + '',
-        type: fieldNames.end ? 'task' : 'milestone',
-        progress: percent > 100 ? 100 : percent || 0,
-        project: projectId,
-        color: getItemColor(item, ctx.token),
-        isDisabled: disable,
-        dependencies: (item.dependencies || []).map((record) => {
-          return record[ctx.rowKey];
-        }),
-        ...itemValues,
+        ...getTaskItem(item,fieldNames,checkPermassion,ctx),    
+        data: data
       });
     }
   });
@@ -149,11 +170,11 @@ const InternalGanttBlockProvider = (props) => {
   const field = useField();
   const { service } = useBlockRequestContext();
   const { token } = useToken();
-  useEffect(()=>{
-    if(props.groupData){
+  useEffect(() => {
+    if (props.groupData) {
       service?.refresh();
     }
-  },[JSON.stringify(props.groupData)]);
+  }, [JSON.stringify(props.groupData)]);
 
   return (
     <GanttBlockContext.Provider
@@ -281,11 +302,11 @@ export const groupData = (data, group, ctx) => {
 };
 export const processDataToGroups = (data, ctx) => {
   const _group = ctx.group;
-  return  groupData(data, _group, ctx)
+  return groupData(data, _group, ctx);
 };
 
 export const GanttBlockProvider = (props) => {
-  const { collection, fields,  ...others } = props;
+  const { collection, fields, ...others } = props;
   const { getCollectionFields } = useCollectionManager();
   const names = Array.from(
     new Set(
@@ -300,19 +321,24 @@ export const GanttBlockProvider = (props) => {
   const range = props.timeRange || props?.fieldNames?.range || 'day';
   const [timeRange, setTimeRange] = useState(range);
   const preProcessData = props.preProcessData || processDataToGroups;
-  const [rowKey, setRowKey] = useState(props.rowKey || (props.group?'rowKey':'id'));
+  const [rowKey, setRowKey] = useState(props.rowKey || (props.group ? 'rowKey' : 'id'));
   const [group, setGroup] = useState(props.group);
   const [sort, setSort] = useState(props.sort);
   const filter = useMemo(() => {
     return props.params.filter;
-  }, [props]);
+  }, [props.params.filter]);
   const params = useMemo(() => {
     const sortField: any = _fields.filter((field) => {
       return field.name == sort;
     })[0];
-    const sortName = ['dic'].includes(sortField?.interface) ? sortField.foreignKey : sortField.name;
+
+    const sortName = sortField
+      ? ['dic'].includes(sortField?.interface)
+        ? sortField?.foreignKey
+        : sortField?.name
+      : sort;
     const { appends } = useAssociationNames();
-    if (['dic'].includes(sortField.interface)) {
+    if (sortField && ['dic'].includes(sortField.interface)) {
       appends.push(sortField.name);
     }
     if (fields?.groups) {
@@ -367,6 +393,7 @@ export const useGanttBlockContext = () => {
 
 export const useGanttBlockProps = () => {
   const ctx = useGanttBlockContext();
+  const {TooltipContent,hasMultiBar} = ctx;
   const preProcessData = ctx.preProcessData || ((data: any) => data || []);
   const [tasks, setTasks] = useState<any>([]);
   const [rightSize, setRightSize] = useState<any>(ctx.rightSize);
@@ -442,6 +469,8 @@ export const useGanttBlockProps = () => {
     onResize,
     hasScroll,
     rightSize,
+    TooltipContent,
+    hasMultiBar
   };
 };
 

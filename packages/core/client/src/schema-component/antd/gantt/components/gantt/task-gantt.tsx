@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useRef } from 'react';
 import { Calendar, CalendarProps } from '../calendar/calendar';
 import { Grid, GridProps } from '../grid/grid';
 import { TaskGanttContent, TaskGanttContentProps } from './task-gantt-content';
+import { TaskGanttContentText } from './task-gantt-content-text';
 
 export type TaskGanttProps = {
   gridProps: GridProps;
@@ -12,12 +13,34 @@ export type TaskGanttProps = {
   scrollX: number;
   ref: any;
   rowKey: string;
+  hasMultiBar: boolean;
 };
 export const TaskGantt: React.FC<TaskGanttProps> = forwardRef(
-  ({ gridProps, calendarProps, barProps, ganttHeight, scrollY, scrollX, rowKey }, ref: any) => {
+  ({ gridProps, calendarProps, barProps, ganttHeight, scrollY, scrollX, rowKey, hasMultiBar }, ref: any) => {
     const ganttSVGRef = useRef<SVGSVGElement>(null);
     const horizontalContainerRef = useRef<HTMLDivElement>(null);
     const newBarProps = { ...barProps, svg: ganttSVGRef };
+    let newBars = null;
+    if (hasMultiBar) {
+      const tasks = barProps.tasks;
+      if (tasks && tasks.length) {
+        const newTasks: any = [];
+        tasks.forEach((bar) => {
+          bar.items.forEach((bar, index) => {
+            newTasks[index] = newTasks[index] || [];
+            newTasks[index].push(bar);
+          });
+        });
+        newBars = newTasks.map((tasks) => {
+          const { tasks: _tasks, ...others } = barProps;
+          return {
+            ...others,
+            tasks,
+            svg: ganttSVGRef,
+          };
+        });
+      }
+    }
 
     useEffect(() => {
       if (horizontalContainerRef.current) {
@@ -56,7 +79,16 @@ export const TaskGantt: React.FC<TaskGanttProps> = forwardRef(
             className="ganttBody"
           >
             <Grid {...gridProps} rowKey={rowKey} />
-            <TaskGanttContent {...newBarProps} rowKey={rowKey} />
+            {hasMultiBar && newBars ? (
+              <>
+              {newBars.map((newBarProps, index) => {
+                return <TaskGanttContent key={index} {...newBarProps} rowKey={rowKey} />;
+              })}
+              <TaskGanttContentText key='text' {...newBarProps} rowKey={rowKey} />
+              </>
+            ) : (
+              <TaskGanttContent {...newBarProps} rowKey={rowKey} />
+            )}
           </svg>
         </div>
       </div>

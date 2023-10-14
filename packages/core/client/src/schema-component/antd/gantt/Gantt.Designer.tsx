@@ -1,4 +1,4 @@
-import { useField, useFieldSchema } from '@formily/react';
+import { ISchema, useField, useFieldSchema } from '@formily/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedBlockDesignerItem, useCompile, useDesignable } from '../..';

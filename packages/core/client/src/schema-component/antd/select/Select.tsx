@@ -7,6 +7,7 @@ import { Select as AntdSelect, Empty, Spin } from 'antd';
 import React from 'react';
 import { ReadPretty } from './ReadPretty';
 import { FieldNames, defaultFieldNames, getCurrentOptions } from './utils';
+import { useProps } from '../../hooks';
 
 type Props = SelectProps<any, any> & {
   objectValue?: boolean;
@@ -15,12 +16,13 @@ type Props = SelectProps<any, any> & {
   rawOptions: any[];
   fieldNames: FieldNames;
   allowClear?:boolean;
+  useProps?: () => any;
 };
 
 const isEmptyObject = (val: any) => !isValid(val) || (typeof val === 'object' && Object.keys(val).length === 0);
 
 const ObjectSelect = (props: Props) => {
-  const { value, options, onChange, fieldNames, mode, loading, rawOptions, defaultValue, allowClear = true, ...others } = props;
+  const { value, options, onChange, fieldNames, mode, loading, rawOptions, defaultValue, allowClear = true, ...others } = useProps(props);
   const toValue = (v: any) => {
     if (isEmptyObject(v)) {
       return;
@@ -82,10 +84,22 @@ const filterOption = (input, option) => (option?.label ?? '').toLowerCase().incl
 
 const InternalSelect = connect(
   (props: Props) => {
-    const { objectValue, loading, value, rawOptions, defaultValue, allowClear, ...others } = props;
-    let mode: any = props.multiple ? 'multiple' : props.mode;
-    if (mode && !['multiple', 'tags'].includes(mode)) {
-      mode = undefined;
+    const { useProps,...others1 } = props;
+    const {...others2 } = useProps?.() || {};
+    const {
+      objectValue, 
+      loading, 
+      value, 
+      rawOptions, 
+      defaultValue, 
+      allowClear,
+      multiple,
+      mode,
+      ...others
+    } = { ...others1, ...others2 } as any;
+    let mode1: any = multiple ? 'multiple' : mode;
+    if (mode1 && !['multiple', 'tags'].includes(mode1)) {
+      mode1 = undefined;
     }
     if (objectValue) {
       return (
@@ -94,13 +108,13 @@ const InternalSelect = connect(
           {...others}
           defaultValue={defaultValue}
           value={value}
-          mode={mode}
+          mode={mode1}
           loading={loading}
         />
       );
     }
     const toValue = (v) => {
-      if (['tags', 'multiple'].includes(props.mode) || props.multiple) {
+      if (['tags', 'multiple'].includes(mode) || multiple) {
         if (v) {
           return toArr(v);
         }

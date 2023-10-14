@@ -13,7 +13,7 @@ import {
 } from '../block/index';
 import { PrjRecordBlockInitializers } from '../initializers';
 
-export const DataSelectProvider: React.FC = (props) => {
+export const DataSelectBlockProvider: React.FC = (props) => {
   const initializers = useContext<any>(SchemaInitializerContext);
   const children = initializers.BlockInitializers.items[2].children;
   const hasDataSelect = children.some((initializer) => initializer.component === 'DataSelect.initializer');
@@ -54,4 +54,4 @@ export const DataSelectProvider: React.FC = (props) => {
   );
 };
 
-DataSelectProvider.displayName = 'DataSelectProvider';
+DataSelectBlockProvider.displayName = 'DataSelectBlockProvider';

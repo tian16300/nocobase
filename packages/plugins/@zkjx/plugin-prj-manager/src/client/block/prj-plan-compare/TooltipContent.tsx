@@ -1,119 +1,19 @@
-import { css, cx } from '@emotion/css';
-import React, { useEffect, useRef, useState } from 'react';
-import { getYmd } from '../../helpers/other-helper';
-import { BarTask } from '../../types/bar-task';
-import { Task } from '../../types/public-types';
-import useStyles from './style';
+import React from 'react';
+import { Input, css, cx, useToken } from '@nocobase/client';
 import { Col, Row, Space, Statistic } from 'antd';
+import { Task } from '@nocobase/client/src/schema-component/antd/gantt/types/public-types';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
-import { useToken } from '../../../__builtins__';
-export type TooltipProps = {
-  task: BarTask;
-  arrowIndent: number;
-  rtl: boolean;
-  svgContainerHeight: number;
-  svgContainerWidth: number;
-  svgWidth: number;
-  headerHeight: number;
-  taskListWidth: number;
-  scrollX: number;
-  scrollY: number;
-  rowHeight: number;
-  fontSize: string;
-  fontFamily: string;
-  TooltipContent: React.FC<{
-    task: Task;
-    fontSize: string;
-    fontFamily: string;
-  }>;
-};
-export const Tooltip: React.FC<TooltipProps> = ({
-  task,
-  rowHeight,
-  rtl,
-  svgContainerHeight,
-  svgContainerWidth,
-  scrollX,
-  scrollY,
-  arrowIndent,
-  fontSize,
-  fontFamily,
-  headerHeight,
-  taskListWidth,
-  TooltipContent,
-}) => {
-  const { wrapSSR, componentCls, hashId } = useStyles();
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const [relatedY, setRelatedY] = useState(0);
-  const [relatedX, setRelatedX] = useState(0);
-  useEffect(() => {
-    if (tooltipRef.current) {
-      const tooltipHeight = tooltipRef.current.offsetHeight * 1.1;
-      const tooltipWidth = tooltipRef.current.offsetWidth * 1.1;
-
-      let newRelatedY = task.index * rowHeight - scrollY + headerHeight;
-      let newRelatedX: number;
-      if (rtl) {
-        newRelatedX = task.x1 - arrowIndent * 1.5 - tooltipWidth - scrollX;
-        if (newRelatedX < 0) {
-          newRelatedX = task.x2 + arrowIndent * 1.5 - scrollX;
-        }
-        const tooltipLeftmostPoint = tooltipWidth + newRelatedX;
-        if (tooltipLeftmostPoint > svgContainerWidth) {
-          newRelatedX = svgContainerWidth - tooltipWidth;
-          newRelatedY += rowHeight;
-        }
-      } else {
-        newRelatedX = task.x2 + arrowIndent * 1.5 + taskListWidth - scrollX;
-        const tooltipLeftmostPoint = tooltipWidth + newRelatedX;
-        const fullChartWidth = taskListWidth + svgContainerWidth;
-        if (tooltipLeftmostPoint > fullChartWidth) {
-          newRelatedX = task.x1 + taskListWidth - arrowIndent * 1.5 - scrollX - tooltipWidth;
-        }
-        if (newRelatedX < taskListWidth) {
-          newRelatedX = svgContainerWidth + taskListWidth - tooltipWidth;
-          newRelatedY += rowHeight;
-        }
-      }
-
-      const tooltipLowerPoint = tooltipHeight + newRelatedY - scrollY;
-      if (tooltipLowerPoint > svgContainerHeight - scrollY) {
-        newRelatedY = svgContainerHeight - tooltipHeight;
-      }
-      setRelatedY(newRelatedY);
-      setRelatedX(newRelatedX);
-    }
-  }, [
-    tooltipRef,
-    task,
-    arrowIndent,
-    scrollX,
-    scrollY,
-    headerHeight,
-    taskListWidth,
-    rowHeight,
-    svgContainerHeight,
-    svgContainerWidth,
-    rtl,
-  ]);
-
-  return wrapSSR(
-    <div
-      ref={tooltipRef}
-      className={cx(relatedX ? 'tooltipDetailsContainer' : 'tooltipDetailsContainerHidden', componentCls, hashId)}
-      style={{ left: relatedX, top: relatedY }}
-    >
-      <TooltipContent task={task} fontSize={fontSize} fontFamily={fontFamily} />
-    </div>,
-  );
+import useStyles from './style';
+import { dayjs } from '@nocobase/utils';
+import { Typography } from 'antd';
+const { Title } = Typography;
+const getYmd = (param) => {
+  const date = dayjs(param);
+  if (date.isValid()) return date.format('YYYY-MM-DD');
+  return '--';
 };
 
-export const StandardTooltipContent: React.FC<{
-  task: Task;
-  fontSize: string;
-  fontFamily: string;
-}> = ({ task, fontSize, fontFamily }) => {
-  const { wrapSSR, componentCls, hashId } = useStyles();
+const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fontFamily }) => {
   const { token } = useToken();
   const style = {
     fontSize,
@@ -130,25 +30,21 @@ export const StandardTooltipContent: React.FC<{
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-  
     prjDuration =
       projectBar.start && projectBar.end
         ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
         : null;
   }
-  return wrapSSR(
-    <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
-      <div
-        className={css`
-          fontsize: ${fontSize};
-          minwidth: 500px;
-        `}
-      >
-        <div style={{ marginBottom: 8, fontSize: '1.1em' }}>
-          <strong>{task.name}</strong>
-        </div>
+  return (
+    <div className="task-tooltip-content-item">
+      <div style={{ fontSize: '1.1em' }}>
+        <strong>
+          {task.seriesName}-{task.title}
+        </strong>
+      </div>
+      {!task.isDiff && (
         <div>
-          <Row gutter={[16, 8]}>
+          <Row gutter={[16, 4]}>
             <Col span={8}>
               <Statistic
                 title={
@@ -276,8 +172,89 @@ export const StandardTooltipContent: React.FC<{
                 />
               )}
             </Col>
+            {task.remark && task.remark.trim() !== '' && (
+              <Col span={24}>
+                <Statistic
+                  title="备注"
+                  value={null}
+                  formatter={() => {
+                    return <Input.ReadPrettyTextArea value={task.remark}></Input.ReadPrettyTextArea>;
+                  }}
+                  valueStyle={{
+                    // color: '#3f8600',
+                    fontSize: fontSize,
+                  }}
+                />
+              </Col>
+            )}
           </Row>
         </div>
+      )}
+      {task.isDiff && (
+        <div>
+          <Row gutter={[16, 8]}>
+            <Col span={8}>
+              <Statistic
+                title={''}
+                value={duration ? duration : '--'}
+                precision={1}
+                valueStyle={{
+                  // color: '#3f8600',
+                  fontSize: fontSize,
+                  fontWeight: 'bold',
+                }}
+                suffix={duration ? '天' : ''}
+              />
+            </Col>
+          </Row>
+        </div>
+      )}
+    </div>
+  );
+};
+export const TooltipContent: React.FC<{
+  task: Task;
+  fontSize: string;
+  fontFamily: string;
+}> = ({ task, fontSize, fontFamily }) => {
+  const { wrapSSR, componentCls, hashId } = useStyles();
+  const style = {
+    fontSize,
+    fontFamily,
+  };
+  const { type } = task;
+  const isProject = type == 'project';
+  let projectBar = null;
+  const duration =
+    task.start && task.end
+      ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+      : null;
+  let prjDuration = null;
+  projectBar = (task as any).projectBar;
+
+  if (isProject && projectBar) {
+    prjDuration =
+      projectBar.start && projectBar.end
+        ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+        : null;
+  }
+  return wrapSSR(
+    <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
+      <div
+        className={css`
+          fontsize: ${fontSize};
+          minwidth: 500px;
+          .task-tooltip-content-item {
+            margin-top: 12px;
+            &:nth-child(0) {
+              margin-top: 0;
+            }
+          }
+        `}
+      >
+        {task?.data?.map((item) => {
+          return !item.isHidden && <TaskItem task={item} fontSize={fontSize} fontFamily={fontFamily} />;
+        })}
       </div>
     </div>,
   );

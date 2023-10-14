@@ -34,6 +34,12 @@ export interface Task {
   projectItem?: any;
   isGroup?:boolean;
   fieldCtx?: any;
+  data?:Array<Task>
+  items?:Array<Task>;
+  height?: number;
+  x?:number;
+  y:number;
+  isHidden?:boolean;
 }
 
 export interface EventOption {

@@ -56,6 +56,7 @@ const preProcessData = (data, ctx) => {
     };
     if (id) {
       groupItem['fieldCtx'] = groupField;
+      groupItem.schemaName = groupField.name;
     }
     return groupItem;
   });

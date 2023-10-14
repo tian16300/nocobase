@@ -116,7 +116,7 @@ export const createDataSelectBlockSchema = (options) => {
   };
   const grid = {
     type: 'void',
-    'x-component': 'Grid'
+    'x-component': 'Grid',
   };
 
   const tabs: ISchema = {
@@ -134,7 +134,7 @@ export const createDataSelectBlockSchema = (options) => {
       },
     },
     properties: {
-      tab1: createTabGrid('项目计划', {
+      tab1: createTabGrid('任务管理', {
         ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
       }),
       // tab2: createTabGrid('项目任务', {
@@ -362,215 +362,12 @@ export const createBaseComp = (comp) => {
   };
 };
 
-export const createPrjWorkPlanGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames, appends, ...others } = options;
-  const schema: ISchema = {
-    type: 'void',
-    'x-component': 'Gantt',
-    'x-component-props': {
-      useProps: '{{ useGanttBlockProps }}',
-    },
-    properties: {
-      toolBar: {
-        type: 'void',
-        'x-component': 'ActionBar',
-        'x-component-props': {
-          style: {
-            marginBottom: 24,
-          },
-        },
-        'x-initializer': 'GanttActionInitializers',
-        properties: {},
-      },
-      table: {
-        type: 'array',
-        'x-initializer': 'TableColumnInitializers',
-        'x-component': 'TableV2',
-        'x-component-props': {
-          rowKey: 'id',
-          rowSelection: {
-            type: 'checkbox',
-          },
-          useProps: '{{ useTableBlockProps }}',
-          pagination: false,
-        },
-        properties: {
-          [uid()]: {
-            type: 'void',
-            'x-decorator': 'TableV2.Column.Decorator',
-            'x-designer': 'TableV2.Column.Designer',
-            'x-component': 'TableV2.Column',
-            properties: {
-              prjStage: {
-                'x-collection-field': 'task.prjStage',
-                'x-component': 'CollectionField',
-                'x-component-props': {
-                  ellipsis: true,
-                  size: 'small',
-                  fieldNames: {
-                    label: 'stage.label',
-                    value: 'id',
-                  },
-                },
-                'x-read-pretty': true,
-                'x-decorator': null,
-                'x-decorator-props': {
-                  labelStyle: {
-                    display: 'none',
-                  },
-                },
-                properties: {
-                  [uid()]: {
-                    type: 'void',
-                    title: '{{ t("View record") }}',
-                    'x-component': 'AssociationField.Viewer',
-                    'x-component-props': {
-                      className: 'nb-action-popup',
-                    },
-                    properties: {
-                      tabs: {
-                        type: 'void',
-                        'x-component': 'Tabs',
-                        'x-component-props': {},
-                        'x-initializer': 'TabPaneInitializers',
-                        properties: {
-                          tab1: {
-                            type: 'void',
-                            title: '{{t("Details")}}',
-                            'x-component': 'Tabs.TabPane',
-                            'x-designer': 'Tabs.Designer',
-                            'x-component-props': {},
-                            properties: {
-                              grid: {
-                                type: 'void',
-                                'x-component': 'Grid',
-                                'x-initializer': 'RecordBlockInitializers',
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          actions: {
-            type: 'void',
-            title: '{{ t("Actions") }}',
-            'x-action-column': 'actions',
-            'x-decorator': 'TableV2.Column.ActionBar',
-            'x-component': 'TableV2.Column',
-            'x-designer': 'TableV2.ActionColumnDesigner',
-            'x-initializer': 'TableActionColumnInitializers',
-            properties: {
-              actions: {
-                type: 'void',
-                'x-decorator': 'DndContext',
-                'x-component': 'Space',
-                'x-component-props': {
-                  split: '',
-                },
-                properties: {},
-              },
-            },
-          },
-        },
-      },
-      detail: {
-        type: 'void',
-        'x-component': 'Gantt.Event',
-        properties: {
-          drawer: {
-            type: 'void',
-            'x-component': 'Action.Drawer',
-            'x-component-props': {
-              className: 'nb-action-popup',
-            },
-            title: '{{ t("View record") }}',
-            properties: {
-              tabs: {
-                type: 'void',
-                'x-component': 'Tabs',
-                'x-component-props': {},
-                'x-initializer': 'TabPaneInitializers',
-                properties: {
-                  tab1: {
-                    type: 'void',
-                    title: '{{t("Details")}}',
-                    'x-component': 'Tabs.TabPane',
-                    'x-designer': 'Tabs.Designer',
-                    'x-component-props': {},
-                    properties: {
-                      grid: {
-                        type: 'void',
-                        'x-component': 'Grid',
-                        'x-initializer': 'RecordBlockInitializers',
-                        properties: {},
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      group: {
-        type: 'void',
-        'x-component': 'Gantt.Event',
-        properties: {
-          drawer: {
-            type: 'void',
-            'x-component': 'Action.Drawer',
-            'x-component-props': {
-              className: 'nb-action-popup',
-            },
-            title: '{{ t("View record") }}',
-            properties: {
-              tabs: {
-                type: 'void',
-                'x-component': 'Tabs',
-                'x-component-props': {},
-                'x-initializer': 'TabPaneInitializers',
-                properties: {
-                  tab1: {
-                    type: 'void',
-                    title: '{{t("Details")}}',
-                    'x-component': 'Tabs.TabPane',
-                    'x-designer': 'Tabs.Designer',
-                    'x-component-props': {},
-                    properties: {
-                      grid: {
-                        type: 'void',
-                        'x-component': 'Grid',
-                        'x-initializer': 'RecordBlockInitializers',
-                        properties: {},
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-  return schema;
-};
 export const createPrjWorkPlanShema = () => {
   const groupsFields = ['prjStage', 'user'];
   const comp = 'PrjWorkPlan';
   const groups = {};
   groupsFields.forEach((key) => {
     groups[key] = {
-      type: 'void',
-      'x-component': 'CollectionField',
-      'x-collection-field': 'task.' + key,
-      properties: {
-        [uid()]: {
           type: 'void',
           'x-component': 'Gantt.Event',
           'x-decorator': 'ACLActionProvider',
@@ -610,9 +407,7 @@ export const createPrjWorkPlanShema = () => {
               },
             },
           },
-        },
-      },
-    };
+        }
   });
   const fields = {
     groups: [
@@ -701,7 +496,7 @@ export const createPrjWorkPlanShema = () => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props': {
-                      allowClear: false
+                      allowClear: false,
                     },
                     enum: fields.sort,
                     default: 'start',
@@ -836,4 +631,231 @@ export const createPrjWorkPlanShema = () => {
 };
 export const createPrjWorkStaticShema = () => {
   return createBaseComp('PrjWorkStatic');
+};
+
+export const createPrjPlanCompare = () => {
+  const Comp = 'PrjPlanCompare';
+  const fields = {
+    groups: [
+      { label: '项目阶段', value: 'prjStage' },
+      { label: '负责人', value: 'user' },
+      { label: '状态', value: 'status' },
+    ],
+    sort: [
+      { label: '开始时间', value: 'start' },
+      { label: '截止时间', value: 'end' },
+      { label: '任务状态', value: 'status' },
+    ],
+    range: [
+      { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
+      { label: '{{t("Week")}}', value: 'week', color: 'pule' },
+      { label: '{{t("Month")}}', value: 'month', color: 'green' },
+      { label: '{{t("QuarterYear")}}', value: 'quarterYear', color: 'red' },
+      { label: '{{t("Year")}}', value: 'year', color: 'green' },
+    ],
+  };
+  const schema = {
+    type: 'void',
+    'x-decorator': `${Comp}.Decorator`,
+    'x-decorator-props': {
+      collection: 'prj_plan_history',
+      resource: 'prj_plan_history',
+      action: 'list',
+      fieldNames: {
+        id: 'id',
+        title: 'title',
+        start: 'start',
+        range: 'week',
+        end: 'end',
+      },
+      params: {
+        // appends: ['prjStage', 'user', 'dependencies'],
+        paginate: false,
+        sort: 'id',
+      },
+      rightSize: 0.9,
+      // group: 'prjStage',
+      fields,
+    },
+    'x-component': `${Comp}.Wrap`,
+    'x-designer': `${Comp}.Designer`,
+    properties: {
+      view: {
+        type: 'void',
+        'x-component': `Gantt`,
+        'x-component-props': {
+          useProps: '{{ useGanttBlockProps }}',
+        },
+        properties: {
+          form: {
+            type: 'object',
+            properties: {
+              layout: {
+                type: 'void',
+                'x-component': 'FormLayout',
+                'x-component-props': {
+                  size: 'default',
+                  layout: 'inline',
+                  labelWidth: 100,
+                  wrapperWidth: 120,
+                },
+                properties: {
+                  prj: {
+                    type: 'number',
+                    title: '选择项目',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'RemoteSelect',
+                    'x-component-props': {
+                      useProps: `{{use${Comp}OptionsProps}}`,
+                    },
+                  },                  
+                  range: {
+                    type: 'string',
+                    title: '时间范围',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props': {
+                      allowClear: false,
+                    },
+                    enum: fields.range,
+                    default: 'week',
+                  }
+                },
+              },
+            },
+          },
+          toolBar: {
+            type: 'void',
+            'x-component': 'ActionBar',
+            'x-component-props': {
+              style: {
+                marginBottom: 24,
+              },
+            },
+            'x-initializer': 'GanttActionInitializers',
+            properties: {
+              version: {
+                type: 'number',
+                title: '当前版本',
+                required: true,
+                'x-decorator': 'FormItem',
+                'x-component': 'Select',
+                'x-component-props': {
+                  useProps: `{{use${Comp}OptionsProps}}`,
+                },
+              },
+              compVersion: {
+                type: 'number',
+                title: '对比版本',
+                required: true,
+                'x-decorator': 'FormItem',
+                'x-component': 'Select',
+                'x-component-props': {
+                  useProps: `{{use${Comp}OptionsProps}}`,
+                },
+              }
+            },
+          },
+          table: {
+            type: 'array',
+            'x-component': `${Comp}.Table`,
+            'x-component-props': {
+              rowKey: 'rowKey',
+              rowSelection: {
+                type: 'checkbox',
+              },
+              pagination: false,
+              useProps: `{{use${Comp}TableBlockProps}}`
+            },
+          },          
+          latest: {
+            type: 'void',
+            'x-component': 'Gantt.Event',
+            'x-decorator': 'ACLActionProvider',
+            'x-acl-action': 'update',
+            properties: {
+              drawer: {
+                type: 'void',
+                'x-component': 'Action.Drawer',
+                'x-component-props': {
+                  className: 'nb-action-popup',
+                },
+                title: '{{ t("项目阶段") }}',
+                properties: {
+                  tabs: {
+                    type: 'void',
+                    'x-component': 'Tabs',
+                    'x-component-props': {},
+                    'x-initializer': 'TabPaneInitializers',
+                    properties: {
+                      tab1: {
+                        type: 'void',
+                        title: '{{t("Details")}}',
+                        'x-component': 'Tabs.TabPane',
+                        'x-designer': 'Tabs.Designer',
+                        'x-component-props': {},
+                        properties: {
+                          grid: {
+                            type: 'void',
+                            'x-component': 'Grid',
+                            'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }
+            }
+          },          
+          compVersion: {
+            type: 'void',
+            'x-component': 'Gantt.Event',
+            'x-decorator': 'ACLActionProvider',
+            'x-acl-action': 'update',
+            properties: {
+              drawer: {
+                type: 'void',
+                'x-component': 'Action.Drawer',
+                'x-component-props': {
+                  className: 'nb-action-popup',
+                },
+                title: '{{ t("项目阶段") }}',
+                properties: {
+                  tabs: {
+                    type: 'void',
+                    'x-component': 'Tabs',
+                    'x-component-props': {},
+                    'x-initializer': 'TabPaneInitializers',
+                    properties: {
+                      tab1: {
+                        type: 'void',
+                        title: '{{t("Details")}}',
+                        'x-component': 'Tabs.TabPane',
+                        'x-designer': 'Tabs.Designer',
+                        'x-component-props': {},
+                        properties: {
+                          grid: {
+                            type: 'void',
+                            'x-component': 'Grid',
+                            'x-initializer': 'RecordBlockInitializers',
+                            properties: {},
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return schema;
 };

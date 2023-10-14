@@ -3,6 +3,7 @@ import { PrjWorkPlanInitializer } from './PrjWorkPlanInitializer';
 import { PrjWorkPlanDesigner } from './PrjWorkPlan.Designer';
 import { PrjWorkPlanProvider } from './PrjWorkPlanProvider';
 import { PrjWorkPlanTable } from './PrjWorkPlanTable';
+import { CardItem, css } from '@nocobase/client';
 
 export const PrjWorkPlan = () => {
   return (
@@ -10,7 +11,7 @@ export const PrjWorkPlan = () => {
   );
 };
 PrjWorkPlan.Wrap = ({ children }) => {
-  return (<>{children}</>)
+  return (<CardItem className={css`box-shadow:none!important;`} bodyStyle={{padding:0}}>{children}</CardItem>)
 }
 
 PrjWorkPlan.Table = PrjWorkPlanTable
