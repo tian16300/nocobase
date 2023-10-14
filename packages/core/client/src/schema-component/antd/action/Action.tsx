@@ -39,6 +39,8 @@ export const Action: ComposedAction = observer(
       icon,
       title,
       onClick,
+      style,
+      openSize,
       ...others
     } = useProps(props);
     const { wrapSSR, componentCls, hashId } = useStyles();
@@ -55,7 +57,6 @@ export const Action: ComposedAction = observer(
     const designerProps = fieldSchema['x-designer-props'];
     const openMode = fieldSchema?.['x-component-props']?.['openMode'];
     const disabled = form.disabled || field.disabled || field.data?.disabled || props.disabled;
-    const openSize = fieldSchema?.['x-component-props']?.['openSize'];
     const toHref = fieldSchema?.['x-component-props']?.['to'];
     const linkageRules = fieldSchema?.['x-linkage-rules'] || [];
     const { designable } = useDesignable();
@@ -112,10 +113,10 @@ export const Action: ComposedAction = observer(
 
     const buttonStyle = useMemo(() => {
       return {
-        ...others.style,
+        ...style,
         opacity: designable && field?.data?.hidden && 0.1,
       };
-    }, [designable, field?.data?.hidden, others.style]);
+    }, [designable, field?.data?.hidden, style]);
 
     const renderButton = () => {
       if (!designable && field?.data?.hidden) {

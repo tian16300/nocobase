@@ -1,16 +1,16 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { onFieldChange } from '@formily/core';
 import { RecursionField, connect, mapProps, observer, useField, useFieldSchema, useForm } from '@formily/react';
-import { onFieldChange, onFormInputChange } from '@formily/core';
 import { uid } from '@formily/shared';
 import { Space, message } from 'antd';
 import { isFunction } from 'mathjs';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RecordProvider, useAPIClient } from '../../../';
 import { isVariable } from '../../../variables/utils/isVariable';
+import { getInnermostKeyAndValue } from '../../common/utils/uitls';
 import { RemoteSelect, RemoteSelectProps } from '../remote-select';
 import useServiceOptions, { useAssociationFieldContext } from './hooks';
-import { getInnermostKeyAndValue } from '../../common/utils/uitls';
 
 export type AssociationSelectProps<P = any> = RemoteSelectProps<P> & {
   action?: string;
@@ -24,7 +24,7 @@ export const filterAnalyses = (filters): any[] => {
   const type = Object.keys(filters)[0] || '$and';
   const conditions = filters[type];
   const results = [];
-  conditions.map((c) => {
+  conditions?.map((c) => {
     const jsonlogic = getInnermostKeyAndValue(c);
     const operator = jsonlogic?.key;
 
@@ -32,7 +32,7 @@ export const filterAnalyses = (filters): any[] => {
       return true;
     }
     const regex = /\{\{\$(?:[a-zA-Z_]\w*)\.([a-zA-Z_]\w*)(?:\.id)?\}\}/;
-    const fieldName = jsonlogic?.value.match(regex)?.[1];
+    const fieldName = jsonlogic?.value.match?.(regex)?.[1];
     if (fieldName) {
       results.push(fieldName);
     }
@@ -124,8 +124,9 @@ const InternalAssociationSelect = observer((props: AssociationSelectProps) => {
           value={value || innerValue}
           service={service}
           onChange={(value) => {
-            setInnerValue(value);
-            props.onChange?.(value);
+            const val = value?.length !== 0 ? value : null;
+            setInnerValue(val);
+            props.onChange?.(val);
           }}
           CustomDropdownRender={addMode === 'quickAdd' && QuickAddContent}
         ></RemoteSelect>

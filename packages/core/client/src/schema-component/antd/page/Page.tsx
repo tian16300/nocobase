@@ -23,6 +23,7 @@ import { ErrorFallback } from '../error-fallback';
 import FixedBlock from './FixedBlock';
 import { PageDesigner, PageTabDesigner } from './PageTabDesigner';
 import { useStyles } from './style';
+import { useStyles as useAClStyles } from '../../../acl/style';
 
 const PageHeaderTitleRender = (props) => {
   const fieldSchema = useFieldSchema();
@@ -100,6 +101,7 @@ export const Page = (props) => {
   );
   const [height, setHeight] = useState(0);
   const { wrapSSR, hashId, componentCls } = useStyles();
+  const aclStyles = useAClStyles();
 
   const handleErrors = (error) => {
     console.error(error);
@@ -109,7 +111,7 @@ export const Page = (props) => {
 
   return wrapSSR(
     <FilterBlockProvider>
-      <div className={`${componentCls} ${hashId}`}>
+      <div className={`${componentCls} ${hashId} ${aclStyles.styles}`}>
         <PageDesigner title={fieldSchema.title || title} />
         <div
           ref={(ref) => {
