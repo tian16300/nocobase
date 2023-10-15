@@ -33,9 +33,9 @@ export class PluginPrjManagerServer extends Plugin {
       'task_hour',
     ]);
     /* 更新 周报保存数据后 更新项目活跃 */
-    this.app.db.on('report.afterSaveWithAssociations', async () => {
+    this.app.db.on('report.afterSaveWithAssociations', async (report, options) => {
       /* 保存周报后 更新数据 */
-      await this.checkPrjActive();
+      await this.checkPrjActive(report, options);
     });
     /* 删除项目历史版本时 移除项目计划历史版本 */
     this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
@@ -152,7 +152,7 @@ export class PluginPrjManagerServer extends Plugin {
 
   async remove() {}
 
-  checkPrjActive = async () => {
+  checkPrjActive = async (report, options) => {
     const weekReport = this.db.getRepository('reportDetail');
     const result: Array<{ belongsPrjKey: number }> = await weekReport.find({
       filter: {
@@ -174,7 +174,7 @@ export class PluginPrjManagerServer extends Plugin {
           activeIndex: groups[belongsPrjKey].length,
         },
       });
-      this.log.debug('更新项目活跃 数据', belongsPrjKey, groups[belongsPrjKey].length);
+      this.log.debug(`更新项目活跃 数据, ${belongsPrjKey}, ${groups[belongsPrjKey].length}`);
     });
   };
 }
