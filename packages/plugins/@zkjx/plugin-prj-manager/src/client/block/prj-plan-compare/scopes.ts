@@ -3,11 +3,11 @@ import { useField, useFieldSchema } from '@formily/react';
 import { useEffect } from 'react';
 import { usePrjPlanCompareProviderContext } from './PrjPlanCompareProvider';
 import { dayjs } from '@nocobase/utils';
-export const usePrjPlanCompareOptionsProps = () => {
+export const usePrjPlanCompareOptionsProps = (_props) => {
   const field: IField = useField();
   const fieldShema = useFieldSchema();
   const { versions, values, setValues } = usePrjPlanCompareProviderContext();
-  let props: any = {};
+  let props: any = {..._props};
   if (['version', 'compVersion'].includes(fieldShema.name as string)) {
   }
   const name = fieldShema.name;

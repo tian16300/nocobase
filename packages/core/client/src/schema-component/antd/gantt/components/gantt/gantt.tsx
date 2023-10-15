@@ -51,7 +51,7 @@ export const DeleteEventContext = React.createContext({
 interface GanttFormCompProps {
   value: { group: 'string'; sort: 'string'; timeRange: 'string' };
   setValue: { [key: string]: (value: string) => {} };
-  getPopupContainer: () => HTMLDivElement;
+  getPopupContainer: () => any;
 }
 export const GanttFormComp: React.FC<GanttFormCompProps> = (props: GanttFormCompProps) => {
   const { value, setValue, getPopupContainer } = props;
@@ -124,26 +124,30 @@ export const GanttForm = connect(
 );
 
 const GanttRecordViewer = (props) => {
-  const { visible, setVisible, record = {}, isCreate = false, getContainer } = props;
+  const { visible, setVisible, record = {}, isCreate = false, getContainer, isFullScreen } = props;
   const { isGroup, schemaName = 'detail' } = record;
   const fieldSchema = useFieldSchema();
   const { name } = useCollection();
   const close = useCallback(() => {
     setVisible(false);
   }, []);
-  const eventSchema = fieldSchema?.properties[schemaName];
-  if(!isGroup && isCreate){
+  const eventSchema = {
+    ...fieldSchema?.properties[schemaName]
+  };
+  if (!isGroup && isCreate) {
     eventSchema['x-component-props'] = {
       inheritsKeys: Object.keys(record).filter((key) => {
         return !/^__+/.test(key);
       }),
     };
-
   }
-  if (eventSchema) {
-    eventSchema.properties.drawer['x-component-props'] = eventSchema.properties.drawer['x-component-props'] || {};
-    eventSchema.properties.drawer['x-component-props'].getContainer = getContainer;
+  const drawerProps = {
+    getContainer:isFullScreen?getContainer: null
   }
+  // if (eventSchema) {
+  //   eventSchema.properties.drawer['x-component-props'] = eventSchema.properties.drawer['x-component-props'] || {};
+  //   eventSchema.properties.drawer['x-component-props'].getContainer = getContainer;
+  // }
   // const eventSchema = useMemo(() => {
   //   let schema:any =  fieldSchema?.properties['detail'];
   //   if (isGroup) {
@@ -166,12 +170,12 @@ const GanttRecordViewer = (props) => {
   //   }
   //   return schema;
   // }, [fieldSchema, record]);
-  const isCollectionField =  record.__collection;
+  const isCollectionField = record.__collection;
   const collectionName = record.__collection || name;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible }} fieldSchema={eventSchema as Schema}>
+        <ActionContextProvider value={{ visible, setVisible, drawerProps }} fieldSchema={eventSchema as Schema}>
           <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
@@ -286,7 +290,7 @@ export const Gantt: any = (props: any) => {
   const containerRef = useRef<HTMLDivElement>();
 
   const getPopupContainer = () => {
-    return isFullscreen ? containerRef.current : document.body;
+    return containerRef.current;
   };
   const formValue = {
     group: ctx.group,
@@ -322,6 +326,16 @@ export const Gantt: any = (props: any) => {
   };
   fieldSchema.properties.toolBar.reduceProperties((pre, s) => {
     setPoupContainer(s);
+  });
+  fieldSchema?.reduceProperties((pre, s) => {
+    s?.reduceProperties((pre, schema) => {
+      if (['Action.Drawer'].includes(schema['x-component'])) {
+        schema['x-component-props'] = s['x-component-props'] || {};
+        schema['x-component-props'].getContainer = () => {
+          return isFullscreen ? getPopupContainer() : document.body;
+        };
+      }
+    });
   });
 
   // task change events
@@ -615,7 +629,11 @@ export const Gantt: any = (props: any) => {
   };
 
   const handleRowSelect = (keys) => {
-    setSelectedRowKeys(keys.map((key)=>{return key+''}));
+    setSelectedRowKeys(
+      keys.map((key) => {
+        return key + '';
+      }),
+    );
   };
   const saveTaskResource = async (task, params) => {
     if (!task.isGroup) {
@@ -673,9 +691,9 @@ export const Gantt: any = (props: any) => {
         flattenedData.forEach((item) => {
           allRecords = allRecords.concat(item.data);
         });
-        recordData = allRecords?.find((item) => item[rowKey] + '' === data[rowKey]+'');
+        recordData = allRecords?.find((item) => item[rowKey] + '' === data[rowKey] + '');
       } else {
-        recordData = flattenedData?.find((item) => item[rowKey] + '' === data[rowKey]+'');
+        recordData = flattenedData?.find((item) => item[rowKey] + '' === data[rowKey] + '');
       }
       if (!recordData) {
         return;
@@ -705,6 +723,22 @@ export const Gantt: any = (props: any) => {
       handerResize({});
     }
   }, [rightSize, isFullscreen]);
+
+  useEffect(() => {
+    fieldSchema?.reduceProperties((pre, s) => {
+      s?.reduceProperties((pre, schema) => {
+        if (['Action.Drawer'].includes(schema['x-component'])) {
+          schema['x-component-props'] = s['x-component-props'] || {};
+          if (isFullscreen){ 
+            schema['x-component-props'].getContainer = getPopupContainer;
+          }
+          else {
+            schema['x-component-props'].getContainer = document.body;
+          }
+        }
+      });
+    });
+  }, [isFullscreen]);
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
@@ -715,6 +749,7 @@ export const Gantt: any = (props: any) => {
     rtl,
     selectedRowKeys,
     rowKey,
+    viewMode,
   };
   const calendarProps: CalendarProps = {
     dateSetup,
@@ -835,6 +870,7 @@ export const Gantt: any = (props: any) => {
         record={record}
         isCreate={isCreate}
         getContainer={getPopupContainer}
+        isFullScreen={isFullscreen}
       />
       <div className="gantt-view-form">
         <Row>

@@ -264,11 +264,15 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
       <g className="arrows" fill={arrowColor} stroke={arrowColor}>
         {tasks.map((task) => {
            return task.barChildren.map((child) => {
+            let index = child.index;
+            if(Array.isArray(index)){
+              index = index[0];
+            }
             return (
               <Arrow
-                key={`Arrow from ${task[rowKey]?.toString()} to ${tasks[child.index][rowKey]?.toString()}`}
+                key={`Arrow from ${task[rowKey]?.toString()} to ${tasks[index][rowKey]?.toString()}`}
                 taskFrom={task}
-                taskTo={tasks[child.index]}
+                taskTo={tasks[index]}
                 rowHeight={rowHeight}
                 taskHeight={taskHeight}
                 arrowIndent={arrowIndent}

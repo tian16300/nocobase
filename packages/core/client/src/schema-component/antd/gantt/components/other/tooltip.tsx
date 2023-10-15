@@ -50,8 +50,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
     if (tooltipRef.current) {
       const tooltipHeight = tooltipRef.current.offsetHeight * 1.1;
       const tooltipWidth = tooltipRef.current.offsetWidth * 1.1;
-
-      let newRelatedY = task.index * rowHeight - scrollY + headerHeight;
+      let index = task.index;
+      if(Array.isArray(index)){
+        index = index[0];
+      }
+      let newRelatedY = index * rowHeight - scrollY + headerHeight;
       let newRelatedX: number;
       if (rtl) {
         newRelatedX = task.x1 - arrowIndent * 1.5 - tooltipWidth - scrollX;

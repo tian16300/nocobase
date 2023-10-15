@@ -1,7 +1,7 @@
 import { observer, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { Drawer } from 'antd';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { OpenSize } from './';
 import { useStyles } from './Action.Drawer.style';
 import { useActionContext } from './hooks';
@@ -14,7 +14,7 @@ const openSizeWidthMap = new Map<OpenSize, string>([
 ]);
 export const ActionDrawer: ComposedActionDrawer = observer(
   (props) => {
-    const { footerNodeName = 'Action.Drawer.Footer', ...others } = props;
+    const { footerNodeName = 'Action.Drawer.Footer',  ...others } = props;
     const { visible, setVisible, openSize = 'middle', drawerProps, modalProps } = useActionContext();
     const schema = useFieldSchema();
     const field = useField();
@@ -25,6 +25,7 @@ export const ActionDrawer: ComposedActionDrawer = observer(
       }
       return buf;
     });
+    
 
     return (
       <Drawer

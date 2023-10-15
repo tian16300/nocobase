@@ -14,6 +14,6 @@ export const useProps = (originalProps: any = {}) => {
   if (typeof useDynamicHook !== 'function') {
     useDynamicProps = useDef;
   }
-  const dynamicProps = useDynamicProps();
+  const dynamicProps = useDynamicProps(originalProps);
   return { ...others, ...dynamicProps };
 };
