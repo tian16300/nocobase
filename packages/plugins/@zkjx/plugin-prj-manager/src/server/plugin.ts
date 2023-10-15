@@ -19,6 +19,7 @@ export class PluginPrjManagerServer extends Plugin {
       'prj',
       'prj_plan',
       'prj_plan_history',
+      'prj_plan_latest',
       'prj_plan_version',
       'prj_stages_files',
       'prjs_files',
