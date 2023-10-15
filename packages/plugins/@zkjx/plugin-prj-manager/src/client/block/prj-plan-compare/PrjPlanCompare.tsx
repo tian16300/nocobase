@@ -242,21 +242,21 @@ PrjPlanCompare.Table = observer((props: any) => {
       y: tableHeight,
     };
   }, [tableHeight]);
-  const dtRender = (v) => {
-    const date = dayjs(v);
-    const formatStr = 'YYYY-MM-DD';
-    return date.isValid() ? date.format(formatStr) : '';
-  };
-  const getDays = (start, end) => {
-    var x = dayjs(start, { utc: false });
-    var y = dayjs(end, { utc: false });
-    if (x.isValid() && y.isValid()) {
-      var duration = dayjs.duration(y.diff(x));
-      const value = duration.as('days');
-      return Math.round(value * 10) / 10 + '天';
-    }
-    return '';
-  };
+  // const dtRender = (v) => {
+  //   const date = dayjs(v);
+  //   const formatStr = 'YYYY-MM-DD';
+  //   return date.isValid() ? date.format(formatStr) : '';
+  // };
+  // const getDays = (start, end) => {
+  //   var x = dayjs(start, { utc: false });
+  //   var y = dayjs(end, { utc: false });
+  //   if (x.isValid() && y.isValid()) {
+  //     var duration = dayjs.duration(y.diff(x));
+  //     const value = duration.as('days');
+  //     return Math.round(value * 10) / 10 + '天';
+  //   }
+  //   return '';
+  // };
   const renderItems = (params) => {
     const record1 = params.data[0];
     const record2 = params.data[1];
