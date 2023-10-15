@@ -42,8 +42,7 @@ export class PluginPrjManagerClient extends Plugin {
       PrjWorkStatic,
       PrjPlanCompare,
     });
-    this.app.addProvider(DataSelectBlockProvider);
-    this.app.addProvider(PrjPlanCompareBlockProvider);
+    this.app.addProviders([DataSelectBlockProvider, PrjPlanCompareBlockProvider]);
   }
 }
 
