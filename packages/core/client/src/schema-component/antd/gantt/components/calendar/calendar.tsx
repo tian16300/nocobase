@@ -11,6 +11,7 @@ import { DateSetup } from '../../types/date-setup';
 import { ViewMode } from '../../types/public-types';
 import useStyles from './style';
 import { TopPartOfCalendar } from './top-part-of-calendar';
+import { dayjs } from '@nocobase/utils';
 
 export type CalendarProps = {
   dateSetup: DateSetup;
@@ -172,8 +173,10 @@ export const Calendar: React.FC<CalendarProps> = ({
         // top
         topValue = `${getLocaleMonth(date, locale)}, ${date.getFullYear()}`;
       }
+      
       // bottom
-      const bottomValue = `W${getWeekNumberISO8601(date)}`;
+      // const bottomValue = `W${getWeekNumberISO8601(date)}`;
+      const bottomValue = dayjs(date).format('第WW周');
 
       bottomValues.push(
         <text

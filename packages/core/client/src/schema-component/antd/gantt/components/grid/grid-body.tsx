@@ -1,5 +1,5 @@
 import { cx } from '@emotion/css';
-import { uid } from '@nocobase/utils/client';
+import { dayjs, uid } from '@nocobase/utils/client';
 import React, { ReactChild } from 'react';
 import { addToDate } from '../../helpers/date-helper';
 import { Task } from '../../types/public-types';
@@ -15,6 +15,7 @@ export type GridBodyProps = {
   rtl: boolean;
   selectedRowKeys: any[];  
   rowKey?: string;
+  viewMode: string;
 };
 const empty = [{ id: uid() }, { id: uid() }, { id: uid() }];
 export const GridBody: React.FC<GridBodyProps> = ({
@@ -26,7 +27,8 @@ export const GridBody: React.FC<GridBodyProps> = ({
   todayColor,
   rtl,
   selectedRowKeys,
-  rowKey
+  rowKey,
+  viewMode
 }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
 
@@ -66,13 +68,14 @@ export const GridBody: React.FC<GridBodyProps> = ({
   let today: ReactChild = <rect />;
   for (let i = 0; i < dates.length; i++) {
     const date = dates[i];
-    let strokeWidth = 0;
+    let strokeWidth = 1;
     /**
      * 如果是天的话 则每周的最后一天 分隔线为1 如果是月 分隔线为
      */
-   const isWeekEnd = date.getDay() % 7 == 0;
-   if (isWeekEnd) {
-     strokeWidth = 1;
+   
+   if(viewMode == 'day'){
+    const isWeekEnd = dayjs(date).format('d') == '1';
+    strokeWidth = isWeekEnd?1:0
    }
 
     ticks.push(

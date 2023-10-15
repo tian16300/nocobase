@@ -71,49 +71,69 @@ export const getDiff = (record, comp) => {
   const e1 = dayjs(end);
   const e2 = dayjs(end1);
   if (s1.isValid() && s2.isValid() && e1.isValid() && e2.isValid()) {
-    let s:dayjs.Dayjs, e:dayjs.Dayjs;
-    const isExistDuration = checkHasJz(s1, s2, e1, e2);
-    if (isExistDuration) {
-      //延期
-      if (e2.toDate().getTime() > e1.toDate().getTime()) {
-        s = e1;
-        e = e2;
-        return {
-          start: s.toISOString(),
-          end:e.toISOString(),
-          seriesName:'延期',
-          isDiff:true,
-          color:'gold-6'
-        }
-      } else if (s2.toDate().getTime() < s1.toDate().getTime()) {
-        //提前
-        s = s1;
-        e = s2;
-        return {
-          start: s.toISOString(),
-          end:e.toISOString(),
-          seriesName:'提前',
-          isDiff:true,
-          color:'green-6'
+    // let s:dayjs.Dayjs, e:dayjs.Dayjs;
+    const isDiff = !(s1.isSame(s2) && e1.isSame(e2));
+    // const isExistDuration = checkHasJz(s1, s2, e1, e2);
+    // if (isExistDuration) {
+    //   //延期
+    //   if (e2.toDate().getTime() > e1.toDate().getTime()) {
+    //     s = e1;
+    //     e = e2;
+    //     return {
+    //       start: s.toISOString(),
+    //       end:e.toISOString(),
+    //       seriesName:'延期',
+    //       isDiff:true,
+    //       color:'gold-6'
+    //     }
+    //   } else if (s2.toDate().getTime() < s1.toDate().getTime()) {
+    //     //提前
+    //     s = s1;
+    //     e = s2;
+    //     return {
+    //       start: s.toISOString(),
+    //       end:e.toISOString(),
+    //       seriesName:'提前',
+    //       isDiff:true,
+    //       color:'green-6'
           
-        }
-      } else{
-        return {
-          color:'transparent',
-          isHidden: true
-        }
-      }
-    } else {
-      return {
-        color:'transparent',
-        isHidden: true
-      };
+    //     }
+    //   } else{
+    //     return {
+    //       color:'transparent',
+    //       isHidden: true
+    //     }
+    //   }
+    // } else {
+    //   return {
+    //     isDiff,
+    //     color:'transparent',
+    //     isHidden: true
+    //   };
+    // }
+    return {
+      isDiff,      
+      isHidden: true
     }
   }
   return {
     isHidden: true
   };
 };
+
+const getItemTitle = (item)=>{
+  const start = dayjs(item.start);
+  const end = dayjs(item.end);
+  if(start.isValid() && end.isValid()){
+
+
+    return '';
+
+
+  }else{
+    return '';
+  }
+}
 export const preProcessData = (data, ctx) => {
   /**
    * 合并
@@ -160,34 +180,37 @@ export const preProcessData = (data, ctx) => {
             ...cpItem,
             color: '#13c2c2',
           },
+          hasDiff,
           data: [
             {
               ...item,
               // type:'bar',
-              color: 'color-3',
+              color: 'blue-6',
               isDisabled: true,
               isHidden:false,
               seriesName: '当前版本',
+              text:getItemTitle(item)
             },           
             {
               ...cpItem,
-              color: 'color-3',
+              color: 'blue-3',
               isDisabled: true,
               isHidden:false,
-              isHiddenTitle:true,
+              isHiddenTitle:false,
               seriesName: '对比版本',
+              text:getItemTitle(cpItem)
             },
-            {
-              ...item,
-              start: null,
-              end: null,
-              // type:'project',
-              isHidden: false,
-              isHiddenTitle:true,
-              seriesName: '延期或提前',
-              ...hasDiff,
-              isDisabled: true,
-            },
+            // {
+            //   ...item,
+            //   start: null,
+            //   end: null,
+            //   // type:'project',
+            //   isHidden: false,
+            //   isHiddenTitle:true,
+            //   seriesName: '延期或提前',
+            //   ...hasDiff,
+            //   isDisabled: true,
+            // },
           ],
         };
       });

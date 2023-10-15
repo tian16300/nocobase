@@ -46,10 +46,11 @@ export const convertToBarTasks = (
       milestoneBackgroundColor,
       milestoneBackgroundSelectedColor
     );
-    const items  = data.map((item)=>{
+    const length = data.length;
+    const items  = data.map((item, index)=>{
       return convertToBarTask(
         {...t, ...item},
-        i,
+        [i, index, length],
         dates,
         columnWidth,
         rowHeight,
@@ -90,7 +91,7 @@ export const convertToBarTasks = (
 
 const convertToBarTask = (
   task: Task,
-  index: number,
+  index: number| number[],
   dates: Date[],
   columnWidth: number,
   rowHeight: number,
@@ -181,7 +182,7 @@ const convertToBarTask = (
 
 const convertToBar = (
   task: Task,
-  index: number,
+  index: number | number[],
   dates: Date[],
   columnWidth: number,
   rowHeight: number,
@@ -243,7 +244,7 @@ const convertToBar = (
 
 const convertToMilestone = (
   task: Task,
-  index: number,
+  index: number | number[],
   dates: Date[],
   columnWidth: number,
   rowHeight: number,
@@ -299,8 +300,17 @@ const taskXCoordinateRTL = (xDate: Date, dates: Date[], columnWidth: number) => 
   x += columnWidth;
   return isNaN(x) ? 0 : x;
 };
-const taskYCoordinate = (index: number, rowHeight: number, taskHeight: number) => {
-  const y = index * rowHeight + (rowHeight - taskHeight) / 2;
+const taskYCoordinate = (pIndex: number| number[], rowHeight: number, taskHeight: number) => {
+  let index = pIndex, index2 = 0, barLength = 2;
+  const space = 2;
+  if(Array.isArray(pIndex)){
+    index = pIndex[0];
+    index2 = pIndex[1];
+    barLength = pIndex[2] || barLength;
+  }else{
+    index = pIndex;
+  }
+  const y = index * rowHeight + (rowHeight - taskHeight*barLength - (barLength-1)*space)/2+ (taskHeight+space)*index2;
   return isNaN(y) ? 0 : y;
 };
 

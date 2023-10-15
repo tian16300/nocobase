@@ -78,13 +78,13 @@ export const TaskGantt: React.FC<TaskGanttProps> = forwardRef(
             ref={ganttSVGRef}
             className="ganttBody"
           >
-            <Grid {...gridProps} rowKey={rowKey} />
+            <Grid {...gridProps} rowKey={rowKey} viewMode={calendarProps.viewMode} />
             {hasMultiBar && newBars ? (
               <>
               {newBars.map((newBarProps, index) => {
                 return <TaskGanttContent key={index} {...newBarProps} rowKey={rowKey} />;
               })}
-              <TaskGanttContentText key='text' {...newBarProps} rowKey={rowKey} />
+              {/* <TaskGanttContentText key='text' {...newBarProps} rowKey={rowKey} /> */}
               </>
             ) : (
               <TaskGanttContent {...newBarProps} rowKey={rowKey} />

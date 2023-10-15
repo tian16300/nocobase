@@ -1,7 +1,7 @@
 import { Task, TaskType } from './public-types';
 
 export interface BarTask extends Task {
-  index: number;
+  index: number | number[];
   typeInternal: TaskTypeInternal;
   x1: number;
   x2: number;

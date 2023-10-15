@@ -387,9 +387,12 @@ export const useGanttBlockContext = () => {
   return useContext(GanttBlockContext);
 };
 
-export const useGanttBlockProps = () => {
+export const useGanttBlockProps = (_props) => {
   const ctx = useGanttBlockContext();
-  const {TooltipContent,hasMultiBar} = ctx;
+  const  props = {
+    ..._props,
+    ...ctx
+  };
   const preProcessData = ctx.preProcessData || ((data: any) => data || []);
   const [tasks, setTasks] = useState<any>([]);
   const [rightSize, setRightSize] = useState<any>(ctx.rightSize);
@@ -456,6 +459,7 @@ export const useGanttBlockProps = () => {
     }
   }, [ctx?.service?.loading]);
   return {
+    ...props,
     fieldNames: ctx.fieldNames,
     timeRange: ctx.timeRange,
     onExpanderClick,
@@ -465,8 +469,6 @@ export const useGanttBlockProps = () => {
     onResize,
     hasScroll,
     rightSize,
-    TooltipContent,
-    hasMultiBar
   };
 };
 

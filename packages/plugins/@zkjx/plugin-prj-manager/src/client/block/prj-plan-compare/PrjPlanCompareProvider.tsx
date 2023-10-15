@@ -98,7 +98,7 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
   }
   const ganttParams = params;
   fieldNames.comp = 'comp';
-  // fieldNames.title = '';
+  fieldNames.title = 'text';
   return (
     <PrjPlanCompareBlockContext.Provider
       value={{
@@ -115,6 +115,7 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
             {...others}
             fieldNames={fieldNames}
             sort={'id'}
+            barFill = {28}
             params={ganttParams}
             record={record}
             values={values}

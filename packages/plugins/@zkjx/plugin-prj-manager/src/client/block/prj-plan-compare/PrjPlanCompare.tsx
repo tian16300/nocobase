@@ -35,6 +35,11 @@ PrjPlanCompare.Wrap = ({ children }) => {
       bodyStyle={{
         height: '100%',
       }}
+      className={css`
+        .gantt-view-form .ant-formily-layout [data-testid='prj-item'] .ant-formily-item-control {
+          width: 200px;
+        }
+      `}
     >
       {loading ? (
         <div
@@ -156,7 +161,7 @@ PrjPlanCompare.Table = observer((props: any) => {
             onRowSelectionChange?.(selectedRowKeys, selectedRows);
           },
           renderCell: (checked, record, index, originNode) => {
-            const  indexStr = index+1;
+            const indexStr = index + 1;
             return (
               <div
                 className={classNames(
@@ -198,7 +203,7 @@ PrjPlanCompare.Table = observer((props: any) => {
                       position: relative;
                       display: flex;
                       align-items: center;
-                      justify-content: flex-start;
+                      justify-content: center;
                       width: 100%;
                     `,
                   )}
@@ -243,24 +248,23 @@ PrjPlanCompare.Table = observer((props: any) => {
     return date.isValid() ? date.format(formatStr) : '';
   };
   const getDays = (start, end) => {
-    var x = dayjs(start,{utc:false});
-    var y = dayjs(end,{utc:false});
-    if(x.isValid() && y.isValid()){
-       var duration = dayjs.duration(y.diff(x));
-       const value = duration.as('days');
-      return Math.round(value*10)/10+'天';
+    var x = dayjs(start, { utc: false });
+    var y = dayjs(end, { utc: false });
+    if (x.isValid() && y.isValid()) {
+      var duration = dayjs.duration(y.diff(x));
+      const value = duration.as('days');
+      return Math.round(value * 10) / 10 + '天';
     }
     return '';
-   
   };
   const renderItems = (params) => {
     const record1 = params.data[0];
     const record2 = params.data[1];
-   
+
     const items: MenuProps['items'] = [
       {
         label: '当前版本',
-        icon: <ZoomInOutlined  />,
+        icon: <ZoomInOutlined />,
         key: '1',
         onClick: () => {
           const onRecordClick = tableCtx?.field?.onRecordClick;
@@ -272,7 +276,7 @@ PrjPlanCompare.Table = observer((props: any) => {
       {
         label: '对比版本',
         key: '2',
-        icon: <ZoomInOutlined  />,
+        icon: <ZoomInOutlined />,
         onClick: () => {
           const onRecordClick = tableCtx?.field?.onRecordClick;
           if (typeof onRecordClick == 'function') {
@@ -295,18 +299,17 @@ PrjPlanCompare.Table = observer((props: any) => {
           <div className="ant-description-input">
             <EllipsisWithTooltip ellipsis>
               <Dropdown menu={{ items: menus }} trigger={['contextMenu']} getPopupContainer={getPopupContainer}>
-                <a
-                  href="javascript:void(0)"
+                <Tag
+                  color={record.hasDiff.isDiff ? '#f50' : 'default'}
                   onClick={() => {
                     const onRecordClick = tableCtx?.field?.onRecordClick;
                     if (typeof onRecordClick == 'function') {
-                      debugger;
                       onRecordClick(record.data[0], ctx);
                     }
                   }}
                 >
                   {t(v)}
-                </a>
+                </Tag>
               </Dropdown>
             </EllipsisWithTooltip>
           </div>
