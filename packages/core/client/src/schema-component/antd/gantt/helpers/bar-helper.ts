@@ -309,6 +309,7 @@ const taskYCoordinate = (pIndex: number| number[], rowHeight: number, taskHeight
     barLength = pIndex[2] || barLength;
   }else{
     index = pIndex;
+    barLength = 1;
   }
   const y = index * rowHeight + (rowHeight - taskHeight*barLength - (barLength-1)*space)/2+ (taskHeight+space)*index2;
   return isNaN(y) ? 0 : y;
