@@ -18,6 +18,7 @@ export function isBarTask(task: Task | BarTask): task is BarTask {
 }
 
 export function removeHiddenTasks(tasks: Task[], ctx) {
+  debugger;
   const groupedTasks = tasks.filter((t) => t.hideChildren && t.type === 'project');
   if (groupedTasks.length > 0) {
     for (let i = 0; groupedTasks.length > i; i++) {

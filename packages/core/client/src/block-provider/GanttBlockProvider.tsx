@@ -122,8 +122,8 @@ const formatData = (
       ];
       tasks.push({
         index: startIdx,
-        type: 'project',
-        ...getTaskItem(item,fieldNames,checkPermassion,ctx),        
+        ...getTaskItem(item,fieldNames,checkPermassion,ctx),   
+        type: 'project',     
         hideChildren: hideChildren,
         project: projectId,
         data: data,
@@ -146,7 +146,8 @@ const formatData = (
 
       tasks.push({
         index: startIdx,
-        ...getTaskItem(item,fieldNames,checkPermassion,ctx),    
+        ...getTaskItem(item,fieldNames,checkPermassion,ctx),         
+        project: projectId,   
         data: data
       });
     }
@@ -170,11 +171,6 @@ const InternalGanttBlockProvider = (props) => {
   const field:IField = useField();
   const { service } = useBlockRequestContext();
   const { token } = useToken(); 
-  // useEffect(() => {
-  //   if (!field.loading) {
-  //     service?.refresh();
-  //   }
-  // }, [field.loading]);
 
   return (
     <GanttBlockContext.Provider
