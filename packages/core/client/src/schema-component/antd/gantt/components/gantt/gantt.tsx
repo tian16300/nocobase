@@ -248,7 +248,6 @@ export const Gantt: any = (props: any) => {
   const { t } = useTranslation();
   const locale = appInfo.data?.lang;
   const tableCtx = useTableBlockContext();
-  const { rowKey = 'id' } = ctx;
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   // const [viewMode, setViewMode] = useState(fieldNames.range || 'day');
@@ -280,7 +279,7 @@ export const Gantt: any = (props: any) => {
   const [ignoreScrollEvent, setIgnoreScrollEvent] = useState(false);
   const columnWidth: number = getColumnWidth(dateSetup.dates.length, verticalGanttContainerRef.current?.clientWidth);
   const svgWidth = dateSetup.dates.length * columnWidth;
-  const { expandFlag } = tableCtx;
+  const { expandFlag, rowKey = 'id' } = tableCtx;
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
@@ -616,7 +615,7 @@ export const Gantt: any = (props: any) => {
   };
 
   const handleRowSelect = (keys) => {
-    setSelectedRowKeys(keys);
+    setSelectedRowKeys(keys.map((key)=>{return key+''}));
   };
   const saveTaskResource = async (task, params) => {
     if (!task.isGroup) {
