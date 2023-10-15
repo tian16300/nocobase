@@ -1,17 +1,8 @@
-import { SchemaComponentOptions, SchemaInitializerContext, SchemaInitializerProvider } from '@nocobase/client';
+import { SchemaInitializerContext, SchemaInitializerProvider } from '@nocobase/client';
 import React, { useContext } from 'react';
 import {
   DataSelect,
-  PrjWorkPlan,
-  PrjWorkStatic,
-  useDataSelectTabsProps,
-  useFormSelectBlockProps,
-  useFormSelectOptionsProps,
-  usePrjWorkPlanDecoratorProps,
-  usePrjWorkPlanProcessData,
-  usePrjWorkPlanTableBlockProps,
 } from '../block/index';
-import { PrjRecordBlockInitializers } from '../initializers';
 
 export const DataSelectBlockProvider: React.FC = (props) => {
   const initializers = useContext<any>(SchemaInitializerContext);
@@ -26,22 +17,6 @@ export const DataSelectBlockProvider: React.FC = (props) => {
     });
   }
   return (
-    <SchemaComponentOptions
-      scope={{
-        useFormSelectBlockProps,
-        useFormSelectOptionsProps,
-        useDataSelectTabsProps,
-        usePrjWorkPlanDecoratorProps,
-        usePrjWorkPlanTableBlockProps,
-        usePrjWorkPlanProcessData,
-      }}
-      components={{
-        PrjRecordBlockInitializers,
-        DataSelect,
-        PrjWorkStatic,
-        PrjWorkPlan,
-      }}
-    >
       <SchemaInitializerProvider
         initializers={{
           ...initializers,
@@ -50,7 +25,6 @@ export const DataSelectBlockProvider: React.FC = (props) => {
       >
         {props.children}
       </SchemaInitializerProvider>
-    </SchemaComponentOptions>
   );
 };
 

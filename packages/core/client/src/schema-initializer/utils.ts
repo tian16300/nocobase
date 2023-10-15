@@ -1602,7 +1602,7 @@ export const createGanttBlockSchema = (options) => {
                 'x-component-props': {
                   size:'default',
                   layout: 'inline',
-                  labelWidth: 60,
+                  labelWidth: 120,
                   wrapperWidth: 120
                 },
                 properties: {

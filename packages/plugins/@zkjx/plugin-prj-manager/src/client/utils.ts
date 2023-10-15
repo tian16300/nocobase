@@ -552,7 +552,7 @@ export const createPrjWorkPlanShema = () => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("任务详情") }}',
+                title: '{{ t("详情") }}',
                 properties: {
                   tabs: {
                     type: 'void',
@@ -697,7 +697,7 @@ export const createPrjPlanCompare = () => {
                   size: 'default',
                   layout: 'inline',
                   labelWidth: 100,
-                  wrapperWidth: 120,
+                  wrapperWidth: 160,
                 },
                 properties: {
                   prj: {
@@ -774,7 +774,8 @@ export const createPrjPlanCompare = () => {
             type: 'void',
             'x-component': 'Gantt.Event',
             'x-decorator': 'ACLActionProvider',
-            'x-acl-action': 'update',
+            'x-acl-action': 'update',  
+            title: '最新版本',
             properties: {
               drawer: {
                 type: 'void',
@@ -796,7 +797,8 @@ export const createPrjPlanCompare = () => {
           compVersion: {
             type: 'void',
             'x-component': 'Gantt.Event',
-            'x-decorator': 'ACLActionProvider',
+            'x-decorator': 'ACLActionProvider',             
+            title: '历史版本',
             'x-acl-action': 'update',
             properties: {
               drawer: {

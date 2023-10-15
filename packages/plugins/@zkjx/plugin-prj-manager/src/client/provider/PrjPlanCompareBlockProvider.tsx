@@ -16,15 +16,7 @@ export const PrjPlanCompareBlockProvider: React.FC = (props) => {
     });
   }
   return (
-    <SchemaComponentOptions
-      scope={{
-        usePrjPlanCompareOptionsProps,
-        usePrjPlanCompareTableBlockProps
-      }}
-      components={{
-        PrjPlanCompare
-      }}
-    >
+  
       <SchemaInitializerProvider
         initializers={{
           ...initializers,
@@ -33,7 +25,6 @@ export const PrjPlanCompareBlockProvider: React.FC = (props) => {
       >
         {props.children}
       </SchemaInitializerProvider>
-    </SchemaComponentOptions>
   );
 };
 

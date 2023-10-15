@@ -56,14 +56,14 @@ export const usePrjPlanCompareTableBlockProps = () => {
   };
 };
 
-export const checkHasJz = (s1, s2, e1, e2) => {
+ const checkHasJz = (s1, s2, e1, e2) => {
   if (e2.toDate().getTime() <= s1.toDate().getTime()) return false;
   if (e1.toDate().getTime() <= s2.toDate().getTime()) {
     return false;
   }
   return true;
 };
-export const getDiff = (record, comp) => {
+ const getDiff = (record, comp) => {
   const { start, end } = record;
   const { start: start1, end: end1 } = comp;
   const s1 = dayjs(start);
