@@ -782,7 +782,6 @@ export const createPrjPlanCompare = () => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("当前版本") }}',
                 properties: {
                   grid: {
                     type: 'void',
@@ -806,7 +805,6 @@ export const createPrjPlanCompare = () => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("对比版本") }}',
                 properties: {
                   grid: {
                     type: 'void',

@@ -1702,7 +1702,6 @@ export const createGanttBlockSchema = (options) => {
                 'x-component-props': {
                   className: 'nb-action-popup',
                 },
-                title: '{{ t("任务详情") }}',
                 properties: {
                   tabs: {
                     type: 'void',
