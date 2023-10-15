@@ -18,7 +18,6 @@ const PrjWorkProviderInner = (props) => {
   const [visible, setVisible] = useState(false);
   const [valueType, setValueType] = useState('');
   const [recordList, setRecordList] = useState([]);
-  
   const schema: any = {
     name: 'detail',
     type: 'void',

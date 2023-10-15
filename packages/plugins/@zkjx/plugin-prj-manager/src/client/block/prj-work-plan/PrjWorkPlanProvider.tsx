@@ -179,14 +179,16 @@ const PrjWorkPlanGanttProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <GanttBlockProvider
-        {...others}
-        params={params}
-        sort={sort}
-        groupField={groupFieldCtx}
-        groupData={parentData}
-        rowKey="rowKey"
-      ></GanttBlockProvider>
+      {!field.loading && (
+        <GanttBlockProvider
+          {...others}
+          params={params}
+          sort={sort}
+          groupField={groupFieldCtx}
+          groupData={parentData}
+          rowKey="rowKey"
+        ></GanttBlockProvider>
+      )}
     </>
   );
 };

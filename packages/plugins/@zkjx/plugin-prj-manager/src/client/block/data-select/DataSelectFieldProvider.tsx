@@ -117,14 +117,15 @@ const InternalDataSelectFieldProvider = (props) => {
   const form = createForm({});
   const params = { ...props.params };
   const { service } = useBlockRequestContext();
+
   const record = useMemo(() => {
     return (service?.data?.data||[])[0];
   }, [service?.data?.data]);
 
-  if (service.loading && !field.loaded) {
+  if (service.loading) {
     return <Spin />;
   }
-  field.loaded = true;
+  field.loading = service.loading;
   return (
     <DataSelectBlockContext.Provider
       value={{
@@ -137,7 +138,7 @@ const InternalDataSelectFieldProvider = (props) => {
         buid,
       }}
     >
-      <InnerRecordProvider {...props}></InnerRecordProvider>
+      {!field.loading && <InnerRecordProvider {...props}></InnerRecordProvider>}
     </DataSelectBlockContext.Provider>
   );
 };

@@ -4,7 +4,7 @@ import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection, useCollectionManager } from '../collection-manager/hooks';
 import { useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
-import { useAssociationNames, useToken } from '..';
+import { IField, useAssociationNames, useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
 import { pick } from 'lodash';
 
@@ -167,14 +167,14 @@ const InternalGanttBlockProvider = (props) => {
     },
     ...others
   } = props;
-  const field = useField();
+  const field:IField = useField();
   const { service } = useBlockRequestContext();
-  const { token } = useToken();
-  useEffect(() => {
-    if (props.groupData) {
-      service?.refresh();
-    }
-  }, [JSON.stringify(props.groupData)]);
+  const { token } = useToken(); 
+  // useEffect(() => {
+  //   if (!field.loading) {
+  //     service?.refresh();
+  //   }
+  // }, [field.loading]);
 
   return (
     <GanttBlockContext.Provider
