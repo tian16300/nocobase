@@ -26,7 +26,7 @@ export const Percent = connect(
               onChange(toValue(v, (v) => v / 100));
             }
           }}
-          value={toValue(v, (v) => v / 100)}
+          value={v}
         />
       </Col>
       <Col flex="100px">
