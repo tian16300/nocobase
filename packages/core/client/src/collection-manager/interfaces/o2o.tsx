@@ -530,4 +530,8 @@ export const obo: IField = {
       // },
     ],
   },
+  sortable: true,
+  sortName:(field)=>{
+    return field.foreignKey;
+  }
 };
