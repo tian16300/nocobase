@@ -8,6 +8,7 @@ import { isArr } from '@formily/shared';
 import { Button } from 'antd';
 import React from 'react';
 import { FormActiveFieldsProvider } from '../../../block-provider';
+import { FlagProvider } from '../../../flag-provider';
 import { useSubTableSpecialCase } from '../form-item/hooks/useSpecialCase';
 import { Table } from '../table-v2/Table';
 import { useAssociationFieldContext } from './hooks';
@@ -65,48 +66,50 @@ export const SubTable: any = observer(
           }
         `}
       >
-        <FormActiveFieldsProvider name="nester">
-          <Table
-            className={css`
-              .ant-formily-item.ant-formily-item-feedback-layout-loose {
-                margin-bottom: 0px !important;
-              }
-              .ant-formily-editable {
-                vertical-align: sub;
-              }
-            `}
-            bordered
-            size={'small'}
-            field={field}
-            showIndex
-            dragSort={showMove}
+        <FlagProvider isInSubTable>
+          <FormActiveFieldsProvider name="nester">
+            <Table
+              className={css`
+                .ant-formily-item.ant-formily-item-feedback-layout-loose {
+                  margin-bottom: 0px !important;
+                }
+                .ant-formily-editable {
+                  vertical-align: sub;
+                }
+              `}
+              bordered
+              size={'small'}
+              field={field}
+              showIndex
+              dragSort={showMove}
             showMove={showMove}
-            showDel={showDel}
+              showDel={showDel}
             showAdd={showAdd}
-            pagination={false}
-            rowSelection={{ type: 'none', hideSelectAll: true }}
-            footer={() =>
-              field.editable && showAdd && (
-                <Button
-                  type={'text'}
-                  block
-                  className={css`
-                    display: block;
-                  `}
-                  onClick={() => {
-                    field.value = field.value || [];
-                    field.value.push({});
-                    field.onInput(field.value);
-                  }}
-                  icon={<PlusOutlined />}
-                >
-                  {/* {t('Add new')} */}
-                </Button>
-              )
-            }
-            isSubTable={true}
-          />
-        </FormActiveFieldsProvider>
+              pagination={false}
+              rowSelection={{ type: 'none', hideSelectAll: true }}
+              footer={() =>
+                field.editable && showAdd && (
+                  <Button
+                    type={'text'}
+                    block
+                    className={css`
+                      display: block;
+                    `}
+                    onClick={() => {
+                      field.value = field.value || [];
+                      field.value.push({});
+                      field.onInput(field.value);
+                    }}
+                    icon={<PlusOutlined />}
+                  >
+                    {/* {t('Add new')} */}
+                  </Button>
+                )
+              }
+              isSubTable={true}
+            />
+          </FormActiveFieldsProvider>
+        </FlagProvider>
       </div>
     );
   },

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useActionContext } from '../..';
 import { useDesignable } from '../../';
 import { Icon } from '../../../icon';
-import { useRecord } from '../../../record-provider';
+import { RecordProvider, useRecord } from '../../../record-provider';
 import { useLocalVariables, useVariables } from '../../../variables';
 import { SortableItem } from '../../common';
 import { useCompile, useComponent, useDesigner } from '../../hooks';
@@ -53,7 +53,7 @@ export const Action: ComposedAction = observer(
     const fieldSchema = useFieldSchema();
     const compile = useCompile();
     const form = useForm();
-    const values = useRecord();
+    const record = useRecord();
     const designerProps = fieldSchema['x-designer-props'];
     const openMode = fieldSchema?.['x-component-props']?.['openMode'];
     const disabled = form.disabled || field.disabled || field.data?.disabled || props.disabled;
@@ -63,11 +63,17 @@ export const Action: ComposedAction = observer(
     const tarComponent = useComponent(component) || component;
     const { modal } = App.useApp();
     const variables = useVariables();
-    const localVariables = useLocalVariables({ currentForm: { values } as any });
+    const localVariables = useLocalVariables({ currentForm: { values: record } as any });
+
+    // fix https://nocobase.height.app/T-2259
+    const shouldResetRecord = ['create', 'customize:bulkUpdate', 'customize:bulkEdit', 'customize:create'].includes(
+      fieldSchema['x-action'],
+    );
 
     let actionTitle = title || compile(fieldSchema.title);
     actionTitle = lodash.isString(actionTitle) ? t(actionTitle) : actionTitle;
     useEffect(() => {
+      field.linkageProperty = {};
       linkageRules
         .filter((k) => !k.disabled)
         .forEach((v) => {
@@ -76,13 +82,14 @@ export const Action: ComposedAction = observer(
               operator: h.operator,
               field,
               condition: v.condition,
-              values,
+              values: record,
               variables,
               localVariables,
             });
           });
         });
-    }, [JSON.stringify(linkageRules), values, designable, field]);
+    }, [JSON.stringify(linkageRules), record, designable, field]);
+
     const handleButtonClick = useCallback(
       (e: React.MouseEvent) => {
         if (isPortalInBody(e.target as Element)) {
@@ -138,7 +145,7 @@ export const Action: ComposedAction = observer(
           {actionTitle}
           <Designer {...designerProps} />
         </SortableItem>
-      ) : (
+      ): (
         <SortableItem
           {...others}
           loading={field?.data?.loading}
@@ -160,7 +167,7 @@ export const Action: ComposedAction = observer(
       );
     };
 
-    return wrapSSR(
+    const result = (
       <ActionContextProvider
         button={renderButton()}
         visible={visible}
@@ -176,7 +183,17 @@ export const Action: ComposedAction = observer(
         {!popover && renderButton()}
         {!popover && props.children}
         {element}
-      </ActionContextProvider>,
+      </ActionContextProvider>
+    );
+
+    return wrapSSR(
+      shouldResetRecord ? (
+        <RecordProvider parent={record} record={{}}>
+          {result}
+        </RecordProvider>
+      ) : (
+        result
+      ),
     );
   },
   { displayName: 'Action' },
