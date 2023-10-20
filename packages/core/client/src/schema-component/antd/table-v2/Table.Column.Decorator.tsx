@@ -29,6 +29,7 @@ export const TableColumnDecorator = (props) => {
   const { fieldSchema, uiSchema, collectionField } = useColumnSchema();
   const { refresh } = useDesignable();
   const compile = useCompile();
+  const required =  fieldSchema['required'];
   useLayoutEffect(() => {
     if (field.title) {
       return;
@@ -44,6 +45,7 @@ export const TableColumnDecorator = (props) => {
     <SortableItem className={designerCss}>
       <Designer fieldSchema={fieldSchema} uiSchema={uiSchema} collectionField={collectionField} />
       {/* <RecursionField name={columnSchema.name} schema={columnSchema}/> */}
+      {required && (<span className="ant-formily-item-asterisk">*</span>)} 
       {field?.title || compile(uiSchema?.title)}
       {/* <div
         onClick={() => {
