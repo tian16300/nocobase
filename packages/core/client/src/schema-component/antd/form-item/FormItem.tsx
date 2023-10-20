@@ -160,7 +160,7 @@ FormItem.Designer = function Designer() {
   const isDateField = ['datetime', 'createdAt', 'updatedAt'].includes(collectionField?.interface);
   const isAttachmentField =
     ['attachment'].includes(collectionField?.interface) || targetCollection?.template === 'file';
-
+  const isMultiple = fieldSchema['x-component-props'].multiple;
   return (
     <GeneralSchemaDesigner>
       <GeneralSchemaItems />
@@ -390,62 +390,62 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
-      {showFieldMode && (fieldSchema['x-component-props']['mode'] == 'SubTable') && (
+      {showFieldMode && fieldSchema['x-component-props']['mode'] == 'SubTable' && (
         <>
-        <SchemaSettings.SwitchItem
-          key="enable-add"
-          title={t('允许新增')}
-          checked={fieldSchema['x-component-props']?.showAdd}
-          onChange={(value) => {
-            const schema = {
-              ['x-uid']: fieldSchema['x-uid'],
-            };
-            field.componentProps.showAdd = value;
-            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-            fieldSchema['x-component-props'].showAdd = value;
-            schema['x-component-props'] = fieldSchema['x-component-props'];
-            dn.emit('patch', {
-              schema,
-            });
-            refresh();
-          }}
-        />
-        <SchemaSettings.SwitchItem
-          key="enable-move"
-          title={t('允许移动')}
-          checked={fieldSchema['x-component-props']?.showMove}
-          onChange={(value) => {
-            const schema = {
-              ['x-uid']: fieldSchema['x-uid'],
-            };
-            field.componentProps.showMove = value;
-            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-            fieldSchema['x-component-props'].showMove = value;
-            schema['x-component-props'] = fieldSchema['x-component-props'];
-            dn.emit('patch', {
-              schema,
-            });
-            refresh();
-          }}
-        />
-        <SchemaSettings.SwitchItem
-          key="enable-remove"
-          title={t('允许删除')}
-          checked={fieldSchema['x-component-props']?.showDel}
-          onChange={(value) => {
-            const schema = {
-              ['x-uid']: fieldSchema['x-uid'],
-            };
-            field.componentProps.showDel = value;
-            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-            fieldSchema['x-component-props'].showDel = value;
-            schema['x-component-props'] = fieldSchema['x-component-props'];
-            dn.emit('patch', {
-              schema,
-            });
-            refresh();
-          }}
-        />
+          <SchemaSettings.SwitchItem
+            key="enable-add"
+            title={t('允许新增')}
+            checked={fieldSchema['x-component-props']?.showAdd}
+            onChange={(value) => {
+              const schema = {
+                ['x-uid']: fieldSchema['x-uid'],
+              };
+              field.componentProps.showAdd = value;
+              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+              fieldSchema['x-component-props'].showAdd = value;
+              schema['x-component-props'] = fieldSchema['x-component-props'];
+              dn.emit('patch', {
+                schema,
+              });
+              refresh();
+            }}
+          />
+          <SchemaSettings.SwitchItem
+            key="enable-move"
+            title={t('允许移动')}
+            checked={fieldSchema['x-component-props']?.showMove}
+            onChange={(value) => {
+              const schema = {
+                ['x-uid']: fieldSchema['x-uid'],
+              };
+              field.componentProps.showMove = value;
+              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+              fieldSchema['x-component-props'].showMove = value;
+              schema['x-component-props'] = fieldSchema['x-component-props'];
+              dn.emit('patch', {
+                schema,
+              });
+              refresh();
+            }}
+          />
+          <SchemaSettings.SwitchItem
+            key="enable-remove"
+            title={t('允许删除')}
+            checked={fieldSchema['x-component-props']?.showDel}
+            onChange={(value) => {
+              const schema = {
+                ['x-uid']: fieldSchema['x-uid'],
+              };
+              field.componentProps.showDel = value;
+              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+              fieldSchema['x-component-props'].showDel = value;
+              schema['x-component-props'] = fieldSchema['x-component-props'];
+              dn.emit('patch', {
+                schema,
+              });
+              refresh();
+            }}
+          />
         </>
       )}
       {showModeSelect && (
@@ -619,6 +619,47 @@ FormItem.Designer = function Designer() {
           }}
         />
       ) : null}
+
+      {/* 至少选几条 最大选多少条 */}
+      {((isAssociationField && isMultiple) || isSubTableFieldMode) && (
+        <SchemaSettings.ModalItem
+          title={t('设置数组长度')}
+          schema={{
+            type: 'object',
+            title: t('设置数组长度'),
+            properties: {
+              minLength: {
+                title: '最小长度',
+                type: 'number',
+                'x-decorator': 'FormItem',
+                'x-component': 'InputNumber',
+              },
+              maxLength: {
+                title: '最大长度',
+                type: 'number',
+                'x-decorator': 'FormItem',
+                'x-component': 'InputNumber',
+              },
+            },
+          }}
+          initialValues={{
+            minLength: fieldSchema['minLength'],
+            maxLength: fieldSchema['maxLength'],
+          }}
+          onSubmit={(values) => {
+            if (values.minLength) field.setValidatorRule('minLength', values.minLength);
+            if (values.maxLength) field.setValidatorRule('maxLength', values.maxLength);
+            Object.assign(fieldSchema, values);
+            dn.emit('patch', {
+              schema: {
+                'x-uid': fieldSchema['x-uid'],
+                ...values,
+              },
+            });
+            dn.refresh();
+          }}
+        ></SchemaSettings.ModalItem>
+      )}
 
       {field.readPretty && options.length > 0 && fieldSchema['x-component'] === 'CollectionField' && !isFileField && (
         <SchemaSettings.SwitchItem
