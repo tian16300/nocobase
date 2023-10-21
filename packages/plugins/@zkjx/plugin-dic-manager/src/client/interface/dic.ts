@@ -8,7 +8,6 @@ export const dic: IField = {
   group: 'advanced',
   order: 5,
   title: '数据字典',
-  sortable: true,
   isAssociation: true,
   isForeignKey: true,
   default: {
@@ -200,6 +199,7 @@ export const dic: IField = {
     }
   },
   invariable: true,
+  sortable: true,
   titleUsable: true,
   sortName:(field)=>{
     return field.foreignKey;

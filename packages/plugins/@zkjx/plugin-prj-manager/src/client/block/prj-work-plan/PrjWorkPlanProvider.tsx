@@ -6,11 +6,13 @@ import {
   useBlockRequestContext,
   useCollectionManager,
   useFilterBlock,
+  useRecord,
 } from '@nocobase/client';
 import { useField } from '@formily/react';
 import { useDataSelectBlockContext } from '../data-select';
 import { usePrjWorkPlanProcessData } from './scopes';
 import { Field } from '@nocobase/database';
+import { Spin } from 'antd';
 
 const PrjWorkProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
@@ -112,7 +114,7 @@ export const PrjWorkPlanProvider = (props) => {
   /* 获取项目任务 */
   return (
     <>
-      <BlockProvider data-testid={target} {...options} params={params} runWhenParamsChanged>
+      <BlockProvider data-testid={target} {...options} params={params}>
         <PrjWorkPlanGanttProvider
           {...props}
           groupField={groupField}
@@ -128,9 +130,12 @@ const PrjWorkPlanGanttProvider = (props) => {
   const field = useField<Field>();
   const { groupField, sort, groupData, ...others } = props;
 
-  const { record, service } = useDataSelectBlockContext();
+  // const { record } = useDataSelectBlockContext();
+  const { service } = useBlockRequestContext();
   const ctx = useBlockRequestContext();
-  field.loading = ctx.service.loading;
+  field.loading = service.loading;
+  const record = useRecord();
+  console.log('PrjWorkPlanGanttProvider record.id', record?.id);
   const params = {
     filter: {
       $and: [
@@ -146,9 +151,9 @@ const PrjWorkPlanGanttProvider = (props) => {
     tree: true,
     paginate: false,
     sort: sort,
-    appends: ['prj', 'prjStage', 'prjStage.stage', 'user', 'status', 'dependencies'],
+    appends: ['prj', 'prjStage', 'user', 'status', 'dependencies'],
   };
-  const [parentData, setParentData] = useState(record.plans);
+  const [parentData, setParentData] = useState(record?.plans||[]);
   const groupFieldCtx = {
     ...groupField,
     blockCtx: {
@@ -159,27 +164,27 @@ const PrjWorkPlanGanttProvider = (props) => {
 
   useEffect(() => {
     if (!ctx.service?.loading) {
-      setParentData(ctx.service?.data?.data);
+      setParentData(ctx.service?.data?.data||[]);
     }
   }, [ctx.service?.loading]);
-  useEffect(() => {
-    params.filter = {
-      $and: [
-        {
-          prj: {
-            id: {
-              $eq: record.id,
-            },
-          },
-        },
-      ],
-    };
-  }, [record.id]);
+  // useEffect(() => {
+  //   params.filter = {
+  //     $and: [
+  //       {
+  //         prj: {
+  //           id: {
+  //             $eq: record.id,
+  //           },
+  //         },
+  //       },
+  //     ],
+  //   };
+  // }, [record.id]);
   /* 首先获取 项目阶段 */
   /* 获取项目任务 */
   return (
     <>
-      {!field.loading && (
+      {(service.loading && record  && record?.id) ? (<Spin></Spin>): (
         <GanttBlockProvider
           {...others}
           params={params}

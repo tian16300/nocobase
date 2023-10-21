@@ -363,7 +363,6 @@ export const GanttBlockProvider = (props) => {
       preProcessData={preProcessData}
       rowKey={rowKey}
       setRowKey={setRowKey}
-      runWhenParamsChanged
     >
       <InternalGanttBlockProvider
         {...others}

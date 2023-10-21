@@ -350,7 +350,7 @@ export default {
                 "title": "任务工时"
             },
             "interface": "o2m",
-            "target": "task_hour"
+            "target": "reportDetail"
         },{
             "name": "process",
             "type": "float",
@@ -374,7 +374,7 @@ export default {
                 },
                 "type": "number",
                 "x-component": "InputNumber",
-                "title": "工时(h)"
+                "title": "总工时(h)"
             },
             "name": "hours",
             "type": "double",

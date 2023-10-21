@@ -69,6 +69,16 @@ export default{
             "interface": "number"
         },
         {
+            name: 'isBusinessTrip',
+            type: 'boolean',
+            interface: 'checkbox',
+            uiSchema: {
+              type: 'boolean',
+              'x-component': 'Checkbox',
+              title: '是否出差',
+            },
+          },
+        {
             "name": "createdAt",
             "interface": "createdAt",
             "type": "date",

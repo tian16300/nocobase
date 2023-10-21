@@ -5,11 +5,23 @@ import { generatePlan } from './actions/plan';
 import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
 import { groupBy } from 'lodash';
+// import { ReportDetailModel, ReportModel } from './model';
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
   activeReceiveExpires = 86400 * 7;
   afterAdd() {}
   beforeLoad() {
+    this.db.addMigrations({
+      namespace: namespace,
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
+    // this.app.db.registerModels({
+    //   ReportModel,
+    //   ReportDetailModel,
+    // });
     this.app.db.on(`dicItem.afterSync`, async (model, options) => {
       const dic = this.app.db.getCollection('dic')?.existsInDb();
       const dicItem = this.app.db.getCollection('dicItem')?.existsInDb();
@@ -35,8 +47,29 @@ export class PluginPrjManagerServer extends Plugin {
     ]);
     /* 更新 周报保存数据后 更新项目活跃 */
     this.app.db.on('report.afterSaveWithAssociations', async (report, options) => {
+      // debugger;
+      // await report.updateReportDetail();
+      // await this.updateReportDetail(report);
       /* 保存周报后 更新数据 */
       await this.checkPrjActive(report, options);
+    });
+    //保存之前 项目更新
+    // this.app.db.on('reportDetail.beforeSave', async (model, options)=>{
+    //    //更新任务
+    //   //  if(model.)
+    // });
+
+
+    this.app.db.on('reportDetail.afterSave', async (model, options) => {
+      if (!model.reportId) {
+        const rep = this.app.db.getRepository('reportDetail');
+        await rep.destroy({
+          filter: {
+            id: model.id
+          }
+        });
+        this.app.db.logger.info(`删除本周完成 ${model.id}`)
+      } 
     });
     /* 删除项目历史版本时 移除项目计划历史版本 */
     this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
@@ -50,6 +83,9 @@ export class PluginPrjManagerServer extends Plugin {
         },
       });
     });
+  }
+  updateReportDetail(report) {
+    // debugger;
   }
   bindSync(names) {
     names.forEach((name) => {
@@ -86,13 +122,7 @@ export class PluginPrjManagerServer extends Plugin {
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/task'),
     });
-    this.db.addMigrations({
-      namespace: namespace,
-      directory: path.resolve(__dirname, 'migrations'),
-      context: {
-        plugin: this,
-      },
-    });
+
     //注册actions
     this.app.resourcer.registerActionHandlers({
       'prj:generatePlan': generatePlan,
@@ -167,9 +197,9 @@ export class PluginPrjManagerServer extends Plugin {
     });
     Object.keys(groups).map(async (belongsPrjKey: string) => {
       const prj = this.db.getRepository('prj');
-       await prj.update({
+      await prj.update({
         filter: {
-          id: belongsPrjKey
+          id: belongsPrjKey,
         },
         values: {
           activeIndex: groups[belongsPrjKey].length,

@@ -298,14 +298,14 @@ export const createDataSelectBlockSchema = (options) => {
                 'x-component': 'Grid.Col',
                 'x-component-props': {},
                 properties: {
-                  ['tabs_' + uid()]: tabs,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+                  ['tabs_' + uid()]: tabs
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   };
   return schema;
 };
@@ -439,7 +439,7 @@ export const createPrjWorkPlanShema = () => {
         id: 'id',
         title: 'title',
         start: 'start',
-        range: 'day',
+        range: 'week',
         end: 'end',
       },
       params: {
