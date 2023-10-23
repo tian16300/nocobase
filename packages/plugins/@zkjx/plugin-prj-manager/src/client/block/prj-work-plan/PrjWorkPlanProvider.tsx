@@ -1,7 +1,8 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BlockProvider,
   GanttBlockProvider,
+  css,
   useAPIClient,
   useBlockRequestContext,
   useCollectionManager,
@@ -125,11 +126,15 @@ export const PrjWorkPlanProvider = (props) => {
   useEffect(() => {
     setRightSize(props.rightSize);
   }, [props.rightSize]);
+  const containerRef = useRef<HTMLDivElement>();
+  const  getPopupContainer = ()=>{
+    return containerRef.current;
+  }
 
 
   /* 获取项目任务 */
   return (
-    <>
+    <div ref={containerRef} className={css`width:100%;height:100%`}>
       <BlockProvider data-testid={target} {...options} params={params}>
         <PrjWorkPlanGanttProvider
           {...props}
@@ -143,9 +148,10 @@ export const PrjWorkPlanProvider = (props) => {
           preProcessData={preProcessData}
           isFullscreen={isFullscreen}
           setIsFullScreen={setIsFullScreen}
+          getPopupContainer={getPopupContainer}
         ></PrjWorkPlanGanttProvider>
       </BlockProvider>
-    </>
+    </div>
   );
 };
 const PrjWorkPlanGanttProvider = (props) => {

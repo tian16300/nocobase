@@ -95,8 +95,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   ...restProps
 }) => {
   const form = useContext(EditableContext)!;
-  
-  
+
   // form.setFieldsValue({ [dataIndex]: [
   //   dayjs(record?.start).format('YYYY-MM-DD'),
   //   dayjs(record?.end).format('YYYY-MM-DD')
@@ -106,13 +105,11 @@ const EditableCell: React.FC<EditableCellProps> = ({
   // if (editable && editing) {
   //   form.setFieldValue('range', [record.start ? dayjs(record.start) : null, record.end ? dayjs(record.end) : null]);
   // }
-  
- 
 
   if (editable) {
     const rangeValue = [record?.start, record?.end];
     form.setFieldValue(dataIndex, [record?.start, record?.end]);
-    const [range,setRange] = useState(rangeValue);
+    const [range, setRange] = useState(rangeValue);
 
     const setValue = (value) => {
       form.setFieldValue(dataIndex, value);
@@ -122,9 +119,9 @@ const EditableCell: React.FC<EditableCellProps> = ({
       try {
         const values = await form.validateFields();
         // const { range } = values;
-        const [start,end] = range as string[];
-        const {start: _start,end: _end, ...others} = record;
-        handleSave({ ...others, start,end });
+        const [start, end] = range as string[];
+        const { start: _start, end: _end, ...others } = record;
+        handleSave({ ...others, start, end });
       } catch (errInfo) {
         console.log('Save failed:', errInfo);
       }
@@ -143,7 +140,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         <Space.Compact size="small">
           <RangePicker
             getPopupContainer={getPopupContainer}
-            format='YYYY-MM-DD'
+            format="YYYY-MM-DD"
             value={range}
             onChange={setValue}
           ></RangePicker>
@@ -177,7 +174,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       rowKey,
       required,
       onExpand,
-      prjStageVersionLink = '',
+      prjStageVersionLink = '',     
       ...others
     } = { ...others1, ...others2 } as any;
     const field: IField = useField();
@@ -197,9 +194,13 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const { editing, setEditing } = usePrjWorkPlanProviderContext();
     const containerRef = useRef<HTMLDivElement>();
     let navigate = useNavigate();
-    const getPopupContainer = () => {
-      return containerRef.current;
-    };
+    const getPopupContainer = ()=>{
+      if(tableCtx.field.getPopupContainer){
+        return tableCtx.field.getPopupContainer();
+      }else{
+        return containerRef.current;
+      }
+    }
     let onRow = null,
       highlightRow = '';
 
@@ -244,8 +245,8 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         ? {
             type: 'checkbox',
             selectedRowKeys: selectedRowKeys,
-            fixed:true,
-            width:50,
+            fixed: true,
+            width: 50,
             onChange(selectedRowKeys: any[], selectedRows: any[]) {
               field.data = field.data || {};
               field.data.selectedRowKeys = selectedRowKeys;

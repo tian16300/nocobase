@@ -143,14 +143,13 @@ const GanttRecordViewer = (props) => {
   }
   const drawerProps = {
     getContainer: isFullScreen ? getContainer : null,
-    
   };
   const isCollectionField = record.__collection;
   const collectionName = record.__collection || name;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible, drawerProps }} >
+        <ActionContextProvider value={{ visible, setVisible, drawerProps }}>
           <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
@@ -218,14 +217,17 @@ export const Gantt: any = (props: any) => {
     setRightSize,
     timeRange,
     hasMultiBar = false,
-    isFullscreen = false,
-    setIsFullScreen: setIsFullScreen,
   } = {
     ...props,
     ...useProps(props),
   } as any;
 
   const ctx = useGanttBlockContext();
+  const {
+    isFullscreen: _isFullscreen = false,
+    setIsFullScreen: propsSetIsFullScreen,
+    getPopupContainer: propsGetPopupContainer,
+  } = ctx;
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
   const locale = appInfo.data?.lang;
@@ -266,10 +268,10 @@ export const Gantt: any = (props: any) => {
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
   const containerRef = useRef<HTMLDivElement>();
-
-  const getPopupContainer = () => {
-    return containerRef.current;
-  };
+  const getPopupContainer = 
+    function () {
+      return containerRef.current;
+    };
   const formValue = {
     group: ctx.group,
     sort: ctx.sort,
@@ -286,6 +288,7 @@ export const Gantt: any = (props: any) => {
     tableCtx.field.onExpandClick = handleTableExpanderClick;
     tableCtx.field.onRowSelect = handleRowSelect;
     tableCtx.field.onRecordClick = handleBarClick;
+    tableCtx.field.getPopupContainer = getPopupContainer;
   }, []);
   useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
@@ -684,7 +687,7 @@ export const Gantt: any = (props: any) => {
     }
   };
   const rightPaneRef = useRef<ReflexElement>();
-  // const [isFullscreen, setIsFullScreen] = useState(_isFullscreen);
+  const [isFullscreen, setIsFullScreen] = useState(_isFullscreen);
   // console.log('gantt isFullscreen', isFullscreen);
   // useEffect(()=>{
   //   setIsFullScreen(_isFullscreen);
@@ -885,9 +888,9 @@ export const Gantt: any = (props: any) => {
               <FullscreenAction
                 containerRef={containerRef}
                 isFullscreen={isFullscreen}
-                onClick={() => {
-                  const fn = setIsFullScreen;
-                  fn(!isFullscreen);
+                onClick={(value) => {
+                  const fn = propsSetIsFullScreen || setIsFullScreen;
+                  fn(value);
                 }}
               />
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
