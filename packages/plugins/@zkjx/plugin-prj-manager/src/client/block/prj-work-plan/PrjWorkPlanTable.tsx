@@ -1,10 +1,12 @@
 import { css } from '@emotion/css';
 import { Field } from '@formily/core';
-import {  observer, useField, useFieldSchema } from '@formily/react';
+import { observer, useField, useFieldSchema } from '@formily/react';
 import {
+  DatePicker,
   EllipsisWithTooltip,
   IField,
   Icon,
+  useAPIClient,
   useBlockRequestContext,
   useGanttBlockContext,
   useRequest,
@@ -14,16 +16,26 @@ import {
 } from '@nocobase/client';
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EditOutlined, DeleteOutlined, PlusCircleOutlined, ZoomInOutlined } from '@ant-design/icons';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EditOutlined,
+  ColumnWidthOutlined,
+  DeleteOutlined,
+  PlusCircleOutlined,
+  ZoomInOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Table, Tag, Dropdown, App } from 'antd';
+import { Table, Tag, Dropdown, App, Row, Col, Button, Form, Input, Space } from 'antd';
 import { useAuthTranslation } from '../../locale';
 import { pick } from 'lodash';
 import { useDataSelectBlockContext } from '..';
 import template from 'lodash/template';
-import { useNavigate} from 'react-router';
-
+import { useNavigate } from 'react-router';
+import { getValuesByPath } from '@nocobase/utils/client';
+import type { FormInstance } from 'antd/es/form';
+import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
+const EditableContext = React.createContext<FormInstance<any> | null>(null);
 export const components = {
   body: {
     row: (props) => {
@@ -45,7 +57,111 @@ export const components = {
     ),
   },
 };
+interface EditableRowProps {
+  index: number;
+}
+const { RangePicker } = DatePicker;
+const EditableRow: React.FC<EditableRowProps> = ({ index, ...props }) => {
+  const [form] = Form.useForm();
+  return (
+    <Form form={form} component={false}>
+      <EditableContext.Provider value={form}>
+        <tr {...props} />
+      </EditableContext.Provider>
+    </Form>
+  );
+};
 
+interface EditableCellProps {
+  title: React.ReactNode;
+  editable: boolean;
+  children: React.ReactNode;
+  dataIndex: string;
+  record: any;
+  editing?: boolean;
+  handleSave: (record: any) => void;
+  getPopupContainer?: () => HTMLDivElement;
+}
+
+const EditableCell: React.FC<EditableCellProps> = ({
+  title,
+  editable,
+  children,
+  dataIndex,
+  record,
+  handleSave,
+  editing,
+  getPopupContainer,
+  ...restProps
+}) => {
+  const form = useContext(EditableContext)!;
+  
+  
+  // form.setFieldsValue({ [dataIndex]: [
+  //   dayjs(record?.start).format('YYYY-MM-DD'),
+  //   dayjs(record?.end).format('YYYY-MM-DD')
+  // ] });
+
+  let childNode = children;
+  // if (editable && editing) {
+  //   form.setFieldValue('range', [record.start ? dayjs(record.start) : null, record.end ? dayjs(record.end) : null]);
+  // }
+  
+ 
+
+  if (editable) {
+    const rangeValue = [record?.start, record?.end];
+    form.setFieldValue(dataIndex, [record?.start, record?.end]);
+    const [range,setRange] = useState(rangeValue);
+
+    const setValue = (value) => {
+      form.setFieldValue(dataIndex, value);
+      setRange(value);
+    };
+    const save = async (value) => {
+      try {
+        const values = await form.validateFields();
+        // const { range } = values;
+        const [start,end] = range as string[];
+        const {start: _start,end: _end, ...others} = record;
+        handleSave({ ...others, start,end });
+      } catch (errInfo) {
+        console.log('Save failed:', errInfo);
+      }
+    };
+    childNode = editing ? (
+      <Form.Item
+        style={{ margin: 0 }}
+        name={dataIndex}
+        rules={[
+          {
+            required: true,
+            message: `${title} 必填`,
+          },
+        ]}
+      >
+        <Space.Compact size="small">
+          <RangePicker
+            getPopupContainer={getPopupContainer}
+            format='YYYY-MM-DD'
+            value={range}
+            onChange={setValue}
+          ></RangePicker>
+          <Button type="primary" onClick={save}>
+            确定
+          </Button>
+        </Space.Compact>
+        {/* <Input ref={inputRef} onPressEnter={save} onBlur={save} /> */}
+      </Form.Item>
+    ) : (
+      <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }}>
+        {children}
+      </div>
+    );
+  }
+
+  return <td {...restProps}>{childNode}</td>;
+};
 
 export const PrjWorkPlanTable: React.FC<any> = observer(
   (props) => {
@@ -78,12 +194,12 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const { t } = useAuthTranslation();
     const { modal } = App.useApp();
     const { record: prjRecord } = useDataSelectBlockContext();
+    const { editing, setEditing } = usePrjWorkPlanProviderContext();
     const containerRef = useRef<HTMLDivElement>();
-    const  fieldSchema = useFieldSchema();
     let navigate = useNavigate();
-    const getPopupContainer = ()=>{
+    const getPopupContainer = () => {
       return containerRef.current;
-    }
+    };
     let onRow = null,
       highlightRow = '';
 
@@ -128,7 +244,8 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         ? {
             type: 'checkbox',
             selectedRowKeys: selectedRowKeys,
-            width: 70,
+            fixed:true,
+            width:50,
             onChange(selectedRowKeys: any[], selectedRows: any[]) {
               field.data = field.data || {};
               field.data.selectedRowKeys = selectedRowKeys;
@@ -137,10 +254,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
             },
             renderCell: (checked, record, index, originNode) => {
               const arr = record.__index.split('.');
-              const arr1 = arr.map((value)=>{
+              const arr1 = arr.map((value) => {
                 return Number(value).valueOf() + 1;
               });
-              const  indexStr = arr1.join('.');
+              const indexStr = arr1.join('.');
               return (
                 <div
                   className={classNames(
@@ -223,7 +340,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     }, [tableHeight]);
     const renderItems = (record) => {
       const isGroup = record.isGroup;
-      const addChildLabel = isGroup ? '添加任务' : '添加子任务';     
+      const addChildLabel = isGroup ? '添加任务' : '添加子任务';
       const items: MenuProps['items'] = [
         {
           label: '编辑',
@@ -241,21 +358,21 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           key: '2',
           icon: <PlusCircleOutlined />,
           onClick: () => {
-            const newRecord:any = {
-              __collection:'task',
-              schemaName:'createTask',
+            const newRecord: any = {
+              __collection: 'task',
+              schemaName: 'createTask',
             };
             newRecord['prj'] = prjRecord;
-            if(!isGroup){
+            if (!isGroup) {
               //任务则赋值 项目 项目阶段 父任务
               newRecord.parent = {
-                ...record
-              }
-              newRecord.prjStage = record.prjStage
-            }else{
+                ...record,
+              };
+              newRecord.prjStage = record.prjStage;
+            } else {
               newRecord[record.fieldCtx.name] = {
-                ...pick(record,['id','stage','nickname', 'label'])
-              }
+                ...pick(record, ['id', 'stage', 'nickname', 'label']),
+              };
             }
             const onRecordClick = tableCtx?.field?.onRecordClick;
             if (typeof onRecordClick == 'function') {
@@ -276,7 +393,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
           icon: <ZoomInOutlined />,
           key: '3',
           onClick: (event) => {
-            navigate(toHref)
+            navigate(toHref);
           },
         });
       }
@@ -310,16 +427,45 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         });
       }
 
-
       return items;
     };
-    const columns: any = [
+    // const [editing, setEditing] = useState(false);
+    const handleEdit = () => {
+      setEditing(!editing);
+    };
+    const handleCancel = () => {
+      setEditing(false);
+    };
+    const defaultColumns: any = [
       {
-        title: '分组',
-        width: 200,
+        title: () => {
+          return (
+            <Row>
+              <Col span={18}>分组</Col>
+              <Col
+                span={6}
+                className={css`
+                  text-align: right;
+                `}
+              >
+                {
+                  <Button
+                    size="small"
+                    type={editing ? 'primary' : 'text'}
+                    icon={<ColumnWidthOutlined />}
+                    onClick={handleEdit}
+                  ></Button>
+                }
+              </Col>
+            </Row>
+          );
+        },
+        width: 'auto',
         dataIndex: 'title',
         key: 'title',
         render: (v, record, index) => {
+          const { fieldCtx } = record;
+          const value = fieldCtx ? getValuesByPath(record, fieldCtx.title, '') : record.title;
           const menus = renderItems(record);
           return (
             <div className="ant-description-input">
@@ -334,7 +480,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
                       }
                     }}
                   >
-                    {t(v)}
+                    {value}
                   </a>
                 </Dropdown>
               </EllipsisWithTooltip>
@@ -343,8 +489,15 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         },
       },
       {
+        title: '时间范围',
+        width: 360,
+        dataIndex: 'range',
+        key: 'range',
+        editable: true,
+      },
+      {
         title: '负责人',
-        width: 100,
+        width: 90,
         dataIndex: 'user',
         key: 'user',
         render: (v, record, index) => {
@@ -362,7 +515,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       },
       {
         title: '状态',
-        width: 100,
+        width: 90,
         dataIndex: 'status',
         key: 'status',
         render: (v, record, index) => {
@@ -394,32 +547,102 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       //   },
       // },
     ];
+    const api = useAPIClient();
+    const handleSave = (record) => {
+      // const newData = [...dataSource];
+      // const index = newData.findIndex((item) => row.key === item.key);
+      // const item = newData[index];
+      // newData.splice(index, 1, {
+      //   ...item,
+      //   ...row,
+      // });
+      /* 保存数据 */
+      const { id, start, end, fieldCtx } = record;
+      api
+        .request({
+          url: `${record.__collection}:update?filterByTk=${record.id}`,
+          method: 'post',
+          data: {
+            id,
+            start,
+            end,
+          },
+        })
+        .then((res) => {
+          if (res.data) {
+            /* 保存成功 */
+            /* 刷新数据 */
+            const { refresh } = fieldCtx.blockCtx.service;
+            refresh();
+          }
+        });
+    };
+    const columns = defaultColumns
+      .filter(({ editable }) => {
+        return editing ? true : !editable;
+      })
+      .map((col) => {
+        if (!col.editable) {
+          return col;
+        }
+        return {
+          ...col,
+          textWrap: 'word-break',
+          ellipsis: true,
+          onCell: (record) => ({
+            record,
+            editable: col.editable,
+            dataIndex: col.dataIndex,
+            title: col.title,
+            editing,
+            handleSave,
+            getPopupContainer,
+          }),
+        };
+      });
+    const components = {
+      body: {
+        row: EditableRow,
+        cell: EditableCell,
+      },
+    };
     return (
       <>
-        <div ref={containerRef}
+        <div
+          ref={containerRef}
           className={css`
             height: 100%;
             overflow: hidden;
+            max-width: 786px;
+            min-width: 426px;
             .ant-table-wrapper {
               height: 100%;
               .ant-spin-nested-loading {
                 height: 100%;
                 .ant-spin-container {
                   height: 100%;
-                  display: flex;
-                  flex-direction: column;
+                  // display: flex;
+                  // flex-direction: column;
                 }
               }
             }
             .ant-table {
-              overflow-x: auto;
+              // overflow-x: auto;
               overflow-y: hidden;
+            }
+            .ant-table-wrapper .ant-table-thead > tr > th,
+            .ant-table-wrapper .ant-table-tbody > tr > th,
+            .ant-table-wrapper .ant-table-tbody > tr > td,
+            .ant-table-wrapper tfoot > tr > th,
+            .ant-table-wrapper tfoot > tr > td {
+              padding: 10px 16px;
             }
           `}
         >
           <Table
             ref={tableSizeRefCallback}
             rowKey={rowKey ?? defaultRowKey}
+            components={components}
             dataSource={dataSource}
             {...others}
             {...restProps}
@@ -428,8 +651,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
               onTableChange?.(pagination, filters, sorter, extra);
             }}
             onRow={onRow}
-            rowClassName={(record) => (selectedRow.includes(record[rowKey]) ? highlightRow : '')}
-            tableLayout={'auto'}
+            rowClassName={(record) => {
+              return selectedRow.includes(record[rowKey]) ? highlightRow + ' editable-row' : 'editable-row';
+            }}
+            // tableLayout={'fixed'}
             scroll={scroll}
             columns={columns}
             expandable={{

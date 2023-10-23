@@ -1,5 +1,5 @@
 import { useDataSelectBlockContext } from '..';
-import { usePrjWorkProviderContext } from './PrjWorkPlanProvider';
+// import { usePrjWorkProviderContext } from './PrjWorkPlanProvider';
 import { dayjs } from '@nocobase/utils';
 
 export const usePrjWorkPlanFormDefValue = () => {
@@ -9,10 +9,10 @@ export const usePrjWorkPlanFormDefValue = () => {
   };
 };
 export const usePrjWorkPlanForm = () => {
-  const { form } = usePrjWorkProviderContext();
+  // const { form } = usePrjWorkProviderContext();
   return {
     layout: 'inline',
-    form,
+    // form,
   };
 };
 
@@ -46,8 +46,8 @@ export const usePrjWorkPlanDecoratorProps = () => {
 };
 
 export const refreshPrjWorkService = async () => {
-  const { service } = usePrjWorkProviderContext();
-  await service.refresh();
+  // const { service } = usePrjWorkProviderContext();
+  // await service.refresh();
 };
 
 export const useWorkPlanGanttParams = (props) => {

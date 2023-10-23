@@ -14,11 +14,19 @@ import { usePrjWorkPlanProcessData } from './scopes';
 import { Field } from '@nocobase/database';
 import { Spin } from 'antd';
 
-const PrjWorkProviderContext = createContext<any>({});
+const PrjWorkPlanProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});
 
 export const PrjWorkPlanProvider = (props) => {
-  const [group, setGroup] = useState(props.group);
+  const {
+    form = {
+      group: {},
+      sort: {},
+      range: {},
+    },
+  } = props;
+
+  const [group, setGroup] = useState(form.group?.default);
   const { getCollectionField } = useCollectionManager();
   const { record, service } = useDataSelectBlockContext();
   if (!service || service.loading || !record || !record.id) {
@@ -36,7 +44,7 @@ export const PrjWorkPlanProvider = (props) => {
     };
     const target = obj.target;
     if (target == 'prj_plan_latest') {
-      obj.title = 'title';
+      obj.title = 'stage.label';
       obj.sort = defaultSort;
     } else if (target == 'users') {
       obj.title = 'nickname';
@@ -111,16 +119,30 @@ export const PrjWorkPlanProvider = (props) => {
 
   /* 首先获取 项目阶段 */
 
+  const [editing, setEditing] = useState(false);
+  const [isFullscreen, setIsFullScreen] = useState(false);
+  const [rightSize, setRightSize] = useState(props.rightSize);
+  useEffect(() => {
+    setRightSize(props.rightSize);
+  }, [props.rightSize]);
+
+
   /* 获取项目任务 */
   return (
     <>
       <BlockProvider data-testid={target} {...options} params={params}>
         <PrjWorkPlanGanttProvider
           {...props}
+          rightSize={rightSize}
+          setRightSize={setRightSize}
+          editing={editing}
+          setEditing={setEditing}
           groupField={groupField}
           group={group}
           setGroup={setGroup}
           preProcessData={preProcessData}
+          isFullscreen={isFullscreen}
+          setIsFullScreen={setIsFullScreen}
         ></PrjWorkPlanGanttProvider>
       </BlockProvider>
     </>
@@ -128,14 +150,11 @@ export const PrjWorkPlanProvider = (props) => {
 };
 const PrjWorkPlanGanttProvider = (props) => {
   const field = useField<Field>();
-  const { groupField, sort, groupData, ...others } = props;
-
-  // const { record } = useDataSelectBlockContext();
+  const { groupField, sort, groupData, editing, setEditing, isFullscreen, setIsFullScreen, ...others } = props;
   const { service } = useBlockRequestContext();
   const ctx = useBlockRequestContext();
   field.loading = service.loading;
   const record = useRecord();
-  console.log('PrjWorkPlanGanttProvider record.id', record?.id);
   const params = {
     filter: {
       $and: [
@@ -153,7 +172,7 @@ const PrjWorkPlanGanttProvider = (props) => {
     sort: sort,
     appends: ['prj', 'prjStage', 'user', 'status', 'dependencies'],
   };
-  const [parentData, setParentData] = useState(record?.plans||[]);
+  const [parentData, setParentData] = useState([]);
   const groupFieldCtx = {
     ...groupField,
     blockCtx: {
@@ -164,7 +183,7 @@ const PrjWorkPlanGanttProvider = (props) => {
 
   useEffect(() => {
     if (!ctx.service?.loading) {
-      setParentData(ctx.service?.data?.data||[]);
+      setParentData(ctx.service?.data?.data || []);
     }
   }, [ctx.service?.loading]);
   // useEffect(() => {
@@ -182,11 +201,27 @@ const PrjWorkPlanGanttProvider = (props) => {
   // }, [record.id]);
   /* 首先获取 项目阶段 */
   /* 获取项目任务 */
+  // useEffect(()=>{
+  //   console.log('editable 变化了', editable);
+  // },[editable]);
   return (
-    <>
-      {(service.loading && record  && record?.id) ? (<Spin></Spin>): (
+    <PrjWorkPlanProviderContext.Provider
+      value={{
+        editing,
+        setEditing,
+        service,
+        isFullscreen,
+        setIsFullScreen,
+        groupFieldCtx
+      }}
+    >
+      {!service?.loading && (
         <GanttBlockProvider
           {...others}
+          setEditing={setEditing}
+          editing={editing}
+          isFullscreen={isFullscreen}
+          setIsFullScreen={setIsFullScreen}
           params={params}
           sort={sort}
           groupField={groupFieldCtx}
@@ -194,11 +229,11 @@ const PrjWorkPlanGanttProvider = (props) => {
           rowKey="rowKey"
         ></GanttBlockProvider>
       )}
-    </>
+    </PrjWorkPlanProviderContext.Provider>
   );
 };
-export const usePrjWorkProviderContext = () => {
-  return useContext(PrjWorkProviderContext);
+export const usePrjWorkPlanProviderContext = () => {
+  return useContext(PrjWorkPlanProviderContext);
 };
 export const usePrjWorkFormProviderContext = () => {
   return useContext(PrjWorkFormProviderContext);

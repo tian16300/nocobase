@@ -1,5 +1,5 @@
 import { FormOutlined } from '@ant-design/icons';
-import { FormLayout } from '@formily/antd-v5';
+import { FormLayout, FormGrid, FormItem } from '@formily/antd-v5';
 import { SchemaOptionsContext } from '@formily/react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,18 +33,18 @@ export const GanttBlockInitializer = (props) => {
               value: field.name,
             };
           });
-        /**
-         * 扩展字典字段
-         */
-        const dicFields = collectionFields
-          ?.filter((field) => field.interface === 'dic')
-          .map((field) => {
-            return {
-              label: field?.uiSchema?.title,
-              value: [field.name, 'label'].join('.'),
-            };
-          });
-        stringFields = stringFields.concat(dicFields);
+        // /**
+        //  * 扩展字典字段
+        //  */
+        // const dicFields = collectionFields
+        //   ?.filter((field) => field.interface === 'dic')
+        //   .map((field) => {
+        //     return {
+        //       label: field?.uiSchema?.title,
+        //       value: [field.name, 'label'].join('.'),
+        //     };
+        //   });
+        // stringFields = stringFields.concat(dicFields);
 
         const dateFields = collectionFields
           ?.filter((field) => field.type === 'date')
@@ -62,28 +62,32 @@ export const GanttBlockInitializer = (props) => {
               value: field.name,
             };
           });
-        const groups = collectionFields.filter((field)=>{
-          return ['m2o','dic'].includes(field.interface) && 'parent' !== field.name;
-        }).map((field) => {
-          const isDicField = ['dic'].includes(field.interface);
-          return {
-            label: field?.uiSchema?.title,
-            value: field.name,
-          };
-        });
-        const sort =  collectionFields.filter((field)=>{
-          return 'date' == field.type || ['dic'].includes(field.interface);
-        }).map((field) => {
-          // const isDicField = ['dic'].includes(field.interface);
-          return {
-            label: field?.uiSchema?.title,
-            value: field.name,
-          };
-        });
-        const range =   [
-          // { label: '{{t("Hour")}}', value: 'hour', color: 'orange' },
-          // { label: '{{t("Quarter of day")}}', value: 'quarterDay', color: 'default' },
-          // { label: '{{t("Half of day")}}', value: 'halfDay', color: 'blue' },
+        const groups = collectionFields
+          .filter((field) => {
+            return ['m2o', 'dic'].includes(field.interface) && 'parent' !== field.name;
+          })
+          .map((field) => {
+            const isDicField = ['dic'].includes(field.interface);
+            return {
+              label: field?.uiSchema?.title,
+              value: field.name,
+            };
+          });
+        const sort = collectionFields
+          .filter((field) => {
+            return 'date' == field.type;
+          })
+          .map((field) => {
+            // const isDicField = ['dic'].includes(field.interface);
+            return {
+              label: field?.uiSchema?.title,
+              value: field.name,
+            };
+          });
+        const range = [
+          { label: '{{t("Hour")}}', value: 'hour', color: 'orange' },
+          { label: '{{t("Quarter of day")}}', value: 'quarterDay', color: 'default' },
+          { label: '{{t("Half of day")}}', value: 'halfDay', color: 'blue' },
           { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
           { label: '{{t("Week")}}', value: 'week', color: 'pule' },
           { label: '{{t("Month")}}', value: 'month', color: 'green' },
@@ -95,7 +99,7 @@ export const GanttBlockInitializer = (props) => {
           t('Create gantt block'),
           () => {
             return (
-              <SchemaComponentOptions scope={options.scope} components={{ ...options.components }}>
+              <SchemaComponentOptions scope={options.scope} components={{ ...options.components, FormGrid, FormItem }}>
                 <FormLayout layout={'vertical'}>
                   <SchemaComponent
                     schema={{
@@ -106,19 +110,6 @@ export const GanttBlockInitializer = (props) => {
                           required: true,
                           'x-component': 'Select',
                           'x-decorator': 'FormItem',
-                        },
-                        group: {
-                          title: t('默认分组'),
-                          enum: groups,
-                          'x-component': 'Select',
-                          'x-decorator': 'FormItem',
-                        },
-                        sort: {
-                          title: t('默认排序'),
-                          enum: sort,
-                          'x-component': 'Select',
-                          'x-decorator': 'FormItem',
-                          default: 'start',
                         },
                         start: {
                           title: t('Start date field'),
@@ -142,11 +133,183 @@ export const GanttBlockInitializer = (props) => {
                           'x-decorator': 'FormItem',
                         },
                         range: {
-                          title: t('Time scale'),
+                          title: t('时间范围'),
                           enum: range,
-                          default: 'day',
                           'x-component': 'Select',
                           'x-decorator': 'FormItem',
+                          'default':'day'
+                        },
+                        form: {
+                          type: 'object',
+                          title: '表单设置',
+                          properties: {
+                            group: {
+                              type: 'object',
+                              // title: '分组设置',
+                              // 'x-decorator': 'FormItem',
+                              'x-component':'FormGrid',
+                              'x-component-props':{
+                                minColumns: [2, 2],
+                                maxColumns:[2, 2]
+                              },
+                              properties:{
+                                visible: {
+                                  type: 'boolean',
+                                  title: '显示分组',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 2 },
+                                  'x-component': 'Switch',
+                                },
+                                options: {
+                                  title: t('选择分组字段'),
+                                  enum: groups,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 1 },
+                                  'x-component-props': {
+                                    mode: 'multiple',
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}"
+                                      }
+                                    }
+                                  }
+                                },                                
+                                default:{
+                                  title: t('默认值'),
+                                  enum: groups,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem', 
+                                  'x-decorator-props': {
+                                    gridSpan: 1
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}"
+                                      }
+                                    }
+                                  }
+                                }
+
+                              }
+                            },
+                            sort: {
+                              type: 'object',
+                              // title: '分组设置',
+                              // 'x-decorator': 'FormItem',
+                              'x-component':'FormGrid',
+                              'x-component-props':{
+                                minColumns: [2, 2],
+                                maxColumns:[2, 2]
+                              },
+                              properties:{
+                                visible: {
+                                  type: 'boolean',
+                                  title: '显示排序',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 2 },
+                                  'x-component': 'Switch',
+                                },
+                                options: {
+                                  title: t('选择排序字段'),
+                                  enum: sort,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 1 },
+                                  'x-component-props': {
+                                    mode: 'multiple',
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}"
+                                      }
+                                    }
+                                  }
+                                },                                
+                                default:{
+                                  title: t('默认值'),
+                                  enum: sort,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem', 
+                                  'x-decorator-props': {
+                                    gridSpan: 1
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}"
+                                      }
+                                    }
+                                  }
+                                }
+
+                              }
+                            },
+                            range: {
+                              type: 'object',
+                              // title: '分组设置',
+                              // 'x-decorator': 'FormItem',
+                              'x-component':'FormGrid',
+                              'x-component-props':{
+                                minColumns: [2, 2],
+                                maxColumns:[2, 2]
+                              },
+                              properties:{
+                                visible: {
+                                  type: 'boolean',
+                                  title: '显示范围',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 2 },
+                                  'x-component': 'Switch',
+                                },
+                                options: {
+                                  title: t('范围字段'),
+                                  enum: range,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem',
+                                  'x-decorator-props':{ gridSpan: 1 },
+                                  'x-component-props': {
+                                    mode: 'multiple',
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}"
+                                      }
+                                    }
+                                  }
+                                },                                
+                                default:{
+                                  title: t('默认值'),
+                                  enum: range,
+                                  'x-component': 'Select',
+                                  'x-decorator': 'FormItem', 
+                                  'x-decorator-props': {
+                                    gridSpan: 1
+                                  },
+                                  "x-reactions": {
+                                    "dependencies": [".visible", "range"],
+                                    "fulfill": {
+                                      "schema": {
+                                        "x-visible": "{{$deps[0]}}",
+                                        "x-value":"{{$deps[1]}}"
+                                      }
+                                    }
+                                  }
+                                }
+
+                              }
+                            }
+                          },
                         },
                       },
                     }}
@@ -157,28 +320,41 @@ export const GanttBlockInitializer = (props) => {
           },
           theme,
         ).open({
-          initialValues: {},
+          initialValues: {
+            range:'day',
+            form:{
+              group:{
+                visible: false
+              },
+              sort:{
+                 visible: false
+              },
+              range:{
+                visible: true,
+                options:['day','week','month','quarterYear','year']
+              }
+
+            }
+          },
         });
 
-        Object.values(values).forEach((val: string) => {
-          const keys = val.split('.');
-          if (keys.length > 1) {
-            appends.push(keys.slice(0, keys.length - 1).join('.'));
-          }
-        });
+        // Object.values(values).forEach((val: string) => {
+        //   const keys = val.split('.');
+        //   if (keys.length > 1) {
+        //     appends.push(keys.slice(0, keys.length - 1).join('.'));
+        //   }
+        // });
+        const {form, ...others} = values;
+
         insert(
           createGanttBlockSchema({
             collection: item.name,
             fieldNames: {
-              ...values,
+              ...others
             },
-            fields:{
-              groups,
-              sort,
-              range
-            },
-            appends: appends
-          }),
+            appends: appends,
+            form
+          })
         );
       }}
     />

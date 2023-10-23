@@ -156,7 +156,7 @@ export default {
   'Quarter of day': '四分之一天',
   'Half of day': '半天',
   Year: '年',
-  QuarterYear: '季度',
+  QuarterYear: '季',
   'Select grouping field': '选择分组字段',
   Media: '多媒体',
   Markdown: 'Markdown',

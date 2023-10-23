@@ -7,7 +7,7 @@ import { DetailsBlockProvider, useDetailsBlockProps } from './DetailsBlockProvid
 import { FilterFormBlockProvider } from './FilterFormBlockProvider';
 import { FormBlockProvider, useFormBlockProps } from './FormBlockProvider';
 import { FormFieldProvider, useFormFieldProps } from './FormFieldProvider';
-import { GanttBlockProvider, useGanttBlockProps } from './GanttBlockProvider';
+import { GanttBlockProvider, useGanttBlockProps, useGanttFormGroupFieldProps, useGanttFormRangeFieldProps, useGanttFormSortFieldProps } from './GanttBlockProvider';
 import * as bp from './hooks';
 import { KanbanBlockProvider, useKanbanBlockProps } from './KanbanBlockProvider';
 import { TableBlockProvider, useTableBlockProps } from './TableBlockProvider';
@@ -44,7 +44,7 @@ export const BlockSchemaComponentProvider: React.FC = (props) => {
         useTableBlockProps,
         useTableSelectorProps,
         useKanbanBlockProps,
-        useGanttBlockProps,
+        useGanttBlockProps
       }}
     >
       {props.children}
@@ -88,7 +88,10 @@ export class BlockSchemaComponentPlugin extends Plugin {
       useTableBlockProps,
       useTableSelectorProps,
       useKanbanBlockProps,
-      useGanttBlockProps,
+      useGanttBlockProps, 
+      useGanttFormGroupFieldProps,     
+      useGanttFormSortFieldProps,
+      useGanttFormRangeFieldProps
     });
   }
 }

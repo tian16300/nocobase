@@ -7,6 +7,7 @@ import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAssociationNames, useToken } from '..';
 import { getValuesByPath } from '@nocobase/utils/client';
 import { pick } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token) => {
@@ -14,10 +15,10 @@ const getItemColor = (item, token) => {
   if (colorName) {
     if (colorName.indexOf('#') !== -1 || colorName.indexOf('rgb') !== -1 || colorName.indexOf('rgba') !== -1) {
       return colorName;
-    } if(colorName.indexOf('-')!==-1){
+    }
+    if (colorName.indexOf('-') !== -1) {
       return token[colorName];
-    } 
-    else {
+    } else {
       return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
     }
   }
@@ -76,7 +77,21 @@ const getProgressValue = (item, fieldNames) => {
 };
 const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
   const disable = checkPermassion(item);
-  const itemValues = pick(item, ['seriesName','title','isHidden','isHiddenTitle','remark','isDiff','isDisabled','type','schemaName','isGroup', 'groupRowKey', 'rowKey', 'fieldCtx']);
+  const itemValues = pick(item, [
+    'seriesName',
+    'title',
+    'isHidden',
+    'isHiddenTitle',
+    'remark',
+    'isDiff',
+    'isDisabled',
+    'type',
+    'schemaName',
+    'isGroup',
+    'groupRowKey',
+    'rowKey',
+    'fieldCtx',
+  ]);
   const start = getValuesByPath(item, fieldNames.start);
   const end = getValuesByPath(item, fieldNames.end);
   return {
@@ -88,11 +103,11 @@ const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
     id: item.id + '',
     color: getItemColor(item, ctx.token),
     isDisabled: disable,
-    progress:getProgressValue(item, fieldNames),
+    progress: getProgressValue(item, fieldNames),
     ...itemValues,
     dependencies: (item.dependencies || []).map((record) => {
       return record[ctx.rowKey];
-    })
+    }),
   };
 };
 const formatData = (
@@ -108,22 +123,23 @@ const formatData = (
   data.forEach((item: any) => {
     if (item.children && item.children.length) {
       const startIdx = tasks.length;
-      const data = item.data?item.data?.map((item)=>{
-        return {
-          project: projectId,
-          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
-        }
-      }):[
-        {
-           
-          project: projectId,
-          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
-        }
-      ];
+      const data = item.data
+        ? item.data?.map((item) => {
+            return {
+              project: projectId,
+              ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+            };
+          })
+        : [
+            {
+              project: projectId,
+              ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+            },
+          ];
       tasks.push({
         index: startIdx,
-        ...getTaskItem(item,fieldNames,checkPermassion,ctx),   
-        type: 'project',     
+        ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+        type: 'project',
         hideChildren: hideChildren,
         project: projectId,
         data: data,
@@ -131,24 +147,25 @@ const formatData = (
       formatData(item.children, fieldNames, tasks, item[ctx.rowKey] + '', hideChildren, checkPermassion, treeData, ctx);
     } else {
       const startIdx = tasks.length;
-      const data = item.data?item.data?.map((item)=>{
-        return {
-          project: projectId,
-          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
-        }
-      }):[
-        {
-           
-          project: projectId,
-          ...getTaskItem(item,fieldNames,checkPermassion,ctx)
-        }
-      ];
+      const data = item.data
+        ? item.data?.map((item) => {
+            return {
+              project: projectId,
+              ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+            };
+          })
+        : [
+            {
+              project: projectId,
+              ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+            },
+          ];
 
       tasks.push({
         index: startIdx,
-        ...getTaskItem(item,fieldNames,checkPermassion,ctx),         
-        project: projectId,   
-        data: data
+        ...getTaskItem(item, fieldNames, checkPermassion, ctx),
+        project: projectId,
+        data: data,
       });
     }
   });
@@ -168,9 +185,9 @@ const InternalGanttBlockProvider = (props) => {
     },
     ...others
   } = props;
-  const field:IField = useField();
+  const field: IField = useField();
   const { service } = useBlockRequestContext();
-  const { token } = useToken(); 
+  const { token } = useToken();
 
   return (
     <GanttBlockContext.Provider
@@ -388,13 +405,14 @@ export const useGanttBlockContext = () => {
 
 export const useGanttBlockProps = (_props) => {
   const ctx = useGanttBlockContext();
-  const  props = {
+  const props = {
     ..._props,
-    ...ctx
+    ...ctx,
   };
   const preProcessData = ctx.preProcessData || ((data: any) => data || []);
   const [tasks, setTasks] = useState<any>([]);
   const [rightSize, setRightSize] = useState<any>(ctx.rightSize);
+  useEffect(() => {}, [ctx.rightSize]);
   const { getPrimaryKey, name, template, writableView } = useCollection();
   const { parseAction } = useACLRoleContext();
   const primaryKey = getPrimaryKey();
@@ -434,6 +452,9 @@ export const useGanttBlockProps = (_props) => {
     setGanttHeight(size);
     setHasScroll(hasScroll);
     setRightSize(comp.props.flex);
+    if (typeof ctx.setRightSize == 'function') {
+      ctx.setRightSize(comp.props.flex);
+    }
   };
   useEffect(() => {
     setRightSize(ctx.rightSize);
@@ -475,5 +496,69 @@ export const useGanttBlockFormItemProps = () => {
   const field = useField();
   return {
     options: [],
+  };
+};
+
+export const useGanttFormSortFieldProps = (props) => {
+  // const { collection, resourceName } = useGanttBlockContext();
+  const { form } = useGanttBlockContext();
+  const { sort } = form;
+  const { fields } = useCollection();
+  const { getInterface } = useCollectionManager();
+
+  const options = fields
+    .filter((field) => {
+      const fieldInterface = getInterface(field?.interface);
+      return fieldInterface?.sortable && sort?.options?.includes(field?.name);
+    })
+    .map((field) => {
+      return {
+        label: field.uiSchema?.title,
+        value: field.name,
+      };
+    });
+  return {
+    options: options,
+  };
+};
+
+export const useGanttFormRangeFieldProps = (props) => {
+  const { form } = useGanttBlockContext();
+  const { range } = form;
+  const { t } = useTranslation();
+  const options = [
+    { label: t('Hour'), value: 'hour', color: 'orange' },
+    { label: t('Quarter of day'), value: 'quarterDay', color: 'default' },
+    { label: t('Half of day'), value: 'halfDay', color: 'blue' },
+    { label: t('Day'), value: 'day', color: 'yellow' },
+    { label: t('Week'), value: 'week', color: 'pule' },
+    { label: t('Month'), value: 'month', color: 'green' },
+    { label: t('QuarterYear'), value: 'quarterYear', color: 'red' },
+    // { label: '{{t("半年")}}', value: 'halfYear', color: 'red' },
+    { label: t('Year'), value: 'year', color: 'green' },
+  ].filter(({ value }) => {
+    return range?.options?.includes(value);
+  });
+  return {
+    options: options,
+  };
+};
+
+export const useGanttFormGroupFieldProps = (props) => {
+  const { form } = useGanttBlockContext();
+  const { group } = form;
+  const { fields } = useCollection();
+  const options = fields
+    .filter((field) => {
+      return ['m2o', 'obo', 'dic'].includes(field?.interface) && group?.options?.includes(field?.name);
+    })
+    .map((field) => {
+      return {
+        label: field.uiSchema?.title,
+        value: field.name,
+      };
+    });
+  return {
+    options: options,
   };
 };

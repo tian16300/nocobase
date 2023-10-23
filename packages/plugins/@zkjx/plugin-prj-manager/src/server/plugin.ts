@@ -27,24 +27,7 @@ export class PluginPrjManagerServer extends Plugin {
       const dicItem = this.app.db.getCollection('dicItem')?.existsInDb();
       if (dic && dicItem) await this.addRecords();
     });
-    this.bindSync([
-      'prj',
-      'prj_plan',
-      'prj_plan_history',
-      'prj_plan_latest',
-      'prj_plan_version',
-      'prj_stages_files',
-      'prjs_files',
-      'prjs_users',
-      'reportSetting',
-      'report',
-      'reportDetail',
-      'reportPlan',
-      'report_target',
-      'task',
-      'tasks_dependencies',
-      'task_hour',
-    ]);
+
     /* 更新 周报保存数据后 更新项目活跃 */
     this.app.db.on('report.afterSaveWithAssociations', async (report, options) => {
       // debugger;
@@ -59,17 +42,16 @@ export class PluginPrjManagerServer extends Plugin {
     //   //  if(model.)
     // });
 
-
     this.app.db.on('reportDetail.afterSave', async (model, options) => {
       if (!model.reportId) {
         const rep = this.app.db.getRepository('reportDetail');
         await rep.destroy({
           filter: {
-            id: model.id
-          }
+            id: model.id,
+          },
         });
-        this.app.db.logger.info(`删除本周完成 ${model.id}`)
-      } 
+        this.app.db.logger.info(`删除本周完成 ${model.id}`);
+      }
     });
     /* 删除项目历史版本时 移除项目计划历史版本 */
     this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
@@ -83,26 +65,33 @@ export class PluginPrjManagerServer extends Plugin {
         },
       });
     });
+    /* 计算项目计划开始时间 计划结束时间 */
+    this.app.db.on('prj_plan_latest.afterSave', async (model) => {});
+    this.app.db.on('prj_plan_latest.afterDestroy', async (model) => {});
+    // this.app.db.on('afterSync', () => {
+    //   this.bindSync([
+    //     'prjs_files',
+    //     'prjs_users',
+    //     'prj_plan_task_time',
+    //     'tasks-dependencies',
+    //     'risk_basic',
+    //     'reportSetting',
+    //     'report',
+    //     'reportDetail',
+    //     'reportPlan',
+    //     'report_target',
+    //     'prj',
+    //     'prj_plan',
+    //     'prj_plan_history',
+    //     'prj_plan_latest',
+    //     'prj_plan_version',
+    //     'prj_stages_files',
+    //     'task',
+    //   ]);
+    // });
   }
   updateReportDetail(report) {
     // debugger;
-  }
-  bindSync(names) {
-    names.forEach((name) => {
-      this.app.db.on(`${name}.afterSync`, async (model, options) => {
-        const collectionName = name;
-        // const collection = this.db.getCollection(collectionName);
-        const repo = this.db.getRepository<any>('collections');
-        const result = await repo.findOne({
-          filter: {
-            name: collectionName,
-          },
-        });
-        if (!result) {
-          await repo.db2cm(collectionName);
-        }
-      });
-    });
   }
   aclAllowList(names, condition) {
     names.forEach((name) => {
@@ -113,6 +102,9 @@ export class PluginPrjManagerServer extends Plugin {
     //增加字典数据
     // await this.addRecords();
 
+    await this.app.db.import({
+      directory: path.resolve(__dirname, './collections/basic'),
+    });
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/prj'),
     });
@@ -142,11 +134,14 @@ export class PluginPrjManagerServer extends Plugin {
         'report_target',
         'task',
         'task_hour',
+        'prj_plan_task_time',
+        'risk_basic',
       ],
       'loggedIn',
     );
-    this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
+    this.aclAllowList(['risk_basic', 'prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
+    this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
 
     // this.app.on('beforeStart', () => {
     //   // 每10分钟执行一次
@@ -175,7 +170,8 @@ export class PluginPrjManagerServer extends Plugin {
     });
   }
 
-  async install(options?: InstallOptions) {}
+  async install(options?: InstallOptions) {
+  }
 
   async afterEnable() {}
 

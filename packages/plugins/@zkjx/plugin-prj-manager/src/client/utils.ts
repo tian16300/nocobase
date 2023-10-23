@@ -298,14 +298,14 @@ export const createDataSelectBlockSchema = (options) => {
                 'x-component': 'Grid.Col',
                 'x-component-props': {},
                 properties: {
-                  ['tabs_' + uid()]: tabs
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                  ['tabs_' + uid()]: tabs,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
   return schema;
 };
@@ -368,90 +368,87 @@ export const createPrjWorkPlanShema = () => {
   const groups = {};
   groupsFields.forEach((key) => {
     groups[key] = {
+      type: 'void',
+      'x-component': 'Gantt.Event',
+      'x-decorator': 'ACLActionProvider',
+      'x-acl-action': 'update',
+      properties: {
+        drawer: {
           type: 'void',
-          'x-component': 'Gantt.Event',
-          'x-decorator': 'ACLActionProvider',
-          'x-acl-action': 'update',
+          'x-component': 'Action.Drawer',
+          'x-component-props': {
+            className: 'nb-action-popup',
+          },
+          title: '{{ t("详情") }}',
           properties: {
-            drawer: {
+            tabs: {
               type: 'void',
-              'x-component': 'Action.Drawer',
-              'x-component-props': {
-                className: 'nb-action-popup',
-              },
-              title: '{{ t("详情") }}',
+              'x-component': 'Tabs',
+              'x-component-props': {},
+              'x-initializer': 'TabPaneInitializers',
               properties: {
-                tabs: {
+                tab1: {
                   type: 'void',
-                  'x-component': 'Tabs',
+                  title: '{{t("Details")}}',
+                  'x-component': 'Tabs.TabPane',
+                  'x-designer': 'Tabs.Designer',
                   'x-component-props': {},
-                  'x-initializer': 'TabPaneInitializers',
                   properties: {
-                    tab1: {
+                    grid: {
                       type: 'void',
-                      title: '{{t("Details")}}',
-                      'x-component': 'Tabs.TabPane',
-                      'x-designer': 'Tabs.Designer',
-                      'x-component-props': {},
-                      properties: {
-                        grid: {
-                          type: 'void',
-                          'x-component': 'Grid',
-                          'x-initializer': 'RecordBlockInitializers',
-                          properties: {},
-                        },
-                      },
+                      'x-component': 'Grid',
+                      'x-initializer': 'RecordBlockInitializers',
+                      properties: {},
                     },
                   },
                 },
               },
             },
           },
-        }
+        },
+      },
+    };
   });
-  const fields = {
-    groups: [
-      { label: '项目阶段', value: 'prjStage' },
-      { label: '负责人', value: 'user' },
-      { label: '状态', value: 'status' },
-    ],
-    sort: [
-      { label: '开始时间', value: 'start' },
-      { label: '截止时间', value: 'end' },
-      { label: '任务状态', value: 'status' },
-    ],
-    range: [
-      { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
-      { label: '{{t("Week")}}', value: 'week', color: 'pule' },
-      { label: '{{t("Month")}}', value: 'month', color: 'green' },
-      { label: '{{t("QuarterYear")}}', value: 'quarterYear', color: 'red' },
-      { label: '{{t("Year")}}', value: 'year', color: 'green' },
-    ],
+  const decoratorProps = {
+    collection: 'task',
+    resource: 'task',
+    action: 'list',
+    fieldNames: {
+      id: 'id',
+      title: 'title',
+      start: 'start',
+      range: 'week',
+      end: 'end',
+    },
+    params: {
+      appends: ['prjStage', 'user', 'dependencies'],
+      paginate: false,
+      sort: 'id',
+    },
+    rightSize: 0.7,
+    form: {
+      group: {
+        visible: true,
+        options: ['prjStage', 'user', 'status'],
+        default: 'prjStage',
+      },
+      sort: {
+        visible: true,
+        options: ['start', 'end', 'real_start', 'real_end', 'plan_days', 'real_days'],
+        default: 'start',
+      },
+      range: {
+        visible: true,
+        options: ['day', 'week', 'month', 'quarterYear', 'year'],
+        default: 'day',
+      },
+    },
   };
+
   return {
     type: 'void',
     'x-decorator': `${comp}.Decorator`,
-    'x-decorator-props': {
-      collection: 'task',
-      resource: 'task',
-      action: 'list',
-      fieldNames: {
-        id: 'id',
-        title: 'title',
-        start: 'start',
-        range: 'week',
-        end: 'end',
-      },
-      params: {
-        appends: ['prjStage', 'user', 'dependencies'],
-        paginate: false,
-        sort: 'id',
-      },
-      rightSize: 0.7,
-      group: 'prjStage',
-      sort: 'start',
-      fields,
-    },
+    'x-decorator-props': decoratorProps,
     'x-component': `${comp}.Wrap`,
     'x-designer': `${comp}.Designer`,
     properties: {
@@ -483,11 +480,10 @@ export const createPrjWorkPlanShema = () => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props': {
-                      allowClear: false,
-                      multiple: false,
+                      useProps: '{{useGanttFormGroupFieldProps}}',
                     },
-                    enum: fields.groups,
-                    default: 'prjStage',
+                    default: decoratorProps.form.group?.default,
+                    'x-visible': decoratorProps.form.group?.visible,
                   },
                   sort: {
                     type: 'string',
@@ -496,10 +492,10 @@ export const createPrjWorkPlanShema = () => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props': {
-                      allowClear: false,
+                      useProps: '{{useGanttFormSortFieldProps}}',
                     },
-                    enum: fields.sort,
-                    default: 'start',
+                    default: decoratorProps.form.sort?.default,
+                    'x-visible': decoratorProps.form.sort?.visible,
                   },
                   range: {
                     type: 'string',
@@ -509,9 +505,10 @@ export const createPrjWorkPlanShema = () => {
                     'x-component': 'Select',
                     'x-component-props': {
                       allowClear: false,
+                      useProps: '{{useGanttFormRangeFieldProps}}',
                     },
-                    enum: fields.range,
-                    default: 'day',
+                    'x-visible': decoratorProps.form.range?.visible,
+                    default: decoratorProps.form.range?.default,
                   },
                 },
               },
@@ -526,7 +523,61 @@ export const createPrjWorkPlanShema = () => {
               },
             },
             'x-initializer': 'GanttActionInitializers',
-            properties: {},
+            properties: {
+              [uid()]: {
+                title: '{{ t("添加计划") }}',
+                type: 'void',
+                'x-action': 'customize:save',
+                'x-component': 'Action',
+                'x-designer': 'Action.Designer',
+                'x-designer-props': {
+                  modalTip:
+                    '{{ t("When the button is clicked, the following fields will be assigned and saved together with the fields in the form. If there are overlapping fields, the value here will overwrite the value in the form.") }}',
+                },
+                'x-action-settings': {
+                  assignedValues: {},
+                  skipValidator: false,
+                  onSuccess: {
+                    manualClose: true,
+                    redirecting: false,
+                    successMessage: '{{t("Submitted successfully")}}',
+                  },
+                  triggerWorkflows: [],
+                },
+                'x-component-props': {
+                  icon: 'calendaroutlined',
+                  danger: false,
+                  type: 'default',
+                  useProps: '{{ useCreatePrjPlanActionProps }}',
+                },
+              },
+              [uid()]: {
+                title: '{{ t("保存为新版本") }}',
+                type: 'void',
+                'x-action': 'customize:save',
+                'x-component': 'Action',
+                'x-designer': 'Action.Designer',
+                'x-designer-props': {
+                  modalTip:
+                    '{{ t("When the button is clicked, the following fields will be assigned and saved together with the fields in the form. If there are overlapping fields, the value here will overwrite the value in the form.") }}',
+                },
+                'x-action-settings': {
+                  assignedValues: {},
+                  skipValidator: false,
+                  onSuccess: {
+                    manualClose: true,
+                    redirecting: false,
+                    successMessage: '{{t("Submitted successfully")}}',
+                  },
+                  triggerWorkflows: [],
+                },
+                'x-component-props': {
+                  danger: false,
+                  type: 'primary',
+                  useProps: '{{ useSaveOtherPrjPlanActionProps }}',
+                }
+              }
+            },
           },
           table: {
             type: 'array',
@@ -709,7 +760,7 @@ export const createPrjPlanCompare = () => {
                     'x-component-props': {
                       useProps: `{{use${Comp}OptionsProps}}`,
                     },
-                  },                  
+                  },
                   range: {
                     type: 'string',
                     title: '时间范围',
@@ -721,7 +772,7 @@ export const createPrjPlanCompare = () => {
                     },
                     enum: fields.range,
                     default: 'week',
-                  }
+                  },
                 },
               },
             },
@@ -755,7 +806,7 @@ export const createPrjPlanCompare = () => {
                 'x-component-props': {
                   useProps: `{{use${Comp}OptionsProps}}`,
                 },
-              }
+              },
             },
           },
           table: {
@@ -767,14 +818,14 @@ export const createPrjPlanCompare = () => {
                 type: 'checkbox',
               },
               pagination: false,
-              useProps: `{{use${Comp}TableBlockProps}}`
+              useProps: `{{use${Comp}TableBlockProps}}`,
             },
-          },          
+          },
           latest: {
             type: 'void',
             'x-component': 'Gantt.Event',
             'x-decorator': 'ACLActionProvider',
-            'x-acl-action': 'update',  
+            'x-acl-action': 'update',
             title: '最新版本',
             properties: {
               drawer: {
@@ -791,13 +842,13 @@ export const createPrjPlanCompare = () => {
                     properties: {},
                   },
                 },
-              }
-            }
-          },          
+              },
+            },
+          },
           compVersion: {
             type: 'void',
             'x-component': 'Gantt.Event',
-            'x-decorator': 'ACLActionProvider',             
+            'x-decorator': 'ACLActionProvider',
             title: '历史版本',
             'x-acl-action': 'update',
             properties: {
@@ -815,12 +866,12 @@ export const createPrjPlanCompare = () => {
                     properties: {},
                   },
                 },
-              }
-            }
-          }
-        }
-      }
-    }
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   return schema;

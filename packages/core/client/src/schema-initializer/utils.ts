@@ -1563,7 +1563,7 @@ export const createCalendarBlockSchema = (options) => {
 };
 
 export const createGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames, fields, appends, ...others } = options;
+  const { collection, resource, fieldNames, appends, form, ...others } = options;
   const schema: ISchema = {
     type: 'void',
     'x-acl-action': `${resource || collection}:list`,
@@ -1581,9 +1581,7 @@ export const createGanttBlockSchema = (options) => {
         sort: 'id',
       },
       rightSize: 0.7,
-      sort: fieldNames?.sort ||  fieldNames?.start || 'start',
-      group: fieldNames?.group,
-      fields,
+      form,
       ...others,
     },
     'x-designer': 'Gantt.Designer',
@@ -1609,18 +1607,18 @@ export const createGanttBlockSchema = (options) => {
                   wrapperWidth: 120
                 },
                 properties: {
-                  // group: {
-                  //   type: 'string',
-                  //   title: '分组',
-                  //   'x-decorator': 'FormItem',
-                  //   'x-component': 'Select',
-                  //   'x-component-props':{
-                  //     'allowClear': false,
-                  //     'multiple':false
-                  //   },
-                  //   'enum':fields.groups,
-                  //   'default':fieldNames?.group
-                  // },
+                  group: {
+                    type: 'string',
+                    title: '分组',
+                    required: true,
+                    'x-decorator': 'FormItem',
+                    'x-component': 'Select',
+                    'x-component-props':{
+                      'useProps':'{{useGanttFormGroupFieldProps}}'
+                    },
+                    'default': form.group?.default,
+                    'x-visible':form.group?.visible
+                  },
                   sort: {
                     type: 'string',
                     title: '排序',
@@ -1628,10 +1626,10 @@ export const createGanttBlockSchema = (options) => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props':{
-                      'allowClear': false
+                      'useProps':'{{useGanttFormSortFieldProps}}'
                     },
-                    'enum':fields.sort,
-                    'default': fieldNames?.sort ||  fieldNames?.start || 'start'
+                    'x-visible':form.sort?.visible,
+                    'default': form.sort?.default
                   },
                   range:{
                     type: 'string',
@@ -1640,10 +1638,11 @@ export const createGanttBlockSchema = (options) => {
                     'x-decorator': 'FormItem',
                     'x-component': 'Select',
                     'x-component-props':{
-                      'allowClear': false
+                      'allowClear': false,
+                      'useProps':'{{useGanttFormRangeFieldProps}}'
                     },
-                    'enum':fields.range,
-                    'default': fieldNames?.range || 'day'
+                    'x-visible':form.range?.visible,
+                    'default': form.range?.default
                   }
                 }
               }

@@ -6,6 +6,7 @@ import {
   PrjPlanCompare,
   PrjWorkPlan,
   PrjWorkStatic,
+  useCreatePrjPlanActionProps,
   useDataSelectBlockContext,
   useDataSelectTabsProps,
   useFormSelectBlockProps,
@@ -14,6 +15,8 @@ import {
   usePrjPlanCompareTableBlockProps,
   usePrjWorkPlanProcessData,
   usePrjWorkPlanTableBlockProps,
+  useSaveOtherPrjPlanActionProps,
+  useSavePrjPlanActionProps,
 } from './block';
 
 export class PluginPrjManagerClient extends Plugin {
@@ -34,6 +37,10 @@ export class PluginPrjManagerClient extends Plugin {
       usePrjPlanCompareTableBlockProps,
       usePrjWorkPlanProcessData,
       usePrjWorkPlanTableBlockProps,
+      useCreatePrjPlanActionProps,
+      useSaveOtherPrjPlanActionProps,
+      useSavePrjPlanActionProps
+
     });
     this.app.addComponents({
       DataSelect,

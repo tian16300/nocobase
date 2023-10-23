@@ -132,7 +132,7 @@ const GanttRecordViewer = (props) => {
     setVisible(false);
   }, []);
   const eventSchema = {
-    ...fieldSchema?.properties[schemaName]
+    ...fieldSchema?.properties[schemaName],
   };
   if (!isGroup && isCreate) {
     eventSchema['x-component-props'] = {
@@ -142,40 +142,15 @@ const GanttRecordViewer = (props) => {
     };
   }
   const drawerProps = {
-    getContainer:isFullScreen?getContainer: null
-  }
-  // if (eventSchema) {
-  //   eventSchema.properties.drawer['x-component-props'] = eventSchema.properties.drawer['x-component-props'] || {};
-  //   eventSchema.properties.drawer['x-component-props'].getContainer = getContainer;
-  // }
-  // const eventSchema = useMemo(() => {
-  //   let schema:any =  fieldSchema?.properties['detail'];
-  //   if (isGroup) {
-  //     const groupField = record.fieldCtx;
-  //     const groupType = groupField.name as string;
-  //     schema = fieldSchema?.properties[groupType].mapProperties((temp) => {
-  //       return temp['x-component'] == 'Gantt.Event' ? temp : false;
-  //     })[0];
-  //   } else if (!isGroup && isCreate) {
-  //     schema = fieldSchema?.properties['createTask'];
-  //     schema['x-component-props'] = {
-  //       inheritsKeys: Object.keys(record).filter((key) => {
-  //         return !/^__+/.test(key);
-  //       }),
-  //     };
-  //   }
-  //   if (schema) {
-  //     schema.properties.drawer['x-component-props'] = schema.properties.drawer['x-component-props'] || {};
-  //     schema.properties.drawer['x-component-props'].getContainer = getContainer;
-  //   }
-  //   return schema;
-  // }, [fieldSchema, record]);
+    getContainer: isFullScreen ? getContainer : null,
+    
+  };
   const isCollectionField = record.__collection;
   const collectionName = record.__collection || name;
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible, drawerProps }} fieldSchema={eventSchema as Schema}>
+        <ActionContextProvider value={{ visible, setVisible, drawerProps }} >
           <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
@@ -240,8 +215,11 @@ export const Gantt: any = (props: any) => {
     height,
     ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
+    setRightSize,
     timeRange,
     hasMultiBar = false,
+    isFullscreen = false,
+    setIsFullScreen: setIsFullScreen,
   } = {
     ...props,
     ...useProps(props),
@@ -330,7 +308,7 @@ export const Gantt: any = (props: any) => {
   fieldSchema?.reduceProperties((pre, s) => {
     s?.reduceProperties((pre, schema) => {
       if (['Action.Drawer'].includes(schema['x-component'])) {
-        schema['x-component-props'] = s['x-component-props'] || {};
+        schema['x-component-props'] = schema['x-component-props'] || {};
         schema['x-component-props'].getContainer = () => {
           return isFullscreen ? getPopupContainer() : document.body;
         };
@@ -706,7 +684,12 @@ export const Gantt: any = (props: any) => {
     }
   };
   const rightPaneRef = useRef<ReflexElement>();
-  const [isFullscreen, setIsFullScreen] = useState(false);
+  // const [isFullscreen, setIsFullScreen] = useState(_isFullscreen);
+  // console.log('gantt isFullscreen', isFullscreen);
+  // useEffect(()=>{
+  //   setIsFullScreen(_isFullscreen);
+  // },[_isFullscreen]);
+
   const handerResize = ({ domElement, component }: { domElement?; component? }) => {
     component = component || rightPaneRef.current;
     domElement = domElement || (component as any)?.ref?.current;
@@ -728,11 +711,10 @@ export const Gantt: any = (props: any) => {
     fieldSchema?.reduceProperties((pre, s) => {
       s?.reduceProperties((pre, schema) => {
         if (['Action.Drawer'].includes(schema['x-component'])) {
-          schema['x-component-props'] = s['x-component-props'] || {};
-          if (isFullscreen){ 
+          schema['x-component-props'] = schema['x-component-props'] || {};
+          if (isFullscreen) {
             schema['x-component-props'].getContainer = getPopupContainer;
-          }
-          else {
+          } else {
             schema['x-component-props'].getContainer = document.body;
           }
         }
@@ -900,7 +882,14 @@ export const Gantt: any = (props: any) => {
             `}
           >
             <Space>
-              <FullscreenAction containerRef={containerRef} setIsFullScreen={setIsFullScreen} />
+              <FullscreenAction
+                containerRef={containerRef}
+                isFullscreen={isFullscreen}
+                onClick={() => {
+                  const fn = setIsFullScreen;
+                  fn(!isFullscreen);
+                }}
+              />
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
             </Space>
           </Col>

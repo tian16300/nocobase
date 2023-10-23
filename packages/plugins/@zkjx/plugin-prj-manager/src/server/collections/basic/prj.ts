@@ -9,6 +9,7 @@ export default {
     "name": "prj",
     "template": "general",
     "view": false,
+    "inherit": ['prj_plan_task_time'],
     "fields": [
         {
             "name": "id",
@@ -331,36 +332,6 @@ export default {
                 "type": "string",
                 "x-component": "Input",
                 "title": "项目编号"
-            }
-        }, {
-            "name": "start",
-            "type": "date",
-            "interface": "datetime",
-            "uiSchema": {
-                "icon": "calendaroutlined",
-                "type": "string",
-                "title": "开始时间",
-                "x-component": "DatePicker",
-                "x-component-props": {
-                    "gmt": false,
-                    "showTime": false,
-                    "dateFormat": "YYYY-MM-DD"
-                }
-            }
-        }, {
-            "name": "end",
-            "type": "date",
-            "interface": "datetime",
-            "uiSchema": {
-                "icon": "carryoutoutlined",
-                "type": "string",
-                "title": "结束时间",
-                "x-component": "DatePicker",
-                "x-component-props": {
-                    "gmt": false,
-                    "showTime": false,
-                    "dateFormat": "YYYY-MM-DD"
-                }
             }
         },
         {

@@ -7329,7 +7329,7 @@ antd-token-previewer@2.0.0-alpha.8, antd-token-previewer@^2.0.0-alpha.6:
     use-debouncy "^4.3.0"
     vanilla-jsoneditor "^0.16.1"
 
-antd@5.8.6, antd@5.x, antd@^5.4.2, antd@^5.5.1:
+antd@5.10.0, antd@5.8.6, antd@5.x, antd@^5.4.2, antd@^5.5.1:
   version "5.8.6"
   resolved "https://registry.npmmirror.com/antd/-/antd-5.8.6.tgz#48af8d4221098dbd1faa5e56f0a1344741e2a3dc"
   dependencies:
