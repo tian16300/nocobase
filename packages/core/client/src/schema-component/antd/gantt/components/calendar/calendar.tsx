@@ -12,6 +12,7 @@ import { ViewMode } from '../../types/public-types';
 import useStyles from './style';
 import { TopPartOfCalendar } from './top-part-of-calendar';
 import { dayjs } from '@nocobase/utils';
+import { useToken } from '../../../__builtins__';
 
 export type CalendarProps = {
   dateSetup: DateSetup;
@@ -35,6 +36,7 @@ export const Calendar: React.FC<CalendarProps> = ({
   fontSize,
 }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
+  const { token } = useToken();
 
   const getCalendarValuesForYear = () => {
     const topValues: ReactChild[] = [];
@@ -43,16 +45,41 @@ export const Calendar: React.FC<CalendarProps> = ({
     for (let i = 0; i < dateSetup.dates.length; i++) {
       const date = dateSetup.dates[i];
       const bottomValue = date.getFullYear();
-      bottomValues.push(
-        <text
-          key={date.getTime()}
-          y={headerHeight * 0.8}
-          x={columnWidth * i + columnWidth * 0.5}
-          className={cx('calendarBottomText')}
-        >
-          {bottomValue}
-        </text>,
-      );
+      const isThisYear = dayjs(date).format('YYYY') == dayjs().format('YYYY');
+
+      if (isThisYear) {
+        bottomValues.push(
+          <g key={date.getTime()}>
+            <rect
+              y={headerHeight * 0.5 - 24*0.5}
+              x={columnWidth * i + columnWidth * 0.5 - 30}
+              className={cx('calendarThisBlock')}
+              width={60}
+              height={24}
+              rx="6"
+            ></rect>
+            <text
+              y={headerHeight * 0.5 + 4}
+              x={columnWidth * i + columnWidth * 0.5}
+              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+            >
+              {bottomValue}
+            </text>
+          </g>,
+        );
+      } else {
+        bottomValues.push(
+          <text
+            key={date.getTime()}
+            y={headerHeight * 0.5 + 4}
+            x={columnWidth * i + columnWidth * 0.5}
+            className={cx('calendarBottomText')}
+          >
+            {bottomValue}
+          </text>,
+        );
+      }
+
       if (i === 0 || date.getFullYear() !== dateSetup.dates[i - 1].getFullYear()) {
         const topValue = date.getFullYear().toString();
         let xText: number;
@@ -85,16 +112,41 @@ export const Calendar: React.FC<CalendarProps> = ({
       const date = dateSetup.dates[i];
       // const bottomValue = getLocaleMonth(date, locale);
       const quarter = 'Q' + Math.floor((date.getMonth() + 3) / 3);
-      bottomValues.push(
-        <text
-          key={date.getTime()}
-          y={headerHeight * 0.8}
-          x={columnWidth * i + columnWidth * 0.5}
-          className={cx('calendarBottomText')}
-        >
-          {quarter}
-        </text>,
-      );
+      const isThisQuarter = dayjs(date).format('YYYY-Q') == dayjs().format('YYYY-Q');
+
+      if (isThisQuarter) {
+        bottomValues.push(
+          <g key={date.getTime()}>
+            <rect
+              y={headerHeight * 0.8 - 18}
+              x={columnWidth * i + columnWidth * 0.5 - 30}
+              className={cx('calendarThisBlock')}
+              width={60}
+              height={24}
+              rx="6"
+            ></rect>
+            <text
+              y={headerHeight * 0.8}
+              x={columnWidth * i + columnWidth * 0.5}
+              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+            >
+              {quarter}
+            </text>
+          </g>,
+        );
+      } else {
+        bottomValues.push(
+          <text
+            key={date.getTime()}
+            y={headerHeight * 0.8}
+            x={columnWidth * i + columnWidth * 0.5}
+            className={cx('calendarBottomText')}
+          >
+            {quarter}
+          </text>,
+        );
+      }
+
       if (i === 0 || date.getFullYear() !== dateSetup.dates[i - 1].getFullYear()) {
         const topValue = date.getFullYear().toString();
         let xText: number;
@@ -126,16 +178,40 @@ export const Calendar: React.FC<CalendarProps> = ({
     for (let i = 0; i < dateSetup.dates.length; i++) {
       const date = dateSetup.dates[i];
       const bottomValue = getLocaleMonth(date, locale);
-      bottomValues.push(
-        <text
-          key={bottomValue + date.getFullYear()}
-          y={headerHeight * 0.8}
-          x={columnWidth * i + columnWidth * 0.5}
-          className={cx('calendarBottomText')}
-        >
-          {bottomValue}
-        </text>,
-      );
+      const isThisMonth = dayjs(date).format('YYYY-MM') == dayjs().format('YYYY-MM');
+      if (isThisMonth) {
+        bottomValues.push(
+          <g key={bottomValue + date.getFullYear()}>
+            <rect
+              y={headerHeight * 0.8 - 18}
+              x={columnWidth * i + columnWidth * 0.5 - 30}
+              className={cx('calendarThisBlock')}
+              width={60}
+              height={24}
+              rx="6"
+            ></rect>
+            <text
+              y={headerHeight * 0.8}
+              x={columnWidth * i + columnWidth * 0.5}
+              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+            >
+              {bottomValue}
+            </text>
+          </g>,
+        );
+      } else {
+        bottomValues.push(
+          <text
+            key={bottomValue + date.getFullYear()}
+            y={headerHeight * 0.8}
+            x={columnWidth * i + columnWidth * 0.5}
+            className={cx('calendarBottomText')}
+          >
+            {bottomValue}
+          </text>,
+        );
+      }
+
       if (i === 0 || date.getFullYear() !== dateSetup.dates[i - 1].getFullYear()) {
         const topValue = date.getFullYear().toString();
         let xText: number;
@@ -173,21 +249,44 @@ export const Calendar: React.FC<CalendarProps> = ({
         // top
         topValue = `${getLocaleMonth(date, locale)}, ${date.getFullYear()}`;
       }
-      
+
       // bottom
       // const bottomValue = `W${getWeekNumberISO8601(date)}`;
       const bottomValue = dayjs(date).format('第WW周');
+      const isThisWeek = dayjs(date).format('YYYY-WW') == dayjs().format('YYYY-WW');
 
-      bottomValues.push(
-        <text
-          key={date.getTime()}
-          y={headerHeight * 0.8}
-          x={columnWidth * (i + +rtl)}
-          className={cx('calendarBottomText')}
-        >
-          {bottomValue}
-        </text>,
-      );
+      if (isThisWeek) {
+        bottomValues.push(
+          <g key={date.getTime()}>
+            <rect
+              y={headerHeight * 0.46}
+              x={columnWidth * (i + +rtl)+ columnWidth * 0.5 - 30}
+              className={cx('calendarThisBlock')}
+              width={60}
+              height={20}
+              rx="6"
+            ></rect>
+            <text
+              y={headerHeight * 0.8}
+              x={columnWidth * (i + +rtl)+ columnWidth * 0.5}
+              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+            >
+              {bottomValue}
+            </text>
+          </g>,
+        );
+      } else {
+        bottomValues.push(
+          <text
+            key={date.getTime()}
+            y={headerHeight * 0.8}
+            x={columnWidth * (i + +rtl)+ columnWidth * 0.5}
+            className={cx('calendarBottomText')}
+          >
+            {bottomValue}
+          </text>,
+        );
+      }
 
       if (topValue) {
         // if last day is new month
@@ -200,7 +299,7 @@ export const Calendar: React.FC<CalendarProps> = ({
               y1Line={0}
               y2Line={topDefaultHeight}
               xText={columnWidth * i + columnWidth * weeksCount * 0.5}
-              yText={topDefaultHeight * 0.9}
+              yText={topDefaultHeight * 0.8}
             />,
           );
         }
@@ -220,20 +319,42 @@ export const Calendar: React.FC<CalendarProps> = ({
       const date = dates[i];
       // const bottomValue = `${getLocalDayOfWeek(date, locale, 'short')}, ${date.getDate().toString()}`;
       const bottomValue = `${date.getDate().toString()}`;
+      const isThisDay = dayjs(date).isToday();
+      if (isThisDay) {
+        bottomValues.push(
+          <g key={date.getTime()}>
+            <rect
+              y={headerHeight * 0.4}
+              x={columnWidth * i}
+              className={cx('calendarThisBlock')}
+              width={columnWidth}
+              height={24}
+              rx="6"
+            ></rect>
+            <text
+              y={headerHeight * 0.8}
+              x={columnWidth * i + columnWidth * 0.5}
+              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+            >
+              {bottomValue}
+            </text>
+          </g>,
+        );
+      } else {
+        bottomValues.push(
+          <text
+            key={date.getTime()}
+            y={headerHeight * 0.8}
+            x={columnWidth * i + columnWidth * 0.5}
+            className={cx('calendarBottomText')}
+          >
+            {bottomValue}
+          </text>,
+        );
+      }
 
-      bottomValues.push(
-        <text
-          key={date.getTime()}
-          y={headerHeight * 0.8}
-          x={columnWidth * i + columnWidth * 0.5}
-          className={cx('calendarBottomText')}
-        >
-          {bottomValue}
-        </text>,
-      );
       if (i + 1 !== dates.length && date.getMonth() !== dates[i + 1].getMonth()) {
         const topValue = getLocaleMonth(date, locale);
-
         topValues.push(
           <TopPartOfCalendar
             key={topValue + date.getFullYear()}
@@ -242,7 +363,7 @@ export const Calendar: React.FC<CalendarProps> = ({
             y1Line={0}
             y2Line={topDefaultHeight}
             xText={columnWidth * (i + 1) - getDaysInMonth(date.getMonth(), date.getFullYear()) * columnWidth * 0.5}
-            yText={topDefaultHeight * 0.9}
+            yText={topDefaultHeight * 0.8}
           />,
         );
       }

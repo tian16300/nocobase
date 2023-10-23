@@ -199,7 +199,7 @@ export const Gantt: any = (props: any) => {
     fontFamily = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'`,
     fontSize = token.fontSize,
     arrowIndent = 20,
-    todayColor = 'rgba(252, 248, 227, 0.5)',
+    todayColor = token.colorWarning,
     viewDate,
     TooltipContent = StandardTooltipContent,
     onDoubleClick,

@@ -97,11 +97,11 @@ export const GridBody: React.FC<GridBodyProps> = ({
         date.getTime() < now.getTime() &&
         addToDate(date, date.getTime() - dates[i - 1].getTime(), 'millisecond').getTime() >= now.getTime())
     ) {
-      today = <rect x={tickX} y={0} width={columnWidth} height={y} fill={todayColor} />;
+      today = <rect x={tickX+ columnWidth*0.5 - 1} y={0} width={2} height={y} fill={todayColor} />;
     }
     // rtl for today
     if (rtl && i + 1 !== dates.length && date.getTime() >= now.getTime() && dates[i + 1].getTime() < now.getTime()) {
-      today = <rect x={tickX + columnWidth} y={0} width={columnWidth} height={y} fill={todayColor} />;
+      today = <rect x={tickX + columnWidth*0.5 - 1} y={0} width={2} height={y} fill={todayColor} />;
     }
     tickX += columnWidth;
   }

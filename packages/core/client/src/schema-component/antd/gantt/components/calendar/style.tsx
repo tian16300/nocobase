@@ -7,6 +7,10 @@ const useStyles = genStyleHook('nb-gantt-calendar', (token) => {
     .onBackground(token.colorBgContainer)
     .toHexShortString();
 
+  const thisBlock = {
+    fill: token.colorWhite,
+  };
+
   return {
     [componentCls]: {
       '.calendarBottomText': {
@@ -44,6 +48,10 @@ const useStyles = genStyleHook('nb-gantt-calendar', (token) => {
         strokeWidth: 1.4,
         background: colorFillAlterSolid,
         borderBottom: `1px solid ${token.colorBorderSecondary}`,
+      },
+      '.calendarThisBlockText': thisBlock,
+      '.calendarThisBlock': {
+        fill: token.colorWarning
       },
     },
   };
