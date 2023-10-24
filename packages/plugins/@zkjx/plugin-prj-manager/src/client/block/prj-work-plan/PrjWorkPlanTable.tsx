@@ -26,7 +26,7 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Table, Tag, Dropdown, App, Row, Col, Button, Form, Input, Space } from 'antd';
+import { Table, Tag, Dropdown, App, Row, Col, Button, Form, Input, Space, message } from 'antd';
 import { useAuthTranslation } from '../../locale';
 import { pick } from 'lodash';
 import { useDataSelectBlockContext } from '..';
@@ -79,6 +79,7 @@ interface EditableCellProps {
   dataIndex: string;
   record: any;
   editing?: boolean;
+  handleLocalSave: (record: any) => void;
   handleSave: (record: any) => void;
   getPopupContainer?: () => HTMLDivElement;
 }
@@ -89,6 +90,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   children,
   dataIndex,
   record,
+  handleLocalSave,
   handleSave,
   editing,
   getPopupContainer,
@@ -114,6 +116,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
     const setValue = (value) => {
       form.setFieldValue(dataIndex, value);
       setRange(value);
+      const [start, end] = value as string[];
+        const { start: _start, end: _end, ...others } = record;
+       handleLocalSave({ ...others, start, end });
+       handleSave({ ...others, start, end });
     };
     const save = async (value) => {
       try {
@@ -186,6 +192,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>(field?.data?.selectedRowKeys || []);
     const [selectedRow, setSelectedRow] = useState([]);
     const dataSource = field?.value?.slice?.()?.filter?.(Boolean) || [];
+    // const [dataSource, setDataSource] = useState(_dataSource);
     const isRowSelect = rowSelection?.type !== 'none';
     const blockCtx = useBlockRequestContext();
     const { t } = useAuthTranslation();
@@ -221,6 +228,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         }
       `;
     }
+
+    // useEffect(()=>{
+    //   setDataSource(field?.value?.slice?.()?.filter?.(Boolean) || []);
+    // },[field?.value]);
 
     useEffect(() => {
       if (expandFlag) {
@@ -370,9 +381,10 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
                 ...record,
               };
               newRecord.prjStage = record.prjStage;
+             
             } else {
               newRecord[record.fieldCtx.name] = {
-                ...pick(record, ['id', 'stage', 'nickname', 'label']),
+                ...pick(record, ['id', 'stage', 'title', 'nickname', 'label']),
               };
             }
             const onRecordClick = tableCtx?.field?.onRecordClick;
@@ -572,11 +584,26 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         .then((res) => {
           if (res.data) {
             /* 保存成功 */
+            message.success("保存成功");
             /* 刷新数据 */
-            const { refresh } = fieldCtx.blockCtx.service;
-            refresh();
+            // const { refresh } = fieldCtx.blockCtx.service;
+            // refresh();
           }
         });
+    };
+    /**
+     * 保存本地数据
+     * @param row 
+     */
+    const handleLocalSave = (row) => {
+      const newData = [...dataSource];
+      const index = newData.findIndex((item) => row.rowKey === item.rowKey);
+      const item = newData[index];     
+      field.value[index] = row;
+      if(typeof tableCtx.field.updateLocalTask == 'function'){
+        const {rowKey, start, end} = row;
+        tableCtx.field.updateLocalTask(rowKey,{start: new Date(start),end: new Date(end)});
+      }
     };
     const columns = defaultColumns
       .filter(({ editable }) => {
@@ -597,6 +624,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
             title: col.title,
             editing,
             handleSave,
+            handleLocalSave,
             getPopupContainer,
           }),
         };

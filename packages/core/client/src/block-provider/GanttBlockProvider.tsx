@@ -350,16 +350,16 @@ export const GanttBlockProvider = (props) => {
         ? sortField?.foreignKey
         : sortField?.name
       : sort;
-    const { appends } = useAssociationNames();
-    if (sortField && ['dic'].includes(sortField.interface)) {
-      appends.push(sortField.name);
-    }
-    if (fields?.groups) {
-      fields?.groups.forEach((field) => {
-        appends.push(field.name);
-      });
-    }
-    const _appends = Array.from(new Set([...(props.params.appends || []), ...appends]));
+    // const { appends } = useAssociationNames();
+    // if (sortField && ['dic'].includes(sortField.interface)) {
+    //   appends.push(sortField.name);
+    // }
+    // if (fields?.groups) {
+    //   fields?.groups.forEach((field) => {
+    //     appends.push(field.name);
+    //   });
+    // }
+    const _appends = Array.from(new Set([...(props.params.appends || [])]));
     return {
       filter: filter,
       sort: sortName,
@@ -478,6 +478,21 @@ export const useGanttBlockProps = (_props) => {
       }
     }
   }, [ctx?.service?.loading]);
+  const updateLocalTask = (rowKey, {start, end})=>{
+    // console.log(tasks);
+    // debugger;
+    const newTasks=[...tasks];
+    const index =  newTasks.findIndex((item)=>{return item.rowKey == rowKey});
+    debugger;
+    newTasks[index].start = start;
+    newTasks[index].end = end;
+    if (newTasks) {
+      setTasks(newTasks);
+      ctx.field.data = newTasks;
+    }
+
+
+  };
   return {
     ...props,
     fieldNames: ctx.fieldNames,
@@ -489,6 +504,7 @@ export const useGanttBlockProps = (_props) => {
     onResize,
     hasScroll,
     rightSize,
+    updateLocalTask
   };
 };
 

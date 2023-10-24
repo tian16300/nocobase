@@ -1,7 +1,7 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
 import dicRecords from './dicRecords';
-import { generatePlan } from './actions/plan';
+import { generatePlan, saveLatest } from './actions/plan';
 import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
 import { groupBy } from 'lodash';
@@ -119,6 +119,7 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.resourcer.registerActionHandlers({
       'prj:generatePlan': generatePlan,
       'prj:hoursCount': hoursCount,
+      'prj:savePlanLatest': saveLatest
     });
     this.aclAllowList(
       [
@@ -142,6 +143,7 @@ export class PluginPrjManagerServer extends Plugin {
     this.aclAllowList(['risk_basic', 'prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
+    this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');
 
     // this.app.on('beforeStart', () => {
     //   // 每10分钟执行一次

@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { ISchema, RecursionField, Schema, connect, mapProps, useFieldSchema } from '@formily/react';
-import { Col, Row, Space, message } from 'antd';
+import { Button, Col, Row, Space, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
@@ -149,7 +149,7 @@ const GanttRecordViewer = (props) => {
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible, drawerProps }}>
+        <ActionContextProvider value={{ visible, setVisible, drawerProps}} fieldSchema={eventSchema as Schema}>
           <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
@@ -217,6 +217,7 @@ export const Gantt: any = (props: any) => {
     setRightSize,
     timeRange,
     hasMultiBar = false,
+    updateLocalTask
   } = {
     ...props,
     ...useProps(props),
@@ -290,6 +291,10 @@ export const Gantt: any = (props: any) => {
     tableCtx.field.onRecordClick = handleBarClick;
     tableCtx.field.getPopupContainer = getPopupContainer;
   }, []);
+  useEffect(() => {
+    /* table ctx expandClick */
+    tableCtx.field.updateLocalTask = updateLocalTask;
+  }, [updateLocalTask]);
   useEffect(() => {
     expandAndCollapseAll?.(!expandFlag);
   }, [expandFlag]);
@@ -704,6 +709,14 @@ export const Gantt: any = (props: any) => {
     const scrollBar = hasScrollX > 0 ? 10 : 0;
     onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
   };
+  /**
+   * 跳转到今天
+   */
+  const goToToday = ()=>{
+
+
+
+  }
   useEffect(() => {
     if (rightPaneRef.current) {
       handerResize({});
@@ -885,6 +898,7 @@ export const Gantt: any = (props: any) => {
             `}
           >
             <Space>
+            <Button onClick={goToToday}>今天</Button>
               <FullscreenAction
                 containerRef={containerRef}
                 isFullscreen={isFullscreen}

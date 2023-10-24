@@ -102,7 +102,6 @@ export const useCreatePrjPlanActionProps = () => {
   const record = useRecord();
   const field = useField();
   const api = useAPIClient();
-  const [messageApi] = message.useMessage();
   const { confirm } = Modal;
   const { service } = usePrjWorkPlanProviderContext();
   // const { service } = useBlockRequestContext();
@@ -188,5 +187,47 @@ export const useSaveOtherPrjPlanActionProps = () => {
   useEffect(() => {
     field.visible = name == 'prjStage' && (blockCtx.service?.data?.data||[]).length > 0;
   },[groupFieldCtx]);
-  return {};
+  const record = useRecord();
+  const api = useAPIClient();
+  const { confirm } = Modal;
+  const { service } = usePrjWorkPlanProviderContext();
+  const plans= [];
+  return {
+    onClick: () => {
+      /* 创建计划 */
+      confirm({
+        title: '确定保存为新版本计划？',
+        icon: <ExclamationCircleFilled />,
+        onOk() {
+          // 增加项目计划
+          return new Promise((resolve, reject) => {
+            api
+              .request({
+                url: 'prj:savePlanLatest',
+                method: 'post',
+                data: {
+                  id: record.id,
+                  plans:plans
+                },
+              })
+              .then((res) => {
+                if (res?.data) {
+                  setTimeout(() => {
+                    message.success('保存成功');
+                    field.visible = false;
+                    /* 刷新 block */
+                    service.refresh();
+                  }, 2000);
+                  resolve({});
+                }
+              })
+              .catch((err) => {
+                message.error(err.message);
+                resolve({});
+              });
+          });
+        },
+      });
+    }
+  };
 };

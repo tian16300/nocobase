@@ -75,7 +75,6 @@ export const TableColumnDesigner = (props) => {
   );
   const isDicField = ['dic'].includes(collectionField?.interface);
   const getSortName = getInterface(collectionField?.interface)?.sortName || function (field){ return field?.name};
-  debugger;
   const sortName = getSortName(collectionField);
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
   const fieldMode = fieldSchema?.['x-component-props']?.['mode'] || 'Select';

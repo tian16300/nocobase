@@ -60,13 +60,6 @@ export const PrjWorkPlanProvider = (props) => {
     }
     return obj;
   };
-  const groupField: any = getGroupField(collection, group);
-  const { target } = groupField;
-  const options = {
-    collection: target,
-    resource: target,
-    action: 'list',
-  };
   const getBlockParams = (groupField, record) => {
     const { target } = groupField;
     let obj: any = {
@@ -107,18 +100,26 @@ export const PrjWorkPlanProvider = (props) => {
     }
     return obj;
   };
-  const params = getBlockParams(groupField, record);
   const preProcessData = usePrjWorkPlanProcessData;
-  // const api = useAPIClient();
-  // const data = await api.request({
-  //   ...options,
-  //   params
-  // });
-  // useEffect(() => {
-  //   setGroupData(record.plans);
-  // }, [JSON.stringify(record?.plans)]);
 
+  const groupField: any = useMemo(()=>{
+    return getGroupField(collection, group);
+  },[collection,group]) ;
   /* 首先获取 项目阶段 */
+  const options = useMemo(()=>{
+    const {target} = groupField;
+    return {
+      collection: target,
+      resource: target,
+      action: 'list',
+    }
+
+  },[groupField])
+  const params = useMemo(()=>{
+    return {
+      ...getBlockParams(groupField, record)
+    }
+  },[groupField])
 
   const [editing, setEditing] = useState(false);
   const [isFullscreen, setIsFullScreen] = useState(false);
@@ -130,12 +131,14 @@ export const PrjWorkPlanProvider = (props) => {
   const  getPopupContainer = ()=>{
     return containerRef.current;
   }
+  
+ 
 
 
   /* 获取项目任务 */
   return (
     <div ref={containerRef} className={css`width:100%;height:100%`}>
-      <BlockProvider data-testid={target} {...options} params={params}>
+      <BlockProvider data-testid={options.collection} {...options} params={params} runWhenParamsChanged>
         <PrjWorkPlanGanttProvider
           {...props}
           rightSize={rightSize}
@@ -149,6 +152,7 @@ export const PrjWorkPlanProvider = (props) => {
           isFullscreen={isFullscreen}
           setIsFullScreen={setIsFullScreen}
           getPopupContainer={getPopupContainer}
+          data-testid={collection}
         ></PrjWorkPlanGanttProvider>
       </BlockProvider>
     </div>

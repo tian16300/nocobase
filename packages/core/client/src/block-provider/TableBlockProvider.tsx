@@ -81,7 +81,8 @@ const InternalTableBlockProvider = (props: Props) => {
 
 export const TableBlockProvider = (props) => {
   const resourceName = props.resource;
-  const params = useMemo(() => ({ ...props.params }), [props.params]);
+  const params = useMemo(() => {
+    return { ...props.params }}, [props.params]);
   const fieldSchema = useFieldSchema();
   const { getCollection, getCollectionField } = useCollectionManager();
   const record = useRecord();

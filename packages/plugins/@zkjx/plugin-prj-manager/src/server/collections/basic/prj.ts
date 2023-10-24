@@ -177,22 +177,6 @@ export default {
         {
             "foreignKey": "prjId",
             "onDelete": "CASCADE",
-            "reverseField": {
-                "uiSchema": {
-                    "title": "项目",
-                    "x-component": "AssociationField",
-                    "x-component-props": {
-                        "multiple": false,
-                        "fieldNames": {
-                            "label": "id",
-                            "value": "id"
-                        }
-                    }
-                },
-                "interface": "m2o",
-                "type": "belongsTo",
-                "name": "prj"
-            },
             "name": "plans",
             "type": "hasMany",
             "uiSchema": {

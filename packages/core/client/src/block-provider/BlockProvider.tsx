@@ -304,9 +304,10 @@ export const RenderChildrenWithAssociationFilter: React.FC<any> = (props) => {
 };
 
 export const BlockProvider = (props) => {
+  const {params:_params, ...others} = props;
   const { collection, association } = props;
   const resource = useResource(props);
-  const params = useMemo(() => ({ ...props.params }), [props.params]);
+  const params = useMemo(() => ({ ..._params }), [_params]);
   const { appends, updateAssociationValues } = useAssociationNames();
   if (!Object.keys(params).includes('appends')) {
     params['appends'] = appends;
@@ -315,9 +316,9 @@ export const BlockProvider = (props) => {
     <MaybeCollectionProvider collection={collection}>
       <BlockAssociationContext.Provider value={association}>
         <BlockResourceContext.Provider value={resource}>
-          <BlockRequestProvider {...props} updateAssociationValues={updateAssociationValues} params={params}>
-            <SharedFilterProvider {...props} params={params}>
-              <FilterBlockRecord {...props} params={params}>
+          <BlockRequestProvider {...others} updateAssociationValues={updateAssociationValues} params={params}>
+            <SharedFilterProvider {...others} params={params}>
+              <FilterBlockRecord {...others} params={params}>
                 <div data-testid={props['data-testid']}>{props.children}</div>
               </FilterBlockRecord>
             </SharedFilterProvider>
