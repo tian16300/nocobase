@@ -34,14 +34,14 @@ export const generatePlan = async (ctx, next) => {
             return {
               stage,
               status,
-              title: stage.label
+              title: stage.label,
             };
           }),
         },
       });
-    }else{
+    } else {
       ctx.body = {
-        errorMessage: '项目计划已创建'
+        errorMessage: '项目计划已创建',
       };
     }
   }
@@ -53,7 +53,7 @@ export const generatePlan = async (ctx, next) => {
  * body { id, plans  }
  */
 export const saveLatest = async (ctx, next) => {
-  const { id, plans } = ctx.request?.body || {};
+  const { id } = ctx.request?.body || {};
   if (!id) {
     ctx.body = {
       errorMessage: '缺少项目ID参数',
@@ -70,28 +70,47 @@ export const saveLatest = async (ctx, next) => {
       sort: '-version',
     });
     const newVersion = version ? version.version + 1 : 1;
-    const historyData = await ctx.db.getRepository('prj_plan_latest').find({
-      filter: {
+    /* 增加项目版本 */
+    await ctx.db.getRepository('prj_plan_version').create({
+      values: {
         prjId: id,
+        version: newVersion,
       },
     });
-    await ctx.db.getRepository('prj_plan_history').createMany({
-      records: historyData.map((item) => {
-        const { id, createdAt, createdBy, ...others } = item;
-        return {
-          ...others,
-          version: newVersion,
-        };
-      }),
+
+    const historyData = await ctx.db.getRepository('prj_plan_latest').find({
+      filter: {
+        prjId: id
+      },
+      sort:'id'
     });
-    /* 保存最新的数据 */
-    await plans.forEach(async (plan) => {
-      const { id, updatedAt, updatedBy, ...others } = plan;
-      await ctx.db.getRepository('prj_plan_latest').update({
-        filterByTk: id,
-        values: others,
+    const records =[];
+
+    historyData.forEach((model)=>{
+      const {id, ...others} = model.dataValues;
+
+
+      records.push({
+        ...others,
+        version: newVersion
       });
+
+
+    })
+
+
+    await ctx.db.getRepository('prj_plan_history').createMany({
+      records: records
     });
+    ctx.logger.info('计划保存为新版本', id, newVersion);
+    /* 保存最新的数据 */
+    // await plans.forEach(async (plan) => {
+    //   const { id, updatedAt, updatedBy, ...others } = plan;
+    //   await ctx.db.getRepository('prj_plan_latest').update({
+    //     filterByTk: id,
+    //     values: others,
+    //   });
+    // });
     ctx.body = 'ok';
   }
 

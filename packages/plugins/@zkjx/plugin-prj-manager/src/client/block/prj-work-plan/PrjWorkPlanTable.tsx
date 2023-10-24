@@ -116,10 +116,10 @@ const EditableCell: React.FC<EditableCellProps> = ({
     const setValue = (value) => {
       form.setFieldValue(dataIndex, value);
       setRange(value);
-      const [start, end] = value as string[];
-        const { start: _start, end: _end, ...others } = record;
-       handleLocalSave({ ...others, start, end });
-       handleSave({ ...others, start, end });
+      const [start = null, end = null] = value as string[];
+      const { start: _start, end: _end, ...others } = record;
+      handleLocalSave({ ...others, start, end });
+      handleSave({ ...others, start, end });
     };
     const save = async (value) => {
       try {
@@ -143,18 +143,12 @@ const EditableCell: React.FC<EditableCellProps> = ({
           },
         ]}
       >
-        <Space.Compact size="small">
-          <RangePicker
-            getPopupContainer={getPopupContainer}
-            format="YYYY-MM-DD"
-            value={range}
-            onChange={setValue}
-          ></RangePicker>
-          <Button type="primary" onClick={save}>
-            确定
-          </Button>
-        </Space.Compact>
-        {/* <Input ref={inputRef} onPressEnter={save} onBlur={save} /> */}
+        <RangePicker
+          getPopupContainer={getPopupContainer}
+          format="YYYY-MM-DD"
+          value={range}
+          onChange={setValue}
+        ></RangePicker>
       </Form.Item>
     ) : (
       <div className="editable-cell-value-wrap" style={{ paddingRight: 24 }}>
@@ -180,7 +174,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       rowKey,
       required,
       onExpand,
-      prjStageVersionLink = '',     
+      prjStageVersionLink = '',
       ...others
     } = { ...others1, ...others2 } as any;
     const field: IField = useField();
@@ -201,13 +195,13 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     const { editing, setEditing } = usePrjWorkPlanProviderContext();
     const containerRef = useRef<HTMLDivElement>();
     let navigate = useNavigate();
-    const getPopupContainer = ()=>{
-      if(tableCtx.field.getPopupContainer){
+    const getPopupContainer = () => {
+      if (tableCtx.field.getPopupContainer) {
         return tableCtx.field.getPopupContainer();
-      }else{
+      } else {
         return containerRef.current;
       }
-    }
+    };
     let onRow = null,
       highlightRow = '';
 
@@ -381,7 +375,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
                 ...record,
               };
               newRecord.prjStage = record.prjStage;
-             
             } else {
               newRecord[record.fieldCtx.name] = {
                 ...pick(record, ['id', 'stage', 'title', 'nickname', 'label']),
@@ -584,7 +577,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         .then((res) => {
           if (res.data) {
             /* 保存成功 */
-            message.success("保存成功");
+            message.success('保存成功');
             /* 刷新数据 */
             // const { refresh } = fieldCtx.blockCtx.service;
             // refresh();
@@ -593,16 +586,16 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     };
     /**
      * 保存本地数据
-     * @param row 
+     * @param row
      */
     const handleLocalSave = (row) => {
       const newData = [...dataSource];
       const index = newData.findIndex((item) => row.rowKey === item.rowKey);
-      const item = newData[index];     
+      const item = newData[index];
       field.value[index] = row;
-      if(typeof tableCtx.field.updateLocalTask == 'function'){
-        const {rowKey, start, end} = row;
-        tableCtx.field.updateLocalTask(rowKey,{start: new Date(start),end: new Date(end)});
+      if (typeof tableCtx.field.updateLocalTask == 'function') {
+        const { rowKey, start, end } = row;
+        tableCtx.field.updateLocalTask(rowKey, { start: new Date(start), end: new Date(end) });
       }
     };
     const columns = defaultColumns

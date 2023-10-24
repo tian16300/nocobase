@@ -35,7 +35,7 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
 import { CollectionProvider, useCollection } from '@nocobase/client';
-import { useEventListener } from 'ahooks';
+import { useEventListener, useSize } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
 import { uid } from '@nocobase/utils';
 import { FullscreenAction } from './FullScreenAction';
@@ -149,7 +149,7 @@ const GanttRecordViewer = (props) => {
   return (
     eventSchema && (
       <DeleteEventContext.Provider value={{ close }}>
-        <ActionContextProvider value={{ visible, setVisible, drawerProps}} fieldSchema={eventSchema as Schema}>
+        <ActionContextProvider value={{ visible, setVisible, drawerProps }} fieldSchema={eventSchema as Schema}>
           <CollectionProvider name={collectionName}>
             <RecordProvider record={record}>
               {isCollectionField ? (
@@ -201,6 +201,7 @@ export const Gantt: any = (props: any) => {
     arrowIndent = 20,
     todayColor = token.colorWarning,
     viewDate,
+    setViewDate,
     TooltipContent = StandardTooltipContent,
     onDoubleClick,
     onClick,
@@ -217,7 +218,7 @@ export const Gantt: any = (props: any) => {
     setRightSize,
     timeRange,
     hasMultiBar = false,
-    updateLocalTask
+    updateLocalTask,
   } = {
     ...props,
     ...useProps(props),
@@ -225,7 +226,7 @@ export const Gantt: any = (props: any) => {
 
   const ctx = useGanttBlockContext();
   const {
-    isFullscreen: _isFullscreen = false,
+    isFullScreen: _isFullscreen = false,
     setIsFullScreen: propsSetIsFullScreen,
     getPopupContainer: propsGetPopupContainer,
   } = ctx;
@@ -269,10 +270,8 @@ export const Gantt: any = (props: any) => {
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
   const containerRef = useRef<HTMLDivElement>();
-  const getPopupContainer = 
-    function () {
-      return containerRef.current;
-    };
+ 
+  
   const formValue = {
     group: ctx.group,
     sort: ctx.sort,
@@ -304,6 +303,12 @@ export const Gantt: any = (props: any) => {
       tbodyRef.current = null;
     };
   }, [tableWrapperRef, tbodyRef]);
+  
+  const getPopupContainer = useMemo(()=>{
+    return ()=>{
+      return containerRef.current;
+    }
+  },[containerRef]);
   const setPoupContainer = (s: ISchema) => {
     if (['Select', 'RemoteSelect'].includes(s['x-component'])) {
       s['x-component-props'] = s['x-component-props'] || {};
@@ -318,7 +323,7 @@ export const Gantt: any = (props: any) => {
       if (['Action.Drawer'].includes(schema['x-component'])) {
         schema['x-component-props'] = schema['x-component-props'] || {};
         schema['x-component-props'].getContainer = () => {
-          return isFullscreen ? getPopupContainer() : document.body;
+          return isFullScreen ? getPopupContainer() : document.body;
         };
       }
     });
@@ -692,11 +697,31 @@ export const Gantt: any = (props: any) => {
     }
   };
   const rightPaneRef = useRef<ReflexElement>();
-  const [isFullscreen, setIsFullScreen] = useState(_isFullscreen);
+  const [isFullScreen, setIsFullScreen] = useState(_isFullscreen);
   // console.log('gantt isFullscreen', isFullscreen);
-  // useEffect(()=>{
-  //   setIsFullScreen(_isFullscreen);
-  // },[_isFullscreen]);
+  useEffect(() => {
+    if (typeof propsSetIsFullScreen == 'function') {
+      propsSetIsFullScreen(isFullScreen);
+    }
+    fieldSchema?.reduceProperties((pre, s) => {
+      s?.reduceProperties((pre, schema) => {
+        if (['Action.Drawer'].includes(schema['x-component'])) {
+          schema['x-component-props'] = schema['x-component-props'] || {};
+          if (isFullScreen) {
+            schema['x-component-props'].getContainer = getPopupContainer;
+          } else {
+            schema['x-component-props'].getContainer = document.body;
+          }
+        }
+      });
+    });
+  }, [isFullScreen]);
+  const size = useSize(wrapperRef);
+  useEffect(() => {
+    if (rightPaneRef.current) {
+      handerResize({});
+    }
+  }, [size?.width, size?.height]);
 
   const handerResize = ({ domElement, component }: { domElement?; component? }) => {
     component = component || rightPaneRef.current;
@@ -712,31 +737,10 @@ export const Gantt: any = (props: any) => {
   /**
    * 跳转到今天
    */
-  const goToToday = ()=>{
+  const goToToday = () => {
+    setViewDate(new Date());
+  };
 
-
-
-  }
-  useEffect(() => {
-    if (rightPaneRef.current) {
-      handerResize({});
-    }
-  }, [rightSize, isFullscreen]);
-
-  useEffect(() => {
-    fieldSchema?.reduceProperties((pre, s) => {
-      s?.reduceProperties((pre, schema) => {
-        if (['Action.Drawer'].includes(schema['x-component'])) {
-          schema['x-component-props'] = schema['x-component-props'] || {};
-          if (isFullscreen) {
-            schema['x-component-props'].getContainer = getPopupContainer;
-          } else {
-            schema['x-component-props'].getContainer = document.body;
-          }
-        }
-      });
-    });
-  }, [isFullscreen]);
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
@@ -868,7 +872,7 @@ export const Gantt: any = (props: any) => {
         record={record}
         isCreate={isCreate}
         getContainer={getPopupContainer}
-        isFullScreen={isFullscreen}
+        isFullScreen={isFullScreen}
       />
       <div className="gantt-view-form">
         <Row>
@@ -898,13 +902,13 @@ export const Gantt: any = (props: any) => {
             `}
           >
             <Space>
-            <Button onClick={goToToday}>今天</Button>
+              <Button onClick={goToToday}>今天</Button>
               <FullscreenAction
                 containerRef={containerRef}
-                isFullscreen={isFullscreen}
+                isFullScreen={isFullScreen}
                 onClick={(value) => {
-                  const fn = propsSetIsFullScreen || setIsFullScreen;
-                  fn(value);
+                  // const fn = propsSetIsFullScreen || setIsFullScreen;
+                  setIsFullScreen(value);
                 }}
               />
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />

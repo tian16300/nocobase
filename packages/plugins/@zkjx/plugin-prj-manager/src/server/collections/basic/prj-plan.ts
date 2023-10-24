@@ -131,34 +131,6 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'prjId',
-      type: 'bigInt',
-      interface: 'integer',
-      isForeignKey: true,
-      uiSchema: {
-        type: 'number',
-        title: '外键(prjId)',
-        'x-component': 'InputNumber',
-      },
-    },
-    {
-      uiSchema: {
-        title: '项目',
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-      },
-      "foreignKey": "prjId",
-      interface: 'm2o',
-      type: 'belongsTo',
-      name: 'prj',
-    },
-    {
       uiSchema: {
         title: '任务',
         'x-component': 'AssociationField',

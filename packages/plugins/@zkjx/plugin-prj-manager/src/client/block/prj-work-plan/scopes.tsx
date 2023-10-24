@@ -206,8 +206,7 @@ export const useSaveOtherPrjPlanActionProps = () => {
                 url: 'prj:savePlanLatest',
                 method: 'post',
                 data: {
-                  id: record.id,
-                  plans:plans
+                  id: record.id
                 },
               })
               .then((res) => {
@@ -216,7 +215,7 @@ export const useSaveOtherPrjPlanActionProps = () => {
                     message.success('保存成功');
                     field.visible = false;
                     /* 刷新 block */
-                    service.refresh();
+                    // service.refresh();
                   }, 2000);
                   resolve({});
                 }

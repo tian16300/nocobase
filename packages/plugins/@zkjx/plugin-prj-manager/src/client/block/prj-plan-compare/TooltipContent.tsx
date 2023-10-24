@@ -4,10 +4,12 @@ import { Col, Row, Space, Statistic } from 'antd';
 import { Task } from '@nocobase/client/src/schema-component/antd/gantt/types/public-types';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import useStyles from './style';
-import { dayjs } from '@nocobase/utils';
+import { dayjs, getWorkDays } from '@nocobase/utils';
 import { Typography } from 'antd';
 const { Title } = Typography;
 const getYmd = (param) => {
+  if(!param || param == '')
+  return '--';
   const date = dayjs(param);
   if (date.isValid()) return date.format('YYYY-MM-DD');
   return '--';
@@ -22,10 +24,10 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  const duration =
-    task.start && task.end
-      ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-      : null;
+  const duration =  task.start && task.end?getWorkDays(dayjs(task.start),dayjs(task.end)): null;
+    // task.start && task.end
+    //   ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+    //   : null;
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 

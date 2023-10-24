@@ -5,6 +5,7 @@ import { generatePlan, saveLatest } from './actions/plan';
 import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
 import { groupBy } from 'lodash';
+import { dayjs, moment2str } from '@nocobase/utils';
 // import { ReportDetailModel, ReportModel } from './model';
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
@@ -66,7 +67,44 @@ export class PluginPrjManagerServer extends Plugin {
       });
     });
     /* 计算项目计划开始时间 计划结束时间 */
-    this.app.db.on('prj_plan_latest.afterSave', async (model) => {});
+    this.app.db.on('prj_plan_latest.afterUpdate', async (model) => {
+      /* */
+      const { prjId } = model;
+      if (prjId) {
+        const { plans } = await this.app.db.getRepository<any>('prj').findOne({
+          filter: {
+            id: prjId,
+          },
+          appends: ['plans'],
+        });
+        const dates = [], days = [],
+          ends = [];
+        plans.forEach(({ start, end }) => {
+          const s = start ? dayjs(start) : null;
+          const e = end ? dayjs(end) : null;
+          if (s && s.isValid()) {
+            dates.push(s);
+          }
+          if (e && e.isValid()) {
+            dates.push(e);
+          }
+
+        });
+        const start = dates.length ? dayjs.min(dates) : null;
+        const end = dates.length ? dayjs.max(dates) : null;
+        const values = {
+          start: start?moment2str(start, {}):null,
+          end: end?moment2str(end, {}):null,
+        };
+        if (start || end) {
+          await this.app.db.getRepository<any>('prj').update({
+            filterByTk: prjId,
+            values,
+          });
+          this.app.logger.info("更新项目计划开始时间及计划结束时间", values);
+        }
+      }
+    });
     this.app.db.on('prj_plan_latest.afterDestroy', async (model) => {});
     // this.app.db.on('afterSync', () => {
     //   this.bindSync([
@@ -119,7 +157,7 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.resourcer.registerActionHandlers({
       'prj:generatePlan': generatePlan,
       'prj:hoursCount': hoursCount,
-      'prj:savePlanLatest': saveLatest
+      'prj:savePlanLatest': saveLatest,
     });
     this.aclAllowList(
       [
@@ -172,8 +210,7 @@ export class PluginPrjManagerServer extends Plugin {
     });
   }
 
-  async install(options?: InstallOptions) {
-  }
+  async install(options?: InstallOptions) {}
 
   async afterEnable() {}
 

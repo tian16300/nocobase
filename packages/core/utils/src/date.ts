@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { dayjs } from './dayjs';
-
+import {NETWORKDAYS} from '@formulajs/formulajs';
 export interface Str2momentOptions {
   gmt?: boolean;
   picker?: 'year' | 'month' | 'week' | 'quarter';
@@ -178,4 +178,15 @@ function absFloor(number) {
   } else {
     return Math.floor(number);
   }
+}
+/**
+ * 获取工作日天数
+ * @param start 开始日期
+ * @param end  结束日期
+ */
+export  const getWorkDays = (start:dayjs.Dayjs, end: dayjs.Dayjs)=>{
+  /**
+   * 求 这一段时间内包含的节假日表
+   */
+  return NETWORKDAYS(start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'),[])
 }

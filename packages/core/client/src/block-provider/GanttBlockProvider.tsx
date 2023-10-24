@@ -427,6 +427,7 @@ export const useGanttBlockProps = (_props) => {
   const [ganttHeight, setGanttHeight] = useState<any>(`calc(100% - ${headerHeight}px)`);
   const [hasScroll, setHasScroll] = useState<any>(false);
   const { rowkey = 'id' } = ctx;
+  const [viewDate, setViewDate] = useState(new Date());
 
   const onExpanderClick = (task: any) => {
     const data = ctx.field.data;
@@ -479,19 +480,14 @@ export const useGanttBlockProps = (_props) => {
     }
   }, [ctx?.service?.loading]);
   const updateLocalTask = (rowKey, {start, end})=>{
-    // console.log(tasks);
-    // debugger;
     const newTasks=[...tasks];
     const index =  newTasks.findIndex((item)=>{return item.rowKey == rowKey});
-    debugger;
     newTasks[index].start = start;
     newTasks[index].end = end;
     if (newTasks) {
       setTasks(newTasks);
       ctx.field.data = newTasks;
     }
-
-
   };
   return {
     ...props,
@@ -504,7 +500,9 @@ export const useGanttBlockProps = (_props) => {
     onResize,
     hasScroll,
     rightSize,
-    updateLocalTask
+    updateLocalTask,
+    viewDate, 
+    setViewDate
   };
 };
 

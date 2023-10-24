@@ -1,5 +1,5 @@
-import { BlockProvider, GanttBlockProvider, RecordProvider, useBlockRequestContext } from '@nocobase/client';
-import React, { createContext, useContext, useState } from 'react';
+import { BlockProvider, GanttBlockProvider, RecordProvider, css, useBlockRequestContext } from '@nocobase/client';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useField } from '@formily/react';
 import { preProcessData } from './scopes';
@@ -25,18 +25,30 @@ export const PrjPlanCompareProvider = (props) => {
       id: recordId,
     };
   }
+  const { params: propsParams, ...others } = props;
+  const [isFullScreen, setIsFullScreen] = useState(false);
   return (
-    <>
+    <div
+      className={css`
+        width: 100%;
+        height: 100%;
+      `}
+    >
       <BlockProvider data-testid="prj-field" {...options} params={params} runWhenParamsChanged>
-        <PrjPlanCompareInnerProvider {...props} setRecordId={setRecordId}></PrjPlanCompareInnerProvider>
+        <PrjPlanCompareInnerProvider
+          {...others}
+          setRecordId={setRecordId}
+          isFullScreen={isFullScreen}
+          setIsFullScreen={setIsFullScreen}
+        ></PrjPlanCompareInnerProvider>
       </BlockProvider>
-    </>
+    </div>
   );
 };
 
 export const PrjPlanCompareInnerProvider = (props: any) => {
-  const { setRecordId} = props;
-  const {fieldNames, ...others} = props;
+  const { setRecordId } = props;
+  const { fieldNames, ...others } = props;
   const { service } = useBlockRequestContext();
   const field = useField();
   const loading = service.loading;
@@ -46,7 +58,7 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
   if (!record) return null;
 
   const [version, setVersion] = useState('latest');
-  const [compVersion, setCompVersion] = useState((record?.plan_version||[])[0]?.version);
+  const [compVersion, setCompVersion] = useState((record?.plan_version || [])[0]?.version);
   const setValues = {
     prj: ({ id }) => {
       setRecordId(id);
@@ -74,29 +86,30 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
     }),
   );
 
-  const params: any = {
-    sort: 'id',
-  };
-
-  if (record && record.id) {
-    const curVersion = version;
-    const versions = [curVersion, compVersion].filter((key) => {
-      return key !== 'latest';
-    });
-    const _version =
-      versions.length > 0
-        ? {
-            $in: versions,
-          }
-        : null;
-    params.filter = {
-      prjId: record.id,
+  const ganttParams = useMemo(() => {
+    const params: any = {
+      sort: 'id',
     };
-    if (version) {
-      params.filter.version = _version;
+    if (record && record.id) {
+      const curVersion = version;
+      const versions = [curVersion, compVersion].filter((key) => {
+        return key !== 'latest';
+      });
+      const _version =
+        versions.length > 0
+          ? {
+              $in: versions,
+            }
+          : null;
+      params.filter = {
+        prjId: record.id,
+      };
+      if (version) {
+        params.filter.version = _version;
+      }
     }
-  }
-  const ganttParams = params;
+    return params;
+  }, [record.id, version, compVersion]);
   fieldNames.comp = 'comp';
   fieldNames.title = 'text';
   return (
@@ -110,21 +123,19 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
         setValues,
       }}
     >
-      {!loading && (
-          <GanttBlockProvider
-            {...others}
-            fieldNames={fieldNames}
-            sort={'id'}
-            barFill = {28}
-            params={ganttParams}
-            record={record}
-            values={values}
-            TooltipContent={TooltipContent}
-            preProcessData={preProcessData}
-            hasMultiBar
-            runWhenParamsChanged
-          ></GanttBlockProvider>
-      )}
+      <GanttBlockProvider
+        fieldNames={fieldNames}
+        sort={'id'}
+        barFill={28}
+        params={ganttParams}
+        record={record}
+        values={values}
+        TooltipContent={TooltipContent}
+        preProcessData={preProcessData}
+        hasMultiBar
+        runWhenParamsChanged
+        {...others}
+      ></GanttBlockProvider>
     </PrjPlanCompareBlockContext.Provider>
   );
 };

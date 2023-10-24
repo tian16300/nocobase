@@ -5,30 +5,33 @@ import { useFullscreen } from 'ahooks';
 import { css } from '@emotion/css';
 import { useTranslation } from 'react-i18next';
 
-export const FullscreenAction = forwardRef((props:{containerRef,  isFullscreen, onClick}) => {
+export const FullscreenAction = forwardRef((props:{containerRef,  isFullScreen, onClick}) => {
   const { t } = useTranslation();
-  const [isFullScreen,{ toggleFullscreen, enterFullscreen, exitFullscreen }] = useFullscreen(props.containerRef);
+  const [isFullScreen,{ toggleFullscreen, enterFullscreen, exitFullscreen }] = useFullscreen(props.containerRef,{
+
+  });
   const getPopupContainer = () => {
     return props.containerRef.current;
   };  
   useEffect(()=>{
-    console.log('FullscreenAction, props.isFullscreen', props.isFullscreen);
-    if(props.isFullscreen){
+    if(props.isFullScreen){
       enterFullscreen();
     }else{
       exitFullscreen();
     }
-  },[props.isFullscreen])
+  },[props.isFullScreen])
   return (
     <Tooltip title={t('Full Screen')} getPopupContainer={getPopupContainer}>
       <Button
-        onClick={()=>{
+        onClick={()=>{ 
           toggleFullscreen();
-          props.onClick(isFullScreen);
+          props.onClick(!isFullScreen);
+          console.log('FullscreenAction, isFullscreen', isFullScreen);
+         
           
         }}
       >
-        {props.isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+        {props.isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
       </Button>
     </Tooltip>
   );

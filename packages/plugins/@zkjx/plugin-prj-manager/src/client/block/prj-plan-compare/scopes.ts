@@ -66,6 +66,18 @@ export const usePrjPlanCompareTableBlockProps = () => {
  const getDiff = (record, comp) => {
   const { start, end } = record;
   const { start: start1, end: end1 } = comp;
+  if(start1!== start){
+    return {
+      isDiff:true,
+      isHidden:true
+    }
+  }
+  if(end1!== end){
+    return {
+      isDiff:true,
+      isHidden:true
+    }
+  }
   const s1 = dayjs(start);
   const s2 = dayjs(start1);
   const e1 = dayjs(end);
@@ -73,44 +85,6 @@ export const usePrjPlanCompareTableBlockProps = () => {
   if (s1.isValid() && s2.isValid() && e1.isValid() && e2.isValid()) {
     // let s:dayjs.Dayjs, e:dayjs.Dayjs;
     const isDiff = !(s1.isSame(s2) && e1.isSame(e2));
-    // const isExistDuration = checkHasJz(s1, s2, e1, e2);
-    // if (isExistDuration) {
-    //   //延期
-    //   if (e2.toDate().getTime() > e1.toDate().getTime()) {
-    //     s = e1;
-    //     e = e2;
-    //     return {
-    //       start: s.toISOString(),
-    //       end:e.toISOString(),
-    //       seriesName:'延期',
-    //       isDiff:true,
-    //       color:'gold-6'
-    //     }
-    //   } else if (s2.toDate().getTime() < s1.toDate().getTime()) {
-    //     //提前
-    //     s = s1;
-    //     e = s2;
-    //     return {
-    //       start: s.toISOString(),
-    //       end:e.toISOString(),
-    //       seriesName:'提前',
-    //       isDiff:true,
-    //       color:'green-6'
-          
-    //     }
-    //   } else{
-    //     return {
-    //       color:'transparent',
-    //       isHidden: true
-    //     }
-    //   }
-    // } else {
-    //   return {
-    //     isDiff,
-    //     color:'transparent',
-    //     isHidden: true
-    //   };
-    // }
     return {
       isDiff,      
       isHidden: true
