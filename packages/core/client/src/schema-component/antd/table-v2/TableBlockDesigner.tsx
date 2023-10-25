@@ -12,7 +12,7 @@ import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings'
 import { useSchemaTemplate } from '../../../schema-templates';
 import { useDesignable } from '../../hooks';
 import { removeNullCondition } from '../filter';
-import { FixedBlockDesignerItem } from '../page';
+// import { FixedBlockDesignerItem } from '../page';
 
 export const TableBlockDesigner = () => {
   const { name, title, sortable } = useCollection();
@@ -66,11 +66,62 @@ export const TableBlockDesigner = () => {
     },
     [dn, field.decoratorProps, fieldSchema, service],
   );
+  const onFixedBlockPropsSubmit = async ({otherHeight}) => {
+    const decoratorProps = {
+      ...fieldSchema['x-decorator-props'],
+      otherHeight
+    };
+    await dn.emit('patch', {
+      schema: {
+        ['x-uid']: fieldSchema['x-uid'],
+        'x-decorator-props': decoratorProps,
+      },
+    });
+    field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
+  };
+  const fixedBlockPropsSchema = {
+    type: 'object',
+    properties: {
+      otherHeight: {
+        type: 'string',
+        title: '其它区块高度',
+        'x-decorator': 'FormItem',
+        'x-component': 'Input',
+        default: fieldSchema['x-decorator-props']?.otherHeight,
+        required: true
+      },
+    },
+  };
   return (
     // fix https://nocobase.height.app/T-2259
     <RecordProvider parent={record} record={{}}>
       <GeneralSchemaDesigner template={template} title={title || name}>
         <SchemaSettings.BlockTitleItem />
+        <SchemaSettings.SwitchItem
+          title={t('Fix block')}
+          checked={fieldSchema['x-decorator-props']?.fixedBlock}
+          onChange={async (fixedBlock) => {
+            const decoratorProps = {
+              ...fieldSchema['x-decorator-props'],
+              fixedBlock,
+            };
+            await dn.emit('patch', {
+              schema: {
+                ['x-uid']: fieldSchema['x-uid'],
+                'x-decorator-props': decoratorProps,
+              },
+            });
+            field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
+          }}
+        />
+        {fieldSchema['x-decorator-props']?.fixedBlock ? (
+        <SchemaSettings.ModalItem
+          title={t('设置固定区块属性')}
+          schema={fixedBlockPropsSchema}
+          onSubmit={onFixedBlockPropsSubmit}
+        />
+      ) : null}
+        {/* <FixedBlockDesignerItem /> */}
         {collection?.tree && collectionField?.collectionName === collectionField?.target && (
           <SchemaSettings.SwitchItem
             title={t('Tree table')}
@@ -108,7 +159,6 @@ export const TableBlockDesigner = () => {
             }}
           />
         )}
-        <FixedBlockDesignerItem />
         <SchemaSettings.DataScope
           collectionName={name}
           defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}

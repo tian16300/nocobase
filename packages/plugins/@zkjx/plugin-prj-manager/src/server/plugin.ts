@@ -7,6 +7,7 @@ import { hoursCount } from './actions/hours';
 import { groupBy } from 'lodash';
 import { dayjs, moment2str } from '@nocobase/utils';
 // import { ReportDetailModel, ReportModel } from './model';
+import { NETWORKDAYS } from '@formulajs/formulajs';
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
   activeReceiveExpires = 86400 * 7;
@@ -61,13 +62,13 @@ export class PluginPrjManagerServer extends Plugin {
         if (taskId && !belongsPrjKey) {
           const record = await this.app.db.getRepository('task').findOne({
             filterByTk: taskId,
-          });          
-          this.app.logger.info("周报任务及项目联动", record.prjId);
+          });
+          this.app.logger.info('周报任务及项目联动', record.prjId);
           await this.app.db.getRepository('reportDetail').update({
             filterByTk: id,
             values: {
-              belongsPrjKey: record.prjId
-            }
+              belongsPrjKey: record.prjId,
+            },
           });
         }
       });
@@ -86,7 +87,7 @@ export class PluginPrjManagerServer extends Plugin {
       });
     });
     /* 计算项目计划开始时间 计划结束时间 */
-    this.app.db.on('prj_plan_latest.afterUpdate', async (model) => {
+    this.app.db.on('prj_plan_latest.afterSave', async (model) => {
       /* */
       const { prjId } = model;
       if (prjId) {
@@ -123,18 +124,42 @@ export class PluginPrjManagerServer extends Plugin {
           this.app.logger.info('更新项目计划开始时间及计划结束时间', values);
         }
       }
-    });
-    this.app.db.on('prj_plan_latest.afterDestroy', async (model) => {});
-    /* 任务保存时 更新检测状态 */
-    this.app.db.on('task:afterUpdate',async (model)=>{
-      /*  */
+       /*计算计划工期及实际工期*/
+       await this.countDays('prj_plan_latest', model, 'start', 'end', 'plan_days');
+       await this.countDays('prj_plan_latest', model, 'real_start', 'real_end', 'real_days');
 
     });
-
+    this.app.db.on('prj.afterSave', async (model) => {
+      /*计算计划工期及实际工期*/
+      await this.countDays('prj', model, 'start', 'end', 'plan_days');
+      await this.countDays('prj', model, 'real_start', 'real_end', 'real_days');
+    });
+    this.app.db.on('task.afterSave', async (model) => {
+      /*计算计划工期及实际工期*/
+      await this.countDays('task', model, 'start', 'end', 'plan_days');
+      await this.countDays('task', model, 'real_start', 'real_end', 'real_days');
+    });
 
     /*定时任务 剩1天截止 */
-
-  
+  }
+  async countDays(collectionName, model, startName, endName, name) {
+    const start = model.get(startName);
+    const end = model.get(endName);
+    const curValue = model.get(name);
+    let days = null;
+    if (start && end) {
+      days = NETWORKDAYS(start, end, []);
+    }
+    if (curValue !== days) {
+      await this.app.db.getRepository(collectionName).update({
+        filter:{
+          id: model.get('id')
+        },
+        values: {
+          [name]: days
+        },
+      });
+    }
   }
   updateReportDetail(report) {
     // debugger;

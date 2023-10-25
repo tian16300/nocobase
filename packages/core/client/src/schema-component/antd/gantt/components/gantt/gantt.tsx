@@ -34,10 +34,10 @@ import { useProps } from '../../../../hooks';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
-import { CollectionProvider, useCollection } from '@nocobase/client';
+import { CollectionProvider, useCollection, useCollectionManager } from '@nocobase/client';
 import { useEventListener, useSize } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
-import { uid } from '@nocobase/utils';
+import { dayjs, uid } from '@nocobase/utils';
 import { FullscreenAction } from './FullScreenAction';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
@@ -144,24 +144,6 @@ const GanttRecordViewer = (props) => {
   const drawerProps = {
     getContainer: isFullScreen ? getContainer : null,
   };
-  const flatTree = (schema)=>{
-    schema.reduceProperties((b, s)=>{
-      const comp = s['x-component']
-      if(['DatePicker','Select', 'RemoteSelect','CollectionField'].includes(comp)){
-        s['x-component-props'] = s['x-component-props']
-        s['x-component-props'].getPopupContainer = isFullScreen ? getContainer : null;
-      }    
-      flatTree(s);
-    });
-  }
-  flatTree(eventSchema);
-
-  eventSchema.reduceProperties((b,s)=>{
-    console.log('eventSchema.reduceProperties',s.name);
-    s.reduceProperties((b, s)=>{
-      console.log('eventSchema.reduceProperties',s.name);
-    });
-  })
   const isCollectionField = record.__collection;
   const collectionName = record.__collection || name;
   return (
@@ -245,8 +227,7 @@ export const Gantt: any = (props: any) => {
   const ctx = useGanttBlockContext();
   const {
     isFullScreen: _isFullscreen = false,
-    setIsFullScreen: propsSetIsFullScreen,
-    getPopupContainer: propsGetPopupContainer,
+    setIsFullScreen: propsSetIsFullScreen
   } = ctx;
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
@@ -327,25 +308,8 @@ export const Gantt: any = (props: any) => {
       return containerRef.current;
     }
   },[containerRef]);
-  const setPoupContainer = (s: ISchema) => {
-    if (['Select', 'RemoteSelect'].includes(s['x-component'])) {
-      s['x-component-props'] = s['x-component-props'] || {};
-      s['x-component-props'].getPopupContainer = getPopupContainer;
-    }
-  };
-  fieldSchema.properties.toolBar.reduceProperties((pre, s) => {
-    setPoupContainer(s);
-  });
-  fieldSchema?.reduceProperties((pre, s) => {
-    s?.reduceProperties((pre, schema) => {
-      if (['Action.Drawer'].includes(schema['x-component'])) {
-        schema['x-component-props'] = schema['x-component-props'] || {};
-        schema['x-component-props'].getContainer = () => {
-          return isFullScreen ? getPopupContainer() : document.body;
-        };
-      }
-    });
-  });
+
+ 
 
   // task change events
   useEffect(() => {
@@ -716,24 +680,46 @@ export const Gantt: any = (props: any) => {
   };
   const rightPaneRef = useRef<ReflexElement>();
   const [isFullScreen, setIsFullScreen] = useState(_isFullscreen);
-  // console.log('gantt isFullscreen', isFullscreen);
-  useEffect(() => {
-    if (typeof propsSetIsFullScreen == 'function') {
-      propsSetIsFullScreen(isFullScreen);
-    }
-    fieldSchema?.reduceProperties((pre, s) => {
-      s?.reduceProperties((pre, schema) => {
-        if (['Action.Drawer'].includes(schema['x-component'])) {
-          schema['x-component-props'] = schema['x-component-props'] || {};
-          if (isFullScreen) {
-            schema['x-component-props'].getContainer = getPopupContainer;
-          } else {
-            schema['x-component-props'].getContainer = document.body;
-          }
+  const {getCollectionField} = useCollectionManager();
+  const flatTreeSchema = (schema, isFullScreen )=>{
+    schema.reduceProperties((b, s)=>{
+      const comp = s['x-component']
+      if(['DatePicker','Select', 'RemoteSelect'].includes(comp)){
+        s['x-component-props'] = s['x-component-props']
+        s['x-component-props'].getPopupContainer = getPopupContainer;
+      }  
+      if(['CollectionField'].includes(comp)){
+        const cFieldName = s['x-collection-field'];
+        const cField =   getCollectionField(cFieldName);
+        const isSelect = cField?.uiSchema?.['x-component'] == "AssociationField";
+        const isDate = cField?.type == 'date';
+        if(isSelect || isDate){
+          s['x-component-props'] = s['x-component-props'];
+          s['x-component-props'].getPopupContainer = getPopupContainer;
         }
-      });
+      }
+      if(['Action.Drawer','Action.Modal','Action.Container','Action.Link'].includes(comp)){
+        s['x-component-props'] = s['x-component-props'];
+        s['x-component-props'].getContainer = isFullScreen ? getPopupContainer : null;
+
+      }
+      // const openModeValue = s?.['x-component-props']?.['openMode'] || 'drawer';
+      // if(['drawer','modal'].includes(openModeValue)){
+      //   // s['x-component-props'] = s['x-component-props'];
+      //   // s['x-component-props'].getContainer = isFullScreen ? getPopupContainer : null;
+      //   // if(s.name == 'drawer'){
+      //   //   debugger;
+      //   // }
+       
+      //   console.log('遍历schema 树',s.name);
+      // }  
+      flatTreeSchema(s, isFullScreen);
     });
+  }
+  useEffect(() => {   
+    flatTreeSchema(fieldSchema, isFullScreen);
   }, [isFullScreen]);
+  flatTreeSchema(fieldSchema, isFullScreen);
   const size = useSize(wrapperRef);
   useEffect(() => {
     if (rightPaneRef.current) {
@@ -756,7 +742,7 @@ export const Gantt: any = (props: any) => {
    * 跳转到今天
    */
   const goToToday = () => {
-    setViewDate(new Date());
+    setViewDate(dayjs().startOf('week'));
   };
 
   const gridProps: GridProps = {
@@ -919,16 +905,18 @@ export const Gantt: any = (props: any) => {
               text-align: right;
             `}
           >
-            <Space>
-              <Button onClick={goToToday}>今天</Button>
+            <Space>  
               <FullscreenAction
                 containerRef={containerRef}
                 isFullScreen={isFullScreen}
                 onClick={(value) => {
                   // const fn = propsSetIsFullScreen || setIsFullScreen;
                   setIsFullScreen(value);
+                  
                 }}
               />
+              <Button onClick={goToToday}>今天</Button>
+            
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
             </Space>
           </Col>
