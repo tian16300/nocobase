@@ -144,6 +144,24 @@ const GanttRecordViewer = (props) => {
   const drawerProps = {
     getContainer: isFullScreen ? getContainer : null,
   };
+  const flatTree = (schema)=>{
+    schema.reduceProperties((b, s)=>{
+      const comp = s['x-component']
+      if(['DatePicker','Select', 'RemoteSelect','CollectionField'].includes(comp)){
+        s['x-component-props'] = s['x-component-props']
+        s['x-component-props'].getPopupContainer = isFullScreen ? getContainer : null;
+      }    
+      flatTree(s);
+    });
+  }
+  flatTree(eventSchema);
+
+  eventSchema.reduceProperties((b,s)=>{
+    console.log('eventSchema.reduceProperties',s.name);
+    s.reduceProperties((b, s)=>{
+      console.log('eventSchema.reduceProperties',s.name);
+    });
+  })
   const isCollectionField = record.__collection;
   const collectionName = record.__collection || name;
   return (
