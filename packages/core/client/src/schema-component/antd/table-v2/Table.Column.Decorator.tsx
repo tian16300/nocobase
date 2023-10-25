@@ -29,7 +29,7 @@ export const TableColumnDecorator = (props) => {
   const { fieldSchema, uiSchema, collectionField } = useColumnSchema();
   const { refresh } = useDesignable();
   const compile = useCompile();
-  const required =  fieldSchema['required'];
+  const required =  fieldSchema?.['required'];
   useLayoutEffect(() => {
     if (field.title) {
       return;

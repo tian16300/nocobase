@@ -13,13 +13,7 @@ export const FullscreenAction = forwardRef((props:{containerRef,  isFullScreen, 
   const getPopupContainer = () => {
     return props.containerRef.current;
   };  
-  useEffect(()=>{
-    if(props.isFullScreen){
-      enterFullscreen();
-    }else{
-      exitFullscreen();
-    }
-  },[props.isFullScreen])
+ 
   return (
     <Tooltip title={t('Full Screen')} getPopupContainer={getPopupContainer}>
       <Button

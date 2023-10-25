@@ -56,9 +56,17 @@ export const PrjPlanCompareInnerProvider = (props: any) => {
 
   const record = service.data?.data[0];
   if (!record) return null;
-
+  const [searchParams] = useSearchParams();
+  let compVersionDefaultStr = searchParams.get('version');
+  let compVersionDefault = null;
+  if(compVersionDefaultStr){
+    compVersionDefault = Number(compVersionDefaultStr).valueOf();
+  }else{
+    compVersionDefault = (record?.plan_version || [])[0]?.version;
+  }
+  
   const [version, setVersion] = useState('latest');
-  const [compVersion, setCompVersion] = useState((record?.plan_version || [])[0]?.version);
+  const [compVersion, setCompVersion] = useState(compVersionDefault);
   const setValues = {
     prj: ({ id }) => {
       setRecordId(id);

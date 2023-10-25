@@ -44,16 +44,35 @@ export class PluginPrjManagerServer extends Plugin {
     // });
 
     this.app.db.on('reportDetail.afterSave', async (model, options) => {
-      if (!model.reportId) {
+      const { dataValues } = model;
+      if (!dataValues.reportId) {
         const rep = this.app.db.getRepository('reportDetail');
         await rep.destroy({
           filter: {
-            id: model.id,
+            id: dataValues.id,
           },
         });
         this.app.db.logger.info(`删除本周完成 ${model.id}`);
       }
     });
+    this.app.db.on('report.afterSaveWithAssociations', async (model, options) => {
+      const weekContent = model.get('weekContent');
+      weekContent.forEach(async ({ id, belongsPrjKey, taskId }) => {
+        if (taskId && !belongsPrjKey) {
+          const record = await this.app.db.getRepository('task').findOne({
+            filterByTk: taskId,
+          });          
+          this.app.logger.info("周报任务及项目联动", record.prjId);
+          await this.app.db.getRepository('reportDetail').update({
+            filterByTk: id,
+            values: {
+              belongsPrjKey: record.prjId
+            }
+          });
+        }
+      });
+    });
+
     /* 删除项目历史版本时 移除项目计划历史版本 */
     this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
       const prjId = model.get('prjId');
@@ -77,7 +96,8 @@ export class PluginPrjManagerServer extends Plugin {
           },
           appends: ['plans'],
         });
-        const dates = [], days = [],
+        const dates = [],
+          days = [],
           ends = [];
         plans.forEach(({ start, end }) => {
           const s = start ? dayjs(start) : null;
@@ -88,45 +108,33 @@ export class PluginPrjManagerServer extends Plugin {
           if (e && e.isValid()) {
             dates.push(e);
           }
-
         });
         const start = dates.length ? dayjs.min(dates) : null;
         const end = dates.length ? dayjs.max(dates) : null;
         const values = {
-          start: start?moment2str(start, {}):null,
-          end: end?moment2str(end, {}):null,
+          start: start ? moment2str(start, {}) : null,
+          end: end ? moment2str(end, {}) : null,
         };
         if (start || end) {
           await this.app.db.getRepository<any>('prj').update({
             filterByTk: prjId,
             values,
           });
-          this.app.logger.info("更新项目计划开始时间及计划结束时间", values);
+          this.app.logger.info('更新项目计划开始时间及计划结束时间', values);
         }
       }
     });
     this.app.db.on('prj_plan_latest.afterDestroy', async (model) => {});
-    // this.app.db.on('afterSync', () => {
-    //   this.bindSync([
-    //     'prjs_files',
-    //     'prjs_users',
-    //     'prj_plan_task_time',
-    //     'tasks-dependencies',
-    //     'risk_basic',
-    //     'reportSetting',
-    //     'report',
-    //     'reportDetail',
-    //     'reportPlan',
-    //     'report_target',
-    //     'prj',
-    //     'prj_plan',
-    //     'prj_plan_history',
-    //     'prj_plan_latest',
-    //     'prj_plan_version',
-    //     'prj_stages_files',
-    //     'task',
-    //   ]);
-    // });
+    /* 任务保存时 更新检测状态 */
+    this.app.db.on('task:afterUpdate',async (model)=>{
+      /*  */
+
+    });
+
+
+    /*定时任务 剩1天截止 */
+
+  
   }
   updateReportDetail(report) {
     // debugger;

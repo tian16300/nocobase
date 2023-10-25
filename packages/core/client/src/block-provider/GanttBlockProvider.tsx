@@ -5,24 +5,45 @@ import { useCollection, useCollectionManager } from '../collection-manager/hooks
 import { useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAssociationNames, useToken } from '..';
-import { getValuesByPath } from '@nocobase/utils/client';
+import { dayjs, getValuesByPath } from '@nocobase/utils/client';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import {NETWORKDAYS} from '@formulajs/formulajs';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token) => {
-  const colorName = item.color || item.status?.color;
-  if (colorName) {
-    if (colorName.indexOf('#') !== -1 || colorName.indexOf('rgb') !== -1 || colorName.indexOf('rgba') !== -1) {
-      return colorName;
+
+  const { colorInfo, colorSuccess, colorWarning, colorError} = token;
+  const { start, end,real_start,real_end} = item;
+  if(end && real_end){
+    const a =dayjs(end), b=dayjs(real_end);
+    if(b.isAfter(a)){
+      return colorError;
+    }else{
+      return colorSuccess;
     }
-    if (colorName.indexOf('-') !== -1) {
-      return token[colorName];
-    } else {
-      return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
+  }else if(end && !real_end){
+    const days = NETWORKDAYS(new Date().toISOString(),end,[]);
+    if(typeof days == 'number' &&  days <=3 && days >0){
+      return colorWarning;
     }
+    return colorInfo;
   }
-  return null;
+
+
+  // const colorName = item.color || item.status?.color;
+  // if (colorName) {
+  //   if (colorName.indexOf('#') !== -1 || colorName.indexOf('rgb') !== -1 || colorName.indexOf('rgba') !== -1) {
+  //     return colorName;
+  //   }
+  //   if (colorName.indexOf('-') !== -1) {
+  //     return token[colorName];
+  //   } else {
+  //     return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
+  //   }
+  // }
+  // return null;
+  return colorInfo;
 };
 
 const findItemMinStart = (item, cStart) => {
@@ -91,6 +112,8 @@ const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
     'groupRowKey',
     'rowKey',
     'fieldCtx',
+    'real_start',
+    'real_end'
   ]);
   const start = getValuesByPath(item, fieldNames.start);
   const end = getValuesByPath(item, fieldNames.end);
