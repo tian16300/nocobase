@@ -7,6 +7,7 @@ export default {
   autoGenId: false,
   autoCreate: true,
   isThrough: true,
+  hidden:true,
   sortable: false,
   fields: [
     {

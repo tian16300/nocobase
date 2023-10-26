@@ -9,7 +9,7 @@ export default {
     "name": "prj",
     "template": "general",
     "view": false,
-    "inherit": ['prj_plan_task_time'],
+    "inherits": ['prj_plan_task_time'],
     "fields": [
         {
             "name": "id",

@@ -1,5 +1,5 @@
 export default {
-    "inherit": ['prj_plan_task_time'],
+    "inherits": ['prj_plan_task_time'],
     "hidden": false,
     "name": "task",
     "title": "任务",

@@ -4,7 +4,7 @@ import dicRecords from './dicRecords';
 import { generatePlan, saveLatest } from './actions/plan';
 import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
-import { groupBy } from 'lodash';
+import 'dayjs/plugin/minMax';
 import { dayjs, moment2str } from '@nocobase/utils';
 // import { ReportDetailModel, ReportModel } from './model';
 import { NETWORKDAYS } from '@formulajs/formulajs';
@@ -189,7 +189,9 @@ export class PluginPrjManagerServer extends Plugin {
   async load() {
     //增加字典数据
     // await this.addRecords();
-
+    await this.app.db.import({
+      directory: path.resolve(__dirname, './collections/inherits'),
+    });
     await this.app.db.import({
       directory: path.resolve(__dirname, './collections/basic'),
     });
@@ -224,7 +226,6 @@ export class PluginPrjManagerServer extends Plugin {
         'task',
         'task_hour',
         'prj_plan_task_time',
-        'risk_basic',
       ],
       'loggedIn',
     );
@@ -232,6 +233,7 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');
+
 
   }
   async addRecords() {
@@ -251,7 +253,28 @@ export class PluginPrjManagerServer extends Plugin {
     });
   }
 
-  async install(options?: InstallOptions) {}
+  async install(options?: InstallOptions) {
+    const repo = this.db.getRepository<any>('collections');
+    if (repo) {
+      await repo.db2cm('prj_plan_task_time');
+      await repo.db2cm('prj_stages_files');
+      await repo.db2cm('prjs_files');
+      await repo.db2cm('prjs_users');
+      await repo.db2cm('tasks_dependencies');      
+      await repo.db2cm('reportSetting'); 
+      await repo.db2cm('prj');    
+      await repo.db2cm('prj_plan');    
+      await repo.db2cm('report');  
+      await repo.db2cm('reportPlan');
+      await repo.db2cm('reportDetail');
+      await repo.db2cm('report_target');
+      await repo.db2cm('prj_plan_version');
+      await repo.db2cm('prj_plan_latest');
+      await repo.db2cm('prj_plan_history');
+      await repo.db2cm('task');
+
+    }
+  }
 
   async afterEnable() {}
 

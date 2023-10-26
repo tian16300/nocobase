@@ -13,7 +13,6 @@ import useStyles from './style';
 import { TopPartOfCalendar } from './top-part-of-calendar';
 import { dayjs } from '@nocobase/utils';
 import { useToken } from '../../../__builtins__';
-
 export type CalendarProps = {
   dateSetup: DateSetup;
   locale: string;

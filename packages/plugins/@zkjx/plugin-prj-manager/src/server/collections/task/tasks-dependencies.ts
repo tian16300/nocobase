@@ -8,6 +8,7 @@ export default {
   autoCreate: false,
   isThrough: true,
   sortable: false,
+  hidden:true,
   fields: [
     {
       name: 'taskId',

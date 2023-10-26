@@ -8,6 +8,7 @@ export default {
   autoCreate: true,
   isThrough: true,
   sortable: false,
+   hidden:true,
   fields: [
     {
       name: 'prj_stage_id',

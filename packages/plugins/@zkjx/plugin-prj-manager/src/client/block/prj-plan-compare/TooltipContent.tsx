@@ -6,10 +6,11 @@ import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import useStyles from './style';
 import { dayjs, getWorkDays } from '@nocobase/utils';
 import { Typography } from 'antd';
+
+import { NETWORKDAYS } from '@formulajs/formulajs';
 const { Title } = Typography;
 const getYmd = (param) => {
-  if(!param || param == '')
-  return '--';
+  if (!param || param == '') return '--';
   const date = dayjs(param);
   if (date.isValid()) return date.format('YYYY-MM-DD');
   return '--';
@@ -24,18 +25,21 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  const duration =  task.start && task.end?getWorkDays(dayjs(task.start),dayjs(task.end)): null;
-    // task.start && task.end
-    //   ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-    //   : null;
+  // task.start && task.end
+  //   ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
+  //   : null;
+  let duration = task.start && task.end ? NETWORKDAYS(task.start, task.end, []) : null;
+  if (typeof duration !== 'number') {
+    duration = null;
+  }
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    prjDuration =
-      projectBar.start && projectBar.end
-        ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-        : null;
+    let prjDuration = projectBar.start && projectBar.end ? NETWORKDAYS(projectBar.start, projectBar.end, []) : null;
+    if (typeof prjDuration !== 'number') {
+      prjDuration = null;
+    }
   }
   return (
     <div className="task-tooltip-content-item">
@@ -87,15 +91,14 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
             </Col>
             <Col span={8}>
               <Statistic
-                title={isProject ? '计划天数' : '天数'}
-                value={duration ? duration : '--'}
+                title={isProject ? '工作日' : '工作日'}
+                value={typeof duration == 'number' ? duration : '--'}
                 precision={1}
                 valueStyle={{
                   // color: '#3f8600',
                   fontSize: fontSize,
                   fontWeight: 'bold',
                 }}
-                suffix={duration ? '天' : ''}
               />
             </Col>
             {isProject && projectBar ? (
@@ -141,15 +144,14 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
                 {projectBar.start && projectBar.end ? (
                   <Col span={8}>
                     <Statistic
-                      title="天数"
-                      value={prjDuration ? prjDuration : '--'}
+                      title="工作日"
+                      value={typeof prjDuration == 'number'? prjDuration : '--'}
                       precision={1}
                       valueStyle={{
                         // color: '#3f8600',
                         fontSize: fontSize,
                         fontWeight: 'bold',
                       }}
-                      suffix={prjDuration ? '天' : ''}
                     />
                   </Col>
                 ) : (
@@ -192,25 +194,7 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
           </Row>
         </div>
       )}
-      {task.isDiff && (
-        <div>
-          <Row gutter={[16, 8]}>
-            <Col span={8}>
-              <Statistic
-                title={''}
-                value={duration ? duration : '--'}
-                precision={1}
-                valueStyle={{
-                  // color: '#3f8600',
-                  fontSize: fontSize,
-                  fontWeight: 'bold',
-                }}
-                suffix={duration ? '天' : ''}
-              />
-            </Col>
-          </Row>
-        </div>
-      )}
+      
     </div>
   );
 };

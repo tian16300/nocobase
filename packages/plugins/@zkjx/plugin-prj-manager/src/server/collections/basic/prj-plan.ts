@@ -9,7 +9,8 @@ export default {
   name: 'prj_plan',
   template: 'general',
   view: false,
-  inherit: ['prj_plan_task_time'],
+  hidden: true,
+  inherits: ['prj_plan_task_time'],
   fields: [
     {
       name: 'id',
