@@ -245,6 +245,34 @@ export default {
             "targetKey": "id"
         },
         {
+            "uiSchema": {
+                "enum": [
+                    {
+                        "value": "1",
+                        "label": "开启",
+                        "color": "success"
+                    },
+                    {
+                        "value": "2",
+                        "label": "关闭",
+                        "color": "default"
+                    },
+                    {
+                        "value": "3",
+                        "label": "取消",
+                        "color": "default"
+                    }
+                ],
+                "type": "string",
+                "x-component": "Select",
+                "title": "开启"
+            },
+            "name": "task_action",
+            "type": "string",
+            "interface": "select",
+            "default":"1"
+        },
+        {
             "name": "userId",
             "type": "bigInt",
             "interface": "integer",

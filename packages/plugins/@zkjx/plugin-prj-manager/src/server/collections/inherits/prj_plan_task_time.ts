@@ -4,7 +4,7 @@
 export default {
   name: 'prj_plan_task_time',
   title: '计划时间表',
-  inherits: false,
+  inherit: false,
   hidden: true,
   fields: [
     {

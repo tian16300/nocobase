@@ -243,8 +243,8 @@ export default {
           },
         },
         'x-read-pretty': true,
-      },
-    },
+      }
+    }
   ],
   title: '项目计划基础表',
 };
