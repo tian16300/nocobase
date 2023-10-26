@@ -30,52 +30,65 @@ export class PluginPrjManagerServer extends Plugin {
       if (dic && dicItem) await this.addRecords();
     });
 
-    /* 更新 周报保存数据后 更新项目活跃 */
-    this.app.db.on('report.afterSaveWithAssociations', async (report, options) => {
-      // debugger;
-      // await report.updateReportDetail();
-      // await this.updateReportDetail(report);
-      /* 保存周报后 更新数据 */
-      await this.checkPrjActive(report, options);
-    });
-    //保存之前 项目更新
-    // this.app.db.on('reportDetail.beforeSave', async (model, options)=>{
-    //    //更新任务
-    //   //  if(model.)
-    // });
-
     this.app.db.on('reportDetail.afterSave', async (model, options) => {
-      const { dataValues } = model;
-      if (!dataValues.reportId) {
-        const rep = this.app.db.getRepository('reportDetail');
-        await rep.destroy({
-          filter: {
-            id: dataValues.id,
-          },
-        });
-        this.app.db.logger.info(`删除本周完成 ${model.id}`);
-      }
-    });
-    this.app.db.on('report.afterSaveWithAssociations', async (model, options) => {
-      const weekContent = model.get('weekContent');
-      weekContent.forEach(async ({ id, belongsPrjKey, taskId }) => {
-        if (taskId && !belongsPrjKey) {
-          const record = await this.app.db.getRepository('task').findOne({
-            filterByTk: taskId,
+      if (model._changed.has('reportId')) {
+        if (!model.get('reportId')) {
+          const rep = this.app.db.getRepository('reportDetail');
+          await rep.destroy({
+            filter: {
+              id: model.get('id'),
+            },
+            transaction: options.transaction,
           });
-          this.app.logger.info('周报任务及项目联动', record.prjId);
+          this.app.db.logger.info(`删除本周完成 ${model.id}`);
+        }
+      }
+      if (model._changed.has('taskId')) {
+        /* 保存任务的项目id */
+        if (model.get('taskId')) {
+          const record = await this.app.db.getRepository('task').findOne({
+            filterByTk: model.get('taskId'),
+          });
           await this.app.db.getRepository('reportDetail').update({
-            filterByTk: id,
+            filterByTk: model.get('id'),
             values: {
               belongsPrjKey: record.prjId,
             },
+            transaction: options.transaction,
+          });
+        } else {
+          await this.app.db.getRepository('reportDetail').update({
+            filterByTk: model.get('id'),
+            values: {
+              belongsPrj: null,
+            },
+            transaction: options.transaction,
           });
         }
-      });
+      }
+      if (model._changed.has('belongsPrjKey')) {
+        /* 更新 项目活跃*/
+        const belongsPrjKey = model.get('belongsPrjKey') || model._previousDataValues.belongsPrjKey;
+        const count = await this.app.db.getRepository('reportDetail').count({
+          filter: {
+            belongsPrjKey: belongsPrjKey,
+          },
+          transaction: options.transaction,
+        });
+        await this.app.db.getRepository('prj').update({
+          filter: {
+            id: belongsPrjKey,
+          },
+          values: {
+            activeIndex: count,
+          },
+          transaction: options.transaction,
+        });
+      }
     });
 
     /* 删除项目历史版本时 移除项目计划历史版本 */
-    this.app.db.on('prj_plan_version.afterDestroy', async (model) => {
+    this.app.db.on('prj_plan_version.afterDestroy', async (model, options) => {
       const prjId = model.get('prjId');
       const version = model.get('version');
       const reb = this.app.db.getRepository<any>('prj_plan_history');
@@ -84,11 +97,16 @@ export class PluginPrjManagerServer extends Plugin {
           prjId: prjId,
           version: version,
         },
+        transaction: options.transaction,
       });
     });
     /* 计算项目计划开始时间 计划结束时间 */
-    this.app.db.on('prj_plan_latest.afterSave', async (model) => {
+    this.app.db.on('prj_plan_latest.afterSave', async (model, options) => {
       /* */
+
+      /*计算计划工期及实际工期*/
+      await this.countDays('prj_plan_latest', model, options, 'start', 'end', 'plan_days');
+      await this.countDays('prj_plan_latest', model, options, 'real_start', 'real_end', 'real_days');
       const { prjId } = model;
       if (prjId) {
         const { plans } = await this.app.db.getRepository<any>('prj').findOne({
@@ -96,10 +114,9 @@ export class PluginPrjManagerServer extends Plugin {
             id: prjId,
           },
           appends: ['plans'],
+          transaction: options.transaction,
         });
-        const dates = [],
-          days = [],
-          ends = [];
+        const dates = [];
         plans.forEach(({ start, end }) => {
           const s = start ? dayjs(start) : null;
           const e = end ? dayjs(end) : null;
@@ -120,45 +137,45 @@ export class PluginPrjManagerServer extends Plugin {
           await this.app.db.getRepository<any>('prj').update({
             filterByTk: prjId,
             values,
+            transaction: options.transaction,
           });
           this.app.logger.info('更新项目计划开始时间及计划结束时间', values);
         }
       }
-       /*计算计划工期及实际工期*/
-       await this.countDays('prj_plan_latest', model, 'start', 'end', 'plan_days');
-       await this.countDays('prj_plan_latest', model, 'real_start', 'real_end', 'real_days');
-
     });
-    this.app.db.on('prj.afterSave', async (model) => {
+    this.app.db.on('prj.afterSave', async (model, options) => {
       /*计算计划工期及实际工期*/
-      await this.countDays('prj', model, 'start', 'end', 'plan_days');
-      await this.countDays('prj', model, 'real_start', 'real_end', 'real_days');
+      await this.countDays('prj', model, options, 'start', 'end', 'plan_days');
+      await this.countDays('prj', model, options, 'real_start', 'real_end', 'real_days');
     });
-    this.app.db.on('task.afterSave', async (model) => {
+    this.app.db.on('task.afterSave', async (model, options) => {
       /*计算计划工期及实际工期*/
-      await this.countDays('task', model, 'start', 'end', 'plan_days');
-      await this.countDays('task', model, 'real_start', 'real_end', 'real_days');
+      await this.countDays('task', model, options, 'start', 'end', 'plan_days');
+      await this.countDays('task', model, options, 'real_start', 'real_end', 'real_days');
     });
 
     /*定时任务 剩1天截止 */
   }
-  async countDays(collectionName, model, startName, endName, name) {
-    const start = model.get(startName);
-    const end = model.get(endName);
-    const curValue = model.get(name);
-    let days = null;
-    if (start && end) {
-      days = NETWORKDAYS(start, end, []);
-    }
-    if (curValue !== days) {
-      await this.app.db.getRepository(collectionName).update({
-        filter:{
-          id: model.get('id')
-        },
-        values: {
-          [name]: days
-        },
-      });
+  async countDays(collectionName, model, options, startName, endName, name) {
+    if (model._changed.has(startName) || model._changed.has(endName) || model._changed.has(name)) {
+      const start = model.get(startName);
+      const end = model.get(endName);
+      const curValue = model.get(name);
+      let days = null;
+      if (start && end) {
+        days = NETWORKDAYS(start, end, []);
+      }
+      if (curValue !== days) {
+        await this.app.db.getRepository(collectionName).update({
+          filter: {
+            id: model.get('id'),
+          },
+          values: {
+            [name]: days,
+          },
+          transaction: options.transaction,
+        });
+      }
     }
   }
   updateReportDetail(report) {
@@ -216,15 +233,6 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');
 
-    // this.app.on('beforeStart', () => {
-    //   // 每10分钟执行一次
-    //   this.timer = setInterval(this.checkPrjActive, 1000 * 60 * 10);
-    // });
-
-    // this.app.on('beforeStop', () => {
-    //   clearInterval(this.timer);
-    //   this.timer = null;
-    // });
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {
@@ -251,31 +259,7 @@ export class PluginPrjManagerServer extends Plugin {
 
   async remove() {}
 
-  checkPrjActive = async (report, options) => {
-    const weekReport = this.db.getRepository('reportDetail');
-    const result: Array<{ belongsPrjKey: number }> = await weekReport.find({
-      filter: {
-        belongsPrjKey: {
-          $notEmpty: true,
-        },
-      },
-    });
-    const groups = groupBy<{ belongsPrjKey: number }>(result, (model) => {
-      return model.belongsPrjKey;
-    });
-    Object.keys(groups).map(async (belongsPrjKey: string) => {
-      const prj = this.db.getRepository('prj');
-      await prj.update({
-        filter: {
-          id: belongsPrjKey,
-        },
-        values: {
-          activeIndex: groups[belongsPrjKey].length,
-        },
-      });
-      this.log.debug(`更新项目活跃 数据, ${belongsPrjKey}, ${groups[belongsPrjKey].length}`);
-    });
-  };
+  
 }
 
 export default PluginPrjManagerServer;

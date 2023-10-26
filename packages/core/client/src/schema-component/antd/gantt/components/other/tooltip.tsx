@@ -4,9 +4,10 @@ import { getYmd } from '../../helpers/other-helper';
 import { BarTask } from '../../types/bar-task';
 import { Task } from '../../types/public-types';
 import useStyles from './style';
-import { Col, Row, Space, Statistic } from 'antd';
+import { Alert, Col, Row, Space, Statistic } from 'antd';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import { useToken } from '../../../__builtins__';
+import { NETWORKDAYS } from '@formulajs/formulajs';
 export type TooltipProps = {
   task: BarTask;
   arrowIndent: number;
@@ -51,7 +52,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       const tooltipHeight = tooltipRef.current.offsetHeight * 1.1;
       const tooltipWidth = tooltipRef.current.offsetWidth * 1.1;
       let index = task.index;
-      if(Array.isArray(index)){
+      if (Array.isArray(index)) {
         index = index[0];
       }
       let newRelatedY = index * rowHeight - scrollY + headerHeight;
@@ -125,19 +126,14 @@ export const StandardTooltipContent: React.FC<{
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  const duration =
-    task.start && task.end
-      ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-      : null;
+  let duration = task.start && task.end ? NETWORKDAYS(task.start, task.end, []) : null;
+  duration = typeof duration == 'number' ? duration : null;
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-  
-    prjDuration =
-      projectBar.start && projectBar.end
-        ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-        : null;
+    prjDuration = projectBar.start && projectBar.end ? NETWORKDAYS(projectBar.start, projectBar.end, []) : null;
+    prjDuration = typeof prjDuration == 'number' ? prjDuration : null;
   }
   return wrapSSR(
     <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
@@ -147,6 +143,8 @@ export const StandardTooltipContent: React.FC<{
           minwidth: 500px;
         `}
       >
+         {task.alterProp && 
+            <Alert className={css`margin-bottom:8px;`} {...task.alterProp} />}
         <div style={{ marginBottom: 8, fontSize: '1.1em' }}>
           <strong>{task.name}</strong>
         </div>
@@ -192,7 +190,7 @@ export const StandardTooltipContent: React.FC<{
             </Col>
             <Col span={8}>
               <Statistic
-                title={isProject ? '计划天数' : '天数'}
+                title={'工期(工作日)'}
                 value={duration ? duration : '--'}
                 precision={1}
                 valueStyle={{
@@ -200,7 +198,6 @@ export const StandardTooltipContent: React.FC<{
                   fontSize: fontSize,
                   fontWeight: 'bold',
                 }}
-                suffix={duration ? '天' : ''}
               />
             </Col>
             {isProject && projectBar ? (
@@ -246,7 +243,7 @@ export const StandardTooltipContent: React.FC<{
                 {projectBar.start && projectBar.end ? (
                   <Col span={8}>
                     <Statistic
-                      title="天数"
+                      title="工期(工作日)"
                       value={prjDuration ? prjDuration : '--'}
                       precision={1}
                       valueStyle={{
@@ -254,7 +251,6 @@ export const StandardTooltipContent: React.FC<{
                         fontSize: fontSize,
                         fontWeight: 'bold',
                       }}
-                      suffix={prjDuration ? '天' : ''}
                     />
                   </Col>
                 ) : (
@@ -279,6 +275,7 @@ export const StandardTooltipContent: React.FC<{
                 />
               )}
             </Col>
+           
           </Row>
         </div>
       </div>

@@ -40,6 +40,7 @@ export interface Task {
   x?:number;
   y:number;
   isHidden?:boolean;
+  alterProp?:object;
 }
 
 export interface EventOption {

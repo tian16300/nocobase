@@ -496,6 +496,7 @@ FormItem.Designer = function Designer() {
             if (!hasAddNew) {
               const addNewActionschema = {
                 'x-action': 'create',
+                'x-acl-action': 'create',
                 title: "{{t('Add new')}}",
                 'x-designer': 'Action.Designer',
                 'x-component': 'Action',
@@ -543,6 +544,7 @@ FormItem.Designer = function Designer() {
               if (!hasAddNew) {
                 const addNewActionschema = {
                   'x-action': 'create',
+                  'x-acl-action': 'create',
                   title: "{{t('Add new')}}",
                   'x-designer': 'Action.Designer',
                   'x-component': 'Action',

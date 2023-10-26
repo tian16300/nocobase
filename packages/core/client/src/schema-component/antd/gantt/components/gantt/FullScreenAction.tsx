@@ -5,7 +5,7 @@ import { useFullscreen } from 'ahooks';
 import { css } from '@emotion/css';
 import { useTranslation } from 'react-i18next';
 
-export const FullscreenAction = forwardRef((props:{containerRef,  isFullScreen, onClick}) => {
+export const FullscreenAction = forwardRef((props:{containerRef, onClick}) => {
   const { t } = useTranslation();
   const [isFullScreen,{ toggleFullscreen, enterFullscreen, exitFullscreen }] = useFullscreen(props.containerRef,{
 
@@ -19,13 +19,11 @@ export const FullscreenAction = forwardRef((props:{containerRef,  isFullScreen, 
       <Button
         onClick={()=>{ 
           toggleFullscreen();
-          props.onClick(!isFullScreen);
-          console.log('FullscreenAction, isFullscreen', isFullScreen);
-         
+          props.onClick();
           
         }}
       >
-        {props.isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+        {isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
       </Button>
     </Tooltip>
   );

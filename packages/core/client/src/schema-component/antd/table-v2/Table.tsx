@@ -35,8 +35,8 @@ import {
   useTableSelectorContext,
 } from '../../../';
 import { useACLFieldWhitelist } from '../../../acl/ACLProvider';
-import { LocalVariablesProvider } from '../../../variables/hooks/useLocalVariables';
 import { useToken } from '../__builtins__';
+import { SubFormProvider } from '../association-field/hooks';
 import { ColumnFieldProvider } from './components/ColumnFieldProvider';
 import { extractIndex, isCollectionFieldComponent, isColumnComponent } from './utils';
 
@@ -82,8 +82,8 @@ const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMov
         render: (v, record) => {
           const index = field.value?.indexOf(record);
           return (
-            <RecordIndexProvider index={record.__index || index}>
-              <LocalVariablesProvider iterationCtx={record}>
+            <SubFormProvider value={record}>
+              <RecordIndexProvider index={record.__index || index}>
                 <RecordProvider record={record}>
                   <ColumnFieldProvider schema={s} basePath={field.address.concat(record.__index || index)}>
                     <RecursionField
@@ -93,8 +93,8 @@ const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMov
                     />
                   </ColumnFieldProvider>
                 </RecordProvider>
-              </LocalVariablesProvider>
-            </RecordIndexProvider>
+              </RecordIndexProvider>
+            </SubFormProvider>
           );
         },
       } as TableColumnProps<any>;
@@ -420,6 +420,12 @@ export const Table: any = observer(
         setExpandesKeys([]);
       }
     }, [expandFlag, allIncludesChildren]);
+
+    useEffect(()=>{
+        setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
+    },[
+      ctx?.field?.data?.selectedRowKeys
+    ])
 
     const components = useMemo(() => {
       return {

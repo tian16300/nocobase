@@ -27,7 +27,7 @@ export const getDefaultFormat = (props: any) => {
   } else if (props['picker'] === 'week') {
     return 'YYYY-wo';
   }
-  return props['showTime'] ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD';
+  return props['showTime'] ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00';
 };
 
 export const toGmt = (value: dayjs.Dayjs) => {

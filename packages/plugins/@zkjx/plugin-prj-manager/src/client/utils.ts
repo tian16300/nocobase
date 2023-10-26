@@ -687,16 +687,6 @@ export const createPrjWorkStaticShema = () => {
 export const createPrjPlanCompare = () => {
   const Comp = 'PrjPlanCompare';
   const fields = {
-    groups: [
-      { label: '项目阶段', value: 'prjStage' },
-      { label: '负责人', value: 'user' },
-      { label: '状态', value: 'status' },
-    ],
-    sort: [
-      { label: '开始时间', value: 'start' },
-      { label: '截止时间', value: 'end' },
-      { label: '任务状态', value: 'status' },
-    ],
     range: [
       { label: '{{t("Day")}}', value: 'day', color: 'yellow' },
       { label: '{{t("Week")}}', value: 'week', color: 'pule' },
@@ -726,7 +716,22 @@ export const createPrjPlanCompare = () => {
       },
       rightSize: 0.9,
       // group: 'prjStage',
-      fields,
+      form:{
+        group:{
+          visible:false
+        },
+        range:{
+          visible:true,
+          options:['day','week','month','quarterYear','year'],
+          default:'week'
+
+        },
+        sort:{
+          visible:false,
+          default:'id'
+        }
+      }
+
     },
     'x-component': `${Comp}.Wrap`,
     'x-designer': `${Comp}.Designer`,

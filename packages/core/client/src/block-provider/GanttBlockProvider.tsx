@@ -8,42 +8,62 @@ import { IField, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import {NETWORKDAYS} from '@formulajs/formulajs';
+import { NETWORKDAYS } from '@formulajs/formulajs';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token) => {
-
-  const { colorInfo, colorSuccess, colorWarning, colorError} = token;
-  const { start, end,real_start,real_end} = item;
-  if(end && real_end){
-    const a =dayjs(end), b=dayjs(real_end);
-    if(b.isAfter(a)){
-      return colorError;
-    }else{
-      return colorSuccess;
+  const { colorInfo, colorSuccess, colorWarning, colorError } = token;
+  let alterProp = null;
+  let color = colorInfo;
+  const { start, end, real_start, real_end } = item;
+  const today = dayjs();
+  if (end && real_end) {
+    const a = dayjs(end),
+      b = dayjs(real_end);
+    if (b.isAfter(a)) {
+      const days = NETWORKDAYS(a, b, []);
+      color = colorError;
+      const message = `已延期${days}个工作日`;
+      const type = 'error';
+      alterProp = {
+        type,
+        message,
+      };
+    } else {
+      color = colorSuccess;
     }
-  }else if(end && !real_end){
-    const days = NETWORKDAYS(new Date().toISOString(),end,[]);
-    if(typeof days == 'number' &&  days <=3 && days >0){
-      return colorWarning;
+  } else if (end && !real_end) {
+    const a = dayjs(end);
+    if (a.isAfter(today)) {
+      const days = NETWORKDAYS(today.toISOString(), end, []);
+      if (typeof days == 'number' && days <= 3 && days > 0) {
+        color = colorWarning;
+        const message = `距离截止时间不到${days}个工作日`;
+        const type = 'warning';
+        const showIcon = true;
+        alterProp = {
+          type,
+          message,
+          showIcon,
+        };
+      }
+    } else if (a.isBefore(today)) {
+      const days = NETWORKDAYS(end, today.toISOString(), []);
+      if (typeof days == 'number') {
+        color = colorError;
+        const message = `已延期${days}个工作日, 请补充实际完成时间！`;
+        const type = 'error';
+        alterProp = {
+          type,
+          message,
+        };
+      }
     }
-    return colorInfo;
   }
-
-
-  // const colorName = item.color || item.status?.color;
-  // if (colorName) {
-  //   if (colorName.indexOf('#') !== -1 || colorName.indexOf('rgb') !== -1 || colorName.indexOf('rgba') !== -1) {
-  //     return colorName;
-  //   }
-  //   if (colorName.indexOf('-') !== -1) {
-  //     return token[colorName];
-  //   } else {
-  //     return token['color' + [(colorName[0] as string).toLocaleUpperCase() + colorName.slice(1, colorName.length)]];
-  //   }
-  // }
-  // return null;
-  return colorInfo;
+  return {
+    color,
+    alterProp,
+  };
 };
 
 const findItemMinStart = (item, cStart) => {
@@ -113,7 +133,7 @@ const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
     'rowKey',
     'fieldCtx',
     'real_start',
-    'real_end'
+    'real_end',
   ]);
   const start = getValuesByPath(item, fieldNames.start);
   const end = getValuesByPath(item, fieldNames.end);
@@ -124,7 +144,7 @@ const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
     // start: new Date(start ?? undefined),
     name: getValuesByPath(item, fieldNames.title) || '',
     id: item.id + '',
-    color: getItemColor(item, ctx.token),
+    ...getItemColor(item, ctx.token),
     isDisabled: disable,
     progress: getProgressValue(item, fieldNames),
     ...itemValues,
@@ -351,44 +371,37 @@ export const GanttBlockProvider = (props) => {
       }),
     ),
   );
-  const _fields = getCollectionFields(collection).filter((field) => {
-    return names.includes(field.name);
-  });
+  const _fields = getCollectionFields(collection);
   const range = props.timeRange || props?.fieldNames?.range || 'day';
   const [timeRange, setTimeRange] = useState(range);
   const preProcessData = props.preProcessData || processDataToGroups;
-  const [rowKey, setRowKey] = useState(props.rowKey || (props.group ? 'rowKey' : 'id'));
-  const [group, setGroup] = useState(props.group);
-  const [sort, setSort] = useState(props.sort);
+  const [rowKey, setRowKey] = useState(props.rowKey || (props.form?.group.default ? 'rowKey' : 'id'));
+  const [group, setGroup] = useState(props.form?.group?.default);
+  const sortVisible = props.form?.sort?.visible;
+  const [sort, setSort] = useState(props.form?.sort?.default);
   const filter = useMemo(() => {
     return props.params.filter;
   }, [props.params.filter]);
   const params = useMemo(() => {
-    const sortField: any = _fields.filter((field) => {
-      return field.name == sort;
-    })[0];
-
-    const sortName = sortField
-      ? ['dic'].includes(sortField?.interface)
-        ? sortField?.foreignKey
-        : sortField?.name
-      : sort;
-    // const { appends } = useAssociationNames();
-    // if (sortField && ['dic'].includes(sortField.interface)) {
-    //   appends.push(sortField.name);
-    // }
-    // if (fields?.groups) {
-    //   fields?.groups.forEach((field) => {
-    //     appends.push(field.name);
-    //   });
-    // }
     const _appends = Array.from(new Set([...(props.params.appends || [])]));
+    const _params:any = {
+     filter: filter,
+     tree: true,
+     paginate: false,
+     appends: _appends,
+   };
+
+    if(sortVisible){
+      const sortField: any = _fields.filter((field) => {
+        return field.name == sort;
+      })[0];
+      const sortName = typeof sortField?.sortName == 'function' ? sortField?.sortName(sortField) : sortField?.name || sort;
+      _params.sort = '-'+sortName;
+    }else if(sort){
+      _params.sort = sort;
+    }
     return {
-      filter: filter,
-      sort: sortName,
-      tree: true,
-      paginate: false,
-      appends: _appends,
+     ..._params
     };
   }, [filter, sort]);
   return (
@@ -502,11 +515,14 @@ export const useGanttBlockProps = (_props) => {
       }
     }
   }, [ctx?.service?.loading]);
-  const updateLocalTask = (rowKey, {start, end})=>{
-    const newTasks=[...tasks];
-    const index =  newTasks.findIndex((item)=>{return item.rowKey == rowKey});
+  const updateLocalTask = (rowKey, { start, end }) => {
+    const newTasks = [...tasks];
+    const index = newTasks.findIndex((item) => {
+      return item.rowKey == rowKey;
+    });
     newTasks[index].start = start;
     newTasks[index].end = end;
+    Object.assign(newTasks[index], getItemColor(newTasks[index], ctx.token));
     if (newTasks) {
       setTasks(newTasks);
       ctx.field.data = newTasks;
@@ -524,8 +540,8 @@ export const useGanttBlockProps = (_props) => {
     hasScroll,
     rightSize,
     updateLocalTask,
-    viewDate, 
-    setViewDate
+    viewDate,
+    setViewDate,
   };
 };
 

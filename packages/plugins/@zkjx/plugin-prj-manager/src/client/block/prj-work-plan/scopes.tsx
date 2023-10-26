@@ -213,7 +213,6 @@ export const useSaveOtherPrjPlanActionProps = () => {
                 if (res?.data) {
                   setTimeout(() => {
                     message.success('保存成功');
-                    field.visible = false;
                     /* 刷新 block */
                     // service.refresh();
                   }, 2000);

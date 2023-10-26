@@ -35,6 +35,7 @@ import { useNavigate } from 'react-router';
 import { getValuesByPath } from '@nocobase/utils/client';
 import type { FormInstance } from 'antd/es/form';
 import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
+import { NETWORKDAYS } from '@formulajs/formulajs';
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 export const components = {
   body: {
@@ -110,27 +111,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   if (editable) {
     const rangeValue = [record?.start, record?.end];
-    form.setFieldValue(dataIndex, [record?.start, record?.end]);
     const [range, setRange] = useState(rangeValue);
+    form.setFieldValue(dataIndex, range);
 
     const setValue = (value) => {
-      form.setFieldValue(dataIndex, value);
-      setRange(value);
       const [start = null, end = null] = value as string[];
+      setRange(value);
       const { start: _start, end: _end, ...others } = record;
-      handleLocalSave({ ...others, start, end });
       handleSave({ ...others, start, end });
-    };
-    const save = async (value) => {
-      try {
-        const values = await form.validateFields();
-        // const { range } = values;
-        const [start, end] = range as string[];
-        const { start: _start, end: _end, ...others } = record;
-        handleSave({ ...others, start, end });
-      } catch (errInfo) {
-        console.log('Save failed:', errInfo);
-      }
     };
     childNode = editing ? (
       <Form.Item
@@ -138,12 +126,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
         name={dataIndex}
         rules={[
           {
-            required: true,
+            required: false,
             message: `${title} 必填`,
           },
         ]}
       >
         <RangePicker
+          
           getPopupContainer={getPopupContainer}
           format="YYYY-MM-DD"
           value={range}
@@ -234,6 +223,14 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         setExpandesKeys([]);
       }
     }, [expandFlag, allIncludesChildren]);
+
+    useEffect(()=>{
+       setSelectedRowKeys(tableCtx?.field?.data?.selectedRowKeys);
+    },[
+      tableCtx?.field?.data?.selectedRowKeys
+    ])
+
+
     const defaultRowKey = (record: any) => {
       return field.value?.indexOf?.(record);
     };
@@ -555,15 +552,12 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
     ];
     const api = useAPIClient();
     const handleSave = (record) => {
-      // const newData = [...dataSource];
-      // const index = newData.findIndex((item) => row.key === item.key);
-      // const item = newData[index];
-      // newData.splice(index, 1, {
-      //   ...item,
-      //   ...row,
-      // });
       /* 保存数据 */
       const { id, start, end, fieldCtx } = record;
+      let plan_days = null;
+      if(start && end){
+         plan_days = NETWORKDAYS(start, end,[]);
+      }
       api
         .request({
           url: `${record.__collection}:update?filterByTk=${record.id}`,
@@ -572,15 +566,14 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
             id,
             start,
             end,
+            plan_days
           },
         })
         .then((res) => {
           if (res.data) {
             /* 保存成功 */
+            handleLocalSave({ ...record, start, end });
             message.success('保存成功');
-            /* 刷新数据 */
-            // const { refresh } = fieldCtx.blockCtx.service;
-            // refresh();
           }
         });
     };
@@ -589,6 +582,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
      * @param row
      */
     const handleLocalSave = (row) => {
+      debugger;
       const newData = [...dataSource];
       const index = newData.findIndex((item) => row.rowKey === item.rowKey);
       const item = newData[index];

@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { ISchema, RecursionField, Schema, connect, mapProps, useFieldSchema } from '@formily/react';
-import { Button, Col, Row, Space, message } from 'antd';
+import { Button, Col, Row, Select, Space, message } from 'antd';
 import React, { SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAPIClient } from '../../../../../api-client';
@@ -35,7 +35,7 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 
 import 'react-reflex/styles.css';
 import { CollectionProvider, useCollection, useCollectionManager } from '@nocobase/client';
-import { useEventListener, useSize } from 'ahooks';
+import { useEventListener, useScroll, useSize } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
 import { dayjs, uid } from '@nocobase/utils';
 import { FullscreenAction } from './FullScreenAction';
@@ -134,13 +134,13 @@ const GanttRecordViewer = (props) => {
   const eventSchema = {
     ...fieldSchema?.properties[schemaName],
   };
-  if (!isGroup && isCreate) {
-    eventSchema['x-component-props'] = {
-      inheritsKeys: Object.keys(record).filter((key) => {
-        return !/^__+/.test(key);
-      }),
-    };
-  }
+  // if (!isGroup && isCreate) {
+  //   eventSchema['x-component-props'] = {
+  //     inheritsKeys: Object.keys(record).filter((key) => {
+  //       return !/^__+/.test(key);
+  //     }),
+  //   };
+  // }
   const drawerProps = {
     getContainer: isFullScreen ? getContainer : null,
   };
@@ -213,7 +213,7 @@ export const Gantt: any = (props: any) => {
     tasks,
     expandAndCollapseAll,
     height,
-    ganttHeight = `calc(100% - ${headerHeight}px)`,
+    ganttHeight: _ganttHeight  = `calc(100% - ${headerHeight}px)`,
     rightSize,
     setRightSize,
     timeRange,
@@ -225,10 +225,6 @@ export const Gantt: any = (props: any) => {
   } as any;
 
   const ctx = useGanttBlockContext();
-  const {
-    isFullScreen: _isFullscreen = false,
-    setIsFullScreen: propsSetIsFullScreen
-  } = ctx;
   const appInfo = useCurrentAppInfo();
   const { t } = useTranslation();
   const locale = appInfo.data?.lang;
@@ -251,7 +247,8 @@ export const Gantt: any = (props: any) => {
   const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(undefined);
   const [taskListWidth, setTaskListWidth] = useState(0);
   const [svgContainerWidth, setSvgContainerWidth] = useState(0);
-  const [svgContainerHeight, setSvgContainerHeight] = useState(ganttHeight);
+  const [ganttHeight, setGanttHeight] = useState(_ganttHeight);
+  const [svgContainerHeight, setSvgContainerHeight] = useState(_ganttHeight);
   const [barTasks, setBarTasks] = useState<BarTask[]>([]);
   const [ganttEvent, setGanttEvent] = useState<GanttEvent>({
     action: '',
@@ -269,8 +266,7 @@ export const Gantt: any = (props: any) => {
   const ganttFullHeight = barTasks.length * rowHeight;
   const tbodyRef = useRef<HTMLDivElement>();
   const containerRef = useRef<HTMLDivElement>();
- 
-  
+
   const formValue = {
     group: ctx.group,
     sort: ctx.sort,
@@ -302,14 +298,12 @@ export const Gantt: any = (props: any) => {
       tbodyRef.current = null;
     };
   }, [tableWrapperRef, tbodyRef]);
-  
-  const getPopupContainer = useMemo(()=>{
-    return ()=>{
-      return containerRef.current;
-    }
-  },[containerRef]);
 
- 
+  const getPopupContainer = useMemo(() => {
+    return () => {
+      return containerRef.current;
+    };
+  }, [containerRef]);
 
   // task change events
   useEffect(() => {
@@ -446,17 +440,29 @@ export const Gantt: any = (props: any) => {
     }
   }, [wrapperRef, rightSize, taskListWidth]);
 
-  useEffect(() => {
-    const tbody = tableWrapperRef?.current?.querySelector('.ant-table-body');
-    if (ganttHeight) {
-      setSvgContainerHeight(ganttHeight + headerHeight);
-      // if(tbody){
-      //   (tbody as any).style = `min-height:${ganttHeight}px;max-height:${ganttHeight}px;`;
-      // }
-    } else {
+  // const { height: containerHeight } = useSize(wrapperRef);
+
+  const tBodySize = useSize(()=>{
+    return tableWrapperRef?.current?.querySelector('.ant-table-body');
+  });
+  /* 表格使用 ahooks table */
+   useScroll(()=>{
+    return tableWrapperRef?.current?.querySelector('.ant-table-body');
+  });
+  useScroll(verticalGanttContainerRef?.current);
+
+  useEffect(()=>{
+    const height = tBodySize?.height;
+    if(height){
+      const hasScrollX = tableWrapperRef?.current?.querySelector('.ant-table-body')?.scrollWidth - tableWrapperRef?.current?.querySelector('.ant-table-body')?.clientWidth > 0;
+      setGanttHeight(height);
+      setSvgContainerHeight(height + headerHeight + (hasScrollX?11:0));
+    }else{
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
-  }, [ganttHeight, tasks, headerHeight, rowHeight]);
+  },[tBodySize?.height,headerHeight,tasks,rowHeight]);
+
+  
 
   // scroll events
   useEffect(() => {
@@ -631,7 +637,16 @@ export const Gantt: any = (props: any) => {
     };
     await saveTaskResource(task, param);
   };
-
+  const flattenTree = (treeData) => {
+    return treeData.reduce((acc, node) => {
+      if (node.children) {
+        return acc.concat([node, ...flattenTree(node.children)]);
+      } else {
+        return acc.concat(node);
+      }
+    }, []);
+  };
+  
   const handleTaskChange = async (task: Task) => {
     const param = {
       filterByTk: task.id,
@@ -646,15 +661,7 @@ export const Gantt: any = (props: any) => {
     const _isCreate = isCreate;
     setIsCreate(_isCreate);
     if (!_isCreate) {
-      const flattenTree = (treeData) => {
-        return treeData.reduce((acc, node) => {
-          if (node.children) {
-            return acc.concat([node, ...flattenTree(node.children)]);
-          } else {
-            return acc.concat(node);
-          }
-        }, []);
-      };
+    
       const ctxProps = _ctx || ctx;
       const rowKey = ctxProps.rowKey || 'id';
       const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
@@ -679,70 +686,59 @@ export const Gantt: any = (props: any) => {
     }
   };
   const rightPaneRef = useRef<ReflexElement>();
-  const [isFullScreen, setIsFullScreen] = useState(_isFullscreen);
-  const {getCollectionField} = useCollectionManager();
-  const flatTreeSchema = (schema, isFullScreen )=>{
-    schema.reduceProperties((b, s)=>{
-      const comp = s['x-component']
-      if(['DatePicker','Select', 'RemoteSelect'].includes(comp)){
-        s['x-component-props'] = s['x-component-props']
-        s['x-component-props'].getPopupContainer = getPopupContainer;
-      }  
-      if(['CollectionField'].includes(comp)){
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const { getCollectionField } = useCollectionManager();
+  const flatTreeSchema = (schema, isFullScreen) => {
+    schema.reduceProperties((b, s) => {
+      const comp = s['x-component'];
+      if (['DatePicker', 'Select', 'RemoteSelect'].includes(comp)) {
+        s['x-component-props'] = s['x-component-props'];
+        s['x-component-props'].getPopupContainer = isFullScreen ? getPopupContainer : null;
+      }
+      if (['CollectionField'].includes(comp)) {
         const cFieldName = s['x-collection-field'];
-        const cField =   getCollectionField(cFieldName);
-        const isSelect = cField?.uiSchema?.['x-component'] == "AssociationField";
+        const cField = getCollectionField(cFieldName);
+        const isSelect = cField?.uiSchema?.['x-component'] == 'AssociationField';
         const isDate = cField?.type == 'date';
-        if(isSelect || isDate){
+        if (isSelect || isDate) {
           s['x-component-props'] = s['x-component-props'];
-          s['x-component-props'].getPopupContainer = getPopupContainer;
+          s['x-component-props'].getPopupContainer = isFullScreen ? getPopupContainer : null;
         }
       }
-      if(['Action.Drawer','Action.Modal','Action.Container','Action.Link'].includes(comp)){
+      if (['Action.Drawer', 'Action.Modal', 'Action.Container', 'Action.Link'].includes(comp)) {
         s['x-component-props'] = s['x-component-props'];
         s['x-component-props'].getContainer = isFullScreen ? getPopupContainer : null;
-
       }
-      // const openModeValue = s?.['x-component-props']?.['openMode'] || 'drawer';
-      // if(['drawer','modal'].includes(openModeValue)){
-      //   // s['x-component-props'] = s['x-component-props'];
-      //   // s['x-component-props'].getContainer = isFullScreen ? getPopupContainer : null;
-      //   // if(s.name == 'drawer'){
-      //   //   debugger;
-      //   // }
-       
-      //   console.log('遍历schema 树',s.name);
-      // }  
       flatTreeSchema(s, isFullScreen);
     });
-  }
-  useEffect(() => {   
+  };
+  useEffect(() => {
     flatTreeSchema(fieldSchema, isFullScreen);
   }, [isFullScreen]);
   flatTreeSchema(fieldSchema, isFullScreen);
   const size = useSize(wrapperRef);
-  useEffect(() => {
-    if (rightPaneRef.current) {
-      handerResize({});
-    }
-  }, [size?.width, size?.height]);
+  // useEffect(() => {
+  //   if (rightPaneRef.current) {
+  //     handerResize({});
+  //   }
+  // }, [size?.width, size?.height]);
 
-  const handerResize = ({ domElement, component }: { domElement?; component? }) => {
-    component = component || rightPaneRef.current;
-    domElement = domElement || (component as any)?.ref?.current;
-    if (!domElement) return;
-    const hasScrollX =
-      tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
-      tableWrapperRef.current.querySelector('.ant-table-body')?.clientWidth;
-    const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
-    const scrollBar = hasScrollX > 0 ? 10 : 0;
-    onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
-  };
+  // const handerResize = ({ domElement, component }: { domElement?; component? }) => {
+  //   component = component || rightPaneRef.current;
+  //   domElement = domElement || (component as any)?.ref?.current;
+  //   if (!domElement) return;
+  //   const hasScrollX =
+  //     tableWrapperRef.current.querySelector('.ant-table-body')?.scrollWidth -
+  //     tableWrapperRef.current.querySelector('.ant-table-body')?.clientWidth;
+  //   const header = tableWrapperRef.current.querySelector('.ant-table-thead')?.clientHeight;
+  //   const scrollBar = hasScrollX > 0 ? 10 : 0;
+  //   onResize.call(this, `calc(100% - ${header}px - ${scrollBar}px)`, hasScrollX, domElement, component);
+  // };
   /**
    * 跳转到今天
    */
   const goToToday = () => {
-    setViewDate(dayjs().startOf('week'));
+    setViewDate(dayjs().subtract(1, 'week').startOf('week'));
   };
 
   const gridProps: GridProps = {
@@ -799,6 +795,9 @@ export const Gantt: any = (props: any) => {
     Object.keys(fieldSchema?.properties?.toolBar?.properties || {}).length > 0 ||
     designable;
   // const containerId = 'gantt_'+uid();
+  const filterOption = (input: string, option?: { label: string; value: string }) =>
+    (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+
   return wrapSSR(
     <div
       ref={containerRef}
@@ -880,6 +879,70 @@ export const Gantt: any = (props: any) => {
       />
       <div className="gantt-view-form">
         <Row>
+          <Col flex="140px">
+             <div className="ant-formily-layout ant-form-inline ant-form-default">
+              <div data-testid="name-item" className="nb-sortable-designer nb-block-item nb-form-item">
+                <div className=" ant-formily-item ant-formily-item-layout-horizontal ant-formily-item-feedback-layout-loose ant-formily-item-label-align-right ant-formily-item-control-align-left css-dev-only-do-not-override-iy8rx">
+                  <div className="ant-formily-item-label">
+                    <div className="ant-formily-item-label-content">
+                      <span>
+                        <label>选择</label>
+                      </span>
+                    </div>
+                    <span className="ant-formily-item-colon">:</span>
+                  </div>
+                  <div className="ant-formily-item-control">
+                    <div className="ant-formily-item-control-content">
+                      <div className="ant-formily-item-control-content-component">
+                        <Select
+                          showSearch
+                          filterOption={filterOption}
+                          options={tasks.map(({ name }, index) => {
+                            return {
+                              label: name,
+                              value: index,
+                            };
+                          })}
+                          allowClear
+                          onChange={(value) => {
+                            // const index =
+                            if (typeof value == 'number') {
+                              const tHeight = wrapperRef.current.querySelector('.horizontalContainer').clientHeight;
+                              const scrollHeight =
+                                wrapperRef.current.querySelector('.horizontalContainer').scrollHeight;
+                              const pageLen = tHeight / rowHeight;
+                              const taskId = tasks[value][rowKey];
+                              /**
+                               * ToDo 查找
+                               */
+
+                              if (value > pageLen && scrollHeight > 0) {
+                                const y = (value + 1 - 3) * ((scrollHeight - tHeight) / (tasks.length - pageLen));
+                                setScrollY(y);
+                                setTBodyScrollY(y);
+                              }else if(scrollHeight > 0){
+                                setScrollY(0);
+                                setTBodyScrollY(0);
+                              }                              
+                              tableCtx.field.data.selectedRowKeys = [rowKey=='id'?Number(taskId).valueOf():taskId];
+                              handleRowSelect([taskId]);
+                            } else {
+                              setScrollY(0);
+                              setTBodyScrollY(0);
+                            }
+                          }}
+                          className={css`
+                            width: 100%;
+                          `}
+                          getPopupContainer={getPopupContainer}
+                        ></Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Col>
           <Col
             flex="680px"
             className={css`
@@ -897,6 +960,7 @@ export const Gantt: any = (props: any) => {
               }
             `}
           >
+           
             <GanttForm value={formValue} setValue={setFormValue} getPopupContainer={getPopupContainer} />
           </Col>
           <Col
@@ -905,18 +969,15 @@ export const Gantt: any = (props: any) => {
               text-align: right;
             `}
           >
-            <Space>  
+            <Space>
               <FullscreenAction
                 containerRef={containerRef}
-                isFullScreen={isFullScreen}
-                onClick={(value) => {
-                  // const fn = propsSetIsFullScreen || setIsFullScreen;
-                  setIsFullScreen(value);
-                  
+                onClick={() => {
+                  setIsFullScreen(!isFullScreen);
                 }}
               />
               <Button onClick={goToToday}>今天</Button>
-            
+
               <RecursionField name={'anctionBar'} schema={fieldSchema.properties.toolBar} />
             </Space>
           </Col>
@@ -935,7 +996,7 @@ export const Gantt: any = (props: any) => {
             className="right-pane"
             resizeWidth
             flex={rightSize}
-            onStopResize={handerResize}
+            // onStopResize={handerResize}
           >
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>
               <TaskGantt

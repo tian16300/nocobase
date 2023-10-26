@@ -148,8 +148,10 @@ export const preProcessData = (data, ctx) => {
           return stage_dicId == item.stage_dicId;
         })[0];
         const hasDiff = getDiff(item, cpItem)||{};
+        debugger;
         return {
           ...item,
+          name: item.title,
           // color:'#52c41a',
           type: 'bar',
           comp: {
