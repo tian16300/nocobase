@@ -2,7 +2,7 @@ import * as functions from '@formulajs/formulajs';
 import { dayjs } from '@nocobase/utils';
 
 Object.assign(functions, {
-  dayjs: dayjs
+  dayjs: dayjs,
 });
 
 const fnNames = Object.keys(functions).filter((key) => key !== 'default');
@@ -19,4 +19,4 @@ export default function (expression: string, scope = {}) {
   console.log('formulajs 打印结果', result);
   return result;
 }
-export {functions}
+export { functions };

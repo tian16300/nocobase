@@ -64,4 +64,4 @@ export function evaluate(this: Evaluator, expression: string, scope: Scope = {})
   });
   return this(exp, context);
 }
-export {functions};
+export { functions };

@@ -8,9 +8,9 @@ import 'dayjs/plugin/minMax';
 import { dayjs, moment2str } from '@nocobase/utils';
 // import { ReportDetailModel, ReportModel } from './model';
 import * as functions from '@formulajs/formulajs';
-const getWorkDays =(start,end)=>{
-  return functions['NETWORKDAYS'](start,end,[]);
-}
+const getWorkDays = (start, end) => {
+  return functions['NETWORKDAYS'](start, end, []);
+};
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
   activeReceiveExpires = 86400 * 7;
@@ -236,8 +236,6 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');
-
-
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {
@@ -263,11 +261,11 @@ export class PluginPrjManagerServer extends Plugin {
       await repo.db2cm('prj_stages_files');
       await repo.db2cm('prjs_files');
       await repo.db2cm('prjs_users');
-      await repo.db2cm('tasks_dependencies');      
-      await repo.db2cm('reportSetting'); 
-      await repo.db2cm('prj');    
-      await repo.db2cm('prj_plan');    
-      await repo.db2cm('report');  
+      await repo.db2cm('tasks_dependencies');
+      await repo.db2cm('reportSetting');
+      await repo.db2cm('prj');
+      await repo.db2cm('prj_plan');
+      await repo.db2cm('report');
       await repo.db2cm('reportPlan');
       await repo.db2cm('reportDetail');
       await repo.db2cm('report_target');
@@ -275,7 +273,6 @@ export class PluginPrjManagerServer extends Plugin {
       await repo.db2cm('prj_plan_latest');
       await repo.db2cm('prj_plan_history');
       await repo.db2cm('task');
-
     }
   }
 
@@ -284,8 +281,6 @@ export class PluginPrjManagerServer extends Plugin {
   async afterDisable() {}
 
   async remove() {}
-
-  
 }
 
 export default PluginPrjManagerServer;
