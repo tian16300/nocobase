@@ -13,6 +13,7 @@ import {
   useTableBlockContext,
   useTableSize,
   useToken,
+  getWorkDays
 } from '@nocobase/client';
 import { default as classNames } from 'classnames';
 import dayjs from 'dayjs';
@@ -35,7 +36,6 @@ import { useNavigate } from 'react-router';
 import { getValuesByPath } from '@nocobase/utils/client';
 import type { FormInstance } from 'antd/es/form';
 import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
-import { NETWORKDAYS } from '@formulajs/formulajs';
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 export const components = {
   body: {
@@ -556,7 +556,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       const { id, start, end, fieldCtx } = record;
       let plan_days = null;
       if(start && end){
-         plan_days = NETWORKDAYS(start, end,[]);
+         plan_days = getWorkDays(start, end);
       }
       api
         .request({

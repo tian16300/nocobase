@@ -6,9 +6,9 @@ import { useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
+import { getWorkDays} from '../index';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { NETWORKDAYS } from '@formulajs/formulajs';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token) => {
@@ -21,7 +21,7 @@ const getItemColor = (item, token) => {
     const a = dayjs(end),
       b = dayjs(real_end);
     if (b.isAfter(a)) {
-      const days = NETWORKDAYS(a, b, []);
+      const days = getWorkDays(real_end, end);
       color = colorError;
       const message = `已延期${days}个工作日`;
       const type = 'error';
@@ -35,7 +35,7 @@ const getItemColor = (item, token) => {
   } else if (end && !real_end) {
     const a = dayjs(end);
     if (a.isAfter(today)) {
-      const days = NETWORKDAYS(today.toISOString(), end, []);
+      const days = getWorkDays(today.toISOString(), end);
       if (typeof days == 'number' && days <= 3 && days > 0) {
         color = colorWarning;
         const message = `距离截止时间不到${days}个工作日`;
@@ -48,7 +48,7 @@ const getItemColor = (item, token) => {
         };
       }
     } else if (a.isBefore(today)) {
-      const days = NETWORKDAYS(end, today.toISOString(), []);
+      const days = getWorkDays(end, today.toISOString());
       if (typeof days == 'number') {
         color = colorError;
         const message = `已延期${days}个工作日, 请补充实际完成时间！`;

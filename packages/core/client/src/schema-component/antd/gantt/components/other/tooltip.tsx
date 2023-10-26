@@ -7,7 +7,7 @@ import useStyles from './style';
 import { Alert, Col, Row, Space, Statistic } from 'antd';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import { useToken } from '../../../__builtins__';
-import { NETWORKDAYS } from '@formulajs/formulajs';
+import { getWorkDays } from '../../../../../index';
 export type TooltipProps = {
   task: BarTask;
   arrowIndent: number;
@@ -126,13 +126,13 @@ export const StandardTooltipContent: React.FC<{
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  let duration = task.start && task.end ? NETWORKDAYS(task.start, task.end, []) : null;
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
   duration = typeof duration == 'number' ? duration : null;
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    prjDuration = projectBar.start && projectBar.end ? NETWORKDAYS(projectBar.start, projectBar.end, []) : null;
+    prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
     prjDuration = typeof prjDuration == 'number' ? prjDuration : null;
   }
   return wrapSSR(

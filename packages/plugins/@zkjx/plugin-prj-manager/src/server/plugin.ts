@@ -6,8 +6,8 @@ import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
 import 'dayjs/plugin/minMax';
 import { dayjs, moment2str } from '@nocobase/utils';
+import { getWorkDays } from '@nocobase/client';
 // import { ReportDetailModel, ReportModel } from './model';
-import { NETWORKDAYS } from '@formulajs/formulajs';
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
   activeReceiveExpires = 86400 * 7;
@@ -163,7 +163,7 @@ export class PluginPrjManagerServer extends Plugin {
       const curValue = model.get(name);
       let days = null;
       if (start && end) {
-        days = NETWORKDAYS(start, end, []);
+        days = getWorkDays(start, end);
       }
       if (curValue !== days) {
         await this.app.db.getRepository(collectionName).update({

@@ -1,13 +1,11 @@
 import React from 'react';
-import { Input, css, cx, useToken } from '@nocobase/client';
+import { Input, css, cx, useToken, getWorkDays } from '@nocobase/client';
 import { Col, Row, Space, Statistic } from 'antd';
 import { Task } from '@nocobase/client/src/schema-component/antd/gantt/types/public-types';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import useStyles from './style';
-import { dayjs, getWorkDays } from '@nocobase/utils';
+import { dayjs } from '@nocobase/utils';
 import { Typography } from 'antd';
-
-import { NETWORKDAYS } from '@formulajs/formulajs';
 const { Title } = Typography;
 const getYmd = (param) => {
   if (!param || param == '') return '--';
@@ -28,7 +26,7 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   // task.start && task.end
   //   ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
   //   : null;
-  let duration = task.start && task.end ? NETWORKDAYS(task.start, task.end, []) : null;
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
   if (typeof duration !== 'number') {
     duration = null;
   }
@@ -36,7 +34,7 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    let prjDuration = projectBar.start && projectBar.end ? NETWORKDAYS(projectBar.start, projectBar.end, []) : null;
+    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
     if (typeof prjDuration !== 'number') {
       prjDuration = null;
     }
@@ -211,18 +209,19 @@ export const TooltipContent: React.FC<{
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  const duration =
-    task.start && task.end
-      ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-      : null;
+
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
+  if (typeof duration !== 'number') {
+    duration = null;
+  }
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    prjDuration =
-      projectBar.start && projectBar.end
-        ? Math.round(((projectBar.end.getTime() - projectBar.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
-        : null;
+    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
+    if (typeof prjDuration !== 'number') {
+      prjDuration = null;
+    }
   }
   return wrapSSR(
     <div className={cx(componentCls, hashId, 'tooltipDefaultContainer')} style={style}>
