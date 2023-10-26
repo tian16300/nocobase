@@ -213,7 +213,7 @@ export const Gantt: any = (props: any) => {
     tasks,
     expandAndCollapseAll,
     height,
-    ganttHeight: _ganttHeight  = `calc(100% - ${headerHeight}px)`,
+    ganttHeight: _ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
     setRightSize,
     timeRange,
@@ -442,27 +442,28 @@ export const Gantt: any = (props: any) => {
 
   // const { height: containerHeight } = useSize(wrapperRef);
 
-  const tBodySize = useSize(()=>{
+  const tBodySize = useSize(() => {
     return tableWrapperRef?.current?.querySelector('.ant-table-body');
   });
   /* 表格使用 ahooks table */
-   useScroll(()=>{
+  useScroll(() => {
     return tableWrapperRef?.current?.querySelector('.ant-table-body');
   });
   useScroll(verticalGanttContainerRef?.current);
 
-  useEffect(()=>{
+  useEffect(() => {
     const height = tBodySize?.height;
-    if(height){
-      const hasScrollX = tableWrapperRef?.current?.querySelector('.ant-table-body')?.scrollWidth - tableWrapperRef?.current?.querySelector('.ant-table-body')?.clientWidth > 0;
+    if (height) {
+      const hasScrollX =
+        tableWrapperRef?.current?.querySelector('.ant-table-body')?.scrollWidth -
+          tableWrapperRef?.current?.querySelector('.ant-table-body')?.clientWidth >
+        0;
       setGanttHeight(height);
-      setSvgContainerHeight(height + headerHeight + (hasScrollX?11:0));
-    }else{
+      setSvgContainerHeight(height + headerHeight + (hasScrollX ? 11 : 0));
+    } else {
       setSvgContainerHeight(tasks.length * rowHeight + headerHeight);
     }
-  },[tBodySize?.height,headerHeight,tasks,rowHeight]);
-
-  
+  }, [tBodySize?.height, headerHeight, tasks, rowHeight]);
 
   // scroll events
   useEffect(() => {
@@ -646,7 +647,7 @@ export const Gantt: any = (props: any) => {
       }
     }, []);
   };
-  
+
   const handleTaskChange = async (task: Task) => {
     const param = {
       filterByTk: task.id,
@@ -661,7 +662,6 @@ export const Gantt: any = (props: any) => {
     const _isCreate = isCreate;
     setIsCreate(_isCreate);
     if (!_isCreate) {
-    
       const ctxProps = _ctx || ctx;
       const rowKey = ctxProps.rowKey || 'id';
       const flattenedData = flattenTree(ctxProps.preProcessData(ctxProps?.service?.data?.data, ctxProps));
@@ -859,6 +859,46 @@ export const Gantt: any = (props: any) => {
             .nb-action-bar {
               margin-bottom: 0 !important;
             }
+            .ant-formily-item {
+              display: flex;
+              position: relative;
+              font-size: 14px;
+              .ant-formily-item-label {
+                line-height: 32px;
+                min-height: 30px;
+                position: relative;
+                display: flex;
+                color: rgba(0, 0, 0, 0.88);
+              }
+             .ant-formily-item-label-content {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+             .ant-formily-item-control {
+                flex: 1;
+                max-width: 100%;
+            }
+             .ant-formily-item-control .ant-formily-item-control-content {
+                display: flex;
+            }
+            .ant-formily-item-control .ant-formily-item-control-content .ant-formily-item-control-content-component {
+              width: 100%;
+              min-height: 30px;
+              line-height: 30px;
+              max-width:160px;
+          }
+
+            }
+            .ant-formily-item {
+            }
+            // .ant-formily-item-label {
+            //   width: 120px;
+            //   display: flex;
+            //   align-items: center;
+            //   .ant-formily-item-label-content {
+            //   }
+            // }
             + .gantt-view-container {
               margin-top: 24px;
             }
@@ -880,7 +920,7 @@ export const Gantt: any = (props: any) => {
       <div className="gantt-view-form">
         <Row>
           <Col flex="140px">
-             <div className="ant-formily-layout ant-form-inline ant-form-default">
+            <div className="ant-formily-layout ant-form-inline ant-form-default">
               <div data-testid="name-item" className="nb-sortable-designer nb-block-item nb-form-item">
                 <div className=" ant-formily-item ant-formily-item-layout-horizontal ant-formily-item-feedback-layout-loose ant-formily-item-label-align-right ant-formily-item-control-align-left css-dev-only-do-not-override-iy8rx">
                   <div className="ant-formily-item-label">
@@ -920,11 +960,13 @@ export const Gantt: any = (props: any) => {
                                 const y = (value + 1 - 3) * ((scrollHeight - tHeight) / (tasks.length - pageLen));
                                 setScrollY(y);
                                 setTBodyScrollY(y);
-                              }else if(scrollHeight > 0){
+                              } else if (scrollHeight > 0) {
                                 setScrollY(0);
                                 setTBodyScrollY(0);
-                              }                              
-                              tableCtx.field.data.selectedRowKeys = [rowKey=='id'?Number(taskId).valueOf():taskId];
+                              }
+                              tableCtx.field.data.selectedRowKeys = [
+                                rowKey == 'id' ? Number(taskId).valueOf() : taskId,
+                              ];
                               handleRowSelect([taskId]);
                             } else {
                               setScrollY(0);
@@ -960,7 +1002,6 @@ export const Gantt: any = (props: any) => {
               }
             `}
           >
-           
             <GanttForm value={formValue} setValue={setFormValue} getPopupContainer={getPopupContainer} />
           </Col>
           <Col
