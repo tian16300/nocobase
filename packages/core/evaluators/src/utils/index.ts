@@ -1,4 +1,5 @@
 import { get, cloneDeep } from 'lodash';
+import { functions } from './formulajs';
 
 export type Scope = { [key: string]: any };
 
@@ -63,3 +64,4 @@ export function evaluate(this: Evaluator, expression: string, scope: Scope = {})
   });
   return this(exp, context);
 }
+export {functions};

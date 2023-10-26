@@ -6,8 +6,11 @@ import { namespace } from '../preset';
 import { hoursCount } from './actions/hours';
 import 'dayjs/plugin/minMax';
 import { dayjs, moment2str } from '@nocobase/utils';
-import { getWorkDays } from '@nocobase/client';
 // import { ReportDetailModel, ReportModel } from './model';
+import * as functions from '@formulajs/formulajs';
+const getWorkDays =(start,end)=>{
+  return functions['NETWORKDAYS'](start,end,[]);
+}
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
   activeReceiveExpires = 86400 * 7;

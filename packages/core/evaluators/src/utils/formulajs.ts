@@ -19,3 +19,4 @@ export default function (expression: string, scope = {}) {
   console.log('formulajs 打印结果', result);
   return result;
 }
+export {functions}

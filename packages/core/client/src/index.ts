@@ -10,8 +10,7 @@ import 'dayjs/plugin/weekday';
 import 'dayjs/plugin/isToday';
 // 重置浏览器样式
 import 'antd/dist/reset.css';
-
-import {NETWORKDAYS} from '@formulajs/formulajs';
+import * as functions from '@formulajs/formulajs';
 /**
  * 获取工作日天数
  * @param start 开始日期
@@ -21,10 +20,8 @@ export  const getWorkDays = (start:string| Date, end:string| Date)=>{
     /**
      * 求 这一段时间内包含的节假日表
      */
-    return NETWORKDAYS(start,end,[])
-  }
-  
-
+    return functions['NETWORKDAYS'](start,end,[]);
+  };
 export * from '@emotion/css';
 export * from './acl';
 export * from './antd-config-provider';
