@@ -29,6 +29,53 @@ export default class TaskAddFields extends Migration {
           },
         });
       }
+      let fieldData = await repo.findOne({
+        filter: {
+          collectionName: 'task',
+          name: 'task_action',
+        },
+      });
+      if (!fieldData) {
+        const field = this.app.db.getCollection('task').getField('task_action');
+        await repo.create({
+          values: {
+            collectionName: 'task',
+            ...field.options,
+          },
+        });
+      }
+      fieldData = await repo.findOne({
+        filter: {
+          collectionName: 'task',
+          name: 'score',
+        },
+      });
+      if (!fieldData) {
+        const field = this.app.db.getCollection('task').getField('score');
+        await repo.create({
+          values: {
+            collectionName: 'task',
+            ...field.options,
+          },
+        });
+      }
+
+      fieldData = await repo.findOne({
+        filter: {
+          collectionName: 'task',
+          name: 'comments',
+        },
+      });
+      if (!fieldData) {
+        const field = this.app.db.getCollection('task').getField('comments');
+        await repo.create({
+          values: {
+            collectionName: 'task',
+            ...field.options,
+          },
+        });
+      }
+
       /* 任务工时指向本周完成 */
       await repo.update({
         filter: {
@@ -37,19 +84,9 @@ export default class TaskAddFields extends Migration {
         },
         values: {
           target: 'reportDetail',
+          name: 'report_task_hour',
         },
       });
-      //移除 prj prj_plan  task
-      // await repo.destroy({
-      //   filter: {
-      //     collectionName: {
-      //       $in: ['prj', 'prj_plan', 'task'],
-      //     },
-      //     name: {
-      //       $in: ['start', 'end', 'real_start', 'real_end'],
-      //     },
-      //   },
-      // });
     }
     /* 更新 项目 prj prj_plan task 继承表 */
     const collections = this.context.db.getRepository('collections');
@@ -64,7 +101,7 @@ export default class TaskAddFields extends Migration {
         },
         values: {
           inherit: true,
-          inherits: ['prj_plan_task_time']
+          inherits: ['prj_plan_task_time'],
         },
       });
       /* 增加表的字段 */
@@ -72,17 +109,51 @@ export default class TaskAddFields extends Migration {
       const b = this.app.db.getCollection('prj');
       const c = this.app.db.getCollection('prj_plan');
       const d = this.app.db.getCollection('task');
+      const e = this.app.db.getCollection('prj_plan_history');
+      const f = this.app.db.getCollection('prj_plan_latest');
       a.forEachField((field) => {
-        if(!b.hasField(field.name)){
+        if (!b.hasField(field.name)) {
           b.addField(field.name, field.options);
         }
-        if(!c.hasField(field.name)){
+        if (!c.hasField(field.name)) {
           c.addField(field.name, field.options);
         }
-        if(!d.hasField(field.name)){
+        if (!d.hasField(field.name)) {
           d.addField(field.name, field.options);
         }
+        if (!e.hasField(field.name)) {
+          e.addField(field.name, field.options);
+        }
+        if (!f.hasField(field.name)) {
+          f.addField(field.name, field.options);
+        }
       });
+      await b.sync();
+      await c.sync();
+      await d.sync();
+      await e.sync();
+      await f.sync();
+
+
+      /* 中间表隐藏 更新数据 */
+      collections.update({
+        filter: {
+          name: {
+            $in: [
+             'prj_plan',
+             'prj_stages_files', 
+             'prjs_users',
+             'prjs_files',
+             'tasks_dependencies',
+             'reportSettingsUsers'],
+          },
+        },
+        values: {
+          'hidden':true
+        }
+      });
+
+
     }
   }
   async bindSync(names) {

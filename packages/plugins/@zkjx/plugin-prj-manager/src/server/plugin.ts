@@ -193,6 +193,9 @@ export class PluginPrjManagerServer extends Plugin {
     //增加字典数据
     // await this.addRecords();
     await this.app.db.import({
+      directory: path.resolve(__dirname, './collections/through'),
+    });
+    await this.app.db.import({
       directory: path.resolve(__dirname, './collections/inherits'),
     });
     await this.app.db.import({
@@ -232,7 +235,7 @@ export class PluginPrjManagerServer extends Plugin {
       ],
       'loggedIn',
     );
-    this.aclAllowList(['risk_basic', 'prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies'], 'public');
+    this.aclAllowList([ 'prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies','reportUsers'], 'public');
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');

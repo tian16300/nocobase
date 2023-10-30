@@ -86,7 +86,7 @@ export const OpenModeSchemaItems: React.FC<Options> = (options) => {
         </SchemaSettings.Item>
       ) : null}
       {['link'].includes(openModeValue) ? (
-        <SchemaSettings.Item>
+        <SchemaSettings.Item title='link'>
           <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
             {/* {t('链接地址')} */}
             <Space.Compact size="middle" style={{ width: '400px' }}>

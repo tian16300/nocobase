@@ -851,7 +851,6 @@ export const useCollectionDataSourceItems = (componentName) => {
   const { t } = useTranslation();
   const { collections, getCollectionFields } = useCollectionManager();
   const { getTemplatesByCollection } = useSchemaTemplateManager();
-
   return [
     {
       type: 'itemGroup',
@@ -1862,9 +1861,9 @@ const getChildren = ({
 }) => {
   return collections
     ?.filter((item) => {
-      if (item.inherit) {
-        return false;
-      }
+      // if (item.inherit) {
+      //   return false;
+      // }
       const fields = getCollectionFields(item.name);
       if (item.autoGenId === false && !fields.find((v) => v.primaryKey)) {
         return false;

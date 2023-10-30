@@ -259,7 +259,7 @@ export default {
                     },
                     {
                         "value": "3",
-                        "label": "取消",
+                        "label": "搁置",
                         "color": "default"
                     }
                 ],
@@ -333,7 +333,7 @@ export default {
                 "type": "belongsTo",
                 "name": "task"
             },
-            "name": "task_hour",
+            "name": "report_task_hour",
             "type": "hasMany",
             "uiSchema": {
                 "x-component": "AssociationField",
@@ -348,7 +348,33 @@ export default {
             },
             "interface": "o2m",
             "target": "reportDetail"
+        },
+        {
+           
+            "name": "score",
+            "type": "double",
+            "interface": "number",
+            "uiSchema": {
+                "x-component-props": {
+                    "step": "1",
+                    "stringMode": true
+                },
+                "type": "number",
+                "x-component": "InputNumber",
+                "title": "评分"
+            }
         },{
+            
+            "name": "comments",
+            "type": "text",
+            "interface": "textarea",
+            "uiSchema": {
+                "type": "string",
+                "x-component": "Input.TextArea",
+                "title": "点评"
+            }
+        },
+        {
             "name": "process",
             "type": "float",
             "interface": "percent",

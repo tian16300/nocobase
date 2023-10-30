@@ -235,6 +235,7 @@ const HeaderMenu = ({
       }),
       notdelete: true,
       disabled: true,
+      order:9999
     };
     const result = getMenuItems(() => {
       return children;
@@ -254,11 +255,9 @@ const HeaderMenu = ({
         className={headerMenuClass}
         onSelect={(info: any) => {
           const s = schema.properties?.[info.key];
-
-          if (!s) {
-            return;
-          }
-
+          // if (!s) {
+          //   return;
+          // }
           if (mode === 'mix') {
             if (s['x-component'] !== 'Menu.SubMenu') {
               onSelect?.(info);
