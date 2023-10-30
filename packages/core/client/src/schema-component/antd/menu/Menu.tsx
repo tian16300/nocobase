@@ -227,11 +227,14 @@ const HeaderMenu = ({
   const items = useMemo(() => {
     const designerBtn: any = {
       key: 'x-designer-button',
-      disabled: true,
       style: { padding: '0 8px', order: 9999 },
-      label: render({ 'data-testid': 'add-menu-item-button-in-header', style: { background: 'none' } }),
+      label: render({
+        'aria-label': 'schema-initializer-Menu-header',
+        'aria-disabled': false,
+        style: { background: 'none' },
+      }),
       notdelete: true,
-      order: 9999
+      disabled: true,
     };
     const result = getMenuItems(() => {
       return children;
@@ -250,7 +253,12 @@ const HeaderMenu = ({
         {...others}
         className={headerMenuClass}
         onSelect={(info: any) => {
-          const s = schema.properties[info.key];
+          const s = schema.properties?.[info.key];
+
+          if (!s) {
+            return;
+          }
+
           if (mode === 'mix') {
             if (s['x-component'] !== 'Menu.SubMenu') {
               onSelect?.(info);
@@ -517,23 +525,25 @@ Menu.Item = observer(
         label: (
           <SchemaContext.Provider value={schema}>
             <FieldContext.Provider value={field}>
-              <SortableItem className={designerCss} removeParentsIfNoChildren={false}>
-                <div className={designerCss}>
-                  {icon && '' !== icon && <Icon type={icon} style={{ marginRight: 10 }} />}
-                  <span
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: 'inline-block',
-                      width: '100%',
-                      verticalAlign: 'middle',
-                    }}
-                    className="menu-item-label-text"
-                  >
-                    {t(field.title)}
-                  </span>
-                  <Designer />
-                </div>
+              <SortableItem
+                role="button"
+                aria-label={t(field.title)}
+                className={designerCss}
+                removeParentsIfNoChildren={false}
+              >
+                <Icon type={icon} />
+                <span
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: 'inline-block',
+                    width: '100%',
+                    verticalAlign: 'middle',
+                  }}
+                >
+                  {t(field.title)}
+                </span>
+                <Designer />
               </SortableItem>
             </FieldContext.Provider>
           </SchemaContext.Provider>

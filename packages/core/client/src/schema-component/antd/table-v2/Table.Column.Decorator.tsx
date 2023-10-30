@@ -1,6 +1,6 @@
 import { useField, useFieldSchema } from '@formily/react';
 import React, { useLayoutEffect } from 'react';
-import { SortableItem, useCollection, useCollectionManager, useCompile, useDesignable, useDesigner } from '../../../';
+import { SortableItem, useCollection, useCollectionManager, useCompile, useDesigner } from '../../../';
 import { designerCss } from './Table.Column.ActionBar';
 import { isCollectionFieldComponent } from './utils';
 
@@ -27,7 +27,6 @@ export const TableColumnDecorator = (props) => {
   const Designer = useDesigner();
   const field = useField();
   const { fieldSchema, uiSchema, collectionField } = useColumnSchema();
-  const { refresh } = useDesignable();
   const compile = useCompile();
   const required =  fieldSchema?.['required'];
   useLayoutEffect(() => {
@@ -46,7 +45,7 @@ export const TableColumnDecorator = (props) => {
       <Designer fieldSchema={fieldSchema} uiSchema={uiSchema} collectionField={collectionField} />
       {/* <RecursionField name={columnSchema.name} schema={columnSchema}/> */}
       {required && (<span className="ant-formily-item-asterisk">*</span>)} 
-      {field?.title || compile(uiSchema?.title)}
+      <div role="button">{field?.title || compile(uiSchema?.title)}</div>
       {/* <div
         onClick={() => {
           field.title = uid();

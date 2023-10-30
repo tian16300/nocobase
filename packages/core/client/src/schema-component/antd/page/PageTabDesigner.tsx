@@ -5,12 +5,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DragHandler, useDesignable } from '../..';
 import { SchemaSettings } from '../../../schema-settings';
+import { useGetAriaLabelOfDesigner } from '../../../schema-settings/hooks/useGetAriaLabelOfDesigner';
 
 export const PageDesigner = ({ title }) => {
   const { dn, designable } = useDesignable();
   const { t } = useTranslation();
   const field = useField();
   const fieldSchema = useFieldSchema();
+  const { getAriaLabel } = useGetAriaLabelOfDesigner();
   const hidePageTitle = fieldSchema['x-component-props']?.hidePageTitle;
   const disablePageHeader = fieldSchema['x-component-props']?.disablePageHeader;
   let hidePageNavIcon = fieldSchema['x-component-props']?.hidePageNavIcon;
@@ -25,8 +27,13 @@ export const PageDesigner = ({ title }) => {
       <div className={'general-schema-designer-icons'}>
         <Space size={2} align={'center'}>
           <SchemaSettings
-            data-testid="page-designer-button"
-            title={<MenuOutlined style={{ cursor: 'pointer', fontSize: 12 }} />}
+            title={
+              <MenuOutlined
+                role="button"
+                aria-label={getAriaLabel('schema-settings')}
+                style={{ cursor: 'pointer', fontSize: 12 }}
+              />
+            }
           >
             <SchemaSettings.SwitchItem
               title={t('Enable page header')}
@@ -138,6 +145,7 @@ export const PageTabDesigner = ({ schema }) => {
   const { dn, designable } = useDesignable();
   const { t } = useTranslation();
   const { modal } = App.useApp();
+  const { getAriaLabel } = useGetAriaLabelOfDesigner();
 
   if (!designable) {
     return null;
@@ -148,9 +156,9 @@ export const PageTabDesigner = ({ schema }) => {
       <div className={'general-schema-designer-icons'}>
         <Space size={2} align={'center'}>
           <DragHandler>
-            <DragOutlined />
+            <DragOutlined style={{ marginRight: 0 }} role="button" aria-label={getAriaLabel('drag-handler', 'tab')} />
           </DragHandler>
-          <SchemaSettings title={<MenuOutlined style={{ cursor: 'pointer', fontSize: 12 }} />}>
+          <SchemaSettings title={<MenuOutlined role="button" aria-label={getAriaLabel('schema-settings', 'tab')} />}>
             <SchemaSettings.ModalItem
               title={t('Edit')}
               schema={
@@ -190,6 +198,7 @@ export const PageTabDesigner = ({ schema }) => {
             />
             <SchemaSettings.Divider />
             <SchemaSettings.Item
+              title="Delete"
               eventKey="remove"
               onClick={() => {
                 modal.confirm({

@@ -39,6 +39,7 @@ export const Sortable = (props: any) => {
   return React.createElement(
     component || 'div',
     {
+      role: 'none',
       ...others,
       className: className,
       ref: setNodeRef,
@@ -119,6 +120,7 @@ export const DragHandler: React.FC = (props) => {
         }}
         {...listeners}
         {...attributes}
+        role="none"
       >
         <span style={{ cursor: 'move', fontSize: 14 }}>{props.children}</span>
       </div>

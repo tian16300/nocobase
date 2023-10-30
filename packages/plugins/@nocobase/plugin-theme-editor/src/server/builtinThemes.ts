@@ -1,9 +1,9 @@
 import { ThemeItem } from '../types';
 
 /** antd 默认主题 */
-export const antd: Omit<ThemeItem, 'id'> = {
+export const defaultTheme: Omit<ThemeItem, 'id'> = {
   config: {
-    "name": "Default theme of antd",
+    "name": "Default",
     "token": {
         "colorInfo": "#1677ff",
         "wireframe": false,
@@ -26,6 +26,7 @@ export const antd: Omit<ThemeItem, 'id'> = {
   },
   optional: true,
   isBuiltIn: true,
+  uid: 'default',
 };
 
 export const dark: Omit<ThemeItem, 'id'> = {
@@ -36,6 +37,7 @@ export const dark: Omit<ThemeItem, 'id'> = {
   },
   optional: true,
   isBuiltIn: true,
+  uid: 'dark',
 };
 
 export const compact: Omit<ThemeItem, 'id'> = {
@@ -46,6 +48,7 @@ export const compact: Omit<ThemeItem, 'id'> = {
   },
   optional: true,
   isBuiltIn: true,
+  uid: 'compact',
 };
 
 /** 同时包含 `紧凑` 和 `暗黑` 两种模式 */
@@ -57,4 +60,5 @@ export const compactDark: Omit<ThemeItem, 'id'> = {
   },
   optional: true,
   isBuiltIn: true,
+  uid: 'compact_dark',
 };

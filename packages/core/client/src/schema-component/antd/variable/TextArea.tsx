@@ -366,6 +366,8 @@ export function TextArea(props) {
       )}
     >
       <div
+        role="button"
+        aria-label="textbox"
         onInput={onInput}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
