@@ -324,7 +324,7 @@ export const BlockProvider = (props: {
   params?: any;
   children?: any;
 }) => {
-  const { collection, association, name } = props;
+  const {params:_params, collection, association, name } = props;
   const resource = useResource(props);
   const params = useMemo(() => ({ ..._params }), [_params]);
   const { appends, updateAssociationValues } = useAssociationNames();
