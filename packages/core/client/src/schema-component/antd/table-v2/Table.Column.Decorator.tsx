@@ -43,9 +43,8 @@ export const TableColumnDecorator = (props) => {
   return (
     <SortableItem className={designerCss}>
       <Designer fieldSchema={fieldSchema} uiSchema={uiSchema} collectionField={collectionField} />
-      {/* <RecursionField name={columnSchema.name} schema={columnSchema}/> */}
-      {required && (<span className="ant-formily-item-asterisk">*</span>)} 
-      <div role="button">{field?.title || compile(uiSchema?.title)}</div>
+      {/* <RecursionField name={columnSchema.name} schema={columnSchema}/> */}     
+      <div role="button"> {required && (<span className="ant-formily-item-asterisk">*</span>)} {field?.title || compile(uiSchema?.title)}</div>
       {/* <div
         onClick={() => {
           field.title = uid();

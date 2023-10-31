@@ -1494,8 +1494,24 @@ SchemaSettings.DataFormat = function DateFormatConfig(props: { fieldSchema: Sche
                   value: 'custom',
                 },
               ],
-            },
-          },
+            },            
+            isPm:{
+              type: 'boolean',
+              title:'是否下午',
+              'x-component': 'Switch',
+              'x-decorator': 'FormItem',
+              'x-decorator-props': {},
+              default:fieldSchema['x-component-props']?.isPm,
+              'x-reactions':[{
+                 dependencies:['.showTime'],
+                 fulfill:{
+                  'state':{
+                    visible: '{{!$deps[0]}}'
+                  }
+                 }
+              }]
+            }
+          }
         } as ISchema
       }
       onSubmit={(data) => {

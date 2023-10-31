@@ -128,13 +128,22 @@ export default class TaskAddFields extends Migration {
           f.addField(field.name, field.options);
         }
       });
+
+      /* 继承的表重写 */
+      c.forEachField((field)=>{
+        if (!e.hasField(field.name)) {
+          e.addField(field.name, field.options);
+        }
+        if (!f.hasField(field.name)) {
+          f.addField(field.name, field.options);
+        }
+      });
+      
       await b.sync();
       await c.sync();
       await d.sync();
       await e.sync();
       await f.sync();
-
-
       /* 中间表隐藏 更新数据 */
       collections.update({
         filter: {

@@ -78,8 +78,12 @@ export const mapDatePicker = function () {
       value: str2moment(props.value, props),
       onChange: (value: Dayjs | null) => {
         if (onChange) {
-          if (!props.showTime && value) {
-            value = value.startOf('day');
+          if (!props.showTime && value) {  
+            if(props.isPm){          
+              value = value.endOf('day');
+            }else{
+              value = value;
+            }
           }
           onChange(moment2str(value, props));
         }
@@ -115,7 +119,7 @@ function getRangeStart(value: Dayjs, options: Moment2strOptions) {
   if (showTime) {
     return value;
   }
-  return value.startOf('day');
+  return value;
 }
 
 function getRangeEnd(value: Dayjs, options: Moment2strOptions) {

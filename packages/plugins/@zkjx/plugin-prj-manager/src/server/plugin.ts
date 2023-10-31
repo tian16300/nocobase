@@ -71,22 +71,24 @@ export class PluginPrjManagerServer extends Plugin {
       }
       if (model._changed.has('belongsPrjKey')) {
         /* 更新 项目活跃*/
-        const belongsPrjKey = model.get('belongsPrjKey') || model._previousDataValues.belongsPrjKey;
-        const count = await this.app.db.getRepository('reportDetail').count({
-          filter: {
-            belongsPrjKey: belongsPrjKey,
-          },
-          transaction: options.transaction,
-        });
-        await this.app.db.getRepository('prj').update({
-          filter: {
-            id: belongsPrjKey,
-          },
-          values: {
-            activeIndex: count,
-          },
-          transaction: options.transaction,
-        });
+        const belongsPrjKey = model.get('belongsPrjKey') || model._previousDataValues?.belongsPrjKey;
+        if (belongsPrjKey) {
+          const count = await this.app.db.getRepository('reportDetail').count({
+            filter: {
+              belongsPrjKey: belongsPrjKey,
+            },
+            transaction: options.transaction,
+          });
+          await this.app.db.getRepository('prj').update({
+            filter: {
+              id: belongsPrjKey,
+            },
+            values: {
+              activeIndex: count,
+            },
+            transaction: options.transaction,
+          });
+        }
       }
     });
 
@@ -235,7 +237,7 @@ export class PluginPrjManagerServer extends Plugin {
       ],
       'loggedIn',
     );
-    this.aclAllowList([ 'prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies','reportUsers'], 'public');
+    this.aclAllowList(['prj_stages_files', 'prjs_files', 'prjs_users', 'tasks_dependencies', 'reportUsers'], 'public');
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');

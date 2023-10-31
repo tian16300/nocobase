@@ -8,8 +8,8 @@ export const generatePlan = async (ctx, next) => {
   } else {
     const isExist = await ctx.db.getRepository('prj_plan_latest').findOne({
       filter: {
-        prjId: prjId,
-      },
+        prjId: prjId
+      }
     });
     if (!isExist) {
       //查找字典项目阶段
@@ -74,43 +74,31 @@ export const saveLatest = async (ctx, next) => {
     await ctx.db.getRepository('prj_plan_version').create({
       values: {
         prjId: id,
-        version: newVersion,
-      },
+        version: newVersion
+      }
     });
 
     const historyData = await ctx.db.getRepository('prj_plan_latest').find({
       filter: {
-        prjId: id
+        prjId: id,
       },
-      sort:'id'
+      sort: 'id',
     });
-    const records =[];
+    const records = [];
 
-    historyData.forEach((model)=>{
-      const {id, ...others} = model.dataValues;
-
+    historyData.forEach((model) => {
+      const { id, ...others } = model.dataValues;
 
       records.push({
         ...others,
-        version: newVersion
+        version: newVersion,
       });
-
-
-    })
-
+    });
 
     await ctx.db.getRepository('prj_plan_history').createMany({
-      records: records
+      records: records,
     });
     ctx.logger.info('计划保存为新版本', id, newVersion);
-    /* 保存最新的数据 */
-    // await plans.forEach(async (plan) => {
-    //   const { id, updatedAt, updatedBy, ...others } = plan;
-    //   await ctx.db.getRepository('prj_plan_latest').update({
-    //     filterByTk: id,
-    //     values: others,
-    //   });
-    // });
     ctx.body = 'ok';
   }
 
