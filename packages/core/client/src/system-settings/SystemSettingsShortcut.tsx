@@ -93,6 +93,20 @@ const schema: ISchema = {
           'x-component': 'Input',
           required: false,
         },
+        companyName: {
+          type: 'string',
+          title: "{{t('Company Name')}}",
+          'x-decorator': 'FormItem',
+          'x-component': 'Input',
+          required: false,
+        },
+        poweredBy: {
+          type: 'string',
+          title: "{{t('PoweredBy')}}",
+          'x-decorator': 'FormItem',
+          'x-component': 'Input',
+          required: false,
+        },
         logo: {
           type: 'string',
           title: "{{t('Logo')}}",

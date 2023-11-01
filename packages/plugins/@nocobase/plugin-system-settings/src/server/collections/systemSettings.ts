@@ -8,7 +8,22 @@ export default defineCollection({
     {
       type: 'string',
       name: 'title',
-      translation: true,
+      translation: true
+    },
+    {
+      type: 'string',
+      name: 'simpleTitle',
+      translation: true
+    },
+    {
+      type: 'string',
+      name: 'companyName',
+      translation: true
+    },
+    {
+      type: 'string',
+      name: 'poweredBy',
+      translation: true
     },
     {
       type: 'boolean',

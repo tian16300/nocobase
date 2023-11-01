@@ -49,6 +49,8 @@ export default {
   Off: '禁用',
   Logo: 'Logo',
   'Login Background':'系统登录背景',
+  'Company Name':'公司名称',
+  'PoweredBy':'版权声明',
   'Add menu item': '添加菜单项',
   Page: '页面',
   Name: '名称',

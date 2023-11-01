@@ -2,10 +2,12 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToken } from '../schema-component';
+import { useSystemSettings } from '../system-settings';
 
 export const PoweredBy = () => {
   const { i18n } = useTranslation();
   const { token } = useToken();
+  const { data } = useSystemSettings();
   const urls = {
     'en-US': 'https://www.nocobase.com',
     'zh-CN': 'https://cn.nocobase.com',
@@ -23,7 +25,7 @@ export const PoweredBy = () => {
         }
       `}
     >
-      Powered by <a href={urls[i18n.language] || urls['en-US']}>NocoBase</a>
+      {data?.data?.poweredBy}
     </div>
   );
 };
