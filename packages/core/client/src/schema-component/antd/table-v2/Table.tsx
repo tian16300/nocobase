@@ -69,7 +69,7 @@ const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMov
       const dataIndex = collectionFields?.length > 0 ? collectionFields[0].name : s.name;
       let collectionName = name;
       if (collectionFields?.length > 0) {
-        collectionName = getCollectionField(collectionFields[0]['x-collection-field']).target || name;
+        collectionName = getCollectionField(collectionFields?.[0]?.['x-collection-field'])?.target || name;
       }
       //如果是字典 key 则为外键
       return {

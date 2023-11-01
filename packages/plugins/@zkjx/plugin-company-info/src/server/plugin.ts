@@ -22,7 +22,7 @@ export class PluginCompanyInfoServer extends Plugin {
         },
       });
       await repo.db2cm('dept');
-      await this.initRecords();
+      // await this.initRecords();
     }
     this.app.acl.allow('dept', 'list', 'public');
   }
