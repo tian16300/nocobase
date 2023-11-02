@@ -323,6 +323,55 @@ FormItem.Designer = function Designer() {
         />
       )}
       {isAllowToSetDefaultValue() && <SchemaSettings.DefaultValue />}
+      {
+        (isSelectFieldMode && (
+          <SchemaSettings.ModalItem title={'追加字段'}
+            initialValues={{
+              appends:fieldSchema['x-component-props']?.service?.params?.appends
+            }}
+            schema={{
+              type:'object',
+              title:'追加字段',
+              properties:{
+                appends:{
+                   type:'array',
+                   'x-decorator':'FormItem',
+                   'x-component': 'TreeSelect',
+                   'x-component-props':{
+                    multiple: true,
+                    defaultExpandAll:true,
+                     treeData: targetFields.filter((field)=>{
+                      return ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'dic'].includes(field?.interface);
+                     }).map((field)=>{
+                      return {
+                        title: compile(field.uiSchema?.title||field.name),
+                        key:field.name,
+                        value: field.name
+                      }
+                     })
+                   }
+                }
+              }
+            }}
+            onSubmit={({appends})=>{
+              fieldSchema['x-component-props'] =  fieldSchema['x-component-props']||{};
+              fieldSchema['x-component-props'].service =  fieldSchema['x-component-props'].service||{};
+              fieldSchema['x-component-props'].service.params =  fieldSchema['x-component-props']?.service?.params||{};
+              fieldSchema['x-component-props'].service.params.appends = appends;
+              const schema = {
+                ['x-uid']: fieldSchema['x-uid'],
+                ['x-component-props']:fieldSchema['x-component-props']
+              };
+              dn.emit('patch', {
+                schema,
+              });
+  
+              dn.refresh();
+            }}
+          ></SchemaSettings.ModalItem>
+        ))
+
+      }
       {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && (
         <SchemaSettings.DataScope
           collectionName={collectionField?.target}
