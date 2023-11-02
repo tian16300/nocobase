@@ -332,7 +332,7 @@ function DuplicationMode() {
               title: '{{ t("Target collection") }}',
               required: true,
               description: t('If collection inherits, choose inherited collections as templates'),
-              default: '{{ collectionName }}',
+              default: name,
               'x-display': collectionList.length > 1 ? 'visible' : 'hidden',
               'x-decorator': 'FormItem',
               'x-component': 'Select',
@@ -896,15 +896,16 @@ function WorkflowConfig() {
 }
 
 const SetInheriteFields = (props) => {
-  const {collectionName} = props;
+  const {collectionName: pCollectionName} = props;
   const { dn } = useDesignable();
   const { t } = useTranslation();
   const field = useField();
   const fieldSchema = useFieldSchema();
   const { name } = useCollection();
-  const { collectionList, getEnableFieldTree, getOnLoadData, getOnCheck } = useCollectionState(name);
   const inheritValues = cloneDeep(fieldSchema['x-component-props'].inheritsKeys || []);
   const record = useRecord();
+  const collectionName = pCollectionName || record?.__collection || name;
+  const { collectionList, getEnableFieldTree, getOnLoadData, getOnCheck } = useCollectionState(collectionName);
   const useSelectAllFields = (form) => {
     return {
       async run() {
@@ -939,12 +940,12 @@ const SetInheriteFields = (props) => {
               title: '{{ t("Target collection") }}',
               required: true,
               description: t('If collection inherits, choose inherited collections as templates'),
-              default: '{{ collectionName }}',
+              default: collectionName,
               'x-display': collectionList.length > 1 ? 'visible' : 'hidden',
               'x-decorator': 'FormItem',
               'x-component': 'Select',
               'x-component-props': {
-                options: collectionList,
+                options: collectionList
               },
             },
             selectAll: {
