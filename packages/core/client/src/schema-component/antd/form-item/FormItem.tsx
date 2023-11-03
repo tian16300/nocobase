@@ -160,7 +160,7 @@ FormItem.Designer = function Designer() {
   const isDateField = ['datetime', 'createdAt', 'updatedAt'].includes(collectionField?.interface);
   const isAttachmentField =
     ['attachment'].includes(collectionField?.interface) || targetCollection?.template === 'file';
-  const isMultiple = fieldSchema['x-component-props'].multiple;
+  const isMultiple = fieldSchema?.['x-component-props']?.multiple;
   return (
     <GeneralSchemaDesigner>
       <GeneralSchemaItems />
