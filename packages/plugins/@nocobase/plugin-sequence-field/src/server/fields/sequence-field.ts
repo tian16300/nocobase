@@ -286,6 +286,45 @@ sequencePatterns.register('date', {
   },
 });
 
+interface FieldOptions{
+  interface: string;
+   value: string;
+   label: string;
+   foreignKey: string;
+}
+sequencePatterns.register('field', {
+  async generate(this: SequenceField, instance, options: { value: FieldOptions}, { transaction } ) {
+    /* 字典 下拉单选 文本 单选 复选框的值 */
+    const {interface: fieldInterface, value, foreignKey} = options?.value || {};
+    if(['dic'].includes(fieldInterface) && instance.get(foreignKey)){
+      const item = await this.database.getRepository('dicItem').findOne({
+        filterByTk: instance.get(foreignKey),
+        transaction
+      });
+      if(item){
+        return item.value;
+      }
+      return '';
+    }else{
+      return instance.get(value);
+    }
+  },
+  batchGenerate(instances, values, options, { transaction }) {
+    const { inputable } = options;
+    instances.forEach((instance, i) => {
+      if (!inputable) {
+        values[i] = sequencePatterns.get('field').generate.call(this, instance, options, );
+      }
+    });
+  },
+  getLength(options) {
+    return options.value?.textLen ?? 2;
+  },
+  getMatcher(options = {}) {
+    return `.{${options?.value?.textLen ?? 2}}`;
+  }
+});
+
 interface PatternConfig {
   type: string;
   title?: string;

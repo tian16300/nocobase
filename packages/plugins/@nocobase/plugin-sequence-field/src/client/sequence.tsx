@@ -1,6 +1,6 @@
 import { ArrayTable, FormButtonGroup, FormDrawer, FormLayout, Submit } from '@formily/antd-v5';
 import { onFieldValueChange } from '@formily/core';
-import { ISchema, SchemaOptionsContext, useForm, useFormEffects } from '@formily/react';
+import { ISchema, SchemaOptionsContext, useField, useForm, useFormEffects } from '@formily/react';
 import {
   Cron,
   IField,
@@ -9,10 +9,11 @@ import {
   css,
   interfacesProperties,
   useCompile,
+  Select
 } from '@nocobase/client';
 import { error } from '@nocobase/utils/client';
-import { Button, Select } from 'antd';
-import React, { useContext } from 'react';
+import { Button, Select as AntdSelect, Tag } from 'antd';
+import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE, lang } from './locale';
 
@@ -29,16 +30,42 @@ function RuleTypeSelect(props) {
   });
 
   return (
-    <Select popupMatchSelectWidth={false} {...props}>
+    <AntdSelect popupMatchSelectWidth={false} {...props}>
       {Object.keys(RuleTypes).map((key) => (
-        <Select.Option key={key} value={key}>
+        <AntdSelect.Option key={key} value={key}>
           {compile(RuleTypes[key].title)}
-        </Select.Option>
+        </AntdSelect.Option>
       ))}
-    </Select>
+    </AntdSelect>
   );
 }
+function SelectField(props){
+  const { useCurrentFields } = props;
+  const compile = useCompile();
+  /* 支持字典 文本 单选  下拉单选 */
+  const fields = useCurrentFields().filter((field)=>{
+    return ['dic','input','select','radioGroup', ].includes(field?.interface);
+  }).map((field)=>{
+    return {
+      label: compile(field?.uiSchema?.title|| field.name),
+      value: field.name,
+      interface: field.interface,
+      foreignKey:field?.foreignKey
+    }
+  });
+  const { setValuesIn } = useForm();
+  const index = ArrayTable.useIndex();
 
+  useFormEffects(() => {
+    onFieldValueChange(`patterns.${index}.type`, (field) => {
+      setValuesIn(`patterns.${index}.options`, {});
+    });
+  });
+
+  return <Select objectValue allowClear options={fields} {...props}></Select>
+
+
+}
 function RuleOptions() {
   const compile = useCompile();
   const { values } = useForm();
@@ -183,13 +210,13 @@ const RuleTypes = {
                 }) || shortValues[5];
           return (
             <fieldset>
-              <Select value={option.value} onChange={(v) => onChange(shortValues[v].cron)}>
+              <AntdSelect value={option.value} onChange={(v) => onChange(shortValues[v].cron)}>
                 {shortValues.map((item) => (
-                  <Select.Option key={item.value} value={item.value}>
+                  <AntdSelect.Option key={item.value} value={item.value}>
                     {lang(item.label)}
-                  </Select.Option>
+                  </AntdSelect.Option>
                 ))}
-              </Select>
+              </AntdSelect>
               {option.value === 5 ? <Cron value={value} onChange={onChange} clearButton={false} /> : null}
             </fieldset>
           );
@@ -204,11 +231,64 @@ const RuleTypes = {
       format(options = { value: 'YYYYMMDD' }) {
         return <code>{options.value}</code>;
       },
+
+    },
+    fieldset: {
+      format: {
+        type: 'string',
+        title: `{{t("Date format", { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': 'Input',
+        'required': true
+      },
     },
   },
+  field:{
+    title: `{{t("Field", { ns: "${NAMESPACE}" })}}`,
+    optionRenders: {
+      textLen({value}){
+        return <code>{value && (<>长度: {value} 位</>)}</code>;
+      },
+      value( { value}) {
+        return <code>{value?<Tag>{value?.label}</Tag>:''}</code>;
+      }
+    },
+    fieldset: {
+      textLen:{
+        type: 'number',
+        title: `{{t("Digits", { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': 'InputNumber',
+        'x-component-props': {
+          min: 1,
+          max: 10,
+        },
+        required: true,
+        default: 2,
+        'x-reactions': {
+          target: 'start',
+          fulfill: {
+            schema: {
+              'x-component-props.max': '{{ 10 ** $self.value - 1 }}',
+            },
+          },
+        }
+      },
+      value: {
+        type: 'string',
+        title: `{{t("Select field", { ns: "${NAMESPACE}" })}}`,
+        'x-decorator': 'FormItem',
+        'x-component': SelectField,
+        'x-component-props':{
+          useCurrentFields: '{{ getCurrentFields }}'
+        },
+        'required': true
+      }
+    }
+  }
 };
 
-export function RuleConfigForm() {
+export function RuleConfigForm(props) {
   const { t } = useTranslation();
   const compile = useCompile();
   const schemaOptions = useContext(SchemaOptionsContext);
@@ -216,6 +296,10 @@ export function RuleConfigForm() {
   const index = ArrayTable.useIndex();
   const { type, options } = values.patterns[index];
   const ruleType = RuleTypes[type];
+  const getCurrentFields = useCallback(()=>{
+    const {currentFields} = props;
+    return currentFields;
+  },[props.currentFields]) ;
   return ruleType?.fieldset ? (
     <Button
       type="link"
@@ -223,7 +307,7 @@ export function RuleConfigForm() {
         FormDrawer(compile(ruleType.title), () => {
           return (
             <FormLayout layout="vertical">
-              <SchemaComponentOptions scope={schemaOptions.scope} components={schemaOptions.components}>
+              <SchemaComponentOptions scope={{...schemaOptions.scope,getCurrentFields}} components={schemaOptions.components}>
                 <SchemaComponent
                   schema={{
                     type: 'object',
@@ -367,6 +451,9 @@ export const sequence: IField = {
                   options: {
                     type: 'object',
                     'x-component': RuleConfigForm,
+                     'x-component-props':{
+                       'currentFields':'{{ useCurrentFields() }}'
+                     }
                   },
                 },
               },
