@@ -316,14 +316,16 @@ export const useBlockContext = () => {
   return useContext(BlockContext);
 };
 
-export const BlockProvider = (props: {
+export interface BlockProviderProps {
   name: string;
   resource: any;
   collection?: any;
   association?: any;
   params?: any;
   children?: any;
-}) => {
+  [name:string]: any;
+}
+export const BlockProvider = (props: BlockProviderProps) => {
   const {params:_params, collection, association, name } = props;
   const resource = useResource(props);
   const params = useMemo(() => ({ ..._params }), [_params]);

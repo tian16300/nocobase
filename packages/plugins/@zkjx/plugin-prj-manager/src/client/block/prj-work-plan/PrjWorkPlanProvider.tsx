@@ -138,7 +138,7 @@ export const PrjWorkPlanProvider = (props) => {
   /* 获取项目任务 */
   return (
     <div ref={containerRef} className={css`width:100%;height:100%`}>
-      <BlockProvider data-testid={options.collection} {...options} params={params} runWhenParamsChanged>
+      <BlockProvider name={options.collection} {...options} params={params} runWhenParamsChanged>
         <PrjWorkPlanGanttProvider
           {...props}
           rightSize={rightSize}
@@ -152,7 +152,7 @@ export const PrjWorkPlanProvider = (props) => {
           isFullscreen={isFullscreen}
           setIsFullScreen={setIsFullScreen}
           getPopupContainer={getPopupContainer}
-          data-testid={collection}
+          name={collection}
         ></PrjWorkPlanGanttProvider>
       </BlockProvider>
     </div>

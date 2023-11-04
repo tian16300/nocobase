@@ -6,7 +6,16 @@ import { preProcessData } from './scopes';
 import { TooltipContent } from './TooltipContent';
 
 const PrjPlanCompareBlockContext = createContext<any>({});
-
+// declare interface BlockProviderProps {
+//   name: string;
+//   resource: any;
+//   collection?: any;
+//   association?: any;
+//   params?: any;
+//   children?: any;
+//   runWhenParamsChanged?:boolean;
+//   ['data-testid']?:string;
+// }
 export const PrjPlanCompareProvider = (props) => {
   const [searchParams] = useSearchParams();
   const options = {
@@ -34,7 +43,7 @@ export const PrjPlanCompareProvider = (props) => {
         height: 100%;
       `}
     >
-      <BlockProvider data-testid="prj-field" {...options} params={params} runWhenParamsChanged>
+      <BlockProvider name="prj-field" {...options} params={params} runWhenParamsChanged>
         <PrjPlanCompareInnerProvider
           {...others}
           setRecordId={setRecordId}
