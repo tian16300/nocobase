@@ -1,6 +1,7 @@
 import { ISchema } from '@formily/react';
 import { uid } from '@nocobase/utils';
-
+import React from 'react';
+import { Divider } from 'antd';
 export const createDataSelectBlockSchema = (options) => {
   const {
     formItemInitializers = 'FormItemInitializers',
@@ -881,3 +882,284 @@ export const createPrjPlanCompare = () => {
 
   return schema;
 };
+
+
+
+export const createDataItemSelectBlockSchema = (options)=>{
+  const {
+    formItemInitializers = 'FormItemInitializers',
+    actionInitializers = 'FormActionInitializers',
+    collection = 'prj',
+    resource,
+    action = 'list',
+    template,
+    params,
+    association,
+    ...others
+  } = options;
+  const _resource = resource || association || collection;
+  const resourceName = _resource.name;
+  const form: ISchema = {
+    type: 'void',
+    'x-component': 'FormV2',
+    'x-component-props': {
+      useProps: '{{ useDataItemSelectFormSelectBlockProps }}',
+    },
+    properties: {
+      ['grid_' + uid()]: {
+        type: 'void',
+        'x-component': 'Grid',
+        properties: {
+          ['row_' + uid()]: {
+            type: 'void',
+            'x-component': 'Grid.Row',
+            properties: {
+              ['col_' + uid()]: {
+                type: 'void',
+                'x-component': 'Grid.Col',
+                'x-component-props': {
+                  width: 36,
+                },
+                properties: {
+                  id: {
+                    type: 'number',
+                    title: '选择',
+                    'x-component': 'RemoteSelect',
+                    'x-decorator': 'FormItem',
+                    'x-designer':'DataItemSelect.ItemDesinger',
+                    'x-component-props': {
+                      multiple: false,
+                      service: {
+                        resource: resourceName,
+                        action,
+                        params,
+                      },
+                      fieldNames: {
+                        label: 'title',
+                        value: 'id',
+                      },
+                      useProps: '{{ useDataItemSelectFormSelectOptionsProps }}',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      [uid()]:{
+        type: 'void',
+        'x-component': 'Divider',
+        'x-designer':'Divider.Designer'
+      }
+    },
+  };
+  const grid = {
+    type: 'void',
+    'x-component': 'Grid',
+  };
+
+  const tabs: ISchema = {
+    type: 'void',
+    'x-component': 'Tabs',
+    'x-component-props': {
+      //  'size':'large',
+      //  'type':'card'
+    },
+    'x-initializer': 'TabPaneInitializers',
+    'x-initializer-props': {
+      gridInitializer: 'RecordFormBlockInitializer',
+      gridInitializerProps: {
+        isBulkEdit: true,
+      },
+    },
+    properties: {
+      tab1: createTabGrid('任务管理', {
+        ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
+      }),
+      // tab2: createTabGrid('项目任务', {
+      //   ['prjWorkPlan_' + uid()]: createPrjWorkPlanShema(),
+      // }),
+      tab2: createTabGrid('工时统计', {
+        ['prjWorkStatic_' + uid()]: createPrjWorkStaticShema(),
+      }),
+      // ...createTabGrid('项目概览', {}),
+      // tab1: {
+      //   type: 'void',
+      //   title: '项目概览',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+      // tab2: {
+      //   type: 'void',
+      //   title: '项目成员',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+      // tab3: {
+      //   type: 'void',
+      //   title: '项目计划',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+      // // tab4: {
+      // //   type: 'void',
+      // //   title: '项目汇总',
+      // //   'x-component': 'Tabs.TabPane',
+      // //   'x-designer': 'Tabs.Designer',
+      // //   'x-component-props': {
+      // //   },
+      // //   properties: {
+      // //     grid: {
+      // //       type: 'void',
+      // //       'x-component': 'Grid',
+      // //       'x-initializer': 'RecordBlockInitializers',
+      // //       'x-initializer-props': {
+      // //         "isBulkEdit": true,
+      // //         'useHookItems': '{{ useRecordBlockInitializerItems }}'
+      // //       },
+      // //       properties: {},
+      // //     },
+      // //   },
+      // // },
+      // tab4: {
+      //   type: 'void',
+      //   title: '工时统计',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+      // tab5: {
+      //   type: 'void',
+      //   title: '数据报表',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+      // tab6: {
+      //   type: 'void',
+      //   title: '项目文件',
+      //   'x-component': 'Tabs.TabPane',
+      //   'x-designer': 'Tabs.Designer',
+      //   'x-component-props': {},
+      //   properties: {
+      //     grid: {
+      //       ...grid,
+      //     },
+      //   },
+      // },
+    },
+  };
+  const schema: ISchema = {
+    type: 'void',
+    'x-acl-action': `${resourceName}:view`,
+    'x-decorator': 'DataItemSelect.Decorator',
+    'x-decorator-props': {
+      ...others,
+      resource: resourceName,
+      collection,
+      association,
+      action: 'list',
+      params: {
+        pageSize: 1,
+        appends: ['status'],
+      },
+    },
+    'x-designer': 'DataItemSelect.Designer',
+    'x-component': 'CardItem',
+    'x-component-props': {
+      span: 3,
+    },
+    // 保存当前筛选区块所能过滤的数据区块
+    'x-filter-targets': [],
+    // 用于存储用户设置的每个字段的运算符，目前仅筛选表单区块支持自定义
+    'x-filter-operators': {},
+    properties: {
+      ['grid_' + uid()]: {
+        type: 'void',
+        'x-component': 'Grid',
+        properties: {
+          ['row_' + uid()]: {
+            type: 'void',
+            'x-component': 'Grid.Row',
+            properties: {
+              ['col_' + uid()]: {
+                type: 'void',
+                'x-component': 'Grid.Col',
+                properties: {
+                  ['form_' + uid()]: form,
+                },
+              },
+            },
+          },
+          ['row_' + uid()]: {
+            type: 'void',
+            'x-component': 'Grid.Row',
+            properties: {
+              ['col_' + uid()]: {
+                type: 'void',
+                'x-component': 'Grid.Col',
+                properties: {
+                  ['prj_detail_'+uid()]:{
+                    type: 'void',
+                    'x-decorator':'BomPrjCost.Decorator',
+                    'x-component':'BomPrjCost',
+                    'x-deisgner':'BomPrjCost.Designer'
+                  }
+                }
+              },
+            },
+          },
+          ['row_' + uid()]: {
+            type: 'void',
+            'x-component': 'Grid.Row',
+            properties: {
+              ['col_' + uid()]: {
+                type: 'void',
+                'x-component': 'Grid.Col',
+                properties: {
+                  ['prj_detail_'+uid()]:{
+                    type: 'void',
+                    'x-decorator':'PrjBomTree.Decorator',
+                    'x-component':'PrjBomTree',
+                    'x-deisgner':'PrjBomTree.Designer'
+                  }
+                }
+              },
+            },
+          }
+        },
+      }
+    },
+  };
+  return schema;
+
+}

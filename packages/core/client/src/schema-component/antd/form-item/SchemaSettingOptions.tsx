@@ -588,14 +588,14 @@ export const EditTitleField = () => {
         const fieldNames = {
           ...collectionField?.uiSchema?.['x-component-props']?.['fieldNames'],
           ...field.componentProps.fieldNames,
-          label,
+          label
         };
         fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
         fieldSchema['x-component-props']['fieldNames'] = fieldNames;
         schema['x-component-props'] = fieldSchema['x-component-props'];
         field.componentProps.fieldNames = fieldSchema['x-component-props'].fieldNames;
         dn.emit('patch', {
-          schema,
+          schema
         });
         dn.refresh();
       }}

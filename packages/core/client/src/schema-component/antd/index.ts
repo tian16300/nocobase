@@ -15,6 +15,7 @@ export * from './color-select';
 export * from './cron';
 export * from './date-picker';
 export * from './details';
+export * from './divider';
 export * from './expand-action';
 export * from './filter';
 export * from './form';

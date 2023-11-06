@@ -1,12 +1,17 @@
 import { Plugin } from '@nocobase/client';
 import { FormLayout } from '@formily/antd-v5';
-import { DataSelectBlockProvider, PrjPlanCompareBlockProvider } from './provider';
+import { DataItemSelectBlockProvider, DataSelectBlockProvider, PrjPlanCompareBlockProvider } from './provider';
 import {
+  BomPrjCost,
+  DataItemSelect,
   DataSelect,
+  PrjBomTree,
   PrjPlanCompare,
   PrjWorkPlan,
   PrjWorkStatic,
   useCreatePrjPlanActionProps,
+  useDataItemSelectFormSelectBlockProps,
+  useDataItemSelectFormSelectOptionsProps,
   useDataSelectBlockContext,
   useDataSelectTabsProps,
   useFormSelectBlockProps,
@@ -32,6 +37,7 @@ export class PluginPrjManagerClient extends Plugin {
       useFormSelectBlockProps,
       useFormSelectOptionsProps,
       useDataSelectBlockContext,
+
       useDataSelectTabsProps,
       usePrjPlanCompareOptionsProps,
       usePrjPlanCompareTableBlockProps,
@@ -39,17 +45,23 @@ export class PluginPrjManagerClient extends Plugin {
       usePrjWorkPlanTableBlockProps,
       useCreatePrjPlanActionProps,
       useSaveOtherPrjPlanActionProps,
-      useSavePrjPlanActionProps
+      useSavePrjPlanActionProps,
+      useDataItemSelectFormSelectBlockProps,
+      useDataItemSelectFormSelectOptionsProps
 
     });
     this.app.addComponents({
+      DataItemSelect,
       DataSelect,
       FormLayout,
       PrjWorkPlan,
       PrjWorkStatic,
       PrjPlanCompare,
+      BomPrjCost,
+      PrjBomTree
+
     });
-    this.app.addProviders([DataSelectBlockProvider, PrjPlanCompareBlockProvider]);
+    this.app.addProviders([DataSelectBlockProvider, PrjPlanCompareBlockProvider,DataItemSelectBlockProvider]);
   }
 }
 
