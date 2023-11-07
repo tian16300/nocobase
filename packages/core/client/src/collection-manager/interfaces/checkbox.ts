@@ -8,18 +8,33 @@ export const checkbox: IField = {
   group: 'choices',
   order: 1,
   title: '{{t("Checkbox")}}',
+  availableTypes: ['boolean'],
+  hasDefaultValue: true,
+  properties: {
+    ...defaultProps,
+    'uiSchema.x-component': {
+      type: 'string',
+      'title':'展示形式',
+      'x-decorator': 'FormItem',
+      'x-component': 'Radio.Group',
+      enum: [
+        {
+          label: '{{t("Checkbox")}}',
+          value: 'Checkbox',
+        },
+        { label: '{{t("Switch")}}', value: 'Switch' },
+      ],
+      default: 'Checkbox',
+    },
+  },  
   default: {
     type: 'boolean',
     // name,
     uiSchema: {
       type: 'boolean',
       'x-component': 'Checkbox',
-    },
-  },
-  availableTypes: ['boolean'],
-  hasDefaultValue: true,
-  properties: {
-    ...defaultProps,
+
+    }
   },
   filterable: {
     operators: operators.boolean,

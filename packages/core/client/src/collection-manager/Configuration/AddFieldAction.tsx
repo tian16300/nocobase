@@ -35,6 +35,7 @@ const getSchema = (schema: IField, record: any, compile) => {
         'uiSchema.x-component-props.showTime',
         'uiSchema.x-component-props.dateFormat',
         'uiSchema.x-component-props.timeFormat',
+        'uiSchema.x-component'
       ],
       fulfill: {
         state: {
@@ -44,6 +45,7 @@ const getSchema = (schema: IField, record: any, compile) => {
             dateFormat: '{{$deps[2]}}',
             timeFormat: '{{$deps[3]}}',
           },
+          component: '{{$deps[4]}}'
         },
       },
     };
