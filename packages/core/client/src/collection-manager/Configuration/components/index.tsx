@@ -1,10 +1,11 @@
 import { Field } from '@formily/core';
 import { observer, useField, useForm } from '@formily/react';
 import { Select } from 'antd';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRecord } from '../../../record-provider';
 import { useCompile } from '../../../schema-component';
 import { useCollectionManager } from '../../hooks';
+import { IField } from '../../interfaces/types';
 
 export const SourceForeignKey = observer(
   () => {
@@ -113,10 +114,37 @@ export const SourceCollection = observer(
 );
 
 export const SourceKey = observer(
-  () => {
+  (props: any) => {
+    const form = useForm();
+    const record = useRecord();
+    const { getCollection } = useCollectionManager();
+    const collection = record?.collectionName ? getCollection(record.collectionName) : record;
+    const compile = useCompile();
+    const fields = collection.fields
+      .filter(({ type }) => {
+        return ['bigInt', 'sequence', 'string'].includes(type);
+      })
+      .map((field) => {
+        return {
+          label: compile(field?.uiSchema?.title),
+          value: field.name,
+        };
+      });
+    const { value, defaultValue = record?.sourceKey || 'id' } = props;
+
     return (
       <div>
-        <Select disabled value={'id'} options={[{ value: 'id', label: 'ID' }]} />
+        <Select
+          value={value}
+          defaultValue={defaultValue}
+          options={fields}
+          onChange={(value) => {
+            form.setValues({
+              ...form.values,
+              sourceKey: value
+            })
+          }}
+        />
       </div>
     );
   },
@@ -124,10 +152,58 @@ export const SourceKey = observer(
 );
 
 export const TargetKey = observer(
-  () => {
+  (props: any) => {
+    const form = useForm();
+    const record = useRecord();
+    const field: IField = useField();
+    const target = record?.target || field.query('target').get('value');
+    const sourceKey = record?.sourceKey || field.query('sourceKey').get('value');
+    const { getCollection, getCollectionField } = useCollectionManager();
+    const collection = record?.collectionName ? getCollection(record.collectionName) : record;
+    const compile = useCompile();
+    const options = useMemo(() => {
+      if (target) {
+        const source = collection?.name;
+        let types = ['bigInt', 'sequence', 'string'];
+        if (sourceKey) {
+          const sourceField = getCollectionField(`${source}.${sourceKey}`);
+          types = [sourceField?.type];
+        }
+
+        const fields = getCollection(target).fields;
+        return fields
+          .filter(({ type }) => {
+            return types.includes(type);
+          })
+          .map((field) => {
+            return {
+              label: compile(field?.uiSchema?.title || field.name),
+              value: field.name,
+            };
+          });
+      } else {
+        return [];
+      }
+    }, [target, sourceKey, collection?.name]);
+    const { value, defaultValue = record?.targetKey || record?.foreignKey || 'id' } = props;
     return (
       <div>
-        <Select disabled value={'id'} options={[{ value: 'id', label: 'ID' }]} />
+        <Select
+          value={value}
+          defaultValue={defaultValue}
+          options={options}
+          allowClear
+          onChange={(value) => {
+            // field.value = value;
+           
+            // props?.onchange?.(value)
+            form.setValues({
+              ...form.values,
+              targetKey: value
+            })
+            
+          }}
+        />
       </div>
     );
   },

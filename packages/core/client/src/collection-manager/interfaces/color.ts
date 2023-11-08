@@ -7,14 +7,7 @@ export const color: IField = {
   group: 'basic',
   order: 10,
   title: '{{t("Color")}}',
-  default: {
-    type: 'string',
-    uiSchema: {
-      type: 'string',
-      'x-component': 'ColorSelect',
-      default: '#1677FF',
-    },
-  },
+ 
   availableTypes: ['string'],
   hasDefaultValue: true,
   properties: {
@@ -33,6 +26,14 @@ export const color: IField = {
           value: 'ColorSelect',
         },
       ],
+    },
+  },
+  default: {
+    type: 'string',
+    uiSchema: {
+      type: 'string',
+      'x-component': 'ColorSelect',
+      default: '#1677FF',
     },
   },
   filterable: {
