@@ -1,13 +1,11 @@
-import { DataNode, TreeProps } from 'antd/es/tree';
 import { Divider, useToken } from '../..';
-import { Button, Dropdown, Input, MenuProps, Space, Tag, Tooltip, Tree } from 'antd';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DownOutlined, EditOutlined, MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import {  Input, Space, Tag, Tooltip, Tree } from 'antd';
+import React, { useEffect,useRef, useState } from 'react';
+import { DownOutlined} from '@ant-design/icons';
 import {
   BlockProvider,
   RecordProvider,
   css,
-  useBlockContext,
   useBlockRequestContext,
   useCollectionManager,
   useCompile,
@@ -15,7 +13,6 @@ import {
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer } from '@formily/react';
 import { useGroupTableBlockResource } from '../GroupTable.Decorator';
-import { cloneDeep } from 'lodash';
 
 const { Search } = Input;
 export const GroupTree = (props) => {
@@ -32,7 +29,7 @@ export const GroupTree = (props) => {
     key: 'id',
     title: collection?.titleField || 'title',
     children: 'children',
-    parentKey: 'parentId'
+    parentKey: 'parentId',
   };
 
   /* 获取标题字段 */
@@ -67,7 +64,6 @@ export const GroupTreeView = (props: any) => {
   const { fieldNames } = props;
   const { key, title, children, parentKey } = fieldNames;
   const { service } = useBlockRequestContext();
-  const { height } = props;
   const fieldSchema = useFieldSchema();
   const { groupSelectedKeys, setGroupSelectedKeys } = useGroupTableBlockResource();
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(['root']);
@@ -77,15 +73,15 @@ export const GroupTreeView = (props: any) => {
     {
       [title]: '全部',
       [key]: 'root',
-      children: []
+      children: [],
     },
   ]);
   const { token } = useToken();
-  
+
   function buildTree(arr, parentId?: React.Key, tree = [], level = 0) {
     for (let i = 0; i < arr.length; i++) {
       if (arr[i].parentId === parentId) {
-        const children = buildTree(arr, arr[i][key], [], level+1);
+        const children = buildTree(arr, arr[i][key], [], level + 1);
         if (children.length) {
           arr[i].children = children;
         }
@@ -103,8 +99,8 @@ export const GroupTreeView = (props: any) => {
         {
           [title]: '全部',
           [key]: 'root',
-          children: buildTree(service.data.data, null, children)
-        }
+          children: buildTree(service.data.data, null, children),
+        },
       ]);
     }
   }, [service.data?.data]);
@@ -118,7 +114,7 @@ export const GroupTreeView = (props: any) => {
         return null;
       })
       .filter((item, i, self): item is React.Key => !!(item && self.indexOf(item) === i));
-    setExpandedKeys(Array.from(new Set(['root',...newExpandedKeys])));
+    setExpandedKeys(Array.from(new Set(['root', ...newExpandedKeys])));
     setSearchValue(value);
     setAutoExpandParent(true);
   };
@@ -151,7 +147,7 @@ export const GroupTreeView = (props: any) => {
               className={css`
                 position: relative;
                 .site-tree-search-value {
-                  color:${token.colorWarning};
+                  color: ${token.colorWarning};
                   font-weight: bold;
                 }
               `}
@@ -159,9 +155,8 @@ export const GroupTreeView = (props: any) => {
               <MemoTooltip title={item[title] as any}>
                 <CheckableTag
                   key={item[key]}
-                  
                   checked={groupSelectedKeys.includes(item[key])}
-                  onChange={(checked) => {
+                  onChange={() => {
                     onSelect([item[key]]);
                   }}
                 >
@@ -192,7 +187,7 @@ export const GroupTreeView = (props: any) => {
                 `}
                 hidden={!groupSelectedKeys.includes(item[key])}
               >
-                {item[key] == 0 ? (
+                {item[key] == 'root' ? (
                   <RecursionField name={'anctionBar'} schema={fieldSchema.properties.groupActions} />
                 ) : (
                   <RecordProvider record={item}>

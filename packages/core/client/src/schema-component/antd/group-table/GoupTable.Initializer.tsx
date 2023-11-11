@@ -5,7 +5,7 @@ import { SchemaOptionsContext } from '@formily/react';
 import { useGlobalTheme } from '../../../global-theme';
 import { DataBlockInitializer } from '../../../schema-initializer';
 import React from 'react';
-import { FormOutlined } from '@ant-design/icons';
+import { TableOutlined } from '@ant-design/icons';
 import { SchemaComponent, SchemaComponentOptions } from '../../core';
 import { ArrayItems, FormLayout } from '@formily/antd-v5';
 import { FormDialog } from '..';
@@ -77,7 +77,7 @@ export const Initializer = (props) => {
     <DataBlockInitializer
       {...props}
       componentType={'GroupTable'}
-      icon={<FormOutlined />}
+      icon={<TableOutlined />}
       onCreateBlockSchema={async ({ item }) => {
         const name = item.name;
         const fields = getCollectionFields(name);
