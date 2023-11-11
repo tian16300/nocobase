@@ -128,7 +128,7 @@ export const useFormBlockProps = () => {
   useEffect(() => {
     if (addChild) {
       ctx.form?.query('parent').take((field) => {
-        field.readPretty = true;
+        // field.readPretty = true;
         field.value = new Proxy({ ...record }, {});
       });
     }

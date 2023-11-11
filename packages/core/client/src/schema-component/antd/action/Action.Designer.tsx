@@ -99,38 +99,48 @@ function ButtonEditor(props) {
               title: t('Button icon'),
               default: fieldSchema?.['x-component-props']?.icon,
               'x-component-props': {},
-              'x-visible': !isLink,
+              // 'x-visible': !isLink,
               // description: `原字段标题：${collectionField?.uiSchema?.title}`,
             },
             type: {
               'x-decorator': 'FormItem',
               'x-component': 'Radio.Group',
-              title: t('Button background color'),
-              default: fieldSchema?.['x-component-props']?.danger
-                ? 'danger'
-                : fieldSchema?.['x-component-props']?.type === 'primary'
-                ? 'primary'
-                : 'default',
+              title: t('按钮类型'),
+              default: fieldSchema?.['x-component-props']?.type,
               enum: [
                 { value: 'default', label: '{{t("Default")}}' },
                 { value: 'primary', label: '{{t("Highlight")}}' },
                 { value: 'danger', label: '{{t("Danger red")}}' },
+                { value: 'text', label: '文本' },
+                { value: 'link', label: '链接' }
               ],
               'x-visible': !isLink,
             },
+            size:{
+              'x-decorator': 'FormItem',
+              'x-component': 'Radio.Group',
+              title: t('按钮尺寸'),
+              default: fieldSchema?.['x-component-props']?.size || 'default',
+              enum: [
+                { value: 'small', label: '小' },
+                { value: 'default', label: '中' },
+                { value: 'large', label: '大' }
+              ],
+              // 'x-visible': !isLink,
+            }
           },
         } as ISchema
       }
-      onSubmit={({ title, icon, type }) => {
+      onSubmit={({ title, icon, type, size }) => {
         fieldSchema.title = title;
         field.title = title;
         field.componentProps.icon = icon;
-        field.componentProps.danger = type === 'danger';
         field.componentProps.type = type;
+        field.componentProps.size = size;
         fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
         fieldSchema['x-component-props'].icon = icon;
-        fieldSchema['x-component-props'].danger = type === 'danger';
         fieldSchema['x-component-props'].type = type;
+        fieldSchema['x-component-props'].size = size;
         dn.emit('patch', {
           schema: {
             ['x-uid']: fieldSchema['x-uid'],

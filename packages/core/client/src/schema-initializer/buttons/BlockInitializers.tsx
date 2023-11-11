@@ -18,6 +18,12 @@ export const BlockInitializers = {
           component: 'TableBlockInitializer',
         },
         {
+          key: 'group-table',
+          type: 'item',
+          title: '{{t("Group Table")}}',
+          component: 'GroupTable.Initializer',
+        },
+        {
           key: 'form',
           type: 'item',
           title: '{{t("Form")}}',

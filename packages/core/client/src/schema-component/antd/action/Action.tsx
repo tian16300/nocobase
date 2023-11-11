@@ -42,6 +42,8 @@ export const Action: ComposedAction = observer(
       onClick,
       style,
       openSize,
+      size,
+      type,
       ...others
     } = useProps(props);
     const { wrapSSR, componentCls, hashId } = useStyles();
@@ -135,7 +137,6 @@ export const Action: ComposedAction = observer(
         <SortableItem
           role="button"
           aria-label={getAriaLabel()}
-          {...others}
           loading={field?.data?.loading}
           icon={icon ? <Icon type={icon} /> : null}
           disabled={disabled}
@@ -143,7 +144,9 @@ export const Action: ComposedAction = observer(
           onClick={handleButtonClick}
           component={tarComponent || Button}
           className={classnames(componentCls, hashId, className, 'nb-action')}
-          type={props.type === 'danger' ? undefined : props.type}
+          type={type}
+          size={size}
+          {...others}
         >
           {actionTitle}
           <Designer {...designerProps} />
@@ -182,6 +185,7 @@ export const Action: ComposedAction = observer(
         containerRefKey={containerRefKey}
         fieldSchema={fieldSchema}
       >
+        {popover}
         {popover && <RecursionField basePath={field.address} onlyRenderProperties schema={fieldSchema} />}
         {!popover && renderButton()}
         {!popover && props.children}

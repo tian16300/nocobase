@@ -128,6 +128,7 @@ export default {
   'Data blocks': '数据区块',
   'Filter blocks': '筛选区块',
   Table: '表格',
+  'Group Table':'分组表格',
   Form: '表单',
   List: '列表',
   'Grid Card': '网格卡片',

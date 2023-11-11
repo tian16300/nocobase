@@ -32,8 +32,6 @@ import { TaskGantt } from './task-gantt';
 import { TaskGanttContentProps } from './task-gantt-content';
 import { useProps } from '../../../../hooks';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-
-import 'react-reflex/styles.css';
 import { CollectionProvider, useCollection, useCollectionManager } from '@nocobase/client';
 import { useEventListener, useScroll, useSize } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
