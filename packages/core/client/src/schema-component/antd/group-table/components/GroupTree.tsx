@@ -141,8 +141,6 @@ export const GroupTreeView = (props: any) => {
     <TreeView {...props} 
      expandedKeys={expandedKeys}
      onExpand={setExpandedKeys}
-    //  onSelect={onSelect}  
-    //  setExpandedKeys={setExpandedKeys}
      ></TreeView>
   );
 };
