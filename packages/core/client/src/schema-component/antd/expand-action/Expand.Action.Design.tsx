@@ -48,26 +48,35 @@ export const ExpandActionDesign = (props) => {
                 'x-decorator': 'FormItem',
                 'x-component': 'Radio.Group',
                 title: t('Button background color'),
-                default: fieldSchema?.['x-component-props']?.danger
-                  ? 'danger'
-                  : fieldSchema?.['x-component-props']?.type === 'primary'
-                  ? 'primary'
-                  : 'default',
+                default: fieldSchema?.['x-component-props']?.type || 'default',
                 enum: [
                   { value: 'default', label: '{{t("Default")}}' },
                   { value: 'primary', label: '{{t("Highlight")}}' },
                   { value: 'danger', label: '{{t("Danger red")}}' },
+                  { value: 'text', label: '文本' },
+                  { value: 'link', label: '链接' }
                 ],
               },
+              size:{
+                'x-decorator': 'FormItem',
+                'x-component': 'Radio.Group',
+                title: t('按钮尺寸'),
+                default: fieldSchema?.['x-component-props']?.size || 'default',
+                enum: [
+                  { value: 'small', label: '小' },
+                  { value: 'default', label: '中' },
+                  { value: 'large', label: '大' }
+                ]
+              }
             },
           } as ISchema
         }
-        onSubmit={({ titleExpand, titleCollapse, iconExpand, iconCollapse, type }) => {
+        onSubmit={({ titleExpand, titleCollapse, iconExpand, iconCollapse, type, size }) => {
           fieldSchema.title = t('Expand/Collapse');
           field.title = t('Expand/Collapse');
           field.componentProps.icon = iconExpand;
-          field.componentProps.danger = type === 'danger';
           field.componentProps.type = type;
+          field.componentProps.size = size;
           fieldSchema['x-component-props'] = {
             ...(fieldSchema['x-component-props'] || {}),
             titleExpand,
@@ -75,7 +84,7 @@ export const ExpandActionDesign = (props) => {
             iconExpand,
             iconCollapse,
             type,
-            danger: type === 'danger',
+            size
           };
           dn.emit('patch', {
             schema: {

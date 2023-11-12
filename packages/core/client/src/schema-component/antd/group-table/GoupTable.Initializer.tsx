@@ -13,7 +13,7 @@ import { uid } from '@formily/shared';
 import { css } from '@emotion/css';
 
 export const createGroupTableSchema = (decoratorProps) => {
-  const { collection } = decoratorProps;
+  const { collection, group } = decoratorProps;
   return {
     type: 'void',
     'x-acl-action': `${collection}:list`,
@@ -31,36 +31,50 @@ export const createGroupTableSchema = (decoratorProps) => {
           useProps: '{{ useGroupTableProps }}',
         },
         properties: {
-          groupActions: {
-            type: 'void',
-            'x-initializer': 'GroupTableGroupActionInitializers',
-            'x-component': 'ActionBar',
-            'x-component-props': {
-              spaceProps: {
-                gap: 4,
-              },
-            },
-            properties: {},
-          },
-          groupRecordActions: {
-            type: 'void',
-            title: '{{ t("Actions") }}',
-            'x-decorator': 'GroupTable.GroupRecordActionBar',
-            'x-component':'ActionBar',
-            'x-designer': 'GroupTable.GroupRecordActionDesigner',
-            'x-initializer': 'GroupTableGroupRecordActionInitializers',
-            properties: {
+          group:{
+            'type':'string',
+            'x-component': 'GroupTable.GroupTree',
+            'x-collection-field':`${collection}.${group}`,
+            properties:{
               actions: {
                 type: 'void',
-                'x-decorator': 'DndContext',
-                'x-component': 'Space',
+                'x-initializer': 'GroupTableGroupActionInitializers',
+                'x-component': 'ActionBar',
                 'x-component-props': {
-                  split: '',
+                  spaceProps: {
+                    gap: 4,
+                  },
                 },
                 properties: {},
               },
-            },
-          },
+              recordActions: {
+                type: 'void',
+                title: '{{ t("Actions") }}',
+                'x-decorator': 'GroupTable.GroupRecordActionBar',
+                'x-component':'ActionBar',
+                'x-designer': 'GroupTable.GroupRecordActionDesigner',
+                'x-initializer': 'GroupTableGroupRecordActionInitializers',
+                properties: {
+                  actions: {
+                    type: 'void',
+                    'x-decorator': 'DndContext',
+                    'x-component': 'Space',
+                    'x-component-props': {
+                      split: '',
+                    },
+                    properties: {},
+                  },
+                },
+              }
+            }
+          },          
+          actions: {
+            type: 'void',
+            'x-initializer': 'GroupTableActionInitializers',
+            'x-component': 'ActionBar',
+            'x-component-props': {},
+            properties: {},
+          }
         },
       },
     },
@@ -95,15 +109,20 @@ export const Initializer = (props) => {
         const fieldItems = fields.map((field, index) => {
           return {
             sort: index,
-            name: t(field?.uiSchema?.title),
-            visible: false,
+            title: t(field?.uiSchema?.title),
+            name: field.name,
+            visible: false
           };
         });
         const columnActions = {
           visible: true,
           align: 'right',
         };
-
+        const pagination = {
+          position: 'bottomRight',
+          showQuickJumper: true,
+          pageSize: 10
+        };
         const values = await FormDialog(
           t('创建分组表格区块'),
           () => {
@@ -156,11 +175,17 @@ export const Initializer = (props) => {
                                     'x-decorator': 'FormItem',
                                     'x-component': 'ArrayItems.SortHandle',
                                   },
-                                  name: {
+                                  title: {
                                     type: 'string',
                                     'x-decorator': 'FormItem',
                                     'x-component': 'Input',
                                     'x-read-pretty': true,
+                                  },
+                                  name:{
+                                    type: 'string',
+                                    'x-decorator': 'FormItem',
+                                    'x-component': 'Input',
+                                    'x-display':false
                                   },
                                   visible: {
                                     type: 'boolean',
@@ -221,6 +246,52 @@ export const Initializer = (props) => {
                             },
                           },
                         },
+                        pagination: {
+                          title: '分页配置',
+                          type: 'object',
+                          'x-decorator': 'FormItem',
+                          'x-component': 'div',
+                          'x-decorator-props': {
+                            className: 'columnActions-item',
+                          },
+                          properties: {
+                            position:{
+                              type: 'string',
+                              title: '位置',
+                              'x-decorator': 'FormItem',
+                              'x-component': 'Radio.Group',
+                              enum: [
+                                {
+                                  label: '底部左侧',
+                                  value: 'bottomLeft',
+                                },
+                                {
+                                  label: '底部右侧',
+                                  value: 'bottomRight',
+                                },
+                              ]
+                            },
+                            showQuickJumper: {
+                              type: 'boolean',
+                              title: '快速跳转',
+                              'x-decorator': 'FormItem',
+                              'x-component': 'Switch'
+                            },
+                            pageSize: {
+                              type: 'number',
+                              title: '每页条数',
+                              'x-decorator': 'FormItem',
+                              'x-component': 'Select',
+                              enum : [10,20,50,100,200].map((item)=>{
+                                return {
+                                  label: item,
+                                  value: item
+                                }
+                              })
+                            }
+                          }
+
+                        }
                       },
                     }}
                   />
@@ -234,6 +305,7 @@ export const Initializer = (props) => {
             group: '',
             fields: fieldItems,
             columnActions: columnActions,
+            pagination:pagination
           },
         });
         insert(
@@ -246,3 +318,6 @@ export const Initializer = (props) => {
     ></DataBlockInitializer>
   );
 };
+
+
+

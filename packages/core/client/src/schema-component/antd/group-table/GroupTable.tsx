@@ -7,14 +7,15 @@ import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { css } from '@emotion/css';
 import { useToken } from '..';
-import { GroupTree, Table } from './components';
+import { GroupTree, TableMain } from './components';
 import { GroupTableGroupRecordActionBar } from './GroupTable.GroupRecordActionBar';
 import { GroupTableGroupRecordActionDesigner } from './GroupTable.GroupRecordActionDesigner';
+import { RecursionField, useFieldSchema } from '@formily/react';
 export const GroupTable: any = (props) => {
   const { token } = useToken();
   const { useProps } = props;
-  const { collection, group } = useProps?.();
-
+  const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
+  const fieldSchema = useFieldSchema();
   return (
     <ReflexContainer
       orientation="vertical"
@@ -32,13 +33,26 @@ export const GroupTable: any = (props) => {
     >
       <ReflexElement className="left-tree" flex={0.3}>
         <div className="pane-container">
-          <GroupTree name={`${collection}.${group}`} />
+          {/* <GroupTree name={`${collection}.${group}`} /> */}
+          <RecursionField name={'tree'} schema={fieldSchema.properties.group} />
         </div>
       </ReflexElement>
       <ReflexSplitter />
       <ReflexElement className="right-table">
         <div className="pane-container">
-          <Table />
+          <TableMain 
+            collection={collection}
+            resource={collection} 
+            action='list'
+            fields={fields}
+            pagination={pagination}
+            columnActions={columnActions}
+            // params={{
+            //   pageSize: pagination.pageSize || 10,
+            //   page: pagination.page || 1
+            // }}
+            {...others}
+          />
         </div>
       </ReflexElement>
     </ReflexContainer>
@@ -50,3 +64,4 @@ GroupTable.Designer = Designer;
 GroupTable.Initializer = Initializer;
 GroupTable.GroupRecordActionBar = GroupTableGroupRecordActionBar;
 GroupTable.GroupRecordActionDesigner = GroupTableGroupRecordActionDesigner;
+GroupTable.GroupTree = GroupTree;

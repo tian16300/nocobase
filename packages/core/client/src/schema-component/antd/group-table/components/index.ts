@@ -1,2 +1,2 @@
 export * from './GroupTree';
-export * from './Table';
+export * from './TableMain';

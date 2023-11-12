@@ -1,11 +1,10 @@
 import { css } from '@emotion/css';
 import { useFieldSchema } from '@formily/react';
 import { Button } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { useCompile } from '../../hooks';
 import { useTableBlockContext, useTableSelectorContext } from '../../../block-provider';
 import { Icon } from '../../../icon';
-
 const actionDesignerCss = css`
   position: relative;
   &:hover {
@@ -47,25 +46,33 @@ const actionDesignerCss = css`
 `;
 
 export const ExpandAction = (props) => {
+  const { expandFlag } = props;
   const schema = useFieldSchema();
   const ctxSelector = useTableSelectorContext();
   const ctxBlock = useTableBlockContext();
   const isTableSelector = schema.parent?.parent?.['x-decorator'] === 'TableSelectorProvider';
   const ctx = isTableSelector ? ctxSelector : ctxBlock;
   const { titleExpand, titleCollapse, iconExpand, iconCollapse } = schema['x-component-props'] || {};
+  const [expandAll, setExpandAll] = useState((ctx?.expandFlag? true : false)|| expandFlag)
   const compile = useCompile();
   return (
     <div className={actionDesignerCss}>
-      {ctx?.params['tree'] && (
+      {(
         <Button
           onClick={() => {
-            ctx?.setExpandFlag();
+            setExpandAll(!expandAll);
+            if(ctx && typeof ctx?.setExpandFlag === 'function'){
+              ctx?.setExpandFlag(!expandAll);
+            }
+            if(typeof props?.setExpandFlag === 'function'){
+              props?.setExpandFlag(!expandAll);
+            }
           }}
-          icon={<Icon type={ctx?.expandFlag ? iconCollapse : iconExpand} />}
+          icon={<Icon type={expandAll ? iconCollapse : iconExpand} />}
           type={props.type}
         >
           {props.children?.[1]}
-          <span style={{ marginLeft: 10 }}>{ctx?.expandFlag ? compile(titleCollapse) : compile(titleExpand)}</span>
+          <span style={{ marginLeft: 10 }}>{expandAll ? compile(titleCollapse) : compile(titleExpand)}</span>
         </Button>
       )}
     </div>

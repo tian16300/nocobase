@@ -55,5 +55,6 @@ export * from './tree-select';
 export * from './upload';
 export * from './variable';
 export * from './group-table';
+export * from './tree-view';
 import 'react-reflex/styles.css';
 import './index.less';

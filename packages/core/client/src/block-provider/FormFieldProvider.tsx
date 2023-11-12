@@ -53,6 +53,7 @@ const InternalFormFieldProvider = (props) => {
   if (service.loading) {
     return <Spin />;
   }
+  debugger;
 
   return (
     <RecordProvider record={service?.data?.data}>
