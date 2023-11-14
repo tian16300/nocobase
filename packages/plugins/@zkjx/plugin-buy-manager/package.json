@@ -1,8 +1,8 @@
 {
   "name": "@zkjx/plugin-buy-manager",
-  "version": "0.14.0-alpha.7",
+  "version": "0.15.0-alpha.2",
   "main": "dist/server/index.js",
-  "dependencies": {},
+  "private": true,
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",

@@ -7,6 +7,7 @@
   "version": "0.15.0-alpha.2",
   "license": "AGPL-3.0",
   "main": "./dist/server/index.js",
+  "private": true,
   "devDependencies": {
     "@ant-design/icons": "5.x",
     "@formily/antd-v5": "1.x",

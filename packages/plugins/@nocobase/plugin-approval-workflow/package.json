@@ -1,5 +1,5 @@
 {
-  "name": "@zkjx/plugin-company-info",
+  "name": "@nocobase/plugin-approval-workflow",
   "version": "0.15.0-alpha.2",
   "main": "dist/server/index.js",
   "private": true,
