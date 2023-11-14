@@ -10,6 +10,7 @@ import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v
 import { BlockProvider, useBlockRequestContext, useFilterByTk } from './BlockProvider';
 import { getValuesByPath } from '@nocobase/utils/client';
 import { FormActiveFieldsProvider } from './hooks';
+import { TemplateBlockProvider } from './TemplateBlockProvider';
 
 export const FormBlockContext = createContext<any>({});
 
@@ -106,11 +107,13 @@ export const FormBlockProvider = (props) => {
   const params = { ...props.params };
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
-      <BlockProvider name={props.name || 'form'} {...props} block={'form'}>
-        <FormActiveFieldsProvider name="form">
-          <InternalFormBlockProvider {...props} />
-        </FormActiveFieldsProvider>
-      </BlockProvider>
+      <TemplateBlockProvider>
+        <BlockProvider name={props.name || 'form'} {...props} block={'form'}>
+          <FormActiveFieldsProvider name="form">
+            <InternalFormBlockProvider {...props} />
+          </FormActiveFieldsProvider>
+        </BlockProvider>
+      </TemplateBlockProvider>
     )
   );
 };

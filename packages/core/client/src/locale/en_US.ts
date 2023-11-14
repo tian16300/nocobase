@@ -38,6 +38,7 @@ export default {
   "Unconnected": "Unconnected",
   "System settings": "System settings",
   "System title": "System title",
+  "Settings": "Settings",
   "System simple title": "System simple title",
   "Logo": "Logo",
   "Add menu item": "Add menu item",
