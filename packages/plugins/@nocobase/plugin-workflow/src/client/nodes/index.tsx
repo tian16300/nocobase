@@ -43,7 +43,6 @@ import query from './query';
 import request from './request';
 import sql from './sql';
 import update from './update';
-
 export interface Instruction {
   title: string;
   type: string;
@@ -71,7 +70,6 @@ instructions.register('loop', loop);
 instructions.register('delay', delay);
 
 instructions.register('manual', manual);
-
 instructions.register('query', query);
 instructions.register('create', create);
 instructions.register('update', update);

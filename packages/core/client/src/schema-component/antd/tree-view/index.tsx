@@ -68,12 +68,15 @@ export const TreeView = connect(
     };
     const handleSelect = (selectedKeys) => {
       setSelectedKeys(selectedKeys as string[]);
+      if (typeof onSelect === 'function') {
+        onSelect(selectedKeys);
+      }
     };
     return (
       <div
         ref={boxRef}
         className={css`
-          height: ${height};
+          height: ${height};         
         `}
       >
         <div ref={searchBoxRef}>
@@ -91,6 +94,9 @@ export const TreeView = connect(
           className={css`
             .ant-tree-node-content-wrapper: hover {
               background-color: transparent;
+            }
+            .ant-tree-list-holder{
+              overflow-x: hidden;
             }
           `}
           titleRender={(item: any) => {

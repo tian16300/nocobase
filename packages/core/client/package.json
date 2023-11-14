@@ -47,6 +47,7 @@
     "markdown-it-highlightjs": "3.3.1",
     "mathjs": "^10.6.0",
     "mermaid": "9.4.3",
+    "react-antd-column-resize": "^1.0.3",
     "react-beautiful-dnd": "^13.1.0",
     "react-big-calendar": "^1.8.1",
     "react-drag-listview": "^0.1.9",

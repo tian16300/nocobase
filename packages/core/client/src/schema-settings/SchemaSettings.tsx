@@ -625,6 +625,7 @@ SchemaSettings.ConnectDataBlocks = function ConnectDataBlocks(props: {
   let { targets = [], uid } = findFilterTargets(fieldSchema);
   const compile = useCompile();
   const { getAllCollectionsInheritChain } = useCollectionManager();
+  console.log('ConnectDataBlocks dataBlocks.length',dataBlocks.length);
 
   if (!inProvider) {
     return null;

@@ -23,7 +23,7 @@ import { Table as AntdTable, Button, Dropdown, Space, TableColumnProps, Tooltip 
 import { default as classNames, default as cls } from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DndContext, useDesignable, useTableSize } from '../..';
+import { DndContext, Json, useDesignable, useTableSize } from '../..';
 import {
   CollectionProvider,
   RecordIndexProvider,
@@ -39,13 +39,13 @@ import { useToken } from '../__builtins__';
 import { SubFormProvider } from '../association-field/hooks';
 import { ColumnFieldProvider } from './components/ColumnFieldProvider';
 import { extractIndex, isCollectionFieldComponent, isColumnComponent } from './utils';
-
+import { useAntdColumnResize } from 'react-antd-column-resize';
 const useArrayField = (props) => {
   const field = useField<ArrayField>();
   return (props.field || field) as ArrayField;
 };
 
-const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMove?:boolean; isSubTable?: boolean }) => {
+const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove?: boolean; isSubTable?: boolean }) => {
   const field = useArrayField(props);
   const schema = useFieldSchema();
   const { name } = useCollection();
@@ -266,7 +266,7 @@ const useTableColumns = (props: { showDel?: boolean;   showAdd?:boolean; showMov
     tableColumns.push({
       title: '',
       key: 'actions',
-      width: (handleItems.length>3?3:handleItems.length)*36,
+      width: (handleItems.length > 3 ? 3 : handleItems.length) * 36,
       align: 'center',
       fixed: 'right',
       render: (v, record, index) => {
@@ -424,11 +424,29 @@ export const Table: any = observer(
       }
     }, [expandFlag, allIncludesChildren]);
 
-    useEffect(()=>{
-        setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
-    },[
-      ctx?.field?.data?.selectedRowKeys
-    ])
+    useEffect(() => {
+      setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
+    }, [ctx?.field?.data?.selectedRowKeys]);
+
+    const [colDataIndexs, setColDataIndexs] = useState([]);
+    useEffect(() => {
+      const newDataIndexes = columns.map(({dataIndex})=>{
+        return dataIndex;
+      });
+      if(JSON.stringify(colDataIndexs) !== JSON.stringify(newDataIndexes)){
+        setColDataIndexs(newDataIndexes)
+      }   
+    },[columns]);
+    const {
+      resizableColumns,
+      components: reSizeComponents,
+      tableWidth,
+      resetColumns
+    } = useAntdColumnResize(() => {
+      return {columns, minWidth: 100};
+    }, [columns.length, colDataIndexs]);
+   
+    
 
     const components = useMemo(() => {
       return {
@@ -442,7 +460,7 @@ export const Table: any = observer(
           },
           cell: (props) => {
             return (
-              <th
+              <reSizeComponents.header.cell
                 {...props}
                 className={cls(
                   props.className,
@@ -452,9 +470,13 @@ export const Table: any = observer(
                     &:hover .general-schema-designer {
                       display: block;
                     }
+                    .resizable-title{
+                      // overflow-x:hidden;
+                      overflow:initial;
+                    }
                   `,
                 )}
-              />
+              ></reSizeComponents.header.cell>
             );
           },
         },
@@ -480,6 +502,7 @@ export const Table: any = observer(
             );
           },
           row: (props) => {
+            console.log('header wrapper row', props);
             return <SortableRow {...props}></SortableRow>;
           },
           cell: (props) => {
@@ -670,13 +693,13 @@ export const Table: any = observer(
     const scroll = useMemo(() => {
       return fixedBlock
         ? {
-            x: 'max-content',
+            x: tableWidth,
             y: tableHeight,
           }
         : {
-            x: 'max-content',
+            x: tableWidth,
           };
-    }, [fixedBlock, tableHeight]);
+    }, [fixedBlock, tableHeight, tableWidth]);
     return (
       <div
         className={css`
@@ -715,7 +738,7 @@ export const Table: any = observer(
             rowClassName={(record) => (selectedRow.includes(record[rowKey]) ? highlightRow : '')}
             tableLayout={'auto'}
             scroll={scroll}
-            columns={columns}
+            columns={resizableColumns}
             expandable={{
               onExpand: (flag, record) => {
                 const newKeys = flag

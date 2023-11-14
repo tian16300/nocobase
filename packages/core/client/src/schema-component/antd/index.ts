@@ -56,5 +56,6 @@ export * from './upload';
 export * from './variable';
 export * from './group-table';
 export * from './tree-view';
+export * from './approval-timeline';
 import 'react-reflex/styles.css';
 import './index.less';

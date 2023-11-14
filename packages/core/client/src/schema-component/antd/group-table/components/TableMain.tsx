@@ -8,7 +8,15 @@ import '@antv/s2-react/dist/style.min.css';
 import { FormContext, RecursionField, useFieldSchema } from '@formily/react';
 import { createForm } from '@formily/core';
 import { SchemaComponentOptions } from '../../../core';
-import { BlockProvider, useBlockRequestContext, useCollectionManager, useCompile, useParsedFilter, useRecord } from '../../../..';
+import {
+  BlockProvider,
+  useBlockRequestContext,
+  useCollectionManager,
+  useCompile,
+  useParsedFilter,
+  useRecord,
+  useToken,
+} from '../../../..';
 export const TableMain = (props) => {
   return (
     <GroupTableMainProvider {...props}>
@@ -27,48 +35,161 @@ const TableView = (props: any) => {
     },
     interaction: {
       enableCopy: true,
+      hoverHighlight: true,
+      selectedCellsSpotlight: true,
+      multiSelection: true,
     },
   };
   const compile = useCompile();
-  
+
   const { service } = useBlockRequestContext();
-  const { fields } = props;
-  const visFields = fields.filter(({visible})=>{ return visible});
-  const columns = visFields.map(({name})=>{
-    return name
+  const { getCollectionField, getCollection } = useCollectionManager();
+  const { fields, collection } = props;
+  const visFields = fields.filter(({ visible }) => {
+    return visible;
   });
-  const metas = visFields.map(({name,title})=>{
-    return {
-        field: name,
-        name: compile(title)
+  const columns = visFields.map(({ name }) => {
+    return name;
+  });
+  const metas = visFields.map(({ name, title }) => {
+    const field = getCollectionField(`${collection}.${name}`);
+    let formatter = (value) => {
+      return value;
+    };
+    if (field?.target) {
+      const titleField = getCollection(field.target)?.titleField || 'id';
+      formatter = (value) => {
+        return value?.[titleField];
+      };
     }
+    return {
+      field: name,
+      name: compile(title),
+      formatter: formatter,
+    };
   });
   const s2DataConfig = {
     fields: {
       columns: columns,
     },
     meta: metas,
-    data: service.data?.data||[]
+    data: service.data?.data || [],
   };
-  
+
   const fieldSchema = useFieldSchema();
   const boxRef = useRef();
+  const { token } = useToken();
+  const textStyle = {
+    fontSize: 14,
+  };
+  const textTheme = {
+    text: {
+      ...textStyle,
+    },
+    seriesText: {
+      ...textStyle,
+    },
+    measureText: {
+      ...textStyle,
+    },
+  };
+  const { 
+    paddingContentVerticalLG,
+     padding, 
+     colorFillAlterSolid: tableHeaderBg, 
+     colorBorderSecondary,
+     colorBgContainer,
+     controlItemBgActive
+    } = token as any;
+  const DefaultTextTheme = {
+    ...textTheme,
+    seriesNumberWidth: 60,
+    cell: {
+      padding: {
+        top: paddingContentVerticalLG,
+        right: padding,
+        bottom: paddingContentVerticalLG,
+        left: padding,
+      },
+      backgroundColor:colorBgContainer,
+    //   horizontalBorderColor:colorBorderSecondary,
+    //   verticalBorderColor:'transparent',
+      interactionState:{
+        hoverFocus:{
+            borderColor: controlItemBgActive
+        },
+        selected:{
+
+        },
+        highlight:{
+
+        }
+      }
+    },
+    splitLine:{
+        horizontalBorderColor: colorBorderSecondary,
+        verticalBorderColor: 'transparent'
+    }
+  };
+  const colCellTheme = {
+    cell:{
+        ...DefaultTextTheme.cell,
+        backgroundColor: tableHeaderBg,
+        padding: {
+            top: paddingContentVerticalLG,
+            right: padding,
+            bottom: paddingContentVerticalLG,
+            left: padding,
+          }
+    }
+  };
+
+  const themeCfg = {
+    name: 'gray',
+    theme: {
+      rowCell: {
+        ...DefaultTextTheme
+      },
+      colCell: {
+        ...DefaultTextTheme,
+        ...colCellTheme,
+      },
+
+      //   cornerCell: { ...textTheme },
+      //   rowCell: { ...textTheme },
+      //   colCell: { ...textTheme },
+      //   dataCell: {
+      //     ...textTheme,
+      //   },
+    },
+  } as any;
   return (
     <>
-      <div className={css`
-       margin-bottom: var(--nb-spacing);
-      `}>
+      <div
+        className={css`
+          margin-bottom: var(--nb-spacing);
+        `}
+      >
         <RecursionField name={'table-anctionBar'} schema={fieldSchema.properties.actions} />
       </div>
       <div ref={boxRef}>
-        <SheetComponent themeCfg={{ name: 'gray' }} 
-        dataCfg={s2DataConfig} 
-        options={s2Options} 
-        sheetType="table"
-        adaptive={{
+        <SheetComponent
+          themeCfg={themeCfg}
+          dataCfg={s2DataConfig}
+          options={s2Options}
+          sheetType="table"
+          adaptive={{
             width: true,
             height: false,
             getContainer: () => boxRef.current,
+          }}
+          showPagination={{
+            onChange: (current, pageSize) => {
+              console.log(current, pageSize);
+            },
+            onShowSizeChange: (current, pageSize) => {
+              console.log(current, pageSize);
+            },
           }}
         />
       </div>

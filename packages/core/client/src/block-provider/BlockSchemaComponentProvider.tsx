@@ -13,7 +13,7 @@ import { KanbanBlockProvider, useKanbanBlockProps } from './KanbanBlockProvider'
 import { TableBlockProvider, useTableBlockProps } from './TableBlockProvider';
 import { TableFieldProvider, useTableFieldProps } from './TableFieldProvider';
 import { TableSelectorProvider, useTableSelectorProps } from './TableSelectorProvider';
-import { useGroupTableProps } from '../schema-component/antd/group-table/GroupTable.Decorator';
+import { useGroupTableBlockProps, useGroupTableProps } from '../schema-component/antd/group-table/GroupTable.Decorator';
 
 // TODO: delete this, replaced by `BlockSchemaComponentPlugin`
 export const BlockSchemaComponentProvider: React.FC = (props) => {
@@ -93,7 +93,8 @@ export class BlockSchemaComponentPlugin extends Plugin {
       useGanttFormGroupFieldProps,     
       useGanttFormSortFieldProps,
       useGanttFormRangeFieldProps,
-      useGroupTableProps
+      useGroupTableProps,
+      useGroupTableBlockProps
     });
   }
 }

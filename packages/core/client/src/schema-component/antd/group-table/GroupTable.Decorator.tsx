@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { BlockProvider } from '../../../block-provider';
+import { BlockProvider, useTableBlockProps } from '../../../block-provider';
 import { useCollectionManager } from '../../../collection-manager';
 interface GroupTableBlockResourceContextProps  {
     groupSelectedKeys?: string []; 
@@ -31,3 +31,14 @@ export const useGroupTableProps = () => {
     ...ctx,
   };
 };
+export const useGroupTableBlockProps = () => {
+  const ctx = useTableBlockProps();
+  return {
+    ...ctx,
+  };
+  }
+
+
+  export const filterByGroup = (groupValue)=>{
+    
+  };
