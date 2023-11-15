@@ -89,6 +89,7 @@ export const DuplicateAction = observer(
         }
       }
     };
+
     return (
       <div
         className={cx(actionDesignerCss, {
