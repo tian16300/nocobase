@@ -67,6 +67,15 @@ export default function () {
         defaultValue: false,
       },
       {
+        type: 'string',
+        name: 'bussinessCollectionName',
+      },
+      {
+        type: 'boolean',
+        name: 'isApproval',
+        defaultValue: false,
+      },
+      {
         type: 'hasMany',
         name: 'revisions',
         target: 'workflows',

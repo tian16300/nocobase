@@ -473,7 +473,11 @@ export const Table: any = observer(
                     .resizable-title{
                       // overflow-x:hidden;
                       overflow:initial;
+                      .ant-table-column-title{
+                        overflow:initial;
+                      }
                     }
+                   
                   `,
                 )}
               ></reSizeComponents.header.cell>
@@ -666,6 +670,7 @@ export const Table: any = observer(
               );
             },
             ...rowSelection,
+            columnWidth: 48
           }
         : undefined,
     };

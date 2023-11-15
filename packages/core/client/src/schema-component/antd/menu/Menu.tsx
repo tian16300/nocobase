@@ -80,7 +80,7 @@ const designerCss = css`
   margin-right: -20px;
   padding: 0 20px;
   width: calc(100% + 40px);
-  height: 100%;
+  // height: 100%;
   &:hover {
     > .general-schema-designer {
       display: block;

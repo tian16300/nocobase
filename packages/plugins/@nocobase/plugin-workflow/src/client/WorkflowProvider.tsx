@@ -15,6 +15,7 @@ import { instructions } from './nodes';
 import { workflowSchema } from './schemas/workflows';
 import { getTriggersOptions, triggers } from './triggers';
 import { ExecutionStatusSelect } from './components/ExecutionStatusSelect';
+import { approvalWorkflows } from './schemas/approvalWorkflows';
 
 // registerField(expressionField.group, 'expression', expressionField);
 
@@ -24,7 +25,7 @@ export function useWorkflowContext() {
   return useContext(WorkflowContext);
 }
 
-export function WorkflowPane() {
+export function WorkflowPane(props) {
   const ctx = useContext(SchemaComponentContext);
   return (
     <Card bordered={false}>
@@ -46,7 +47,32 @@ export function WorkflowPane() {
     </Card>
   );
 }
-
+/**
+ * 审批流程
+ * @returns 
+ */
+export const ApprovalWorkflow  = ()=>{
+  const ctx = useContext(SchemaComponentContext);
+  return (
+    <Card bordered={false}>
+      <SchemaComponentContext.Provider value={{ ...ctx, designable: false }}>
+        <SchemaComponent
+          schema={approvalWorkflows}
+          components={{
+            WorkflowLink,
+            ExecutionResourceProvider,
+            ExecutionLink,
+            OpenDrawer,
+            ExecutionStatusSelect,
+          }}
+          scope={{
+            getTriggersOptions,
+          }}
+        />
+      </SchemaComponentContext.Provider>
+    </Card>
+  );
+}
 export const WorkflowProvider = (props) => {
   const pmCtx = useContext(PluginManagerContext);
   const cmCtx = useContext(CollectionManagerContext);

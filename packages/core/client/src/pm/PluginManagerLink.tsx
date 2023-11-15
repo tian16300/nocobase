@@ -5,8 +5,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../application';
-import { ActionContextProvider, useCompile } from '../schema-component';
-import { useToken } from '../style';
+import { ActionContextProvider, useCompile, useDesignable, useToken } from '../schema-component';
 
 export const PluginManagerLink = () => {
   const { t } = useTranslation();
@@ -16,7 +15,7 @@ export const PluginManagerLink = () => {
     <Tooltip title={t('Plugin manager')}>
       <Button
         data-testid={'plugin-manager-button'}
-        icon={<ApiOutlined style={{ color: token.colorTextHeaderMenu }} />}
+        icon={<ApiOutlined  />}
         title={t('Plugin manager')}
         onClick={() => {
           navigate('/admin/pm/list');
@@ -100,7 +99,7 @@ export const SettingsCenterDropdown = () => {
       >
         <Button
           data-testid="plugin-settings-button"
-          icon={<SettingOutlined style={{ color: token.colorTextHeaderMenu }} />}
+          icon={<SettingOutlined />}
           // title={t('All plugin settings')}
         />
       </Popover>

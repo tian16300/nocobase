@@ -85,6 +85,31 @@ export const executionSchema = {
             },
           },
           properties: {
+            copy:{
+              type: 'void',
+              title: '{{t("Copy")}}',
+              'x-component': 'Action',
+              'x-component-props': {
+                useAction() {
+                  const { t } = useTranslation();
+                  const { refresh, defaultRequest } = useResourceActionContext();
+                  const { resource } = useResourceContext();
+                  const { setVisible } = useActionContext();
+                  return {
+                    async run() {
+                      await resource.destroy({ filter: defaultRequest.params?.filter });
+                      message.success(t('Operation succeeded'));
+                      refresh();
+                      setVisible(false);
+                    },
+                  };
+                },
+                confirm: {
+                  title: `{{t("Clear all executions", { ns: "${NAMESPACE}" })}}`,
+                  content: `{{t("Clear executions will not reset executed count, and started executions will not be deleted, are you sure you want to delete them all?", { ns: "${NAMESPACE}" })}}`,
+                },
+              },
+            },
             clear: {
               type: 'void',
               title: '{{t("Clear")}}',
@@ -110,6 +135,7 @@ export const executionSchema = {
                 },
               },
             },
+
           },
         },
         table: {

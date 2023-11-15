@@ -192,7 +192,7 @@ export const CurrentUser = () => {
               white-space: nowrap;
               text-overflow: ellipsis;
             `}
-            style={{ cursor: 'pointer', border: 0, padding: '16px', color: token.colorTextHeaderMenu }}
+            style={{ cursor: 'pointer', border: 0, padding: '16px' }}
           >
             {data?.data?.nickname || data?.data?.username || data?.data?.email}
           </span>

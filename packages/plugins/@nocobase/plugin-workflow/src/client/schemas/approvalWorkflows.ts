@@ -23,6 +23,28 @@ const collection = {
       } as ISchema,
     },
     {
+      name: 'bussinessCollectionName',
+      type: 'string',
+      interface: 'collection',
+      uiSchema: {
+        type: 'string',
+        'x-component': 'CollectionSelect',
+        title: '关联业务表',
+      },
+    },
+    {
+      type: 'boolean',
+      name: 'isApproval',
+      interface: 'checkbox',
+      uiSchema: {
+        title: `{{t("isApproval", { ns: "${NAMESPACE}" })}}`,
+        type: 'boolean',
+        'x-component': 'Switch',
+        'x-decorator': 'FormItem',
+        default: true,
+      } as ISchema,
+    },
+    {
       type: 'string',
       name: 'type',
       interface: 'select',
@@ -36,6 +58,7 @@ const collection = {
         },
         required: true,
       } as ISchema,
+      default: 'collection',
     },
     {
       type: 'string',
@@ -78,6 +101,22 @@ const collection = {
       type: 'object',
       name: 'options',
     },
+    {
+      name: 'config',
+      type: 'json',
+      interface: 'json',
+      uiSchema: {
+        type: 'object',
+        'x-component': 'Input.JSON',
+        'x-component-props': {
+          autoSize: {
+            minRows: 5,
+          },
+        },
+        default: null,
+        title: '配置',
+      },
+    },
   ],
 };
 
@@ -89,6 +128,33 @@ const workflowFieldset = {
   type: {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
+    required: true,
+    // 'x-display': true
+  },
+  isApproval: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    // 'x-display': true
+  },
+  bussinessCollectionName: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    required: true,
+  },
+  config: {
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    'x-reactions': [
+      {
+        dependencies: ['.bussinessCollectionName'],
+        fulfill: {
+          state: {
+            value:'{{ {"collection": $deps[0] ,"changed": ["approve_status"],"appends": ["updatedBy", "updatedBy.dept"],"condition": { "$and": []},"mode": 2} }}'
+          }
+        },
+      },
+    ],
+    'x-hidden': true
   },
   enabled: {
     'x-component': 'CollectionField',
@@ -123,7 +189,7 @@ const workflowFieldset = {
   },
 };
 
-export const workflowSchema: ISchema = {
+export const approvalWorkflows: ISchema = {
   type: 'void',
   properties: {
     [uid()]: {
@@ -138,9 +204,7 @@ export const workflowSchema: ISchema = {
           params: {
             filter: {
               current: true,
-              isApproval:{
-                $not: true
-              }
+              isApproval: true,
             },
             sort: ['-createdAt'],
             except: ['config'],
@@ -189,13 +253,27 @@ export const workflowSchema: ISchema = {
                   'x-decorator': 'Form',
                   'x-decorator-props': {
                     initialValue: {
-                      current: true
+                      current: true,
+                      type: 'collection',
+                      isApproval: true,
+                      config: {
+                        collection: '',
+                        changed: ['approve_status'],
+                        appends: ['updatedBy', 'updatedBy.dept'],
+                        condition: {
+                          $and: [],
+                        },
+                        mode: 2,
+                      },
                     },
                   },
                   title: '{{t("Add new")}}',
                   properties: {
                     title: workflowFieldset.title,
-                    type: workflowFieldset.type,
+                    // type: workflowFieldset.type,
+                    // isApproval: workflowFieldset.isApproval,
+                    bussinessCollectionName: workflowFieldset.bussinessCollectionName,
+                    config: workflowFieldset.config,
                     description: workflowFieldset.description,
                     options: workflowFieldset.options,
                     footer: {
@@ -220,6 +298,19 @@ export const workflowSchema: ISchema = {
                       },
                     },
                   },
+                  ['x-linkage-rules']: [
+                    {
+                      condition: {
+                        $and: [],
+                      },
+                      actions: [
+                        {
+                          targetFields: ['type', 'isApproval'],
+                          operator: 'hidden',
+                        },
+                      ],
+                    },
+                  ],
                 },
               },
             },
@@ -260,12 +351,12 @@ export const workflowSchema: ISchema = {
                 },
               },
             },
-            type: {
+            bussinessCollectionName: {
               type: 'void',
               'x-decorator': 'Table.Column.Decorator',
               'x-component': 'Table.Column',
               properties: {
-                type: {
+                bussinessCollectionName: {
                   type: 'string',
                   'x-component': 'CollectionField',
                   'x-read-pretty': true,
@@ -326,8 +417,8 @@ export const workflowSchema: ISchema = {
                       type: 'void',
                       'x-component': 'WorkflowLink',
                       'x-component-props': {
-                        'params':'?from=workflow'
-                      }
+                        params: '?from=approvalWorkflow',
+                      },
                     },
                     update: {
                       type: 'void',
@@ -347,6 +438,9 @@ export const workflowSchema: ISchema = {
                           title: '{{ t("Edit") }}',
                           properties: {
                             title: workflowFieldset.title,
+                            type: workflowFieldset.type,
+                            isApproval: workflowFieldset.isApproval,
+                            bussinessCollectionName: workflowFieldset.bussinessCollectionName,
                             enabled: workflowFieldset.enabled,
                             description: workflowFieldset.description,
                             options: workflowFieldset.options,
@@ -372,6 +466,19 @@ export const workflowSchema: ISchema = {
                               },
                             },
                           },
+                          ['x-linkage-rules']: [
+                            {
+                              condition: {
+                                $and: [],
+                              },
+                              actions: [
+                                {
+                                  targetFields: ['type', 'isApproval'],
+                                  operator: 'hidden',
+                                },
+                              ],
+                            },
+                          ],
                         },
                       },
                     },
@@ -459,3 +566,10 @@ export const workflowSchema: ISchema = {
     },
   },
 };
+
+/* 
+人员 [userId]
+申请人主管 
+{{$context.data.updatedBy.dept.supervisor.id}} 
+
+*/

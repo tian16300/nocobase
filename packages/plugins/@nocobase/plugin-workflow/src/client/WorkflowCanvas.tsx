@@ -13,8 +13,7 @@ import { str2moment } from '@nocobase/utils/client';
 import { App, Breadcrumb, Button, Dropdown, Switch, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CanvasContent } from './CanvasContent';
 import { ExecutionLink } from './ExecutionLink';
 import { FlowContext, useFlowContext } from './FlowContext';
@@ -53,7 +52,14 @@ export function WorkflowCanvas() {
   const [visible, setVisible] = useState(false);
   const { styles } = useStyles();
   const { modal } = App.useApp();
-
+  const  types ={
+    'workflow':'工作流',
+    'approvalWorkflow':'审批流程'
+ }
+  const [searchParams] = useSearchParams();
+  const from = searchParams.get('from');
+  const [historyRouteName] = useState(types[from]);
+ 
   useEffect(() => {
     const { title } = data?.data ?? {};
     setTitle?.(`${lang('Workflow')}${title ? `: ${title}` : ''}`);
@@ -63,6 +69,7 @@ export function WorkflowCanvas() {
     return <div>{loading ? lang('Loading') : lang('Load failed')}</div>;
   }
 
+
   const { nodes = [], revisions = [], ...workflow } = data?.data ?? {};
   linkNodes(nodes);
 
@@ -70,7 +77,7 @@ export function WorkflowCanvas() {
 
   function onSwitchVersion({ key }) {
     if (key != workflow.id) {
-      navigate(getWorkflowDetailPath(key));
+      navigate(getWorkflowDetailPath(key, searchParams.toString()!==''?'?'+searchParams.toString():''));
     }
   }
 
@@ -95,7 +102,7 @@ export function WorkflowCanvas() {
     });
     message.success(t('Operation succeeded'));
 
-    navigate(`/admin/workflow/workflows/${revision.id}`);
+    navigate(`/admin/workflow/workflows/${revision.id}${searchParams.toString()!==''?'?'+searchParams.toString():''}`);
   }
 
   async function onDelete() {
@@ -150,7 +157,7 @@ export function WorkflowCanvas() {
         <header>
           <Breadcrumb
             items={[
-              { title: <Link to={app.pluginSettingsManager.getRoutePath('workflow')}>{lang('Workflow')}</Link> },
+              { title: <Link to={app.pluginSettingsManager.getRoutePath(from)}>{historyRouteName}</Link> },
               { title: <strong>{workflow.title}</strong> },
             ]}
           />

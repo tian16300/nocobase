@@ -10,7 +10,7 @@ import { Plugin } from '@nocobase/client';
 import React from 'react';
 import { ExecutionPage } from './ExecutionPage';
 import { WorkflowPage } from './WorkflowPage';
-import { WorkflowPane, WorkflowProvider } from './WorkflowProvider';
+import { WorkflowPane,ApprovalWorkflow, WorkflowProvider } from './WorkflowProvider';
 import { DynamicExpression } from './components/DynamicExpression';
 import { triggers, useTrigger, getTriggersOptions } from './triggers';
 import { instructions } from './nodes';
@@ -35,6 +35,12 @@ export class WorkflowPlugin extends Plugin {
       title: `{{t("Workflow", { ns: "${NAMESPACE}" })}}`,
       Component: WorkflowPane,
       aclSnippet: 'pm.workflow.workflows',
+    });
+    this.app.pluginSettingsManager.add(`approvalWorkflow`, {
+      title: "审批流程", // 原 title
+      icon: "teamoutlined", // 原 icon
+      Component: ApprovalWorkflow,
+      aclSnippet: 'pm.workflow.approvalWorkflow',
     });
   }
 
