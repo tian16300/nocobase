@@ -33,8 +33,7 @@ export class PresetNocoBase extends Plugin {
     'company-info',
     'dic-manager',
     'prj-manager',
-    'custom-request',
-    'approval-workflow'
+    'custom-request'
   ];
 
   localPlugins = [
