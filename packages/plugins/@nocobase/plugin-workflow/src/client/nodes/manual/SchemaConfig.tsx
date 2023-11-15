@@ -415,7 +415,7 @@ export function SchemaConfig({ value, onChange }) {
             'x-decorator': 'Form',
             'x-component': 'Action.Drawer',
             'x-component-props': {
-              className: 'nb-action-popup',
+              // className: 'nb-action-popup',
             },
             properties: {
               tabs: {
