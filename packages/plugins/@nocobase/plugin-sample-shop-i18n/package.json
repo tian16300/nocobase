@@ -3,10 +3,7 @@
   "version": "0.15.0-alpha.2",
   "main": "./dist/server/index.js",
   "devDependencies": {
-    "antd": "5.x",
-    "nodejs-snowflake": "2.0.1",
-    "react": "^18.2.0",
-    "react-i18next": "^11.15.1"
+    "nodejs-snowflake": "2.0.1"
   },
   "peerDependencies": {
     "@nocobase/client": "0.x",

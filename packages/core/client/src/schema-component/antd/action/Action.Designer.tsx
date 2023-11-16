@@ -19,7 +19,6 @@ import { DefaultValueProvider } from '../../../schema-settings/hooks/useIsAllowT
 import { useLinkageAction } from './hooks';
 import { requestSettingsSchema } from './utils';
 import { css } from '@emotion/css';
-import { usePlugin } from '../../../application/hooks';
 
 const Tree = connect(
   AntdTree,

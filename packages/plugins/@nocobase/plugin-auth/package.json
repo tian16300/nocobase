@@ -3,14 +3,8 @@
   "version": "0.15.0-alpha.2",
   "main": "./dist/server/index.js",
   "devDependencies": {
-    "@ant-design/icons": "5.x",
-    "@formily/react": "2.x",
-    "@formily/shared": "2.x",
     "@types/cron": "^2.0.1",
-    "antd": "5.x",
-    "cron": "^2.3.1",
-    "react": "^18.2.0",
-    "react-i18next": "^11.15.1"
+    "cron": "^2.3.1"
   },
   "peerDependencies": {
     "@nocobase/actions": "0.x",

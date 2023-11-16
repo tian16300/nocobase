@@ -5,10 +5,7 @@
   "license": "AGPL-3.0",
   "main": "./dist/server/index.js",
   "devDependencies": {
-    "@formily/react": "2.x",
-    "@formulajs/formulajs": "^4.2.0",
-    "react": "^18.2.0",
-    "react-i18next": "^11.15.1"
+    "@formulajs/formulajs": "^4.2.0"
   },
   "peerDependencies": {
     "@nocobase/client": "0.x",

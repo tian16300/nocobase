@@ -105,6 +105,7 @@ export default {
   'Expand/Collapse': '展开/折叠',
   'Default collapse': '默认展开',
   'Tree collection': '树结构表',
+  'Tree Form': '树表单',
   'Tree table': '树表格',
   'Parent ID': '父记录ID',
   Parent: '父记录',

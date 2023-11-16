@@ -1,81 +1,104 @@
 import React from 'react';
-import { Initializer } from './GoupTable.Initializer';
-import { Provider } from './GroupTable.Decorator';
-import { Designer } from './GroupTable.Designer';
-import { CardItem } from '../card-item';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-import 'react-reflex/styles.css';
-import { css } from '@emotion/css';
-import { useToken } from '..';
-import { GroupTree, TableMain } from './components';
-import { GroupTableGroupRecordActionBar } from './GroupTable.GroupRecordActionBar';
-import { GroupTableGroupRecordActionDesigner } from './GroupTable.GroupRecordActionDesigner';
+import { CardItem, useToken } from '..';
 import { RecursionField, useFieldSchema } from '@formily/react';
-import { GroupTreeDesigner } from './GroupTable.GroupTreeDesigner';
-import { FilterBlockProvider } from '../../../filter-provider';
+import { css } from '@emotion/css';
 import { uid } from '@nocobase/utils';
-export const GroupTable: any = (props) => {
+import { LeftTree } from './LeftTree';
+import { RecordProvider } from '../../../record-provider';
+import { Divider, Space, Flex } from 'antd';
+export const TreeFormMain = (props) => {
   const { token } = useToken();
-  const { useProps } = props;
-  const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
+  //   const { useProps } = props;
+  //   const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
   const fieldSchema = useFieldSchema();
+  const record = {};
   const hasApproval = true;
   const leftFlex = hasApproval ? 0.15 : 0.3;
   return (
-    <ReflexContainer
-      orientation="vertical"
+    <CardItem
       className={css`
-        height: 600px;
-        border: 1px solid ${token.colorBorder};
-        .pane-container {
-          height: 100%;
-          > div,
-          > div > .nb-fixed-block,
-          > div > .nb-fixed-block > .ant-nb-card-item {
-            height: 100%;
-          }
-          .ant-card {
-            box-shadow: none;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            .ant-card-body {
-              padding: ${token.padding}px;
-              flex-grow: 1;
-              display: flex;
-              flex-direction: column;
-              overflow: auto;
-              .nb-action-bar + div {
-                flex-grow: 1;
-              }
-            }
-          }
-        }
-        &.reflex-container.vertical > .reflex-splitter {
-          border-left-color: ${token.colorBorder};
-          border-right-color: ${token.colorBorder};
+        .ant-card-body {
+          padding: 8px;
         }
       `}
     >
-      <ReflexElement className="left-tree" flex={leftFlex}>
-        <div className={'pane-container'}>
-          {/* <GroupTree name={`${collection}.${group}`} /> */}
-          <RecursionField name={'tree'} schema={fieldSchema.properties.group} />
-        </div>
-      </ReflexElement>
-      <ReflexSplitter />
-      <ReflexElement className="main">
-        <div className="pane-container">
-          <RecursionField name={'table'} schema={fieldSchema.properties.table} />
-        </div>
-      </ReflexElement>
-      {/* 有审批流程则显示 */}
-      {/* {hasApproval && <ReflexSplitter />}
-      {hasApproval && (
-        <ReflexElement className="middle" flex={0.15}>
+      <ReflexContainer
+        orientation="vertical"
+        className={css`
+          height: 600px;
+          border: 1px solid ${token.colorBorder};
+          .pane-container:not(.multi-rows) {
+            height: 100%;
+            & > div:not(.multi-rows) {
+              height: 100%;
+              & > .nb-fixed-block,
+              & > .nb-fixed-block > .ant-nb-card-item {
+                height: 100%;
+              }
+              .ant-card {
+                box-shadow: none;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                .ant-card-body {
+                  padding: ${token.padding}px;
+                  flex-grow: 1;
+                  display: flex;
+                  flex-direction: column;
+                  overflow: auto;
+                  .nb-action-bar + div {
+                    flex-grow: 1;
+                  }
+                }
+              }
+            }
+          }
+          &.reflex-container.vertical > .reflex-splitter {
+            border-left-color: ${token.colorBorder};
+            border-right-color: ${token.colorBorder};
+          }
+        `}
+      >
+        <ReflexElement className="left-tree" flex={leftFlex}>
           <div className={'pane-container'}>
-            <RecursionField
+            <LeftTree></LeftTree>
+            {/* <GroupTree name={`${collection}.${group}`} /> */}
+            {/* <RecursionField name={'tree'} schema={fieldSchema.properties.group} /> */}
+          </div>
+        </ReflexElement>
+        <ReflexSplitter />
+        <ReflexElement className={'main'}>
+          <div
+            className={
+              'pane-container multi-rows ' +
+              css`
+                padding: 10px;
+                overflow-x: hidden;
+              `
+            }
+          >
+            <Flex gap="middle" vertical>
+              <div>
+                <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
+              </div>
+              <div>
+                <RecordProvider record={record}>
+                  <RecursionField name={'form'} schema={fieldSchema.properties.form} />
+                </RecordProvider>
+              </div>
+            </Flex>
+
+            {/* <RecursionField name={'table'} schema={fieldSchema.properties.table} /> */}
+          </div>
+        </ReflexElement>
+        {/* 有审批流程则显示 */}
+        {hasApproval && <ReflexSplitter />}
+        {hasApproval && (
+          <ReflexElement className="middle" flex={0.15}>
+            <div className={'pane-container'}>
+              {/* <RecursionField
               name={'approveRecords'}
               schema={{
                 // type: 'void',
@@ -179,35 +202,13 @@ export const GroupTable: any = (props) => {
                     },
                   },
                 },
-                'x-uid': 'wl_info-approval-records'
+                'x-uid': 'wl_info-approval-records',
               }}
-            />
-          </div>
-        </ReflexElement>
-      )} */}
-    </ReflexContainer>
-  );
-};
-GroupTable.Wrap = (props) => {
-  return (
-    <CardItem
-      {...props}
-      className={css`
-        .ant-card-body {
-          padding: 0;
-        }
-      `}
-    >
-      {props.children}
+            /> */}
+            </div>
+          </ReflexElement>
+        )}
+      </ReflexContainer>
     </CardItem>
   );
 };
-GroupTable.Decorator = Provider;
-GroupTable.Designer = Designer;
-GroupTable.Initializer = Initializer;
-GroupTable.GroupRecordActionBar = GroupTableGroupRecordActionBar;
-GroupTable.GroupRecordActionDesigner = GroupTableGroupRecordActionDesigner;
-GroupTable.GroupTree = GroupTree;
-GroupTable.GroupTreeDesigner = GroupTreeDesigner;
-
-GroupTable.filterGroup = (group, filter) => {};

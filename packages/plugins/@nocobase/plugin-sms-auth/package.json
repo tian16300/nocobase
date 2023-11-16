@@ -6,12 +6,7 @@
   "description.zh-CN": "SMS authentication for NocoBase",
   "version": "0.15.0-alpha.2",
   "main": "./dist/server/index.js",
-  "devDependencies": {
-    "@formily/react": "2.x",
-    "antd": "5.x",
-    "react": "18.x",
-    "react-i18next": "^11.15.1"
-  },
+  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/actions": "0.x",
     "@nocobase/auth": "0.x",

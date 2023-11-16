@@ -30,6 +30,12 @@ export const BlockInitializers = {
           component: 'FormBlockInitializer',
         },
         {
+          key: 'tree-form',
+          type: 'item',
+          title: '{{t("Tree Form")}}',
+          component: 'TreeForm.Initializer',
+        },
+        {
           key: 'details',
           type: 'item',
           title: '{{t("Details")}}',

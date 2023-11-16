@@ -27,5 +27,6 @@ export * from './TableSelectorInitializers';
 export * from './GroupTableGroupActionInitializers';
 export * from './GroupTableGroupRecordActionInitializers';
 export * from './GroupTableActionInitializers';
+export * from './TreeFormActionInitializers';
 // association filter
 export * from '../../schema-component/antd/association-filter/AssociationFilter';

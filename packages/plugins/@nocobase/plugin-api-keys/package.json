@@ -11,7 +11,6 @@
     "@formily/react": "2.x",
     "@formily/shared": "2.x",
     "ahooks": "^3.7.2",
-    "antd": "5.x",
     "dayjs": "^1.11.8",
     "i18next": "^22.4.9",
     "react": "^18.2.0",

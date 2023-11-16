@@ -8,10 +8,7 @@
   "license": "AGPL-3.0",
   "main": "./dist/server/index.js",
   "devDependencies": {
-    "@formily/react": "2.x",
-    "mathjs": "^10.6.0",
-    "react": "18.x",
-    "react-i18next": "^11.15.1"
+    "mathjs": "^10.6.0"
   },
   "peerDependencies": {
     "@nocobase/client": "0.x",

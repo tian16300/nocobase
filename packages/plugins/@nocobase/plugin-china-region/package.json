@@ -8,8 +8,6 @@
   "main": "./dist/server/index.js",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@formily/core": "2.x",
-    "@formily/react": "2.x",
     "@types/cross-spawn": "^6.0.2",
     "china-division": "^2.4.0",
     "cross-spawn": "^7.0.3"
