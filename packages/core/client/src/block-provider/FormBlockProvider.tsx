@@ -7,7 +7,7 @@ import { useCollection } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
 import { useActionContext, useDesignable } from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
-import { BlockProvider, useBlockRequestContext, useFilterByTk } from './BlockProvider';
+import { BlockProvider, useBlockRequestContext, useFilterByTk, useParamsFromRecord } from './BlockProvider';
 import { getValuesByPath } from '@nocobase/utils/client';
 import { FormActiveFieldsProvider } from './hooks';
 import { TemplateBlockProvider } from './TemplateBlockProvider';
@@ -125,13 +125,28 @@ export const useFormBlockContext = () => {
 export const useFormBlockProps = () => {
   const ctx = useFormBlockContext();
   const record = useRecord();
-  const { fieldSchema } = useActionContext();
+  const { fieldSchema: actionFieldSchema } = useActionContext();
+  const fieldSchema = actionFieldSchema?actionFieldSchema: useFieldSchema();
   const addChild = fieldSchema?.['x-component-props']?.addChild;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys||[];
+  const { type } = useFormBlockType()
+ 
+
   useEffect(() => {
-    if (addChild) {
+    if (!ctx?.service?.loading) {
+      ctx.form?.setInitialValues(ctx.service?.data?.data);
+    }
+  }, [ctx?.service?.loading]);
+  useEffect(() => {
+    if(type == 'update')
+    ctx?.service?.run();
+  }, [JSON.stringify(record), type]);
+  useEffect(() => {
+    debugger;
+    if(type == 'create'){
+      if (addChild) {
       ctx.form?.query('parent').take((field) => {
-        field.readPretty = true;
+        // field.readPretty = true;
         field.value = new Proxy({ ...record }, {});
       });
     }
@@ -140,21 +155,18 @@ export const useFormBlockProps = () => {
         ctx.form?.query(key).take((field) => {
           const value = record[key];
           if(value && typeof value == 'object'){
-            field.readPretty = true;
+            // field.readPretty = true;
             field.value = new Proxy({ ...value }, {});
           }
         });
       });
     }
-  });
 
-  useEffect(() => {
-    if (!ctx?.service?.loading) {
-      ctx.form?.setInitialValues(ctx.service?.data?.data);
     }
-  }, [ctx?.service?.loading]);
+    
+  },[JSON.stringify(record), type, addChild, inheritsKeys]);
   return {
-    form: ctx.form,
+    form: ctx.form
   };
 };
 

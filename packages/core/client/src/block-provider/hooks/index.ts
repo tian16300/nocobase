@@ -1,10 +1,10 @@
 import { SchemaExpressionScopeContext, useField, useFieldSchema, useForm } from '@formily/react';
-import { isURL, parse } from '@nocobase/utils/client';
+import { isURL, parse, uid } from '@nocobase/utils/client';
 import { App, message } from 'antd';
 import _, { cloneDeep } from 'lodash';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
-import { ChangeEvent, useContext, useEffect } from 'react';
+import { ChangeEvent, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
@@ -24,6 +24,7 @@ import { useBlockRequestContext, useFilterByTk, useParamsFromRecord } from '../B
 import { useDetailsBlockContext } from '../DetailsBlockProvider';
 import { mergeFilter } from '../SharedFilterProvider';
 import { TableFieldResource } from '../TableFieldProvider';
+import { onFormMount, onFormValuesChange } from '@formily/core';
 
 export * from './useFormActiveFields';
 export * from './useParsedFilter';
@@ -361,49 +362,75 @@ export const useFilterBlockActionProps = () => {
   const { getDataBlocks } = useFilterBlock();
   const { name } = useCollection();
   const { getCollectionJoinField } = useCollectionManager();
+  const [formValues,setFormValues] = useState(form.values);
+ 
+  const filterAction = async function (_getDataBlocks) {
+    const { targets = [], uid } = findFilterTargets(fieldSchema);
+    actionField.data.loading = true;
+    // try {
+      // 收集 filter 的值
+      console.log('formValues', formValues);
+      await Promise.all(
+        _getDataBlocks().map(async (block) => {
+          const target = targets.find((target) => target.uid === block.uid);
+          if (!target) return;
+
+          const param = block.service.params?.[0] || {};
+          // 保留原有的 filter
+          const storedFilter = block.service.params?.[1]?.filters || {};
+        
+
+          storedFilter[uid] = removeNullCondition(
+            transformToFilter(formValues, fieldSchema, getCollectionJoinField, name),
+          );
+
+          const mergedFilter = mergeFilter([
+            ...Object.values(storedFilter).map((filter) => removeNullCondition(filter)),
+            block.defaultFilter,
+          ]);
+
+          return block.doFilter(
+            {
+              ...param,
+              page: 1,
+              filter: mergedFilter,
+            },
+            { filters: storedFilter },
+          );
+        }),
+      );
+      actionField.data.loading = false;
+    // } catch (error) {
+    //   console.error(error);
+    //   actionField.data.loading = false;
+    // }
+  };
+  
+  const autoChange = true;
 
   actionField.data = actionField.data || {};
+  useEffect(() => {
+    const id = uid();
+    form.addEffects(id, () => {
+      onFormValuesChange(async (form) => {       
+        // setFormValues(form.values);
+        // if (autoChange){
+        //   // const { getDataBlocks } = useFilterBlock();
+        //   // actionField?.componentProps?.useProps()?.onClick?.();
+        // };
+        filterAction(getDataBlocks);
+      });
+
+    });
+    return () => {
+      form.removeEffects(id);
+    };
+  }, [filterAction, getDataBlocks]);
 
   return {
     async onClick() {
-      const { targets = [], uid } = findFilterTargets(fieldSchema);
-
-      actionField.data.loading = true;
-      try {
-        // 收集 filter 的值
-        await Promise.all(
-          getDataBlocks().map(async (block) => {
-            const target = targets.find((target) => target.uid === block.uid);
-            if (!target) return;
-
-            const param = block.service.params?.[0] || {};
-            // 保留原有的 filter
-            const storedFilter = block.service.params?.[1]?.filters || {};
-
-            storedFilter[uid] = removeNullCondition(
-              transformToFilter(form.values, fieldSchema, getCollectionJoinField, name),
-            );
-
-            const mergedFilter = mergeFilter([
-              ...Object.values(storedFilter).map((filter) => removeNullCondition(filter)),
-              block.defaultFilter,
-            ]);
-
-            return block.doFilter(
-              {
-                ...param,
-                page: 1,
-                filter: mergedFilter,
-              },
-              { filters: storedFilter },
-            );
-          }),
-        );
-        actionField.data.loading = false;
-      } catch (error) {
-        console.error(error);
-        actionField.data.loading = false;
-      }
+      setFormValues(form.values);
+      filterAction(getDataBlocks);
     },
   };
 };
@@ -422,34 +449,35 @@ export const useResetBlockActionProps = () => {
 
       form.reset();
       actionField.data.loading = true;
-      try {
-        // 收集 filter 的值
-        await Promise.all(
-          getDataBlocks().map(async (block) => {
-            const target = targets.find((target) => target.uid === block.uid);
-            if (!target) return;
+      // try {
+      // 收集 filter 的值
+      await Promise.all(
+        getDataBlocks().map(async (block) => {
+          const target = targets.find((target) => target.uid === block.uid);
+          if (!target) return;
 
-            const param = block.service.params?.[0] || {};
-            // 保留原有的 filter
-            const storedFilter = block.service.params?.[1]?.filters || {};
+          const param = block.service.params?.[0] || {};
+          // 保留原有的 filter
+          const storedFilter = block.service.params?.[1]?.filters || {};
 
-            delete storedFilter[uid];
-            const mergedFilter = mergeFilter([...Object.values(storedFilter), block.defaultFilter]);
+          delete storedFilter[uid];
+          const mergedFilter = mergeFilter([...Object.values(storedFilter), block.defaultFilter]);
 
-            return block.doFilter(
-              {
-                ...param,
-                page: 1,
-                filter: mergedFilter,
-              },
-              { filters: storedFilter },
-            );
-          }),
-        );
-        actionField.data.loading = false;
-      } catch (error) {
-        actionField.data.loading = false;
-      }
+          return block.doFilter(
+            {
+              ...param,
+              page: 1,
+              filter: mergedFilter,
+            },
+            { filters: storedFilter },
+          );
+        }),
+      );
+      actionField.data.loading = false;
+      // }
+      // catch (error) {
+      //   actionField.data.loading = false;
+      // }
     },
   };
 };
@@ -850,7 +878,6 @@ export const useUpdateActionProps = () => {
   const localVariables = useLocalVariables({ currentForm: form });
   const { getActiveFieldsName } = useFormActiveFields() || {};
 
-
   return {
     async onClick() {
       const {
@@ -898,15 +925,15 @@ export const useUpdateActionProps = () => {
       });
       actionField.data = field.data || {};
       actionField.data.loading = true;
-      const getFormBlockService = (__parent, collectionName)=>{
-         const pColName = __parent.props.collection ||  __parent.props.resource;
-         if(collectionName == pColName){
+      const getFormBlockService = (__parent, collectionName) => {
+        const pColName = __parent.props.collection || __parent.props.resource;
+        if (collectionName == pColName) {
           return __parent.service;
-         }else if(__parent.__parent){
+        } else if (__parent.__parent) {
           return getFormBlockService(__parent.__parent, collectionName);
-         }
-         return null;
-      }
+        }
+        return null;
+      };
       try {
         await resource.update({
           filterByTk,
@@ -923,9 +950,9 @@ export const useUpdateActionProps = () => {
             : undefined,
         });
         actionField.data.loading = false;
-        const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource)
+        const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource);
         service?.refresh?.();
-        
+
         // __parent?.service?.refresh?.();
         setVisible?.(false);
         if (!onSuccess?.successMessage) {
@@ -1358,10 +1385,10 @@ export const useAssociationNames = () => {
             }
           });
         }
-         /**
+        /**
          * 设置默认值字段
          */
-         if (s['x-component-props']?.inheritsKeys) {
+        if (s['x-component-props']?.inheritsKeys) {
           Object.values(s['x-component-props']?.inheritsKeys).forEach((name: string) => {
             appends.add(name);
           });

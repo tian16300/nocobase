@@ -1,4 +1,5 @@
 import { uid } from '@nocobase/utils';
+import formSchema from './formSchema';
 
 export const createSchema = (props) => {
   const {
@@ -33,6 +34,7 @@ export const createSchema = (props) => {
       useProps: '{{ useTreeFormBlockProps }}',
     },
     properties: {
+      filterForm:formSchema(collection),
       actions: {
         type: 'void',
         'x-initializer': 'GroupTableGroupActionInitializers',
@@ -43,21 +45,7 @@ export const createSchema = (props) => {
           },
         },
         properties: {
-          add: {
-            type: 'void',
-            'x-action': 'create',
-            'x-acl-action': 'create',
-            title: "{{t('Add new')}}",
-            'x-designer': 'Action.Designer',
-            'x-component': 'Action',
-            'x-decorator': 'ACLActionProvider',
-            'x-component-props': {
-              openMode: 'link',
-              type: 'primary',
-              icon: 'PlusOutlined',
-              useProps: '{{ useTreeFormCreateActionProps }}', 
-            },
-          },
+         
         },
       },
       recordActions: {
@@ -111,7 +99,7 @@ export const createSchema = (props) => {
       form: {
         type: 'void',
         properties: {
-          create: {
+          add: {
             type: 'void',
             'x-acl-action-props': {
               skipScopeCheck: false,
@@ -129,7 +117,7 @@ export const createSchema = (props) => {
               //   title,
             },
             properties: {
-              [uid()]: {
+              form: {
                 type: 'void',
                 'x-component': 'FormV2',
                 'x-component-props': {
@@ -156,8 +144,7 @@ export const createSchema = (props) => {
                   },
                 },
               },
-            },
-            'x-visible': true
+            }
           },
           update: {
             type: 'void',
@@ -170,7 +157,6 @@ export const createSchema = (props) => {
               action: 'get',
               resource: collection,
               collection: collection,
-              useSourceId: '{{ useSourceIdFromParentRecord }}',
               useParams: '{{ useParamsFromRecord }}',
               actionInitializers: 'UpdateFormActionInitializers',
             },
@@ -180,7 +166,7 @@ export const createSchema = (props) => {
               //   title,
             },
             properties: {
-              [uid()]: {
+              form: {
                 type: 'void',
                 'x-component': 'FormV2',
                 'x-component-props': {
@@ -207,8 +193,7 @@ export const createSchema = (props) => {
                   },
                 },
               },
-            },
-            'x-visible': false
+            }
           },
         },
       },

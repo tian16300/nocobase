@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
-import { BlockProvider, useTableBlockProps } from '../../../block-provider';
+import { BlockProvider, TableBlockProvider, useTableBlockProps } from '../../../block-provider';
 import { useCollectionManager } from '../../../collection-manager';
-interface GroupTableBlockResourceContextProps  {
-    groupSelectedKeys?: string []; 
-    setGroupSelectedKeys?: (arg:string []) => void;
-};
+import { FixedBlockWrapper } from '..';
+interface GroupTableBlockResourceContextProps {
+  groupSelectedKeys?: string[];
+  setGroupSelectedKeys?: (arg: string[]) => void;
+}
 const GroupTableBlockResourceContext = createContext<GroupTableBlockResourceContextProps>({});
 
 export const Provider = (props) => {
@@ -15,10 +16,11 @@ export const Provider = (props) => {
   const [groupSelectedKeys, setGroupSelectedKeys] = useState(['root']);
 
   return (
-   
-      <GroupTableBlockResourceContext.Provider value={{ ...others,groupSelectedKeys, setGroupSelectedKeys }}>
+    <FixedBlockWrapper>
+      <GroupTableBlockResourceContext.Provider value={{ ...others, groupSelectedKeys, setGroupSelectedKeys }}>
         {children}
       </GroupTableBlockResourceContext.Provider>
+    </FixedBlockWrapper>
   );
 };
 
@@ -36,9 +38,6 @@ export const useGroupTableBlockProps = () => {
   return {
     ...ctx,
   };
-  }
+};
 
-
-  export const filterByGroup = (groupValue)=>{
-    
-  };
+export const filterByGroup = (groupValue) => {};

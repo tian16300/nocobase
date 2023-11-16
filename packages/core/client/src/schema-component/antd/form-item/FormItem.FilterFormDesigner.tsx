@@ -27,6 +27,7 @@ export const FilterFormDesigner = () => {
       <EditTooltip />
       <EditValidationRules />
       <EditComponent />
+      <SchemaSettings.DefaultValue />
       <EditOperator />
       <EditTitleField />
       {collectionField ? <SchemaSettings.Divider /> : null}

@@ -1,33 +1,115 @@
-import React from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import { CardItem, useToken } from '..';
-import { RecursionField, useFieldSchema } from '@formily/react';
+import { FormProvider, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { css } from '@emotion/css';
 import { uid } from '@nocobase/utils';
 import { LeftTree } from './LeftTree';
-import { RecordProvider } from '../../../record-provider';
-import { Divider, Space, Flex } from 'antd';
+import { RecordProvider, useRecord } from '../../../record-provider';
+import { Divider, Space } from 'antd';
+import { useSize } from 'ahooks';
+import { useDesignable } from '../../hooks';
+import { IField } from '../../../collection-manager';
+import { useBlockRequestContext } from '../../../block-provider';
+import { createForm } from '@formily/core';
+interface TreeNode {
+  id: number;
+  name: string;
+  children?: TreeNode[];
+}
+function treeToArray(tree: TreeNode[], result: TreeNode[] = []): TreeNode[] {
+  for (const node of tree) {
+    result.push(node);
+    if (node.children) {
+      treeToArray(node.children, result);
+    }
+  }
+  return result;
+}
 export const TreeFormMain = (props) => {
   const { token } = useToken();
   //   const { useProps } = props;
   //   const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
   const fieldSchema = useFieldSchema();
-  const record = {};
+  const parent = useRecord();
+  const [record,setRecord] = useState({});
   const hasApproval = true;
   const leftFlex = hasApproval ? 0.15 : 0.3;
+  const boxRef = useRef(null);
+  const queryFormRef = useRef(null);
+  const size = useSize(boxRef);
+  const designable = useDesignable();
+  const { service} = useBlockRequestContext()
+  const field:IField = useField();
+  // const onSelect = (selectedKeys, info) => {
+  //   const selectedKey = selectedKeys[selectedKeys.length - 1];
+  //   const record = field?.data?.dataSource?.find((item) => item.id === selectedKey);
+  //   setRecord(record);
+  // }
+  // useEffect(() => {
+  //   if (field?.data?.selectedKeys?.length) {
+  //     const selectedKeys = field?.data?.selectedKeys;
+  //     const selectedKey = selectedKeys[selectedKeys.length - 1];
+  //     const record = field?.data?.dataSource?.find((item) => item.id === selectedKey);
+  //     setRecord(record);
+  //   }
+  // }, [ field?.data?.selectedKeys]);
+  const updateForm = useMemo(() => {
+    return createForm({
+      effects(){}
+    })
+  }, []);
+  useEffect(() => {
+    if (field?.data?.selectedRowKeys?.length) {
+      const selectedRowKeys = field?.data?.selectedRowKeys;
+      const selectedKey = selectedRowKeys[selectedRowKeys.length - 1];
+      const array = treeToArray(service?.data?.data||[],[])
+      const recordValue = array?.find((item) => item.id === selectedKey);
+      setRecord({
+        ...recordValue,
+        __parent:recordValue
+      });
+    }
+  },[field?.value]);
+  useEffect(()=>{
+    console.log(updateForm.fields);
+
+    
+  },[JSON.stringify(record)]);
   return (
     <CardItem
+      ref={boxRef}
       className={css`
-        .ant-card-body {
-          padding: 8px;
+        > .ant-card-body {
+          padding: ${token.padding}px;
         }
       `}
     >
+      <div
+        className={
+          `filterForm ` +
+          css`
+            .ant-card {
+              box-shadow: none;
+              margin-bottom: 0;
+              .nb-action-bar {
+                display: ${designable ? 'flex' : 'none!important'};
+              }
+              .ant-card-body {
+                padding: 0;
+              }
+            }
+          `
+        }
+        ref={queryFormRef}
+      >
+        <RecursionField name={'filterForm'} schema={fieldSchema.properties.filterForm} />
+      </div>
       <ReflexContainer
         orientation="vertical"
         className={css`
-          height: 600px;
           border: 1px solid ${token.colorBorder};
+          height: calc(100% - 44px);
           .pane-container:not(.multi-rows) {
             height: 100%;
             & > div:not(.multi-rows) {
@@ -71,24 +153,38 @@ export const TreeFormMain = (props) => {
         <ReflexSplitter />
         <ReflexElement className={'main'}>
           <div
+            ref={boxRef}
             className={
               'pane-container multi-rows ' +
               css`
                 padding: 10px;
-                overflow-x: hidden;
+                .form-container {
+                  // overflow-x: hidden;
+                  .ant-formily-layout {
+                    width: 100%;
+                    overflow-x: hidden;
+                  }
+                }
+                .ant-card {
+                  box-shadow: none;
+                  margin-bottom: 0;
+                }
               `
             }
           >
-            <Flex gap="middle" vertical>
-              <div>
-                <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
-              </div>
-              <div>
-                <RecordProvider record={record}>
-                  <RecursionField name={'form'} schema={fieldSchema.properties.form} />
-                </RecordProvider>
-              </div>
-            </Flex>
+            <div
+              className={css`
+                margin-bottom: 8px;
+              `}
+            >
+              <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
+            </div>
+            <div className="form-container">
+              <RecordProvider record={record}  isMemo>
+                <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
+              </RecordProvider>
+              {/* <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} /> */}
+            </div>
 
             {/* <RecursionField name={'table'} schema={fieldSchema.properties.table} /> */}
           </div>

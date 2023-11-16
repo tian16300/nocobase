@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Initializer } from './GoupTable.Initializer';
 import { Provider } from './GroupTable.Decorator';
 import { Designer } from './GroupTable.Designer';
@@ -6,7 +6,7 @@ import { CardItem } from '../card-item';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { css } from '@emotion/css';
-import { useToken } from '..';
+import { TableBlockDesigner, useFixedBlock, useToken } from '..';
 import { GroupTree, TableMain } from './components';
 import { GroupTableGroupRecordActionBar } from './GroupTable.GroupRecordActionBar';
 import { GroupTableGroupRecordActionDesigner } from './GroupTable.GroupRecordActionDesigner';
@@ -14,6 +14,7 @@ import { RecursionField, useFieldSchema } from '@formily/react';
 import { GroupTreeDesigner } from './GroupTable.GroupTreeDesigner';
 import { FilterBlockProvider } from '../../../filter-provider';
 import { uid } from '@nocobase/utils';
+import { useSize } from 'ahooks';
 export const GroupTable: any = (props) => {
   const { token } = useToken();
   const { useProps } = props;
@@ -21,12 +22,17 @@ export const GroupTable: any = (props) => {
   const fieldSchema = useFieldSchema();
   const hasApproval = true;
   const leftFlex = hasApproval ? 0.15 : 0.3;
+  const { height, fixedBlockUID } = useFixedBlock();
+  const boxRef = useRef();
+  const vHeight =  `calc(100vh - ${height} - ${token.padding * 2}px)`;
+
   return (
+    <div style={{height:vHeight}} ref={boxRef} >
     <ReflexContainer
       orientation="vertical"
       className={css`
-        height: 600px;
         border: 1px solid ${token.colorBorder};
+        height: 100%;
         .pane-container {
           height: 100%;
           > div,
@@ -59,7 +65,7 @@ export const GroupTable: any = (props) => {
       `}
     >
       <ReflexElement className="left-tree" flex={leftFlex}>
-        <div className={'pane-container'}>
+        <div className={'pane-container'}>          
           {/* <GroupTree name={`${collection}.${group}`} /> */}
           <RecursionField name={'tree'} schema={fieldSchema.properties.group} />
         </div>
@@ -186,15 +192,17 @@ export const GroupTable: any = (props) => {
         </ReflexElement>
       )} */}
     </ReflexContainer>
+    </div>
   );
 };
 GroupTable.Wrap = (props) => {
+  const { token } = useToken();
   return (
     <CardItem
       {...props}
       className={css`
         .ant-card-body {
-          padding: 0;
+          padding: ${token.padding}px;
         }
       `}
     >
@@ -203,7 +211,7 @@ GroupTable.Wrap = (props) => {
   );
 };
 GroupTable.Decorator = Provider;
-GroupTable.Designer = Designer;
+GroupTable.Designer = TableBlockDesigner;
 GroupTable.Initializer = Initializer;
 GroupTable.GroupRecordActionBar = GroupTableGroupRecordActionBar;
 GroupTable.GroupRecordActionDesigner = GroupTableGroupRecordActionDesigner;

@@ -181,6 +181,7 @@ export const LeftTree = (props: any) => {
         { filters: storedFilter },
       );
     });
+    props?.onSelect?.(value);
   };
   useEffect(() => {
     const defaultKeys = ['root'];
@@ -201,7 +202,7 @@ export const LeftTree = (props: any) => {
   }, [expandFlag, service.data?.data]);
 
   return (
-    <CardItem {...props}>
+    <CardItem {...props} title={collection.title}>
       <TreeView
         {...props}
         fieldNames={fieldNames}

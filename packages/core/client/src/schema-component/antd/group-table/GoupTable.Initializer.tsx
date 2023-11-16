@@ -54,7 +54,8 @@ export const createGroupTableSchema = (decoratorProps) => {
               action: 'list',
               params: {
                 paginate: false
-              }
+              },
+              fixedBlock:false
             },
             'x-designer':'GroupTable.GroupTreeDesigner',
             'x-collection-field': `${collection}.${group}`,
@@ -108,6 +109,7 @@ export const createGroupTableSchema = (decoratorProps) => {
               dragSort: false,
               disableTemplate: disableTemplate ?? false,
               blockType,
+              fixedBlock:false,
               ...others
             },
             'x-designer': TableBlockDesigner ?? 'TableBlockDesigner',
