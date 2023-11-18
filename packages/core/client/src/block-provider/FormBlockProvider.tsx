@@ -142,7 +142,6 @@ export const useFormBlockProps = () => {
     ctx?.service?.run();
   }, [JSON.stringify(record), type]);
   useEffect(() => {
-    debugger;
     if(type == 'create'){
       if (addChild) {
       ctx.form?.query('parent').take((field) => {

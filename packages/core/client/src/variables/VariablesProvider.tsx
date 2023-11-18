@@ -67,12 +67,16 @@ const VariablesProvider = ({ children }) => {
         }
 
         const key = list[index];
+        /**
+         * 如果是 `$nForm`，则不需要再去请求数据了 排除用户修改数据的情况
+         */
+        const isUserHandleRecord = list.includes('$nForm');
         const associationField: CollectionFieldOptions = getCollectionJoinField(
           getFieldPath(list.slice(0, index + 1).join('.')),
         );
-        if (Array.isArray(current)) {
+        if (Array.isArray(current) && !isUserHandleRecord) {
           const result = current.map((item) => {
-            if (shouldToRequest(item?.[key]) && item?.id != null) {
+            if ( shouldToRequest(item?.[key]) && item?.id != null) {
               if (associationField?.target) {
                 const url = `/${collectionName}/${item.id}/${key}:${getAction(associationField.type)}`;
                 if (hasRequested(url)) {
@@ -81,7 +85,7 @@ const VariablesProvider = ({ children }) => {
                 const result = api
                   .request({
                     url,
-                    params
+                    params,
                   })
                   .then((data) => {
                     clearRequested(url);
@@ -95,7 +99,7 @@ const VariablesProvider = ({ children }) => {
             return item?.[key];
           });
           current = _.flatten(await Promise.all(result));
-        } else if (shouldToRequest(current[key]) && current.id != null && associationField?.target) {
+        } else if (!isUserHandleRecord && shouldToRequest(current[key]) && current.id != null && associationField?.target) {
           const url = `/${collectionName}/${current.id}/${key}:${getAction(associationField.type)}`;
           let data = null;
           if (hasRequested(url)) {
@@ -103,7 +107,7 @@ const VariablesProvider = ({ children }) => {
           } else {
             const waitForData = api.request({
               url,
-              params
+              params,
             });
             stashRequested(url, waitForData);
             data = await waitForData;
@@ -212,7 +216,7 @@ const VariablesProvider = ({ children }) => {
      * @param localVariables 局部变量，解析完成后会被清除
      * @returns
      */
-    async (str: string, localVariables?: VariableOption | VariableOption[], params?:any) => {
+    async (str: string, localVariables?: VariableOption | VariableOption[], params?: any) => {
       if (!isVariable(str)) {
         return str;
       }
@@ -283,9 +287,10 @@ export default VariablesProvider;
 function shouldToRequest(value) {
   // fix https://nocobase.height.app/T-2502
   // 兼容 `对多` 和 `对一` 子表单子表格字段的情况
-  if (JSON.stringify(value) === '[{}]' || JSON.stringify(value) === '{}') {
-    return true;
-  }
+  if (_.isEmpty(value) ) {
 
-  return _.isEmpty(value);
+    return true;
+  }else{
+    return false;
+  }
 }
