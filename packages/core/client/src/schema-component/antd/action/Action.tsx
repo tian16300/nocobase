@@ -44,6 +44,7 @@ export const Action: ComposedAction = observer(
       openSize,
       size,
       type,
+      disabled: propsDisabled,
       ...others
     } = useProps(props);
     const { wrapSSR, componentCls, hashId } = useStyles();
@@ -59,7 +60,7 @@ export const Action: ComposedAction = observer(
     const record = useRecord();
     const designerProps = fieldSchema['x-designer-props'];
     const openMode = fieldSchema?.['x-component-props']?.['openMode'];
-    const disabled = form.disabled || field.disabled || field.data?.disabled || props.disabled;
+    const disabled = form.disabled || field.disabled || field.data?.disabled || propsDisabled;
     const toHref = fieldSchema?.['x-component-props']?.['to'];
     const linkageRules = fieldSchema?.['x-linkage-rules'] || [];
     const { designable } = useDesignable();

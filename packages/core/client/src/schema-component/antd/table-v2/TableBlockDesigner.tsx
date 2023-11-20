@@ -2,6 +2,7 @@ import { ArrayItems } from '@formily/antd-v5';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAPIClient } from '../../../api-client';
 import { useFormBlockContext, useTableBlockContext } from '../../../block-provider';
 import { mergeFilter } from '../../../block-provider/SharedFilterProvider';
 import { useCollection, useCollectionManager } from '../../../collection-manager';
@@ -92,6 +93,7 @@ export const TableBlockDesigner = () => {
       },
     },
   };
+  const api = useAPIClient();
   return (
     // fix https://nocobase.height.app/T-2259
     <RecordProvider parent={record} record={{}}>
@@ -146,10 +148,20 @@ export const TableBlockDesigner = () => {
           <SchemaSettings.SwitchItem
             title={t('Enable drag and drop sorting')}
             checked={field.decoratorProps.dragSort}
-            onChange={(dragSort) => {
+            onChange={async (dragSort) => {
+              if (dragSort && collectionField) {
+                const { data } = await api.resource('collections.fields', collectionField.collectionName).update({
+                  filterByTk: collectionField.name,
+                  values: {
+                    sortable: true,
+                  },
+                });
+                const sortBy = data?.data?.[0]?.sortBy;
+                fieldSchema['x-decorator-props'].dragSortBy = sortBy;
+              }
               field.decoratorProps.dragSort = dragSort;
               fieldSchema['x-decorator-props'].dragSort = dragSort;
-              service.run({ ...service.params?.[0], sort: 'sort' });
+              service.run({ ...service.params?.[0], sort: fieldSchema['x-decorator-props'].dragSortBy });
               dn.emit('patch', {
                 schema: {
                   ['x-uid']: fieldSchema['x-uid'],

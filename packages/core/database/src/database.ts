@@ -73,6 +73,8 @@ import { patchSequelizeQueryInterface, snakeCase } from './utils';
 import { BaseValueParser, registerFieldValueParsers } from './value-parsers';
 import { ViewCollection } from './view-collection';
 import { CollectionFactory } from './collection-factory';
+import chalk from 'chalk';
+import { checkDatabaseVersion } from './helpers';
 
 export type MergeOptions = merge.Options;
 
@@ -124,9 +126,13 @@ export const DialectVersionAccessors = {
   mysql: {
     sql: 'select version() as version',
     get: (v: string) => {
-      if (v.toLowerCase().includes('mariadb')) {
-        return '';
-      }
+      const m = /([\d+.]+)/.exec(v);
+      return m[0];
+    },
+  },
+  mariadb: {
+    sql: 'select version() as version',
+    get: (v: string) => {
       const m = /([\d+.]+)/.exec(v);
       return m[0];
     },
@@ -155,7 +161,13 @@ class DatabaseVersion {
           return false;
         }
         const [result] = (await this.db.sequelize.query(accessors[dialect].sql)) as any;
-        return semver.satisfies(accessors[dialect].get(result?.[0]?.version), versions[dialect]);
+        const versionResult = accessors[dialect].get(result?.[0]?.version);
+
+        if (lodash.isPlainObject(versionResult) && versionResult.dialect) {
+          return semver.satisfies(versionResult.version, versions[versionResult.dialect]);
+        }
+
+        return semver.satisfies(versionResult, versions[dialect]);
       }
     }
     return false;
@@ -313,16 +325,22 @@ export class Database extends EventEmitter implements AsyncEmitter {
   }
 
   registerCollectionType() {
-    this.collectionFactory.registerCollectionType(InheritedCollection, (options) => {
-      return options.inherits && lodash.castArray(options.inherits).length > 0;
+    this.collectionFactory.registerCollectionType(InheritedCollection, {
+      condition: (options) => {
+        return options.inherits && lodash.castArray(options.inherits).length > 0;
+      },
     });
 
-    this.collectionFactory.registerCollectionType(ViewCollection, (options) => {
-      return options.viewName || options.view;
+    this.collectionFactory.registerCollectionType(ViewCollection, {
+      condition: (options) => {
+        return options.viewName || options.view;
+      },
     });
 
-    this.collectionFactory.registerCollectionType(SqlCollection, (options) => {
-      return options.sql;
+    this.collectionFactory.registerCollectionType(SqlCollection, {
+      condition: (options) => {
+        return options.sql;
+      },
     });
   }
 
@@ -348,6 +366,7 @@ export class Database extends EventEmitter implements AsyncEmitter {
         await connection.query('SET search_path TO public;');
       });
     }
+
     return options;
   }
 
@@ -458,6 +477,10 @@ export class Database extends EventEmitter implements AsyncEmitter {
 
   inDialect(...dialect: string[]) {
     return dialect.includes(this.sequelize.getDialect());
+  }
+
+  isMySQLCompatibleDialect() {
+    return this.inDialect('mysql', 'mariadb');
   }
 
   /**
@@ -664,7 +687,7 @@ export class Database extends EventEmitter implements AsyncEmitter {
   }
 
   async sync(options?: SyncOptions) {
-    const isMySQL = this.sequelize.getDialect() === 'mysql';
+    const isMySQL = this.isMySQLCompatibleDialect();
     if (isMySQL) {
       await this.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', null);
     }
@@ -753,7 +776,23 @@ export class Database extends EventEmitter implements AsyncEmitter {
     }
   }
 
+  async checkVersion() {
+    return await checkDatabaseVersion(this);
+  }
+
   async prepare() {
+    if (this.isMySQLCompatibleDialect()) {
+      const result = await this.sequelize.query(`SHOW VARIABLES LIKE 'lower_case_table_names'`, { plain: true });
+
+      if (result?.Value === '1' && !this.options.underscored) {
+        console.log(
+          `Your database lower_case_table_names=1, please add ${chalk.yellow('DB_UNDERSCORED=true')} to the .env file`,
+        );
+
+        process.exit();
+      }
+    }
+
     if (this.inDialect('postgres') && this.options.schema && this.options.schema != 'public') {
       await this.sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${this.options.schema}"`, null);
     }
