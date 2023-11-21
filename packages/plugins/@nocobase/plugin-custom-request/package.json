@@ -6,7 +6,6 @@
   "displayName.zh-CN": "自定义请求",
   "description": "Custom request action",
   "description.zh-CN": "自定义请求操作",
-  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",

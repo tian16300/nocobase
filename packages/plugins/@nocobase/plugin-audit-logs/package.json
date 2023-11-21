@@ -7,7 +7,6 @@
   "description.zh-CN": "数据的增删改日志",
   "main": "./dist/server/index.js",
   "license": "AGPL-3.0",
-  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/database": "0.x",

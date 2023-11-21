@@ -2,7 +2,6 @@
   "name": "@nocobase/plugin-sample-custom-signup-page",
   "version": "0.16.0-alpha.3",
   "main": "./dist/server/index.js",
-  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",

@@ -6,7 +6,6 @@
   "displayName.zh-CN": "Hello",
   "description": "A simple NocoBase plugin example",
   "description.zh-CN": "一个简单的 NocoBase 插件",
-  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",

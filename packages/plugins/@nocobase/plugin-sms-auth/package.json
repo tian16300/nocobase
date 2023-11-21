@@ -6,7 +6,6 @@
   "description.zh-CN": "SMS authentication for NocoBase",
   "version": "0.16.0-alpha.3",
   "main": "./dist/server/index.js",
-  "devDependencies": {},
   "peerDependencies": {
     "@nocobase/actions": "0.x",
     "@nocobase/auth": "0.x",

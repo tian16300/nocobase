@@ -1,6 +1,6 @@
 {
   "name": "@zkjx/plugin-buy-manager",
-  "version": "0.15.0-alpha.2",
+  "version": "0.16.0-alpha.3",
   "main": "dist/server/index.js",
   "private": true,
   "peerDependencies": {
