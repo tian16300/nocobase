@@ -10,6 +10,6 @@
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",
     "@nocobase/test": "0.x",
-    "@nocobase/utils": "^0.14.0-alpha.7"
+    "@nocobase/utils": "0.x"
   }
 }
