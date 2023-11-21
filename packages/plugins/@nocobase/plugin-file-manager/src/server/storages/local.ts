@@ -29,9 +29,9 @@ export default {
       title: 'Local storage',
       type: STORAGE_TYPE_LOCAL,
       name: `local`,
-      baseUrl: LOCAL_STORAGE_BASE_URL || `http://localhost:${APP_PORT || '13000'}/${documentRoot}`,
+      baseUrl: '/storage/uploads',
       options: {
-        documentRoot,
+        documentRoot: 'storage/uploads',
       },
     };
   },
