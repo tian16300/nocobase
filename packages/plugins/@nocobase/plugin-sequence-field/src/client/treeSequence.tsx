@@ -1,6 +1,6 @@
 import { ArrayTable, FormButtonGroup, FormDrawer, FormLayout, Submit } from '@formily/antd-v5';
 import { onFieldValueChange } from '@formily/core';
-import { ISchema, SchemaOptionsContext, useField, useForm, useFormEffects } from '@formily/react';
+import { ISchema, SchemaOptionsContext, useField, useForm, useFormEffects, useFieldSchema } from '@formily/react';
 import {
   Cron,
   IField,
@@ -9,7 +9,7 @@ import {
   css,
   interfacesProperties,
   useCompile,
-  Select
+  Select,
 } from '@nocobase/client';
 import { error } from '@nocobase/utils/client';
 import { Button, Select as AntdSelect, Tag } from 'antd';
@@ -19,13 +19,14 @@ import { NAMESPACE, lang } from './locale';
 
 function RuleTypeSelect(props) {
   const compile = useCompile();
-
   const { setValuesIn } = useForm();
   const index = ArrayTable.useIndex();
+  const schema = useFieldSchema();
+  const name = schema.parent.parent.parent.name;
 
   useFormEffects(() => {
-    onFieldValueChange(`patterns.${index}.type`, (field) => {
-      setValuesIn(`patterns.${index}.options`, {});
+    onFieldValueChange(`${name}.${index}.type`, (field) => {
+      setValuesIn(`${name}.${index}.options`, {});
     });
   });
 
@@ -39,38 +40,43 @@ function RuleTypeSelect(props) {
     </AntdSelect>
   );
 }
-function SelectField(props){
-  const { useCurrentFields } = props;
+function SelectField(props) {
+  const { useCurrentFields, propName } = props;
   const compile = useCompile();
   /* 支持字典 文本 单选  下拉单选 */
-  const fields = useCurrentFields().filter((field)=>{
-    return ['dic','input','select','radioGroup', 'obo'].includes(field?.interface);
-  }).map((field)=>{
-    return {
-      label: compile(field?.uiSchema?.title|| field.name),
-      value: field.name,
-      interface: field.interface,
-      foreignKey:field?.foreignKey
-    }
-  });
+  const fields = useCurrentFields()
+    .filter((field) => {
+      return ['dic', 'input', 'select', 'radioGroup', 'obo'].includes(field?.interface);
+    })
+    .map((field) => {
+      return {
+        label: compile(field?.uiSchema?.title || field.name),
+        value: field.name,
+        target: field.target,
+        targetKey:field?.targetKey|| 'id',
+        interface: field.interface,
+        foreignKey: field?.foreignKey,
+      };
+    });
   const { setValuesIn } = useForm();
   const index = ArrayTable.useIndex();
-
+  const name = propName;
   useFormEffects(() => {
-    onFieldValueChange(`patterns.${index}.type`, (field) => {
-      setValuesIn(`patterns.${index}.options`, {});
+    onFieldValueChange(`${name}.${index}.type`, (field) => {
+      setValuesIn(`${name}.${index}.options`, {});
     });
   });
 
-  return <Select objectValue allowClear options={fields} {...props}></Select>
-
-
+  return <Select objectValue allowClear options={fields} {...props}></Select>;
 }
-function RuleOptions() {
+function RuleOptions(props: { name?: string } = {}) {
   const compile = useCompile();
   const { values } = useForm();
   const index = ArrayTable.useIndex();
-  const { type, options } = values.patterns[index];
+  const schema = useFieldSchema();
+  /* 属性名称 */
+  const name = schema.parent.parent.parent.name;
+  const { type, options } = values[name]?.[index];
   const ruleType = RuleTypes[type];
   return (
     <div
@@ -231,7 +237,6 @@ const RuleTypes = {
       format(options = { value: 'YYYYMMDD' }) {
         return <code>{options.value}</code>;
       },
-
     },
     fieldset: {
       format: {
@@ -239,22 +244,22 @@ const RuleTypes = {
         title: `{{t("Date format", { ns: "${NAMESPACE}" })}}`,
         'x-decorator': 'FormItem',
         'x-component': 'Input',
-        'required': true
+        required: true,
       },
     },
   },
-  field:{
+  field: {
     title: `{{t("Field", { ns: "${NAMESPACE}" })}}`,
     optionRenders: {
-      textLen({value}){
-        return <code>{value && (<>长度: {value} 位</>)}</code>;
+      textLen({ value }) {
+        return <code>{value && <>长度: {value} 位</>}</code>;
       },
-      value( { value}) {
-        return <code>{value?<Tag>{value?.label}</Tag>:''}</code>;
-      }
+      value({ value }) {
+        return <code>{value ? <Tag>{value?.label}</Tag> : ''}</code>;
+      },
     },
     fieldset: {
-      textLen:{
+      textLen: {
         type: 'number',
         title: `{{t("Digits", { ns: "${NAMESPACE}" })}}`,
         'x-decorator': 'FormItem',
@@ -272,34 +277,42 @@ const RuleTypes = {
               'x-component-props.max': '{{ 10 ** $self.value - 1 }}',
             },
           },
-        }
+        },
       },
       value: {
         type: 'string',
         title: `{{t("Select field", { ns: "${NAMESPACE}" })}}`,
         'x-decorator': 'FormItem',
         'x-component': SelectField,
-        'x-component-props':{
-          useCurrentFields: '{{ getCurrentFields }}'
+        'x-component-props': {
+          useCurrentFields: '{{ getCurrentFields }}',
+          propName: '{{ getPropName() }}',
         },
-        'required': true
-      }
-    }
-  }
+        required: true,
+      },
+    },
+  },
 };
 
-export function RuleConfigForm(props) {
+export function TreeRuleConfigForm(props) {
   const { t } = useTranslation();
   const compile = useCompile();
   const schemaOptions = useContext(SchemaOptionsContext);
   const { values, setValuesIn } = useForm();
   const index = ArrayTable.useIndex();
-  const { type, options } = values.patterns[index];
+  const schema = useFieldSchema();
+  /* 属性名称 */
+  const name = schema.parent.parent.parent.parent.name;
+  const { type, options } = values[name]?.[index];
   const ruleType = RuleTypes[type];
-  const getCurrentFields = useCallback(()=>{
-    const {currentFields} = props;
+  const getCurrentFields = useCallback(() => {
+    const { currentFields } = props;
     return currentFields;
-  },[props.currentFields]) ;
+  }, [props.currentFields]);
+
+  const getPropName = useCallback(() => {
+    return name;
+  }, [name]);
   return ruleType?.fieldset ? (
     <Button
       type="link"
@@ -307,7 +320,10 @@ export function RuleConfigForm(props) {
         FormDrawer(compile(ruleType.title), () => {
           return (
             <FormLayout layout="vertical">
-              <SchemaComponentOptions scope={{...schemaOptions.scope,getCurrentFields}} components={schemaOptions.components}>
+              <SchemaComponentOptions
+                scope={{ ...schemaOptions.scope, getCurrentFields, getPropName }}
+                components={schemaOptions.components}
+              >
                 <SchemaComponent
                   schema={{
                     type: 'object',
@@ -338,7 +354,7 @@ export function RuleConfigForm(props) {
             initialValues: options,
           })
           .then((values) => {
-            setValuesIn(`patterns.${index}`, { type, options: { ...values } });
+            setValuesIn(`${name}.${index}`, { type, options: { ...values } });
           })
           .catch((err) => {
             error(err);
@@ -350,15 +366,20 @@ export function RuleConfigForm(props) {
   ) : null;
 }
 
-export const sequence: IField = {
-  name: 'sequence',
+/**
+ * 前缀 编码规则
+ * 分隔符
+ * 层级位数配置
+ */
+export const treeSequence: IField = {
+  name: 'treeSequence',
   type: 'object',
   group: 'advanced',
   order: 3,
-  title: `{{t("Sequence", { ns: "${NAMESPACE}" })}}`,
+  title: '树形自动编码',
   sortable: true,
   default: {
-    type: 'sequence',
+    type: 'treeSequence',
     uiSchema: {
       type: 'string',
       'x-component': 'Input',
@@ -383,7 +404,7 @@ export const sequence: IField = {
     unique: interfacesProperties.unique,
     patterns: {
       type: 'array',
-      title: `{{t("Sequence rules", { ns: "${NAMESPACE}" })}}`,
+      title: '前缀编码规则',
       required: true,
       'x-decorator': 'FormItem',
       'x-component': 'ArrayTable',
@@ -450,10 +471,136 @@ export const sequence: IField = {
                 properties: {
                   options: {
                     type: 'object',
-                    'x-component': RuleConfigForm,
-                     'x-component-props':{
-                       'currentFields':'{{ useCurrentFields() }}'
-                     }
+                    'x-component': TreeRuleConfigForm,
+                    'x-component-props': {
+                      currentFields: '{{ useCurrentFields() }}',
+                    },
+                  },
+                },
+              },
+              remove: {
+                type: 'void',
+                'x-component': 'ArrayTable.Remove',
+              },
+            },
+          },
+        },
+      },
+      properties: {
+        add: {
+          type: 'void',
+          'x-component': 'ArrayTable.Addition',
+          'x-component-props': {
+            defaultValue: { type: 'integer', options: { digits: 2, start: 1 } },
+          },
+          title: `{{t("Add rule", { ns: "${NAMESPACE}" })}}`,
+        },
+      },
+    },
+    splitText: {
+      type: 'string',
+      title: '分隔符',
+      'x-decorator': 'FormItem',
+      'x-component': 'Select',
+      enum: [
+        {
+          label: '-',
+          value: '-',
+        },
+        {
+          label: '_',
+          value: '_',
+        },
+      ],
+      default: '-',
+    },
+    levelConfig: {
+      type: 'array',
+      title: '层级',
+      required: true,
+      'x-decorator': 'FormItem',
+      'x-component': 'ArrayTable',
+      items: {
+        type: 'object',
+        properties: {
+          sort: {
+            type: 'void',
+            'x-component': 'ArrayTable.Column',
+            'x-component-props': { width: 50, title: '', align: 'center' },
+            properties: {
+              sort: {
+                type: 'void',
+                'x-component': 'ArrayTable.SortHandle',
+              },
+            },
+          },
+          index: {
+            type: 'void',
+            'x-component': 'ArrayTable.Column',
+            'x-component-props': { width: 80, title: '层级', align: 'center' },
+            properties: {
+              index: {
+                type: 'void',
+                'x-component': 'ArrayTable.Index',
+              },
+            },
+          },
+          type: {
+            type: 'void',
+            'x-component': 'ArrayTable.Column',
+            'x-component-props': { title: `{{t("Type", { ns: "${NAMESPACE}" })}}` },
+            // 'x-hidden': true,
+            properties: {
+              type: {
+                type: 'number',
+                name: 'type',
+                required: true,
+                'x-decorator': 'FormItem',
+                'x-component': RuleTypeSelect,
+              },
+            },
+          },
+          options: {
+            type: 'void',
+            'x-component': 'ArrayTable.Column',
+            'x-component-props': { title: `{{t("Rule content", { ns: "${NAMESPACE}" })}}` },
+            properties: {
+              options: {
+                type: 'object',
+                name: 'options',
+                'x-component': RuleOptions,
+                'x-component-props': {
+                  name: 'levelConfig',
+                },
+              },
+            },
+          },
+          operations: {
+            type: 'void',
+            'x-component': 'ArrayTable.Column',
+            'x-component-props': {
+              title: `{{t("Operations", { ns: "${NAMESPACE}" })}}`,
+              dataIndex: 'operations',
+              fixed: 'right',
+              className: css`
+                > *:not(:last-child) {
+                  margin-right: 0.5em;
+                }
+                button {
+                  padding: 0;
+                }
+              `,
+            },
+            properties: {
+              config: {
+                type: 'void',
+                properties: {
+                  options: {
+                    type: 'object',
+                    'x-component': TreeRuleConfigForm,
+                    'x-component-props': {
+                      currentFields: '{{ useCurrentFields() }}',
+                    },
                   },
                 },
               },

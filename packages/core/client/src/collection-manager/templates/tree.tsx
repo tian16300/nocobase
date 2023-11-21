@@ -22,6 +22,17 @@ export const tree: ICollectionTemplate = {
         },
       },
       {
+        interface: 'level',
+        name: 'level',
+        type: 'bigInt',
+        uiSchema: {
+          type: 'number',
+          title: '层级',
+          'x-component': 'InputNumber',
+          'x-read-pretty': true,
+        },
+      },
+      {
         interface: 'm2o',
         type: 'belongsTo',
         name: 'parent',

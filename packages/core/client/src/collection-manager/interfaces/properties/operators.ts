@@ -79,7 +79,6 @@ export const id = [
   { label: '{{t("exists")}}', value: '$exists', noValue: true },
   { label: '{{t("not exists")}}', value: '$notExists', noValue: true },
 ];
-
 export const enumType = [
   {
     label: '{{t("is")}}',

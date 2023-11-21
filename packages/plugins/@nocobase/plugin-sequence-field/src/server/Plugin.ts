@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import { Plugin } from '@nocobase/server';
 import { Registry } from '@nocobase/utils';
 import { Pattern, SequenceField } from './fields/sequence-field';
+import { TreeSequenceField } from './fields/tree-sequence-field';
 
 const asyncRandomInt = promisify(randomInt);
 
@@ -16,6 +17,7 @@ export default class SequenceFieldPlugin extends Plugin {
 
     db.registerFieldTypes({
       sequence: SequenceField,
+      treeSequence: TreeSequenceField,
     });
 
     db.addMigrations({
@@ -29,75 +31,73 @@ export default class SequenceFieldPlugin extends Plugin {
     await this.importCollections(path.resolve(__dirname, 'collections'));
 
     db.on('fields.beforeSave', async (field, { transaction }) => {
-      if (field.get('type') !== 'sequence') {
-        return;
+      if (field.get('type') == 'sequence') {
+        const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
+        if (!patterns.length) {
+          return;
+        }
+        const SequenceRepo = db.getRepository('sequences');
+        await patterns.reduce(
+          (promise: Promise<any>, p) =>
+            promise.then(async () => {
+              if (p.options?.key == null) {
+                Object.assign(p, {
+                  options: {
+                    ...p.options,
+                    key: await asyncRandomInt(1 << 16),
+                  },
+                });
+              }
+            }),
+          Promise.resolve(),
+        );
+        const sequences = await SequenceRepo.find({
+          filter: {
+            field: field.get('name'),
+            collection: field.get('collectionName'),
+            key: patterns.map((p) => p.options.key),
+          },
+          transaction,
+        });
+        await patterns.reduce(
+          (promise: Promise<any>, p) =>
+            promise.then(async () => {
+              if (!sequences.find((s) => s.get('key') === p.options.key)) {
+                await SequenceRepo.create({
+                  values: {
+                    field: field.get('name'),
+                    collection: field.get('collectionName'),
+                    key: p.options.key,
+                  },
+                  transaction,
+                });
+                await field.load({ transaction });
+              }
+            }),
+          Promise.resolve(),
+        );
       }
-      const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
-      if (!patterns.length) {
-        return;
-      }
-
-      const SequenceRepo = db.getRepository('sequences');
-      await patterns.reduce(
-        (promise: Promise<any>, p) =>
-          promise.then(async () => {
-            if (p.options?.key == null) {
-              Object.assign(p, {
-                options: {
-                  ...p.options,
-                  key: await asyncRandomInt(1 << 16),
-                },
-              });
-            }
-          }),
-        Promise.resolve(),
-      );
-      const sequences = await SequenceRepo.find({
-        filter: {
-          field: field.get('name'),
-          collection: field.get('collectionName'),
-          key: patterns.map((p) => p.options.key),
-        },
-        transaction,
-      });
-      await patterns.reduce(
-        (promise: Promise<any>, p) =>
-          promise.then(async () => {
-            if (!sequences.find((s) => s.get('key') === p.options.key)) {
-              await SequenceRepo.create({
-                values: {
-                  field: field.get('name'),
-                  collection: field.get('collectionName'),
-                  key: p.options.key,
-                },
-                transaction,
-              });
-              await field.load({ transaction });
-            }
-          }),
-        Promise.resolve(),
-      );
+      return;
     });
 
     db.on('fields.afterDestroy', async (field, { transaction }) => {
-      if (field.get('type') !== 'sequence') {
-        return;
-      }
+      if (field.get('type') == 'sequence') {
+        const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
+        if (!patterns.length) {
+          return;
+        }
 
-      const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
-      if (!patterns.length) {
-        return;
+        const SequenceRepo = db.getRepository('sequences');
+        await SequenceRepo.destroy({
+          filter: {
+            field: field.get('name'),
+            collection: field.get('collectionName'),
+            key: patterns.map((p) => p.key),
+          },
+          transaction,
+        });
       }
-
-      const SequenceRepo = db.getRepository('sequences');
-      await SequenceRepo.destroy({
-        filter: {
-          field: field.get('name'),
-          collection: field.get('collectionName'),
-          key: patterns.map((p) => p.key),
-        },
-        transaction,
-      });
+      return;
     });
   }
 

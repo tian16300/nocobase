@@ -72,9 +72,9 @@ sequencePatterns.register('integer', {
   //   }
   //   return null;
   // },
-  async generate(this: SequenceField, instance: Model, options, { transaction }) {
+  async generate(this: TreeSequenceField, instance: Model, options, { transaction }) {
     const recordTime = <Date>instance.get('createdAt') ?? new Date();
-    const { digits = 1, start = 0, base = 10, cycle, key } = options;
+    const { digits = 2, start = 1, base = 10, cycle, key } = options;
     const { repository: SeqRepo, model: SeqModel } = this.database.getCollection('sequences');
     const lastSeq =
       (await SeqRepo.findOne({
@@ -287,16 +287,16 @@ sequencePatterns.register('date', {
   },
 });
 
-interface FieldOptions{
+interface FieldOptions {
   interface: string;
-   value: string;
-   label: string;
-   foreignKey: string;
-   target: string;
+  value: string;
+  label: string;
+  target: string;
   targetKey: string;
+  foreignKey: string;
 }
 sequencePatterns.register('field', {
-  async generate(this: SequenceField, instance, options: { value: FieldOptions }, { transaction }) {
+  async generate(this: TreeSequenceField, instance, options: { value: FieldOptions }, { transaction }) {
     /* 字典 下拉单选 文本 单选 复选框的值 */
     const { interface: fieldInterface, value, target, targetKey, foreignKey } = options?.value || {};
     let gValue = '';
@@ -328,7 +328,7 @@ sequencePatterns.register('field', {
     const { inputable } = options;
     instances.forEach((instance, i) => {
       if (!inputable) {
-        values[i] = sequencePatterns.get('field').generate.call(this, instance, options, );
+        values[i] = sequencePatterns.get('field').generate.call(this, instance, options);
       }
     });
   },
@@ -337,7 +337,7 @@ sequencePatterns.register('field', {
   },
   getMatcher(options = {}) {
     return `.{${options?.value?.textLen ?? 2}}`;
-  }
+  },
 });
 
 interface PatternConfig {
@@ -345,24 +345,40 @@ interface PatternConfig {
   title?: string;
   options?: any;
 }
-export interface SequenceFieldOptions extends BaseColumnFieldOptions {
-  type: 'sequence';
+export interface TreeSequenceFieldOptions extends BaseColumnFieldOptions {
+  type: 'treeSequence';
   patterns: PatternConfig[];
+  splitText: string;
+  levelConfig: PatternConfig[];
 }
 
-export class SequenceField extends Field {
+export class TreeSequenceField extends Field {
   matcher: RegExp;
-
   get dataType() {
     return DataTypes.STRING;
   }
 
-  constructor(options: SequenceFieldOptions, context: FieldContext) {
+  constructor(options: TreeSequenceFieldOptions, context: FieldContext) {
     super(options, context);
     if (!options.patterns || !options.patterns.length) {
       throw new Error('at least one pattern should be defined for sequence type');
     }
+    if (!options.levelConfig || !options.levelConfig.length) {
+      throw new Error('at least one pattern should be defined for sequence type');
+    }
     options.patterns.forEach((pattern) => {
+      const P = sequencePatterns.get(pattern.type);
+      if (!P) {
+        throw new Error(`pattern type ${pattern.type} is not registered`);
+      }
+      if (P.validate) {
+        const error = P.validate(pattern.options);
+        if (error) {
+          throw new Error(error);
+        }
+      }
+    });
+    options.levelConfig.forEach((pattern) => {
       const P = sequencePatterns.get(pattern.type);
       if (!P) {
         throw new Error(`pattern type ${pattern.type} is not registered`);
@@ -402,7 +418,7 @@ export class SequenceField extends Field {
     if (options.skipIndividualHooks?.has(`${this.collection.name}.beforeCreate.${this.name}`)) {
       return;
     }
-    const { name, patterns, inputable } = this.options;
+    const { name, patterns, inputable, levelConfig, splitText } = this.options;
     const value = instance.get(name);
     if (value != null && inputable) {
       return this.update(instance, options);
@@ -416,7 +432,20 @@ export class SequenceField extends Field {
         }),
       Promise.resolve([]),
     );
-    instance.set(name, results.join(''));
+    const prefix = results.join('');
+    /**
+     * TODO 获取当前节点层级
+     */
+    const level = 1;
+    const levelResults = await levelConfig.slice(0, level).reduce(
+      (promise, p) =>
+        promise.then(async (result) => {
+          const item = await sequencePatterns.get(p.type).generate.call(this, instance, p.options, options);
+          return result.concat(item);
+        }),
+      Promise.resolve([]),
+    );
+    instance.set(name, [prefix, ...levelResults].join(splitText));
   };
 
   setGroupValue = async (instances: Model[], options) => {
@@ -428,7 +457,8 @@ export class SequenceField extends Field {
     }
     options.skipIndividualHooks.add(`${this.collection.name}.beforeCreate.${this.name}`);
 
-    const { name, patterns, inputable } = this.options;
+    const { name, patterns, inputable, levelConfig } = this.options;
+
     const array = Array(patterns.length)
       .fill(null)
       .map(() => Array(instances.length));
@@ -452,7 +482,6 @@ export class SequenceField extends Field {
   cleanHook = (_, options) => {
     options.skipIndividualHooks.delete(`${this.collection.name}.beforeCreate.${this.name}`);
   };
-
   match(value) {
     return typeof value === 'string' ? value.match(this.matcher) : null;
   }

@@ -350,33 +350,33 @@ export interface SequenceFieldOptions extends BaseColumnFieldOptions {
   patterns: PatternConfig[];
 }
 
-export class SequenceField extends Field {
+export class LevelField extends Field {
   matcher: RegExp;
 
   get dataType() {
-    return DataTypes.STRING;
+    return DataTypes.INTEGER;
   }
 
   constructor(options: SequenceFieldOptions, context: FieldContext) {
     super(options, context);
-    if (!options.patterns || !options.patterns.length) {
-      throw new Error('at least one pattern should be defined for sequence type');
-    }
-    options.patterns.forEach((pattern) => {
-      const P = sequencePatterns.get(pattern.type);
-      if (!P) {
-        throw new Error(`pattern type ${pattern.type} is not registered`);
-      }
-      if (P.validate) {
-        const error = P.validate(pattern.options);
-        if (error) {
-          throw new Error(error);
-        }
-      }
-    });
+    // if (!options.patterns || !options.patterns.length) {
+    //   throw new Error('at least one pattern should be defined for sequence type');
+    // }
+    // options.patterns.forEach((pattern) => {
+    //   const P = sequencePatterns.get(pattern.type);
+    //   if (!P) {
+    //     throw new Error(`pattern type ${pattern.type} is not registered`);
+    //   }
+    //   if (P.validate) {
+    //     const error = P.validate(pattern.options);
+    //     if (error) {
+    //       throw new Error(error);
+    //     }
+    //   }
+    // });
 
-    const patterns = options.patterns.map(({ type, options }) => sequencePatterns.get(type).getMatcher(options));
-    this.matcher = new RegExp(`^${patterns.map((p) => `(${p})`).join('')}$`, 'i');
+    // const patterns = options.patterns.map(({ type, options }) => sequencePatterns.get(type).getMatcher(options));
+    // this.matcher = new RegExp(`^${patterns.map((p) => `(${p})`).join('')}$`, 'i');
   }
 
   validate = (instance: Model) => {
@@ -399,24 +399,37 @@ export class SequenceField extends Field {
   };
 
   setValue = async (instance: Model, options) => {
-    if (options.skipIndividualHooks?.has(`${this.collection.name}.beforeCreate.${this.name}`)) {
-      return;
-    }
-    const { name, patterns, inputable } = this.options;
-    const value = instance.get(name);
-    if (value != null && inputable) {
-      return this.update(instance, options);
-    }
+    const { transaction} = options;
+    const { QueryTypes } = require('sequelize');
+    const sql = `SELECT depth
+    FROM closure
+    WHERE descendant_id = <目标节点的 ID>
+      AND ancestor_id = <根节点的 ID>`;
+      
 
-    const results = await patterns.reduce(
-      (promise, p) =>
-        promise.then(async (result) => {
-          const item = await sequencePatterns.get(p.type).generate.call(this, instance, p.options, options);
-          return result.concat(item);
-        }),
-      Promise.resolve([]),
-    );
-    instance.set(name, results.join(''));
+
+      // const { depth } = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    
+    // const users = await sequelize.query(sql, { type: QueryTypes.SELECT });
+    // const depth = await 
+    // if (options.skipIndividualHooks?.has(`${this.collection.name}.beforeCreate.${this.name}`)) {
+    //   return;
+    // }
+    // const { name, patterns, inputable } = this.options;
+    // const value = instance.get(name);
+    // if (value != null && inputable) {
+    //   return this.update(instance, options);
+    // }
+
+    // const results = await patterns.reduce(
+    //   (promise, p) =>
+    //     promise.then(async (result) => {
+    //       const item = await sequencePatterns.get(p.type).generate.call(this, instance, p.options, options);
+    //       return result.concat(item);
+    //     }),
+    //   Promise.resolve([]),
+    // );
+    // instance.set(name, results.join(''));
   };
 
   setGroupValue = async (instances: Model[], options) => {
