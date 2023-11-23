@@ -10,10 +10,10 @@ import { useCompile } from '../../hooks';
 import { ActionContextProvider, useActionContext } from '../action';
 import { EllipsisWithTooltip } from '../input/EllipsisWithTooltip';
 import { useAssociationFieldContext, useFieldNames, useInsertSchema } from './hooks';
+import { transformNestedData } from './InternalCascadeSelect';
 import schema from './schema';
 import { getLabelFormatValue, useLabelUiSchema } from './util';
 import { getValuesByPath } from '@nocobase/utils/client';
-import { transformNestedData } from './InternalCascadeSelect';
 
 interface IEllipsisWithTooltipRef {
   setPopoverVisible: (boolean) => void;
