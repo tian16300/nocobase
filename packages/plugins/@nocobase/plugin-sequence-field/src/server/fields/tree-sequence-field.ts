@@ -12,18 +12,20 @@ import { Registry } from '@nocobase/utils';
 import parser from 'cron-parser';
 import dayjs from 'dayjs';
 import lodash from 'lodash';
+import { randomInt } from 'crypto';
+import { promisify } from 'util';
 import suportFieldTypes from '../config/suportFieldTypes';
 
 export interface Pattern {
   validate?(options): string | null;
   generate(
-    this: SequenceField,
+    this: TreeSequenceField,
     instance: Model,
     opts: { [key: string]: any },
     options: Transactionable,
   ): Promise<string> | string;
   batchGenerate(
-    this: SequenceField,
+    this: TreeSequenceField,
     instances: Model[],
     values: string[],
     opts: { [key: string]: any },
@@ -32,7 +34,7 @@ export interface Pattern {
   getLength(options): number;
   getMatcher(options): string;
   update?(
-    this: SequenceField,
+    this: TreeSequenceField,
     instance: Model,
     value: string,
     options,
@@ -202,7 +204,6 @@ sequencePatterns.register('integer', {
 
     await lastSeq.save({ transaction });
   },
-
   async update(instance, value, options, { transaction }) {
     const recordTime = <Date>instance.get('createdAt') ?? new Date();
     const { digits = 1, start = 0, base = 10, cycle, key } = options;
@@ -268,7 +269,7 @@ sequencePatterns.register('integer', {
 });
 
 sequencePatterns.register('date', {
-  generate(this: SequenceField, instance, options) {
+  generate(this: TreeSequenceField, instance, options) {
     return dayjs(instance.get(options?.field ?? 'createdAt')).format(options?.format ?? 'YYYYMMDD');
   },
   batchGenerate(instances, values, options) {
@@ -294,14 +295,15 @@ interface FieldOptions {
   target: string;
   targetKey: string;
   foreignKey: string;
+  textLen: number;
 }
 sequencePatterns.register('field', {
   async generate(this: TreeSequenceField, instance, options: { value: FieldOptions }, { transaction }) {
     /* 字典 下拉单选 文本 单选 复选框的值 */
-    const { interface: fieldInterface, value, target, targetKey, foreignKey } = options?.value || {};
+    const { interface: fieldInterface, value, target, targetKey, foreignKey, textLen } = options?.value || {};
     let gValue = '';
     if (suportFieldTypes.includes(fieldInterface) && instance.get(foreignKey)) {
-      switch(fieldInterface){
+      switch (fieldInterface) {
         case 'dic':
           const item = await this.database.getRepository(target).findOne({
             filter: {
@@ -314,13 +316,19 @@ sequencePatterns.register('field', {
           }
           break;
         case 'obo':
-           gValue = instance.get(foreignKey);
-           break;
-       default:
-         gValue = instance.get(value);
+          gValue = instance.get(foreignKey);
+          break;
+        default:
+          gValue = instance.get(value);
       }
     } else {
       gValue = instance.get(value);
+    }
+    if (gValue.length < textLen) {
+      const addr = new Array(textLen - gValue.length).fill('*').join('');
+      gValue = gValue + addr;
+    } else {
+      gValue = gValue.slice(0, textLen);
     }
     return gValue;
   },
@@ -351,7 +359,70 @@ export interface TreeSequenceFieldOptions extends BaseColumnFieldOptions {
   splitText: string;
   levelConfig: PatternConfig[];
 }
+const asyncRandomInt = promisify(randomInt);
+const FieldBeforeSave = async function (field, { transaction }, db) {
+  const patterns =  [...(field.get('patterns') || []),...(field.get('levelConfig') || [])].filter((p) => p.type === 'integer');
+  if (!patterns.length) {
+    return;
+  }
+  const SequenceRepo = db.getRepository('sequences');
+  await patterns.reduce(
+    (promise: Promise<any>, p) =>
+      promise.then(async () => {
+        if (p.options?.key == null) {
+          Object.assign(p, {
+            options: {
+              ...p.options,
+              key: await asyncRandomInt(1 << 16),
+            },
+          });
+        }
+      }),
+    Promise.resolve(),
+  );
+  const sequences = await SequenceRepo.find({
+    filter: {
+      field: field.get('name'),
+      collection: field.get('collectionName'),
+      key: patterns.map((p) => p.options.key),
+    },
+    transaction,
+  });
+  await patterns.reduce(
+    (promise: Promise<any>, p) =>
+      promise.then(async () => {
+        if (!sequences.find((s) => s.get('key') === p.options.key)) {
+          await SequenceRepo.create({
+            values: {
+              field: field.get('name'),
+              collection: field.get('collectionName'),
+              key: p.options.key,
+            },
+            transaction,
+          });
+          await field.load({ transaction });
+        }
+      }),
+    Promise.resolve(),
+  );
+};
 
+const FieldAfterDestroy = async function (field, { transaction }, db) {
+  const patterns = [...(field.get('patterns') || []),...(field.get('levelConfig') || [])].filter((p) => p.type === 'integer');
+  // const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
+  if (!patterns.length) {
+    return;
+  }
+  const SequenceRepo = db.getRepository('sequences');
+  await SequenceRepo.destroy({
+    filter: {
+      field: field.get('name'),
+      collection: field.get('collectionName'),
+      key: patterns.map((p) => p.options.key),
+    },
+    transaction,
+  });
+};
 export class TreeSequenceField extends Field {
   matcher: RegExp;
   get dataType() {
@@ -436,7 +507,7 @@ export class TreeSequenceField extends Field {
     /**
      * TODO 获取当前节点层级
      */
-    const level = 1;
+    const level = (instance.get('level')|| 0)+1;
     const levelResults = await levelConfig.slice(0, level).reduce(
       (promise, p) =>
         promise.then(async (result) => {
@@ -521,4 +592,7 @@ export class TreeSequenceField extends Field {
     this.off('beforeBulkCreate', this.setGroupValue);
     this.off('afterBulkCreate', this.cleanHook);
   }
+
+  static beforeSave = FieldBeforeSave;
+  static afterDestroy = FieldAfterDestroy;
 }

@@ -296,11 +296,12 @@ interface FieldOptions {
   foreignKey: string;
   target: string;
   targetKey: string;
+  textLen: number;
 }
 sequencePatterns.register('field', {
   async generate(this: SequenceField, instance, options: { value: FieldOptions }, { transaction }) {
     /* 字典 下拉单选 文本 单选 复选框的值 */
-    const { interface: fieldInterface, value, target, targetKey, foreignKey } = options?.value || {};
+    const { interface: fieldInterface, value, target, targetKey, foreignKey, textLen } = options?.value || {};
     let gValue = '';
     if (suportFieldTypes.includes(fieldInterface) && instance.get(foreignKey)) {
       switch (fieldInterface) {
@@ -324,6 +325,14 @@ sequencePatterns.register('field', {
     } else {
       gValue = instance.get(value);
     }
+    if(gValue.length < textLen) {
+      const addr = new Array(textLen - gValue.length).fill('*').join('');
+      gValue = gValue + addr;
+
+    }else{
+      gValue = gValue.slice(0, textLen);
+    }
+
     return gValue;
   },
   batchGenerate(instances, values, options, { transaction }) {
@@ -558,6 +567,7 @@ export class SequenceField extends Field {
   }
   static beforeSave = SequenceFieldBeforeSave;
   static afterDestroy = SequenceFieldAfterDestroy;
+
 }
 
 

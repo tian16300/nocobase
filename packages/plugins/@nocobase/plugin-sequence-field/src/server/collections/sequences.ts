@@ -7,7 +7,6 @@ export default defineCollection({
     async delayRestore(restorer) {
       const app = restorer.app;
       const importedCollections = restorer.importedCollections;
-
       const sequenceFields = importedCollections
         .map((collection) =>
           [...app.db.getCollection(collection).fields.values()].filter((field) => field.type === 'sequence'),
@@ -70,6 +69,10 @@ export default defineCollection({
     {
       name: 'current',
       type: 'bigInt',
+    },
+    {
+      name: 'level',
+      type: 'integer',
     },
     {
       name: 'lastGeneratedAt',

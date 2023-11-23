@@ -31,12 +31,18 @@ export default class SequenceFieldPlugin extends Plugin {
       if (field.get('type') == 'sequence') {
         return await SequenceField.beforeSave(field, { transaction }, db);
       }
+      if (field.get('type') == 'treeSequence') {
+        return await TreeSequenceField.beforeSave(field, { transaction }, db);
+      }
       return;
     });
 
     db.on('fields.afterDestroy', async (field, { transaction }) => {
       if (field.get('type') == 'sequence') {
-        SequenceField.afterDestroy(field, { transaction }, db);
+       return await SequenceField.afterDestroy(field, { transaction }, db);
+      }
+      if (field.get('type') == 'treeSequence') {
+        return await TreeSequenceField.afterDestroy(field, { transaction }, db);
       }
       return;
     });
