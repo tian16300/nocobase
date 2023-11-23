@@ -22,17 +22,6 @@ export const tree: ICollectionTemplate = {
         },
       },
       {
-        interface: 'level',
-        name: 'level',
-        type: 'bigInt',
-        uiSchema: {
-          type: 'number',
-          title: '层级',
-          'x-component': 'InputNumber',
-          'x-read-pretty': true,
-        },
-      },
-      {
         interface: 'm2o',
         type: 'belongsTo',
         name: 'parent',
@@ -72,13 +61,27 @@ export const tree: ICollectionTemplate = {
           },
         },
       },
+      {
+        interface: 'level',
+        name: 'level',
+        type: 'level',
+        uiSchema: {
+          type: 'number',
+          title: '层级',
+          'x-component': 'InputNumber',
+          'x-read-pretty': true,
+        },
+      },
     ],
   },
   events: {
-    beforeSubmit(values) {
+    beforeSubmit(values: any) {
       if (Array.isArray(values?.fields)) {
-        values?.fields.map((f) => {
-          f.target = values.name;
+        values?.fields.map((f: any) => {
+          const intf = f?.interface;
+          if (['m2o', 'o2m'].includes(intf)) {
+            f.target = values.name;
+          }
         });
       }
     },

@@ -9,10 +9,7 @@ export const level: IField = {
   title: '层级',
   sortable: true,
   default: {
-    name: 'level',
     type: 'level',
-    autoIncrement: true,
-    allowNull: false,
     uiSchema: {
       type: 'number',
       title: '层级',
@@ -20,7 +17,7 @@ export const level: IField = {
       'x-read-pretty': true,
     },
   },
-  availableTypes: ['integer', 'string'],
+  availableTypes: ['bigInt','integer', 'string'],
   properties: {
     'uiSchema.title': {
       type: 'string',
@@ -30,6 +27,15 @@ export const level: IField = {
       'x-decorator': 'FormItem',
       'x-component': 'Input',
     },
+    name:{
+      type:'string',
+      title: '字段名',
+      required: true,
+      default: 'level',
+      'x-decorator': 'FormItem',
+      'x-component': 'Input',
+      'x-disabled': true
+    }
   },
   filterable: {
     operators: operators.number,

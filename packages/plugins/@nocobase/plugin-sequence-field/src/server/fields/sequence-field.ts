@@ -12,6 +12,8 @@ import { Registry } from '@nocobase/utils';
 import parser from 'cron-parser';
 import dayjs from 'dayjs';
 import lodash from 'lodash';
+import { randomInt } from 'crypto';
+import { promisify } from 'util';
 import suportFieldTypes from '../config/suportFieldTypes';
 
 export interface Pattern {
@@ -287,12 +289,12 @@ sequencePatterns.register('date', {
   },
 });
 
-interface FieldOptions{
+interface FieldOptions {
   interface: string;
-   value: string;
-   label: string;
-   foreignKey: string;
-   target: string;
+  value: string;
+  label: string;
+  foreignKey: string;
+  target: string;
   targetKey: string;
 }
 sequencePatterns.register('field', {
@@ -301,7 +303,7 @@ sequencePatterns.register('field', {
     const { interface: fieldInterface, value, target, targetKey, foreignKey } = options?.value || {};
     let gValue = '';
     if (suportFieldTypes.includes(fieldInterface) && instance.get(foreignKey)) {
-      switch(fieldInterface){
+      switch (fieldInterface) {
         case 'dic':
           const item = await this.database.getRepository(target).findOne({
             filter: {
@@ -314,10 +316,10 @@ sequencePatterns.register('field', {
           }
           break;
         case 'obo':
-           gValue = instance.get(foreignKey);
-           break;
-       default:
-         gValue = instance.get(value);
+          gValue = instance.get(foreignKey);
+          break;
+        default:
+          gValue = instance.get(value);
       }
     } else {
       gValue = instance.get(value);
@@ -328,7 +330,7 @@ sequencePatterns.register('field', {
     const { inputable } = options;
     instances.forEach((instance, i) => {
       if (!inputable) {
-        values[i] = sequencePatterns.get('field').generate.call(this, instance, options, );
+        values[i] = sequencePatterns.get('field').generate.call(this, instance, options);
       }
     });
   },
@@ -337,7 +339,7 @@ sequencePatterns.register('field', {
   },
   getMatcher(options = {}) {
     return `.{${options?.value?.textLen ?? 2}}`;
-  }
+  },
 });
 
 interface PatternConfig {
@@ -349,7 +351,69 @@ export interface SequenceFieldOptions extends BaseColumnFieldOptions {
   type: 'sequence';
   patterns: PatternConfig[];
 }
+const asyncRandomInt = promisify(randomInt);
+const SequenceFieldBeforeSave = async function (field, { transaction }, db) {
+  const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
+  if (!patterns.length) {
+    return;
+  }
+  const SequenceRepo = db.getRepository('sequences');
+  await patterns.reduce(
+    (promise: Promise<any>, p) =>
+      promise.then(async () => {
+        if (p.options?.key == null) {
+          Object.assign(p, {
+            options: {
+              ...p.options,
+              key: await asyncRandomInt(1 << 16),
+            },
+          });
+        }
+      }),
+    Promise.resolve(),
+  );
+  const sequences = await SequenceRepo.find({
+    filter: {
+      field: field.get('name'),
+      collection: field.get('collectionName'),
+      key: patterns.map((p) => p.options.key),
+    },
+    transaction,
+  });
+  await patterns.reduce(
+    (promise: Promise<any>, p) =>
+      promise.then(async () => {
+        if (!sequences.find((s) => s.get('key') === p.options.key)) {
+          await SequenceRepo.create({
+            values: {
+              field: field.get('name'),
+              collection: field.get('collectionName'),
+              key: p.options.key,
+            },
+            transaction,
+          });
+          await field.load({ transaction });
+        }
+      }),
+    Promise.resolve(),
+  );
+};
 
+const SequenceFieldAfterDestroy = async function (field, { transaction }, db) {
+  const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
+  if (!patterns.length) {
+    return;
+  }
+  const SequenceRepo = db.getRepository('sequences');
+  await SequenceRepo.destroy({
+    filter: {
+      field: field.get('name'),
+      collection: field.get('collectionName'),
+      key: patterns.map((p) => p.options.key),
+    },
+    transaction,
+  });
+};
 export class SequenceField extends Field {
   matcher: RegExp;
 
@@ -492,4 +556,8 @@ export class SequenceField extends Field {
     this.off('beforeBulkCreate', this.setGroupValue);
     this.off('afterBulkCreate', this.cleanHook);
   }
+  static beforeSave = SequenceFieldBeforeSave;
+  static afterDestroy = SequenceFieldAfterDestroy;
 }
+
+

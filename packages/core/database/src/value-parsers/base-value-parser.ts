@@ -34,7 +34,7 @@ export class BaseValueParser {
     return this.value;
   }
 
-  async setValue(value: any) {
+  async setValue(value: any, { transaction }: any, instance?: any) {
     this.value = value;
   }
 }
