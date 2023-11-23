@@ -733,7 +733,7 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
-      {form && !form?.readPretty && collectionField?.interface !== 'o2m' && !isPatternDisabled(fieldSchema) && (
+      {form && !form?.readPretty && !isPatternDisabled(fieldSchema) && (
         <SchemaSettings.SelectItem
           key="pattern"
           title={t('Pattern')}
