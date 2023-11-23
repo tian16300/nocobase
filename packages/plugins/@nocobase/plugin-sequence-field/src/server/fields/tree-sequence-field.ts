@@ -356,12 +356,13 @@ interface PatternConfig {
 export interface TreeSequenceFieldOptions extends BaseColumnFieldOptions {
   type: 'treeSequence';
   patterns: PatternConfig[];
-  splitText: string;
   levelConfig: PatternConfig[];
 }
 const asyncRandomInt = promisify(randomInt);
 const FieldBeforeSave = async function (field, { transaction }, db) {
-  const patterns =  [...(field.get('patterns') || []),...(field.get('levelConfig') || [])].filter((p) => p.type === 'integer');
+  const patterns = [...(field.get('patterns') || []), ...(field.get('levelConfig') || [])].filter(
+    (p) => p.type === 'integer',
+  );
   if (!patterns.length) {
     return;
   }
@@ -408,7 +409,9 @@ const FieldBeforeSave = async function (field, { transaction }, db) {
 };
 
 const FieldAfterDestroy = async function (field, { transaction }, db) {
-  const patterns = [...(field.get('patterns') || []),...(field.get('levelConfig') || [])].filter((p) => p.type === 'integer');
+  const patterns = [...(field.get('patterns') || []), ...(field.get('levelConfig') || [])].filter(
+    (p) => p.type === 'integer',
+  );
   // const patterns = (field.get('patterns') || []).filter((p) => p.type === 'integer');
   if (!patterns.length) {
     return;
@@ -462,8 +465,15 @@ export class TreeSequenceField extends Field {
       }
     });
 
-    const patterns = options.patterns.map(({ type, options }) => sequencePatterns.get(type).getMatcher(options));
-    this.matcher = new RegExp(`^${patterns.map((p) => `(${p})`).join('')}$`, 'i');
+    const patternsMatchers = options.patterns.map(({ type, options }) =>
+      sequencePatterns.get(type).getMatcher(options),
+    );
+    const levelConfigMatchers = options.levelConfig.map(({ type, options }) =>
+      sequencePatterns.get(type).getMatcher(options),
+    );
+    const patterns = [...patternsMatchers, ...levelConfigMatchers];
+    const splitText = options.splitText || '';
+    this.matcher = new RegExp(`^${patterns.map((p) => `(${p})`).join(splitText)}$`, 'i');
   }
 
   validate = (instance: Model) => {
@@ -494,7 +504,6 @@ export class TreeSequenceField extends Field {
     if (value != null && inputable) {
       return this.update(instance, options);
     }
-
     const results = await patterns.reduce(
       (promise, p) =>
         promise.then(async (result) => {
@@ -507,8 +516,9 @@ export class TreeSequenceField extends Field {
     /**
      * TODO 获取当前节点层级
      */
-    const level = (instance.get('level')|| 0)+1;
-    const levelResults = await levelConfig.slice(0, level).reduce(
+    const levelIndex = (instance.get('level') || 0);
+
+    const levelResults = await [levelConfig[levelIndex]].reduce(
       (promise, p) =>
         promise.then(async (result) => {
           const item = await sequencePatterns.get(p.type).generate.call(this, instance, p.options, options);
@@ -516,7 +526,27 @@ export class TreeSequenceField extends Field {
         }),
       Promise.resolve([]),
     );
-    instance.set(name, [prefix, ...levelResults].join(splitText));
+    /**
+     * 查询父节点编码
+     */
+    if(instance.get('parentId')){
+     const repo = this.database.getRepository(this.collection.name);
+      const pModel = await repo.findOne({
+        filter:{
+          id:instance.get('parentId')
+        },
+        transaction:options.transaction
+      })
+      if(pModel){
+        const pCode = pModel.get(name);
+        instance.set(name, [pCode, ...levelResults].join(splitText));
+      }else{
+        instance.set(name, [prefix, ...levelResults].join(splitText));
+      }      
+    }else{
+      instance.set(name, [prefix, ...levelResults].join(splitText));
+    }
+   
   };
 
   setGroupValue = async (instances: Model[], options) => {
