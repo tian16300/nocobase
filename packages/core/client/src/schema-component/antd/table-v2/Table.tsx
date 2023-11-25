@@ -429,48 +429,48 @@ export const Table: any = observer(
     }, [ctx?.field?.data?.selectedRowKeys]);
 
     const [colDataIndexs, setColDataIndexs] = useState([]);
-    const onResizeCell = (cellKey, width) => {
-      const column = columns.find((col) => {return col.dataIndex === cellKey}); 
-     if(designable){
-      /** 保存宽度 */
-      const uid = column.key; 
-      const columnSchema = schema['properties'][uid];
-      if(columnSchema){
-        const props = columnSchema['x-component-props'] || {};
-          props['width'] = width;
-          const schemaData: any = {
-            ['x-uid']: columnSchema['x-uid'],
-          };
-          schemaData['x-component-props'] = props;
-          columnSchema['x-component-props'] = props;
-          dn.emit('patch', {
-            schema: schemaData
-          });
-          dn.refresh();
-      }
-     }
-    };
-   
+
     useEffect(() => {
-      const newDataIndexes = columns.map(({dataIndex})=>{
+      const newDataIndexes = columns.map(({ dataIndex }) => {
         return dataIndex;
       });
-      if(JSON.stringify(colDataIndexs) !== JSON.stringify(newDataIndexes)){
-        setColDataIndexs(newDataIndexes)
-      }   
-    },[columns]);
-    const [resizeAction, setResizeAction] = useState(false);
+      if (JSON.stringify(colDataIndexs) !== JSON.stringify(newDataIndexes)) {
+        setColDataIndexs(newDataIndexes);
+      }
+    }, [columns]);
     const {
       resizableColumns,
       components: reSizeComponents,
       tableWidth,
       resetColumns,
-
     } = useAntdColumnResize(() => {
-      return {columns, minWidth: 100};
-    }, [columns.length, colDataIndexs, resizeAction]);
-    const {designable, dn} = useDesignable();
+      return { columns, minWidth: 60 };
+    }, [columns.length, colDataIndexs]);
+    const { designable, dn } = useDesignable();
     const components = useMemo(() => {
+      const onResizeCell = (cellKey, width) => {
+        const column = columns.find((col) => {
+          return col.dataIndex === cellKey;
+        });
+        if (designable) {
+          /** 保存宽度 */
+          const uid = column.key;
+          const columnSchema = schema['properties'][uid];
+          if (columnSchema) {
+            const props = columnSchema['x-component-props'] || {};
+            props['width'] = width;
+            const schemaData: any = {
+              ['x-uid']: columnSchema['x-uid'],
+            };
+            schemaData['x-component-props'] = props;
+            columnSchema['x-component-props'] = props;
+            dn.emit('patch', {
+              schema: schemaData,
+            });
+            dn.refresh();
+          }
+        }
+      };
       return {
         header: {
           wrapper: (props) => {
@@ -480,16 +480,16 @@ export const Table: any = observer(
               </DndContext>
             );
           },
-          cell: (props) => {            
-            const {className, onResize, ...others} = props;
+          cell: (props) => {
+            const { className, onResize, ...others } = props;
             // const [width, setWidth] = useState(dfWidth);
-            const  onSaveCellWidth = (cellKey, width) => {
+            const onSaveCellWidth = (cellKey, width) => {
               // setWidth(width);
               onResize && onResize(cellKey, width);
               onResizeCell(cellKey, width);
             };
             return (
-              <reSizeComponents.header.cell              
+              <reSizeComponents.header.cell
                 className={cls(
                   className,
                   css`
@@ -497,30 +497,24 @@ export const Table: any = observer(
                     white-space: nowrap;
                     position: relative;
                     .nb-sortable-designer {
-                      position:initial;
+                      position: initial;
                     }
                     &:hover .general-schema-designer {
                       display: block;
                     }
-                    .resizable-title{
-                      // overflow-x:hidden;
-                      overflow:initial;
-                      position:initial;
-                      .ant-table-column-title{
-                        overflow:initial;
+                    .resizable-title {
+                      overflow-x: hidden;
+                      position: initial;
+                      .ant-table-column-title {
+                        overflow: initial;
                       }
-                      left:0;
-                      top:0;
-                      right:0;
-                      bottom:0;
                     }
-                    .general-schema-designer{
-                      top:0!important;
-                      left:0!important;
-                      bottom:0!important;
-                      right:0!important;
+                    .general-schema-designer {
+                      top: 0 !important;
+                      left: 0 !important;
+                      bottom: 0 !important;
+                      right: 0 !important;
                     }
-                    
                   `,
                 )}
                 onResize={onSaveCellWidth}
@@ -552,18 +546,23 @@ export const Table: any = observer(
             );
           },
           row: (props) => {
-            console.log('header wrapper row', props);
             return <SortableRow {...props}></SortableRow>;
           },
           cell: (props) => {
+            const { className, onMouseEnter, onMouseLeave, ...others } = props;
             return (
               <td
-                {...props}
+                {...others}
                 className={classNames(
-                  props.className,
+                  className,
                   css`
                     max-width: 300px;
                     // white-space: nowrap;
+                    overflow-x: hidden;
+                    .nb-block-item {
+                      width: 100%;
+                      overflow-x: hidden;
+                    }
                     .nb-read-pretty-input-number {
                       text-align: right;
                     }
@@ -579,7 +578,7 @@ export const Table: any = observer(
           },
         },
       };
-    }, [field, onRowDragEnd, dragSort, onResizeCell]);
+    }, [field, onRowDragEnd, dragSort]);
 
     /**
      * 为没有设置 key 属性的 record 生成一个唯一的 key
@@ -716,7 +715,7 @@ export const Table: any = observer(
               );
             },
             ...rowSelection,
-            columnWidth: 48
+            columnWidth: 48,
           }
         : undefined,
     };
