@@ -145,9 +145,7 @@ export const TreeFormMain = (props) => {
       >
         <ReflexElement className="left-tree" flex={leftFlex}>
           <div className={'pane-container'}>
-            <LeftTree></LeftTree>
-            {/* <GroupTree name={`${collection}.${group}`} /> */}
-            {/* <RecursionField name={'tree'} schema={fieldSchema.properties.group} /> */}
+            <RecursionField name={'tree'} schema={fieldSchema.properties.tree} />
           </div>
         </ReflexElement>
         <ReflexSplitter />

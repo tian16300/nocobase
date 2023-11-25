@@ -619,8 +619,7 @@ export const EditDataBlockSelectorAction = () => {
       return { label: item.uiSchema.title, value: item.name };
     });
   const initialValues = fieldSchema?.['x-component-props'];
-  const isDataBlockSelectorActionField = fieldSchema?.['x-component-props']?.component === 'DataBlockSelectorAction';
-  debugger;
+  const isDataBlockSelectorActionField = fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
   return (
     <>
       {isDataBlockSelectorActionField && <SchemaSettings.ButtonEditor />}

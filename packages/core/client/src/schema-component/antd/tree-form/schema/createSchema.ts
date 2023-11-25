@@ -16,25 +16,33 @@ export const createSchema = (props) => {
     ...others
   } = props;
   return {
-    type: 'array',
-    'x-acl-action': `${collection}:list`,
-    'x-decorator': 'TreeForm.Decorator',
-    'x-decorator-props': {
-      collection: `${collection}`,
-      resource: `${collection}`,
-      action: 'list',
-      params: {
-        paginate: false,
-      },
-      name: 'tree-form',
-    },
+    type: 'void',
     'x-designer': 'TreeForm.Designer',
     'x-component': 'TreeForm.Main',
     'x-component-props': {
       useProps: '{{ useTreeFormBlockProps }}',
     },
     properties: {
-      filterForm:formSchema(collection),
+      filterForm: formSchema(collection),
+      tree: {
+        type: 'string',
+        'x-acl-action': `${collection}:list`,
+        'x-decorator': 'TreeForm.Decorator',
+        'x-decorator-props': {
+          collection: `${collection}`,
+          resource: `${collection}`,
+          action: 'list',
+          params: {
+            paginate: false,
+          },
+          name: 'tree-form',
+        },
+      
+        'x-component': 'TreeForm.Tree',
+        'x-component-props': {
+          useProps: '{{ useTreeFormBlockProps }}',
+        },
+      },
       actions: {
         type: 'void',
         'x-initializer': 'TableActionInitializers',
@@ -44,9 +52,7 @@ export const createSchema = (props) => {
             gap: 4,
           },
         },
-        properties: {
-         
-        },
+        properties: {},
       },
       recordActions: {
         type: 'void',
@@ -144,7 +150,7 @@ export const createSchema = (props) => {
                   },
                 },
               },
-            }
+            },
           },
           update: {
             type: 'void',
@@ -193,7 +199,7 @@ export const createSchema = (props) => {
                   },
                 },
               },
-            }
+            },
           },
         },
       },

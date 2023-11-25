@@ -14,6 +14,7 @@ import { ActionContextProvider, useActionContext } from '../action';
 import { FileSelector } from '../preview';
 import { useFieldNames } from './useFieldNames';
 import { getLabelFormatValue, useLabelUiSchema } from './util';
+import { useDataBlockSelectorProps } from '..';
 
 export const RecordPickerContext = createContext(null);
 
@@ -206,7 +207,7 @@ export const InputRecordPicker: React.FC<any> = (props: IRecordPickerProps) => {
           open={false}
         />
       )}
-      {Drawer({
+      {RecordPickerDrawer({
         multiple,
         onChange,
         selectedRows,
@@ -232,16 +233,17 @@ export const RecordPickerProvider = (props) => {
   );
 };
 
-const Drawer: React.FunctionComponent<{
+export const RecordPickerDrawer: React.FunctionComponent<{
   multiple: any;
   onChange: any;
   selectedRows: any[];
   setSelectedRows: React.Dispatch<React.SetStateAction<any[]>>;
-  collectionField: any;
+  collectionField?: any;
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
   fieldSchema;
   options: any[];
+  collection?: string;
 }> = ({
   multiple,
   onChange,
@@ -252,6 +254,8 @@ const Drawer: React.FunctionComponent<{
   setVisible,
   fieldSchema,
   options,
+  collection
+
 }) => {
   const getFilter = () => {
     const targetKey = collectionField?.targetKey || 'id';
@@ -266,14 +270,15 @@ const Drawer: React.FunctionComponent<{
     setSelectedRows,
     options,
     collectionField,
+    collection
   };
   return (
     <RecordPickerProvider {...recordPickerProps}>
-      <CollectionProvider allowNull name={collectionField?.target}>
+      <CollectionProvider allowNull name={collectionField?.target || collection}>
         <ActionContextProvider openMode="drawer" visible={visible} setVisible={setVisible}>
           <FormProvider>
             <TableSelectorParamsProvider params={{ filter: getFilter() }}>
-              <SchemaComponentOptions scope={{ useTableSelectorProps, usePickActionProps }}>
+              <SchemaComponentOptions scope={{ useTableSelectorProps, usePickActionProps, useDataBlockSelectorProps }}>
                 <RecursionField
                   schema={fieldSchema}
                   onlyRenderProperties

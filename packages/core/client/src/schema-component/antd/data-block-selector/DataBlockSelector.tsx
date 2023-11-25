@@ -1,95 +1,127 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { SchemaInitializer } from '../../../schema-initializer';
 import { CollectionProvider, useCollection, useCollectionManager } from '../../../collection-manager';
 import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
 import { RecursionField, observer, useField, useFieldSchema, useForm } from '@formily/react';
-import { useDesignable } from '../../hooks';
+import { useCompile, useDesignable } from '../../hooks';
 import { Action, ActionContextProvider, useActionContext } from '../action';
 import { useRecord } from '../../../record-provider';
 import { useLocalVariables, useVariables } from '../../../variables';
 import { linkageAction } from '../action/utils';
 import { actionDesignerCss } from '../../../schema-initializer/components';
-import { Button } from 'antd';
-import { RecordPickerContext, RecordPickerProvider } from '../record-picker';
+import { Button, Select } from 'antd';
+import {
+  RecordPickerContext,
+  RecordPickerDrawer,
+  RecordPickerProvider,
+  getLabelFormatValue,
+  useFieldNames,
+  useLabelUiSchema,
+} from '../record-picker';
 import { unionBy } from 'lodash';
 import {
   WithoutFormFieldResource,
+  useAssociation,
   useFormBlockContext,
   useTableBlockContext,
-  useTableBlockContext,
-  useTableSelectorContext,
 } from '../../../block-provider';
 
-export const DataBlockSelectorAction: any = observer(
-  (props: any) => {
-    const [visible, setVisible] = useState(false);
-    // const collection = useCollection();
-    const fieldSchema = useFieldSchema();
-    const field: any = useField();
-    const linkageRules: any[] = fieldSchema?.['x-linkage-rules'] || [];
-    const values = useRecord();
-    const ctx = useActionContext();
-    const variables = useVariables();
-    const localVariables = useLocalVariables({ currentForm: { values } as any });
-    const { collection, addTo, ...others } = props;
-    const [currentCollection, setCurrentCollection] = useState(collection);
+const DataBlockSelectorActionContext = createContext(null);
+export const DataBlockSelectorAction: any = (props: any) => {
+  const { value, collection: tName, multiple = true, addTo, onChange, ...buttonProps } = props;
+  const fieldNames = useFieldNames(props);
+  const [visible, setVisible] = useState(false);
+  const fieldSchema = useFieldSchema();
+  // const collectionField = {
+  //   target: tName,
+  // };
+  const collection = useCollection();
+  const { getCollectionField, getCollectionFields } = useCollectionManager();
+  // const compile = useCompile();
+  // const labelUiSchema = useLabelUiSchema(collectionField, fieldNames?.label || 'label');
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [options, setOptions] = useState([]);
+  const field = useField();
+  const toFieldRef = useRef(null);
+  const [toField, setToField] = useState({});
+  useEffect(() => {
+    if (addTo) {
+      const target = getCollectionField(`${collection.name}.${addTo}`)?.target;
+      if(target){
+        const temp = getCollectionFields(target).find((item) => item.target === tName);
+        if (temp) {
+          setToField(temp);
+        }
+      }     
+    }
+  }, []);
 
-    useEffect(() => {
-      field.linkageProperty = {};
-      linkageRules
-        .filter((k) => !k.disabled)
-        .forEach((v) => {
-          v.actions?.forEach((h) => {
-            linkageAction({
-              operator: h.operator,
-              field,
-              condition: v.condition,
-              variables,
-              localVariables,
-            });
-          });
-        });
-    }, [field, linkageRules, localVariables, variables]);
-    const [selectedRows, setSelectedRows] = useState([]);
-    const pickerProps = {
-      size: 'small',
-      multiple: true,
-      // association: {
-      //   target: fieldSchema,
-      // },
-      // onChange: props?.onChange,
-      selectedRows,
-      setSelectedRows,
-    };
+  // useEffect(() => {
+  //   if (value) {
+  //     const opts = (Array.isArray(value) ? value : value ? [value] : []).map((option) => {
+  //       const label = option[fieldNames.label];
+  //       return {
+  //         ...option,
+  //         [fieldNames.label]: getLabelFormatValue(labelUiSchema, compile(label)),
+  //       };
+  //     });
+  //     setOptions(opts);
+  //   }
+  // }, [value, fieldNames?.label]);
 
-    return (
-      <div className={actionDesignerCss}>
-        <ActionContextProvider value={{ ...ctx, visible, setVisible }}>
-          <Button
-            {...others}
-            onClick={() => {
-              setVisible(true);
-              setCurrentCollection(collection);
-            }}
-          ></Button>
+  const getValue = () => {
+    // if (multiple == null) return null;
 
-          <WithoutFormFieldResource.Provider value={false}>
-            <RecordPickerProvider {...pickerProps}>
-              <CollectionProvider name={currentCollection}>
-                <RecursionField
-                  schema={fieldSchema}
-                  basePath={field.address}
-                  onlyRenderProperties
-                />
-              </CollectionProvider>
-            </RecordPickerProvider>
-          </WithoutFormFieldResource.Provider>
-        </ActionContextProvider>
-      </div>
-    );
-  },
-  { displayName: 'DataBlockSelectorAction' },
-);
+    return Array.isArray(value) ? value?.map((v) => v[fieldNames.value]) : value?.[fieldNames.value];
+  };
+
+  const handleSelect = () => {
+    setVisible(true);
+    setSelectedRows([]);
+  };
+
+  const handleRemove = (file) => {
+    const newOptions = options.filter((option) => option.id !== file.id);
+    setOptions(newOptions);
+    if (newOptions.length === 0) {
+      return onChange(null);
+    }
+    onChange(newOptions);
+  };
+
+  return (
+    <div>
+      <DataBlockSelectorActionContext.Provider
+        value={{
+          selectedRows,
+          toField,
+          addTo,
+        }}
+      >
+        <Button
+          {...buttonProps}
+          onClick={() => {
+            setVisible(true);
+          }}
+        >
+          {field.title}
+        </Button>
+        {RecordPickerDrawer({
+          multiple,
+          onChange,
+          selectedRows,
+          setSelectedRows,
+          // collectionField,
+          visible,
+          setVisible,
+          fieldSchema,
+          options,
+          collection: tName
+        })}
+      </DataBlockSelectorActionContext.Provider>
+    </div>
+  );
+};
 DataBlockSelectorAction.Provider = () => {};
 /**
  * 无效
@@ -151,7 +183,7 @@ DataBlockSelectorAction.Designer = (props) => {
     });
   const initialValues = fieldSchema?.['x-component-props'];
   const isDataBlockSelectorActionField = fieldSchema?.['x-component-props']?.component === 'DataBlockSelectorAction';
-  
+
   return (
     // <GeneralSchemaDesigner title={title || name}>
     <>
@@ -203,57 +235,42 @@ DataBlockSelectorAction.Designer = (props) => {
     // </GeneralSchemaDesigner>
   );
 };
+const useDataBlockSelectorActionContext = () => {
+  return useContext(DataBlockSelectorActionContext);
+};
 
 export const useDataBlockSelectorProps = () => {
   const { setVisible } = useActionContext();
-  const { multiple, onChange } = useContext(RecordPickerContext);
-  const fieldName = 'bom_wl';
-  const field = useField();
   const { form } = useFormBlockContext();
-  const ctx = useTableBlockContext();
-
-  // field.value = field.value || [];
-  // field.value.push({});
-  // field.onInput(field.value);
+  const { selectedRows, toField, addTo } = useDataBlockSelectorActionContext();
   return {
     onClick() {
-      if (multiple) {
-        // 获取当前的bom_wl字段的值
-        const currentBomWl = form.values['bom_wl'] || [];
-        const selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
-        const selectedRows = ctx?.service?.data?.data?.filter((item) => selectedRowKeys?.includes(item.id)) || [];
-        const rows = form.values['value'];
-        // 如果选择了多个物料，那么将这些物料添加到bom_wl字段的值中
-        const newRows = [];
-        rows.map(({ id, ...others }) => {
-          const isExist = currentBomWl.find((item) => {
-            return item.wl_id === id;
+      const rows = selectedRows;
+      // 获取当前的bom_wl字段的值
+      const currentBomWl = form.values[addTo] || [];
+      const newRows = [];
+      // const toField = toFieldRef.current;
+      rows.map((row) => {
+        const isExist = currentBomWl.find((item) => {
+          return item[toField.forienKey] === row[toField.targetKey];
+        });
+        if (!isExist) {
+          newRows.push({
+            ...row,
+            [toField.name]: {
+              ...row,
+            },
+            [toField.forienKey]: row[toField.targetKey]
           });
-          if (!isExist) {
-            newRows.push({
-              ...others,
-              wl_id: id,
-              wl: {
-                id,
-                ...others,
-              },
-            });
-          }
-        });
+         
+        }
+      });
+      const newBomWl = [...currentBomWl, ...newRows];
+      form.setValues({
+        ...form.values,
+        [addTo]: newBomWl
+      });
 
-        // 将选中的物料添加到bom_wl字段的值中
-        const newBomWl = [...currentBomWl, ...newRows];
-        // 更新bom_wl字段的值
-        // form.setFieldValue('bom_wl', newBomWl);
-
-        form.setValues({
-          ...form.values,
-          bom_wl: newBomWl,
-        });
-      } else {
-        // 如果只选择了一个物料，那么直接设置bom_wl字段的值为这个物料
-        // form.setFieldValue('bom_wl', selectedRows?.[0] || null);
-      }
       setVisible(false);
     },
     disabled: false,

@@ -65,56 +65,50 @@ export const FormItemInitializers = (props: any) => {
       title: '批量选择',
       component: 'DataBlockSelectorInitializer',
       schema: {
-        title: '批量选择',
-        type: 'void',
-        'x-editable': false,
+        type: 'array',
+        title: `批量选择`,
         'x-decorator': 'FormItem',
         'x-designer': 'FormItem.Designer',
-        'x-component': 'Action',
-        'x-component-props': {
-          openMode: 'drawer',
-          type: 'primary',
-          component: 'DataBlockSelectorAction',
-          icon: 'PlusOutlined',
-        },
+        'x-component': 'DataBlockSelectorAction',
         properties: {
-          drawer: {
-            "type": "void",
-            'x-component': 'Action.Drawer',
-            "title": "{{ t(\"Select record\") }}",
-            "x-component-props": {
-                "className": "nb-record-picker-selector"
+          selector: {
+            type: 'void',
+            title: '{{ t("Select record") }}',
+            'x-component': 'RecordPicker.Selector',
+            'x-component-props': {
+              className: 'nb-record-picker-selector',
             },
-            "properties": {
-                "grid": {
-                    "type": "void",
-                    "x-component": "Grid",
-                    "x-initializer": "TableSelectorInitializers",
+            properties: {
+              grid: {
+                type: 'void',
+                'x-component': 'Grid',
+                'x-initializer': 'TableSelectorInitializers',
+              },
+              footer: {
+                'x-component': 'Action.Container.Footer',
+                'x-component-props': {},
+                properties: {
+                  actions: {
+                    type: 'void',
+                    'x-component': 'ActionBar',
+                    'x-component-props': {},
+                    properties: {
+                      submit: {
+                        title: '{{ t("Submit") }}',
+                        'x-action': 'submit',
+                        'x-component': 'Action',
+                        'x-component-props': {
+                          type: 'primary',
+                          htmlType: 'submit',
+                          useProps: '{{ useDataBlockSelectorProps }}',
+                        },
+                      },
+                    },
+                  },
                 },
-                "footer": {
-                    "x-component": "Action.Drawer.Footer",
-                    "x-component-props": {},
-                    "properties": {
-                        "actions": {
-                            "type": "void",
-                            "x-component": "ActionBar",
-                            "x-component-props": {},
-                            "properties": {
-                                "submit": {
-                                    "title": "{{ t(\"Submit\") }}",
-                                    "x-component": "Action",
-                                    "x-designer": "Action.Designer",
-                                    "x-component-props": {
-                                        "type": "primary",
-                                        "useProps": "{{ useDataBlockSelectorProps }}"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
+              },
+            },
+          },
         },
       },
     },

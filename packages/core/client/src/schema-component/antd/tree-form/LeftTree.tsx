@@ -55,7 +55,7 @@ export const LeftTree = (props: any) => {
   const field: IField = useField();
   const { resource, service } = useBlockRequestContext();
   // const [dataSource, setDataSource] = useState([]);
-  field.loading = service.loading;
+  // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
   const collection = getCollection(field.decoratorProps.collection);
