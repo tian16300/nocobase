@@ -58,5 +58,6 @@ export * from './group-table';
 export * from './tree-view';
 export * from './approval-timeline';
 export * from './tree-form';
+export * from './data-block-selector';
 import 'react-reflex/styles.css';
 import './index.less';

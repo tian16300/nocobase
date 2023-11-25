@@ -20,7 +20,7 @@ export const ExportDesigner = () => {
 
   return (
     <GeneralSchemaDesigner disableInitializer>
-      <SchemaSettings.ModalItem
+      {/* <SchemaSettings.ModalItem
         title={t('Edit button')}
         schema={
           {
@@ -82,7 +82,8 @@ export const ExportDesigner = () => {
           });
           dn.refresh();
         }}
-      />
+      /> */}
+      <SchemaSettings.ButtonEditor />
       <SchemaSettings.ActionModalItem
         title={t('Exportable fields')}
         schema={schema}

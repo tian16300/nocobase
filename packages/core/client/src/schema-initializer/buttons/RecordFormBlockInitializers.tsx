@@ -30,7 +30,8 @@ export const RecordFormBlockInitializers = (props: any) => {
               type: 'item',
               title: '{{t("Markdown")}}',
               component: 'MarkdownBlockInitializer',
-            },
+            }
+            
           ],
         },
       ]}

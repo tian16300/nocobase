@@ -76,6 +76,7 @@ function ButtonEditor(props) {
   const { dn } = useDesignable();
   const { t } = useTranslation();
   const isLink = props?.isLink || fieldSchema['x-component'] === 'Action.Link';
+  const defValue =  fieldSchema['x-component-props']||{};
 
   return (
     <SchemaSettings.ModalItem
@@ -131,6 +132,7 @@ function ButtonEditor(props) {
           },
         } as ISchema
       }
+      initialValues={{...defValue}}
       onSubmit={({ title, icon, type, size }) => {
         fieldSchema.title = title;
         field.title = title;
@@ -1078,5 +1080,5 @@ export const ActionDesigner = (props) => {
     </GeneralSchemaDesigner>
   );
 };
-
+SchemaSettings.ButtonEditor = ButtonEditor;
 ActionDesigner.ButtonEditor = ButtonEditor;

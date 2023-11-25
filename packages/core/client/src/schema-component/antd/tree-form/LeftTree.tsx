@@ -1,7 +1,7 @@
-import { CardItem, Divider, TreeView, removeNullCondition, useToken } from '../..';
-import { Input, Space, Tag, Tooltip, Tree } from 'antd';
+import { CardItem, Divider, TreeView, removeNullCondition, useDesignable, useToken } from '../..';
+import { Button, Input, Space, Tag, Tooltip, Tree } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, MoreOutlined } from '@ant-design/icons';
 import {
   BlockProvider,
   IField,
@@ -17,48 +17,6 @@ import {
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
 import { forEach } from 'lodash';
-
-// export const GroupTree = (props) => {
-//   const fieldSchema = useFieldSchema();
-//   const fieldName = fieldSchema['x-collection-field'];
-//   const { getCollectionField, getCollection } = useCollectionManager();
-//   const field = getCollectionField(fieldName);
-//   const compile = useCompile();
-//   const title = compile(field.uiSchema?.title);
-//   const groupResource = field.target;
-//   const treeRef = useRef(null);
-//   const size = useSize(treeRef);
-//   const collection = getCollection(groupResource);
-//   const fieldNames = {
-//     key: 'id',
-//     title: collection?.titleField || 'title',
-//     children: 'children',
-//     parentKey: 'parentId',
-//   };
-
-//   /* 获取标题字段 */
-//   return (
-//     // <BlockProvider
-//     //   name={'table'}
-//     //   collection={groupResource}
-//     //   resource={groupResource}
-//     //   action="list"
-//     //   params={{ paginate: false }}
-//     // >
-//     // <CardItem>
-//     //   <Space direction="vertical" size="small" style={{ display: 'flex' }}>
-//     //     <div>
-//     //      <strong>{title}</strong>
-//     //     </div>
-//     //     <div ref={treeRef}>
-//     //       <GroupTreeView height={size?.height || '500px'} fieldNames={fieldNames} />
-//     //     </div>
-//     //   </Space>
-//     //   </CardItem>
-//     // </BlockProvider>
-//     <></>
-//   );
-// };
 function buildTree(
   arr,
   parentKey?: React.Key,
@@ -95,7 +53,7 @@ const treeEach = (tree, callback, { children }) => {
 };
 export const LeftTree = (props: any) => {
   const field: IField = useField();
-  const { resource , service } = useBlockRequestContext();
+  const { resource, service } = useBlockRequestContext();
   // const [dataSource, setDataSource] = useState([]);
   field.loading = service.loading;
   const fieldSchema = useFieldSchema();
@@ -200,9 +158,11 @@ export const LeftTree = (props: any) => {
     }
     setExpandedKeys(defaultKeys);
   }, [expandFlag, service.data?.data]);
-
   return (
-    <CardItem {...props} title={collection.title}>
+    <CardItem
+      {...props}
+      title={collection.title}     
+    >
       <TreeView
         {...props}
         fieldNames={fieldNames}

@@ -180,10 +180,10 @@ export const TreeFormMain = (props) => {
               <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
             </div>
             <div className="form-container">
-              <RecordProvider record={record}  isMemo>
+              {/* <RecordProvider record={record}  isMemo>
                 <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
-              </RecordProvider>
-              {/* <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} /> */}
+              </RecordProvider> */}
+              <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
             </div>
 
             {/* <RecursionField name={'table'} schema={fieldSchema.properties.table} /> */}

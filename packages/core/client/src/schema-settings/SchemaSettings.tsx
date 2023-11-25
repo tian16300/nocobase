@@ -1969,6 +1969,9 @@ SchemaSettings.DataScope = function DataScopeConfigure(props: DataScopeProps) {
   );
 };
 
+
+
+
 // 是否是系统字段
 export const isSystemField = (collectionField: CollectionFieldOptions, getInterface) => {
   const i = getInterface?.(collectionField?.interface);

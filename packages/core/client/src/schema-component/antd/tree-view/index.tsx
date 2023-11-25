@@ -1,12 +1,11 @@
-import { Divider, useToken } from '../..';
-import { Input, Space, Tag, Tooltip, Tree } from 'antd';
+import { Divider, useDesignable, useToken } from '../..';
+import { Button, Dropdown, Input, Popconfirm, Space, Tag, Tooltip, Tree } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DownOutlined } from '@ant-design/icons';
+import { DashOutlined, DownOutlined, MoreOutlined } from '@ant-design/icons';
 import { IField, RecordProvider, css } from '@nocobase/client';
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField, connect, mapProps, mapReadPretty } from '@formily/react';
 import { debounce, forEach } from 'lodash';
-import { fi } from '@faker-js/faker';
 
 const { Search } = Input;
 const MemoTooltip = Tooltip || React.memo(Tooltip);
@@ -72,11 +71,12 @@ export const TreeView = connect(
         onSelect(selectedKeys);
       }
     };
+    
     return (
       <div
         ref={boxRef}
         className={css`
-          height: ${height};         
+          height: ${height};
         `}
       >
         <div ref={searchBoxRef}>
@@ -95,7 +95,7 @@ export const TreeView = connect(
             .ant-tree-node-content-wrapper: hover {
               background-color: transparent;
             }
-            .ant-tree-list-holder{
+            .ant-tree-list-holder {
               overflow-x: hidden;
             }
           `}
@@ -149,9 +149,7 @@ export const TreeView = connect(
                   `}
                   hidden={!selectedKeys.includes(item[key])}
                 >
-                  {item[key] == 'root' ? (
-                    <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
-                  ) : (
+                  {item[key] !== 'root' && (
                     <RecordProvider record={item}>
                       <RecursionField name={'recordActionBar'} schema={fieldSchema.properties.recordActions} />
                     </RecordProvider>

@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { css } from '@emotion/css';
 import { ArrayField } from '@formily/core';
 import { exchangeArrayState } from '@formily/core/esm/shared/internals';
-import { observer } from '@formily/react';
+import { RecursionField, observer } from '@formily/react';
 import { action } from '@formily/reactive';
 import { isArr } from '@formily/shared';
 import { Button } from 'antd';
@@ -67,7 +67,7 @@ export const SubTable: any = observer(
         `}
       >
         <FlagProvider isInSubTable>
-          <FormActiveFieldsProvider name="nester">
+          <FormActiveFieldsProvider name="nester">           
             <Table
               className={css`
                 .ant-formily-item.ant-formily-item-feedback-layout-loose {

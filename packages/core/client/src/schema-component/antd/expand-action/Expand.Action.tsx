@@ -46,7 +46,7 @@ const actionDesignerCss = css`
 `;
 
 export const ExpandAction = (props) => {
-  const { expandFlag } = props;
+  const { expandFlag, size } = props;
   const schema = useFieldSchema();
   const ctxSelector = useTableSelectorContext();
   const ctxBlock = useTableBlockContext();
@@ -58,7 +58,8 @@ export const ExpandAction = (props) => {
   return (
     <div className={actionDesignerCss}>
       {(
-        <Button
+        <Button 
+        size={size}
           onClick={() => {
             setExpandAll(!expandAll);
             if(ctx && typeof ctx?.setExpandFlag === 'function'){
@@ -72,7 +73,7 @@ export const ExpandAction = (props) => {
           type={props.type}
         >
           {props.children?.[1]}
-          <span style={{ marginLeft: 10 }}>{expandAll ? compile(titleCollapse) : compile(titleExpand)}</span>
+          <span>{expandAll ? compile(titleCollapse) : compile(titleExpand)}</span>
         </Button>
       )}
     </div>

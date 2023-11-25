@@ -37,7 +37,7 @@ export const createSchema = (props) => {
       filterForm:formSchema(collection),
       actions: {
         type: 'void',
-        'x-initializer': 'GroupTableGroupActionInitializers',
+        'x-initializer': 'TableActionInitializers',
         'x-component': 'ActionBar',
         'x-component-props': {
           spaceProps: {

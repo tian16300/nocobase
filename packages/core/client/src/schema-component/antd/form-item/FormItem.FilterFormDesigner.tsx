@@ -5,6 +5,7 @@ import { useCollection, useCollectionManager } from '../../../collection-manager
 import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
 import {
   EditComponent,
+  EditDataBlockSelectorAction,
   EditDescription,
   EditOperator,
   EditTitle,
@@ -12,6 +13,7 @@ import {
   EditTooltip,
   EditValidationRules,
 } from './SchemaSettingOptions';
+import { DataBlockSelectorAction } from '..';
 
 export const FilterFormDesigner = () => {
   const { getCollectionJoinField } = useCollectionManager();

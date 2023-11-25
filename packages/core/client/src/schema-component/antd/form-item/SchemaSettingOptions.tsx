@@ -589,17 +589,82 @@ export const EditTitleField = () => {
         const fieldNames = {
           ...collectionField?.uiSchema?.['x-component-props']?.['fieldNames'],
           ...field.componentProps.fieldNames,
-          label
+          label,
         };
         fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
         fieldSchema['x-component-props']['fieldNames'] = fieldNames;
         schema['x-component-props'] = fieldSchema['x-component-props'];
         field.componentProps.fieldNames = fieldSchema['x-component-props'].fieldNames;
         dn.emit('patch', {
-          schema
+          schema,
         });
         dn.refresh();
       }}
     />
   ) : null;
+};
+
+export const EditDataBlockSelectorAction = () => {
+  const fieldSchema = useFieldSchema();
+  const field = useField();
+  const { dn } = useDesignable();
+  const { name, title } = useCollection();
+  const { getCollectionFields } = useCollectionManager();
+  const fields = getCollectionFields(name);
+  const addToFields = fields
+    .filter(({ type }) => {
+      return type == 'hasMany';
+    })
+    .map((item) => {
+      return { label: item.uiSchema.title, value: item.name };
+    });
+  const initialValues = fieldSchema?.['x-component-props'];
+  const isDataBlockSelectorActionField = fieldSchema?.['x-component-props']?.component === 'DataBlockSelectorAction';
+  debugger;
+  return (
+    <>
+      {isDataBlockSelectorActionField && <SchemaSettings.ButtonEditor />}
+      {isDataBlockSelectorActionField && (
+        <SchemaSettings.ActionModalItem
+          title="批量选择"
+          schema={{
+            type: 'object',
+            properties: {
+              collection: {
+                type: 'string',
+                title: '选择数据表',
+                'x-decorator': 'FormItem',
+                'x-component': 'CollectionSelect',
+              },
+              addTo: {
+                type: 'string',
+                title: '添加到',
+                'x-decorator': 'FormItem',
+                'x-component': 'Select',
+                enum: addToFields,
+              },
+            },
+          }}
+          initialValues={initialValues}
+          onSubmit={(values) => {
+            field.componentProps = {
+              ...field.componentProps,
+              ...values,
+            };
+            fieldSchema['x-component-props'] = {
+              ...initialValues,
+              ...values,
+            };
+            dn.emit('patch', {
+              schema: {
+                ['x-uid']: fieldSchema['x-uid'],
+                'x-component-props': fieldSchema['x-component-props'],
+              },
+            });
+            dn.refresh();
+          }}
+        />
+      )}
+    </>
+  );
 };

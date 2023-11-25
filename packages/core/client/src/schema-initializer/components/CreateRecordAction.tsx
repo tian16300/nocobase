@@ -303,6 +303,7 @@ function FinallyButton({
         type={componentType}
         disabled={field.disabled}
         danger={props.danger}
+        size = {props.size}
         icon={icon}
         onClick={(info) => {
           const collectionName = getLinkageCollection(linkageFromForm, form, field);
@@ -327,6 +328,7 @@ function FinallyButton({
       type={componentType}
       disabled={field.disabled}
       danger={props.danger}
+      size = {props.size}
       icon={icon}
       onClick={(info) => {
         onClick?.(collection.name);

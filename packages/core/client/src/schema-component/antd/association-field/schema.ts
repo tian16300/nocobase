@@ -124,6 +124,20 @@ export default {
     'x-initializer-props': {
       action: false,
     },
-    properties: {},
+    properties: {
+      // action: {
+      //   type: 'void',
+      //   'x-component': 'AssociationField.SubTableAction',
+      //   properties: {},
+      // },
+      // table: {
+      //   type: 'void',
+      //   'x-component': 'AssociationField.SubTable',
+      //   'x-initializer': 'TableColumnInitializers',
+      //   'x-initializer-props': {
+      //     action: false,
+      //   },
+      // },
+    },
   },
 };

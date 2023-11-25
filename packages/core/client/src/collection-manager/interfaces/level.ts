@@ -9,6 +9,7 @@ export const level: IField = {
   title: '层级',
   sortable: true,
   default: {
+    name:'level',
     type: 'level',
     uiSchema: {
       type: 'number',

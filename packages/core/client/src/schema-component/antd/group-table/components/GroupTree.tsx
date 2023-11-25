@@ -1,7 +1,7 @@
 import { CardItem, Divider, TreeView, removeNullCondition, useToken } from '../..';
-import { Input, Space, Tag, Tooltip, Tree } from 'antd';
+import { Button, Input, Space, Tag, Tooltip, Tree } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, MoreOutlined } from '@ant-design/icons';
 import {
   BlockProvider,
   IField,
@@ -12,53 +12,12 @@ import {
   useBlockRequestContext,
   useCollectionManager,
   useCompile,
+  useDesignable,
   useFilterBlock,
 } from '@nocobase/client';
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
 import { forEach } from 'lodash';
-
-// export const GroupTree = (props) => {
-//   const fieldSchema = useFieldSchema();
-//   const fieldName = fieldSchema['x-collection-field'];
-//   const { getCollectionField, getCollection } = useCollectionManager();
-//   const field = getCollectionField(fieldName);
-//   const compile = useCompile();
-//   const title = compile(field.uiSchema?.title);
-//   const groupResource = field.target;
-//   const treeRef = useRef(null);
-//   const size = useSize(treeRef);
-//   const collection = getCollection(groupResource);
-//   const fieldNames = {
-//     key: 'id',
-//     title: collection?.titleField || 'title',
-//     children: 'children',
-//     parentKey: 'parentId',
-//   };
-
-//   /* 获取标题字段 */
-//   return (
-//     // <BlockProvider
-//     //   name={'table'}
-//     //   collection={groupResource}
-//     //   resource={groupResource}
-//     //   action="list"
-//     //   params={{ paginate: false }}
-//     // >
-//     // <CardItem>
-//     //   <Space direction="vertical" size="small" style={{ display: 'flex' }}>
-//     //     <div>
-//     //      <strong>{title}</strong>
-//     //     </div>
-//     //     <div ref={treeRef}>
-//     //       <GroupTreeView height={size?.height || '500px'} fieldNames={fieldNames} />
-//     //     </div>
-//     //   </Space>
-//     //   </CardItem>
-//     // </BlockProvider>
-//     <></>
-//   );
-// };
 function buildTree(
   arr,
   parentKey?: React.Key,
@@ -93,6 +52,8 @@ const treeEach = (tree, callback, { children }) => {
     }
   });
 };
+
+const MemoTooltip = Tooltip || React.memo(Tooltip);
 export const GroupTree = (props: any) => {
   const field: IField = useField();
   const { service } = useBlockRequestContext();
@@ -205,9 +166,54 @@ export const GroupTree = (props: any) => {
     }
     setExpandedKeys(defaultKeys);
   }, [expandFlag, service.data?.data]);
-
+  const { designable } = useDesignable();
   return (
-    <CardItem {...props}>
+    <CardItem
+      {...props}
+      extra={
+        <>
+          {designable && (
+            <div>
+              <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
+            </div>
+          )}
+          <div
+            className={css`
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+            `}
+          >
+            {!designable && (
+              <MemoTooltip
+                placement="bottomRight"
+                color={'#fff'}
+                title={
+                  <>
+                    <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
+                  </>
+                }
+                trigger={['click']}
+                overlayClassName={css`
+                  .ant-space {
+                    flex-direction: column !important;
+                    align-items: flex-start !important;
+                    .ant-btn {
+                      border-color: 0 !important;
+                    }
+                  }
+                `}
+              >
+                <Button icon={<MoreOutlined />} type="text"></Button>
+              </MemoTooltip>
+            )}
+          </div>
+        </>
+      }
+      headStyle = {{
+        padding:'0 12px'
+      }}
+    >
       <TreeView
         {...props}
         fieldNames={fieldNames}

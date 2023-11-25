@@ -5,7 +5,6 @@ import { GeneralSchemaDesigner, SchemaSettings, useDesignable } from '@nocobase/
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShared } from './useShared';
-
 export const ImportDesigner = () => {
   const field = useField();
   const fieldSchema = useFieldSchema();
@@ -20,7 +19,7 @@ export const ImportDesigner = () => {
 
   return (
     <GeneralSchemaDesigner disableInitializer>
-      <SchemaSettings.ModalItem
+      {/* <SchemaSettings.ModalItem
         title={t('Edit button')}
         schema={
           {
@@ -58,6 +57,7 @@ export const ImportDesigner = () => {
                   { value: 'danger', label: '{{t("Danger red")}}' },
                 ],
               },
+
             },
           } as ISchema
         }
@@ -82,7 +82,8 @@ export const ImportDesigner = () => {
           });
           dn.refresh();
         }}
-      />
+      /> */}
+      <SchemaSettings.ButtonEditor />
       <SchemaSettings.ActionModalItem
         title={t('Importable fields')}
         schema={schema}

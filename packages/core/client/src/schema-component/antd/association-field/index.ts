@@ -5,6 +5,7 @@ import { InternalPicker } from './InternalPicker';
 import { Nester } from './Nester';
 import { ReadPretty } from './ReadPretty';
 import { SubTable } from './SubTable';
+import { InternalSubTableAction } from './InternalSubTableAction';
 
 export const AssociationField: any = connect(Editable, mapReadPretty(ReadPretty));
 
@@ -14,3 +15,4 @@ AssociationField.AddNewer = Action.Container;
 AssociationField.Selector = Action.Container;
 AssociationField.Viewer = Action.Container;
 AssociationField.InternalSelect = InternalPicker;
+AssociationField.SubTableAction = InternalSubTableAction;

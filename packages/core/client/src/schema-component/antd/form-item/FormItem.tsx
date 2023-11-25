@@ -26,7 +26,7 @@ import { DynamicComponentProps } from '../filter/DynamicComponent';
 import { HTMLEncode } from '../input/shared';
 import { useColorFields } from '../table-v2/Table.Column.Designer';
 import { FilterFormDesigner } from './FormItem.FilterFormDesigner';
-import { useEnsureOperatorsValid } from './SchemaSettingOptions';
+import { EditDataBlockSelectorAction, useEnsureOperatorsValid } from './SchemaSettingOptions';
 import useLazyLoadAssociationFieldOfForm from './hooks/useLazyLoadAssociationFieldOfForm';
 import useLazyLoadDisplayAssociationFieldsOfForm from './hooks/useLazyLoadDisplayAssociationFieldsOfForm';
 import useParseDefaultValue from './hooks/useParseDefaultValue';
@@ -733,6 +733,8 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
+      
+      <EditDataBlockSelectorAction />
       {form && !form?.readPretty && !isPatternDisabled(fieldSchema) && (
         <SchemaSettings.SelectItem
           key="pattern"
