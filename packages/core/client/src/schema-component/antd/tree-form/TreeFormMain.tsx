@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-import { CardItem, useToken } from '..';
+import { CardItem, FixedBlockWrapper, useFixedBlock, useToken } from '..';
 import { FormProvider, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { css } from '@emotion/css';
 import { uid } from '@nocobase/utils';
@@ -9,7 +9,7 @@ import { RecordProvider, useRecord } from '../../../record-provider';
 import { Divider, Space } from 'antd';
 import { useSize } from 'ahooks';
 import { useDesignable } from '../../hooks';
-import { IField } from '../../../collection-manager';
+import { CollectionProvider, IField } from '../../../collection-manager';
 import { useBlockRequestContext } from '../../../block-provider';
 import { createForm } from '@formily/core';
 interface TreeNode {
@@ -32,15 +32,15 @@ export const TreeFormMain = (props) => {
   //   const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
   const fieldSchema = useFieldSchema();
   const parent = useRecord();
-  const [record,setRecord] = useState({});
+  const [record, setRecord] = useState({});
   const hasApproval = true;
   const leftFlex = hasApproval ? 0.15 : 0.3;
   const boxRef = useRef(null);
   const queryFormRef = useRef(null);
   const size = useSize(boxRef);
   const designable = useDesignable();
-  const { service} = useBlockRequestContext()
-  const field:IField = useField();
+  const { service } = useBlockRequestContext();
+  const field: IField = useField();
   // const onSelect = (selectedKeys, info) => {
   //   const selectedKey = selectedKeys[selectedKeys.length - 1];
   //   const record = field?.data?.dataSource?.find((item) => item.id === selectedKey);
@@ -56,34 +56,47 @@ export const TreeFormMain = (props) => {
   // }, [ field?.data?.selectedKeys]);
   const updateForm = useMemo(() => {
     return createForm({
-      effects(){}
-    })
+      effects() {},
+    });
   }, []);
   useEffect(() => {
     if (field?.data?.selectedRowKeys?.length) {
       const selectedRowKeys = field?.data?.selectedRowKeys;
       const selectedKey = selectedRowKeys[selectedRowKeys.length - 1];
-      const array = treeToArray(service?.data?.data||[],[])
+      const array = treeToArray(service?.data?.data || [], []);
       const recordValue = array?.find((item) => item.id === selectedKey);
       setRecord({
         ...recordValue,
-        __parent:recordValue
+        __parent: recordValue,
       });
     }
-  },[field?.value]);
-  useEffect(()=>{
+  }, [field?.value]);
+  useEffect(() => {
     console.log(updateForm.fields);
-
-    
-  },[JSON.stringify(record)]);
+  }, [JSON.stringify(record)]);
+  const [userAction, setUserAction] = useState('create');
+  const { height } = useFixedBlock();
+  const otherHeight = field?.decoratorProps?.otherHeight;
+  const isFixed = field?.decoratorProps?.isFixed ? field?.decoratorProps?.isFixed : false;
+  const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+  /**
+   * TODO 获取项目信息
+   */
+  const prjRecord = {};
   return (
     <CardItem
       ref={boxRef}
       className={css`
         > .ant-card-body {
           padding: ${token.padding}px;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
       `}
+      style={{
+        height: isFixed ? vHeight : undefined,
+      }}
     >
       <div
         className={
@@ -96,7 +109,9 @@ export const TreeFormMain = (props) => {
                 display: ${designable ? 'flex' : 'none!important'};
               }
               .ant-card-body {
-                padding: 0;
+                // padding: 0;
+                padding-top: 0;
+                padding-bottom: 0;
               }
             }
           `
@@ -109,7 +124,7 @@ export const TreeFormMain = (props) => {
         orientation="vertical"
         className={css`
           border: 1px solid ${token.colorBorder};
-          height: calc(100% - 44px);
+          height: 100%;
           .pane-container:not(.multi-rows) {
             height: 100%;
             & > div:not(.multi-rows) {
@@ -145,7 +160,7 @@ export const TreeFormMain = (props) => {
       >
         <ReflexElement className="left-tree" flex={leftFlex}>
           <div className={'pane-container'}>
-            <RecursionField name={'tree'} schema={fieldSchema.properties.tree} />
+            {/* <RecursionField name={'tree'} schema={fieldSchema.properties.tree} /> */}
           </div>
         </ReflexElement>
         <ReflexSplitter />
@@ -175,13 +190,22 @@ export const TreeFormMain = (props) => {
                 margin-bottom: 8px;
               `}
             >
-              <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
+              <CollectionProvider name="bom">
+                <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
+              </CollectionProvider>
             </div>
             <div className="form-container">
               {/* <RecordProvider record={record}  isMemo>
                 <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
               </RecordProvider> */}
-              <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
+
+              {userAction == 'create' && (
+                <CollectionProvider name="bom">
+                  <RecordProvider record={prjRecord}>
+                    <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
+                  </RecordProvider>
+                </CollectionProvider>
+              )}
             </div>
 
             {/* <RecursionField name={'table'} schema={fieldSchema.properties.table} /> */}

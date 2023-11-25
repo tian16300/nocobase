@@ -6,7 +6,7 @@ import { Designer } from "./Designer";
 import { TreeFormMain } from "./TreeFormMain";
 import { LeftTree } from "./LeftTree";
 import { Initializer } from "./Initializer";
-import { TableBlockDesigner } from "../table-v2";
+import { TreeFormBlockDesigner } from "./TreeFormBlockDesigner";
 
 export const TreeForm = ()=>{};
 TreeForm.Initializer = Initializer;
@@ -27,4 +27,4 @@ TreeForm.Wrap = (props) => {
       </CardItem>
     );
   };
-TreeForm.Designer = TableBlockDesigner;
+TreeForm.Designer = TreeFormBlockDesigner;

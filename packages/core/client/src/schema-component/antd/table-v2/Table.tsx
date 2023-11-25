@@ -447,30 +447,31 @@ export const Table: any = observer(
       return { columns, minWidth: 60 };
     }, [columns.length, colDataIndexs]);
     const { designable, dn } = useDesignable();
-    const components = useMemo(() => {
-      const onResizeCell = (cellKey, width) => {
-        const column = columns.find((col) => {
-          return col.dataIndex === cellKey;
-        });
-        if (designable) {
-          /** 保存宽度 */
-          const uid = column.key;
-          const columnSchema = schema['properties'][uid];
-          if (columnSchema) {
-            const props = columnSchema['x-component-props'] || {};
-            props['width'] = width;
-            const schemaData: any = {
-              ['x-uid']: columnSchema['x-uid'],
-            };
-            schemaData['x-component-props'] = props;
-            columnSchema['x-component-props'] = props;
-            dn.emit('patch', {
-              schema: schemaData,
-            });
-            dn.refresh();
-          }
+    const onResizeCell = (cellKey, width) => {
+      const column = columns.find((col) => {
+        return col.dataIndex === cellKey;
+      });
+      if (designable) {
+        /** 保存宽度 */
+        const uid = column.key;
+        const columnSchema = schema['properties'][uid];
+        if (columnSchema) {
+          const props = columnSchema['x-component-props'] || {};
+          props['width'] = width;
+          const schemaData: any = {
+            ['x-uid']: columnSchema['x-uid'],
+          };
+          schemaData['x-component-props'] = props;
+          columnSchema['x-component-props'] = props;
+          dn.emit('patch', {
+            schema: schemaData,
+          });
+          dn.refresh();
         }
-      };
+      }
+    };
+    const components = useMemo(() => {
+      
       return {
         header: {
           wrapper: (props) => {
@@ -578,7 +579,7 @@ export const Table: any = observer(
           },
         },
       };
-    }, [field, onRowDragEnd, dragSort]);
+    }, [field, onRowDragEnd, dragSort, onResizeCell]);
 
     /**
      * 为没有设置 key 属性的 record 生成一个唯一的 key
@@ -612,7 +613,10 @@ export const Table: any = observer(
         return (rowKey ?? defaultRowKey)(record)?.toString();
       }
     };
-
+    if(rowSelection){
+      rowSelection.columnWidth = 80;
+      rowSelection.fixed = 'left';
+    }
     const restProps = {
       rowSelection: rowSelection
         ? {
@@ -715,7 +719,8 @@ export const Table: any = observer(
               );
             },
             ...rowSelection,
-            columnWidth: 48,
+            columnWidth: 80,
+            fixed: 'left'
           }
         : undefined,
     };
@@ -769,6 +774,9 @@ export const Table: any = observer(
           .ant-table {
             overflow-x: auto;
             overflow-y: hidden;
+            .ant-table-selection-column,.ant-table-cell-fix-left,.ant-table-cell-fix-right {
+              overflow:hidden;
+            }
           }
         `}
       >

@@ -74,7 +74,11 @@ export const TableColumnDesigner = (props) => {
     collectionField?.interface,
   );
   const isDicField = ['dic'].includes(collectionField?.interface);
-  const getSortName = getInterface(collectionField?.interface)?.sortName || function (field){ return field?.name};
+  const getSortName =
+    getInterface(collectionField?.interface)?.sortName ||
+    function (field) {
+      return field?.name;
+    };
   const sortName = getSortName(collectionField);
   const fieldModeOptions = useFieldModeOptions({ fieldSchema });
   const fieldMode = fieldSchema?.['x-component-props']?.['mode'] || 'Select';
@@ -187,7 +191,7 @@ export const TableColumnDesigner = (props) => {
               ...columnSchema['x-component-props'],
               sorter: v,
               // isDicField: isDicField,
-              sortName
+              sortName,
             };
             // if (isDicField) {
             //   columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey;
@@ -435,6 +439,43 @@ export const TableColumnDesigner = (props) => {
           defaultChecked
         />
       )}
+      <SchemaSettings.SelectItem
+        title={t('列固定')}
+        value={field.componentProps.fixed}
+        onChange={(fixed) => {
+          const schema: ISchema = {
+            ['x-uid']: columnSchema['x-uid'],
+          };
+          columnSchema['x-component-props'] = {
+            ...columnSchema['x-component-props'],
+            fixed,
+          };
+          // if (isDicField) {
+          //   columnSchema['x-component-props']['sorterKey'] = collectionField.foreignKey;
+          //   columnSchema['x-component-props']['isDicField'];
+          // }
+          schema['x-component-props'] = columnSchema['x-component-props'];
+          field.componentProps.fixed = fixed;
+          dn.emit('patch', {
+            schema,
+          });
+          dn.refresh();
+        }}
+        options={[
+          {
+            label: '无',
+            value: '',
+          },
+          {
+            label: '左侧固定',
+            value: 'left',
+          },
+          {
+            label: '右侧固定',
+            value: 'right',
+          },
+        ]}
+      />
       <SchemaSettings.Divider />
       <SchemaSettings.Remove
         removeParentsIfNoChildren={!isSubTableColumn}
