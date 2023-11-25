@@ -5,7 +5,7 @@ import _, { isEmpty, pick } from 'lodash';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useCollection } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
-import { useActionContext, useDesignable } from '../schema-component';
+import { useActionContext, useDesignable, useTreeFormBlockContext } from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
 import { BlockProvider, useBlockRequestContext, useFilterByTk, useParamsFromRecord } from './BlockProvider';
 import { getValuesByPath } from '@nocobase/utils/client';
@@ -126,11 +126,11 @@ export const useFormBlockProps = () => {
   const ctx = useFormBlockContext();
   const record = useRecord();
   const { fieldSchema: actionFieldSchema } = useActionContext();
-  const fieldSchema = actionFieldSchema?actionFieldSchema: useFieldSchema();
+  const fieldSchema = actionFieldSchema ? actionFieldSchema : useFieldSchema();
   const addChild = fieldSchema?.['x-component-props']?.addChild;
-  const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys||[];
-  const { type } = useFormBlockType()
- 
+  const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
+  const { type } = useFormBlockType();
+  // const { refreshAction, setRefreshAction } = useTreeFormBlockContext()||{};
 
   useEffect(() => {
     if (!ctx?.service?.loading) {
@@ -138,34 +138,39 @@ export const useFormBlockProps = () => {
     }
   }, [ctx?.service?.loading]);
   useEffect(() => {
-    if(type == 'update')
-    ctx?.service?.run();
+    if (type == 'update') {
+      ctx?.service?.run();
+      // if (setRefreshAction) {
+      //   setRefreshAction(!refreshAction);
+      // }
+    }
   }, [JSON.stringify(record), type]);
   useEffect(() => {
-    if(type == 'create'){
+    if (type == 'create') {
       if (addChild) {
-      ctx.form?.query('parent').take((field) => {
-        // field.readPretty = true;
-        field.value = new Proxy({ ...record }, {});
-      });
-    }
-    if (inheritsKeys) {
-      inheritsKeys.forEach(key => {
-        ctx.form?.query(key).take((field) => {
-          const value = record[key];
-          if(value && typeof value == 'object'){
-            // field.readPretty = true;
-            field.value = new Proxy({ ...value }, {});
-          }
+        ctx.form?.query('parent').take((field) => {
+          // field.readPretty = true;
+          field.value = new Proxy({ ...record }, {});
         });
-      });
+      }
+      if (inheritsKeys) {
+        inheritsKeys.forEach((key) => {
+          ctx.form?.query(key).take((field) => {
+            const value = record[key];
+            if (value && typeof value == 'object') {
+              // field.readPretty = true;
+              field.value = new Proxy({ ...value }, {});
+            }
+          });
+        });
+      }
+      // if (setRefreshAction) {
+      //   setRefreshAction(!refreshAction);
+      // }
     }
-
-    }
-    
-  },[JSON.stringify(record), type, addChild, inheritsKeys]);
+  }, [JSON.stringify(record), type, addChild, inheritsKeys]);
   return {
-    form: ctx.form
+    form: ctx.form,
   };
 };
 

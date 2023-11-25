@@ -323,55 +323,55 @@ FormItem.Designer = function Designer() {
         />
       )}
       {isAllowToSetDefaultValue() && <SchemaSettings.DefaultValue />}
-      {
-        (isSelectFieldMode && (
-          <SchemaSettings.ModalItem title={'追加字段'}
-            initialValues={{
-              appends:fieldSchema['x-component-props']?.service?.params?.appends
-            }}
-            schema={{
-              type:'object',
-              title:'追加字段',
-              properties:{
-                appends:{
-                   type:'array',
-                   'x-decorator':'FormItem',
-                   'x-component': 'TreeSelect',
-                   'x-component-props':{
-                    multiple: true,
-                    defaultExpandAll:true,
-                     treeData: targetFields.filter((field)=>{
+      {isSelectFieldMode && (
+        <SchemaSettings.ModalItem
+          title={'追加字段'}
+          initialValues={{
+            appends: fieldSchema['x-component-props']?.service?.params?.appends,
+          }}
+          schema={{
+            type: 'object',
+            title: '追加字段',
+            properties: {
+              appends: {
+                type: 'array',
+                'x-decorator': 'FormItem',
+                'x-component': 'TreeSelect',
+                'x-component-props': {
+                  multiple: true,
+                  defaultExpandAll: true,
+                  treeData: targetFields
+                    .filter((field) => {
                       return ['obo', 'oho', 'o2o', 'o2m', 'm2m', 'm2o', 'dic'].includes(field?.interface);
-                     }).map((field)=>{
+                    })
+                    .map((field) => {
                       return {
-                        title: compile(field.uiSchema?.title||field.name),
-                        key:field.name,
-                        value: field.name
-                      }
-                     })
-                   }
-                }
-              }
-            }}
-            onSubmit={({appends})=>{
-              fieldSchema['x-component-props'] =  fieldSchema['x-component-props']||{};
-              fieldSchema['x-component-props'].service =  fieldSchema['x-component-props'].service||{};
-              fieldSchema['x-component-props'].service.params =  fieldSchema['x-component-props']?.service?.params||{};
-              fieldSchema['x-component-props'].service.params.appends = appends;
-              const schema = {
-                ['x-uid']: fieldSchema['x-uid'],
-                ['x-component-props']:fieldSchema['x-component-props']
-              };
-              dn.emit('patch', {
-                schema,
-              });
-  
-              dn.refresh();
-            }}
-          ></SchemaSettings.ModalItem>
-        ))
+                        title: compile(field.uiSchema?.title || field.name),
+                        key: field.name,
+                        value: field.name,
+                      };
+                    }),
+                },
+              },
+            },
+          }}
+          onSubmit={({ appends }) => {
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props'].service = fieldSchema['x-component-props'].service || {};
+            fieldSchema['x-component-props'].service.params = fieldSchema['x-component-props']?.service?.params || {};
+            fieldSchema['x-component-props'].service.params.appends = appends;
+            const schema = {
+              ['x-uid']: fieldSchema['x-uid'],
+              ['x-component-props']: fieldSchema['x-component-props'],
+            };
+            dn.emit('patch', {
+              schema,
+            });
 
-      }
+            dn.refresh();
+          }}
+        ></SchemaSettings.ModalItem>
+      )}
       {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && (
         <SchemaSettings.DataScope
           collectionName={collectionField?.target}
@@ -441,60 +441,58 @@ FormItem.Designer = function Designer() {
       )}
       {showFieldMode && fieldSchema['x-component-props']['mode'] == 'SubTable' && (
         <>
-          <SchemaSettings.SwitchItem
-            key="enable-add"
-            title={t('允许新增')}
-            checked={fieldSchema['x-component-props']?.showAdd}
-            onChange={(value) => {
+          <SchemaSettings.ModalItem
+            title="子表格设置"
+            schema={{
+              type: 'object',
+              title: '子表格设置',
+              properties: {
+                showAdd: {
+                  type: 'boolean',
+                  title: '允许新增',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'Switch',
+                },
+                showMove: {
+                  type: 'boolean',
+                  title: '允许移动',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'Switch',
+                },
+                showDel: {
+                  type: 'boolean',
+                  title: '允许删除',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'Switch',
+                },
+                scrollY: {
+                  type: 'number',
+                  title: '最大高度',
+                  'x-decorator': 'FormItem',
+                  'x-component': 'InputNumber',
+                },
+              },
+            }}
+            initialValues={fieldSchema['x-component-props']}
+            onSubmit={(values) => {
               const schema = {
                 ['x-uid']: fieldSchema['x-uid'],
               };
-              field.componentProps.showAdd = value;
-              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-              fieldSchema['x-component-props'].showAdd = value;
+              field.componentProps = {
+                ...field.componentProps,
+                ...values,
+              };
+              fieldSchema['x-component-props'] = {
+                ...fieldSchema['x-component-props'],
+                ...values,
+              };
               schema['x-component-props'] = fieldSchema['x-component-props'];
               dn.emit('patch', {
                 schema,
               });
               refresh();
             }}
-          />
-          <SchemaSettings.SwitchItem
-            key="enable-move"
-            title={t('允许移动')}
-            checked={fieldSchema['x-component-props']?.showMove}
-            onChange={(value) => {
-              const schema = {
-                ['x-uid']: fieldSchema['x-uid'],
-              };
-              field.componentProps.showMove = value;
-              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-              fieldSchema['x-component-props'].showMove = value;
-              schema['x-component-props'] = fieldSchema['x-component-props'];
-              dn.emit('patch', {
-                schema,
-              });
-              refresh();
-            }}
-          />
-          <SchemaSettings.SwitchItem
-            key="enable-remove"
-            title={t('允许删除')}
-            checked={fieldSchema['x-component-props']?.showDel}
-            onChange={(value) => {
-              const schema = {
-                ['x-uid']: fieldSchema['x-uid'],
-              };
-              field.componentProps.showDel = value;
-              fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
-              fieldSchema['x-component-props'].showDel = value;
-              schema['x-component-props'] = fieldSchema['x-component-props'];
-              dn.emit('patch', {
-                schema,
-              });
-              refresh();
-            }}
-          />
+          ></SchemaSettings.ModalItem>
         </>
       )}
       {showModeSelect && (
@@ -733,7 +731,7 @@ FormItem.Designer = function Designer() {
           }}
         />
       )}
-      
+
       <EditDataBlockSelectorAction />
       {form && !form?.readPretty && !isPatternDisabled(fieldSchema) && (
         <SchemaSettings.SelectItem

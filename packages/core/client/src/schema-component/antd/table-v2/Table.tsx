@@ -51,7 +51,7 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
   const { name } = useCollection();
   const { getCollectionField } = useCollectionManager();
   const { schemaInWhitelist } = useACLFieldWhitelist();
-  const { designable } = useDesignable();
+  const { designable, dn } = useDesignable();
   const { exists, render } = useSchemaInitializer(schema['x-initializer']);
   const columns = schema
     .reduceProperties((buf, s) => {
@@ -273,8 +273,38 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
         return <TableRecordAction items={handleItems} index={index} record={record} />;
       },
     });
-  }
-  return tableColumns;
+  }  
+  const [refresh, setRefresh] = useState(false);
+  const onResizeCell = (cellKey, width) => {
+    const column = tableColumns.find((col) => {
+      return col.dataIndex === cellKey;
+    });
+    if (designable) {
+      /** 保存宽度 */
+      const uid = column.key;
+      const columnSchema = schema['properties'][uid];
+      if (columnSchema) {
+        const props = columnSchema['x-component-props'] || {};
+        props['width'] = width;
+        const schemaData: any = {
+          ['x-uid']: columnSchema['x-uid'],
+        };
+        schemaData['x-component-props'] = props;
+        columnSchema['x-component-props'] = props;
+        dn.emit('patch', {
+          schema: schemaData,
+        });
+        setRefresh(!refresh);
+        dn.refresh();
+      }
+    }
+  };
+ 
+  return {
+    columns: tableColumns,
+    onResizeCell,
+    refresh
+  };
 };
 
 const SortableRow = (props) => {
@@ -376,10 +406,13 @@ export const Table: any = observer(
       rowKey,
       required,
       onExpand,
+      scrollY,
       ...others
     } = { ...others1, ...others2 } as any;
     const field = useArrayField(others);
-    const columns = useTableColumns(others);
+    const { columns, onResizeCell, refresh } = useTableColumns(others) as any;
+    field.data = field.data || {};
+    field.data.onResizeCell = onResizeCell;
     const schema = useFieldSchema();
     const isTableSelector = schema?.parent?.['x-decorator'] === 'TableSelectorProvider';
     const ctx = isTableSelector ? useTableSelectorContext() : useTableBlockContext();
@@ -428,16 +461,6 @@ export const Table: any = observer(
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
 
-    const [colDataIndexs, setColDataIndexs] = useState([]);
-
-    useEffect(() => {
-      const newDataIndexes = columns.map(({ dataIndex }) => {
-        return dataIndex;
-      });
-      if (JSON.stringify(colDataIndexs) !== JSON.stringify(newDataIndexes)) {
-        setColDataIndexs(newDataIndexes);
-      }
-    }, [columns]);
     const {
       resizableColumns,
       components: reSizeComponents,
@@ -445,33 +468,9 @@ export const Table: any = observer(
       resetColumns,
     } = useAntdColumnResize(() => {
       return { columns, minWidth: 60 };
-    }, [columns.length, colDataIndexs]);
-    const { designable, dn } = useDesignable();
-    const onResizeCell = (cellKey, width) => {
-      const column = columns.find((col) => {
-        return col.dataIndex === cellKey;
-      });
-      if (designable) {
-        /** 保存宽度 */
-        const uid = column.key;
-        const columnSchema = schema['properties'][uid];
-        if (columnSchema) {
-          const props = columnSchema['x-component-props'] || {};
-          props['width'] = width;
-          const schemaData: any = {
-            ['x-uid']: columnSchema['x-uid'],
-          };
-          schemaData['x-component-props'] = props;
-          columnSchema['x-component-props'] = props;
-          dn.emit('patch', {
-            schema: schemaData,
-          });
-          dn.refresh();
-        }
-      }
-    };
+    }, [field, onRowDragEnd, dragSort, refresh]);
+
     const components = useMemo(() => {
-      
       return {
         header: {
           wrapper: (props) => {
@@ -483,11 +482,10 @@ export const Table: any = observer(
           },
           cell: (props) => {
             const { className, onResize, ...others } = props;
-            // const [width, setWidth] = useState(dfWidth);
             const onSaveCellWidth = (cellKey, width) => {
-              // setWidth(width);
               onResize && onResize(cellKey, width);
-              onResizeCell(cellKey, width);
+              const onResizeCell = field.data?.onResizeCell;
+              if (typeof onResizeCell === 'function') onResizeCell(cellKey, width);
             };
             return (
               <reSizeComponents.header.cell
@@ -579,7 +577,10 @@ export const Table: any = observer(
           },
         },
       };
-    }, [field, onRowDragEnd, dragSort, onResizeCell]);
+    }, [field, onRowDragEnd, dragSort]);
+
+
+   
 
     /**
      * 为没有设置 key 属性的 record 生成一个唯一的 key
@@ -613,7 +614,7 @@ export const Table: any = observer(
         return (rowKey ?? defaultRowKey)(record)?.toString();
       }
     };
-    if(rowSelection){
+    if (rowSelection) {
       rowSelection.columnWidth = 80;
       rowSelection.fixed = 'left';
     }
@@ -720,7 +721,7 @@ export const Table: any = observer(
             },
             ...rowSelection,
             columnWidth: 80,
-            fixed: 'left'
+            fixed: 'left',
           }
         : undefined,
     };
@@ -746,15 +747,17 @@ export const Table: any = observer(
 
     const { height: tableHeight, tableSizeRefCallback } = useTableSize();
     const scroll = useMemo(() => {
-      return fixedBlock
-        ? {
-            x: tableWidth,
-            y: tableHeight,
-          }
-        : {
-            x: tableWidth,
-          };
-    }, [fixedBlock, tableHeight, tableWidth]);
+      const value: { x: number; y?: number } = {
+        x: tableWidth,
+      };
+      if (scrollY) {
+        value.y = scrollY;
+      }
+      if (fixedBlock) {
+        value.y = tableHeight;
+      }
+      return value;
+    }, [fixedBlock, tableHeight, tableWidth, scrollY]);
     return (
       <div
         className={css`
@@ -774,8 +777,10 @@ export const Table: any = observer(
           .ant-table {
             overflow-x: auto;
             overflow-y: hidden;
-            .ant-table-selection-column,.ant-table-cell-fix-left,.ant-table-cell-fix-right {
-              overflow:hidden;
+            .ant-table-selection-column,
+            .ant-table-cell-fix-left,
+            .ant-table-cell-fix-right {
+              overflow: hidden;
             }
           }
         `}

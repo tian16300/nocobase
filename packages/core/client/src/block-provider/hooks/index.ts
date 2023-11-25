@@ -369,7 +369,7 @@ export const useFilterBlockActionProps = () => {
     actionField.data.loading = true;
     // try {
       // 收集 filter 的值
-      console.log('formValues', formValues);
+      // console.log('formValues', formValues);
       await Promise.all(
         _getDataBlocks().map(async (block) => {
           const target = targets.find((target) => target.uid === block.uid);
@@ -409,27 +409,27 @@ export const useFilterBlockActionProps = () => {
   const autoChange = true;
 
   actionField.data = actionField.data || {};
-  useEffect(() => {
-    const id = uid();
-    form.addEffects(id, () => {
-      onFormValuesChange(async (form) => {       
-        // setFormValues(form.values);
-        // if (autoChange){
-        //   // const { getDataBlocks } = useFilterBlock();
-        //   // actionField?.componentProps?.useProps()?.onClick?.();
-        // };
-        filterAction(getDataBlocks);
-      });
+  // useEffect(() => {
+  //   const id = uid();
+  //   form.addEffects(id, () => {
+  //     onFormValuesChange(async (form) => {       
+  //       // setFormValues(form.values);
+  //       // if (autoChange){
+  //       //   // const { getDataBlocks } = useFilterBlock();
+  //       //   // actionField?.componentProps?.useProps()?.onClick?.();
+  //       // };
+  //       filterAction(getDataBlocks);
+  //     });
 
-    });
-    return () => {
-      form.removeEffects(id);
-    };
-  }, [filterAction, getDataBlocks]);
+  //   });
+  //   return () => {
+  //     form.removeEffects(id);
+  //   };
+  // }, [filterAction, getDataBlocks]);
 
   return {
     async onClick() {
-      setFormValues(form.values);
+      // setFormValues(form.values);
       filterAction(getDataBlocks);
     },
   };

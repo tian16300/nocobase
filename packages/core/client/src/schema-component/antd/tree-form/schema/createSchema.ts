@@ -40,57 +40,57 @@ export const createSchema = (props) => {
       
         'x-component': 'TreeForm.Tree',
         'x-component-props': {
-          useProps: '{{ useTreeFormBlockProps }}',
+          useProps: '{{ useTreeFormBlockTreeItemProps }}',
         },
         properties:{
-          recordActions: {
+           recordActions: {
+        type: 'void',
+        title: '{{ t("Actions") }}',
+        'x-component': 'ActionBar',
+        'x-designer': 'GroupTable.GroupRecordActionDesigner',
+        properties: {
+          actions: {
             type: 'void',
-            title: '{{ t("Actions") }}',
-            'x-component': 'ActionBar',
-            'x-designer': 'GroupTable.GroupRecordActionDesigner',
+            'x-decorator': 'DndContext',
+            'x-component': 'Space',
+            'x-component-props': {
+              split: '',
+            },
             properties: {
-              actions: {
-                type: 'void',
-                'x-decorator': 'DndContext',
-                'x-component': 'Space',
+              add: {
+                title: '添加',
+                'x-action': 'create',
+                'x-designer': 'Action.Designer',
+                'x-component': 'Action',
+                'x-visible': '{{treeTable}}',
                 'x-component-props': {
-                  split: '',
+                  icon: 'pluscircleoutlined',
+                  type: 'link',
+                  size: 'small',
+                  addChild: true,
+                  useProps: '{{ useTreeFormAddChildActionProps }}',
                 },
-                properties: {
-                  add: {
-                    title: '添加',
-                    'x-action': 'create',
-                    'x-designer': 'Action.Designer',
-                    'x-component': 'Action',
-                    'x-visible': '{{treeTable}}',
-                    'x-component-props': {
-                      icon: 'pluscircleoutlined',
-                      type: 'link',
-                      size: 'small',
-                      addChild: true,
-                      useProps: '{{ useTreeFormAddChildActionProps }}',
-                    },
+              },
+              delete: {
+                title: '{{ t("Delete") }}',
+                'x-action': 'destroy',
+                'x-component': 'Action',
+                'x-designer': 'Action.Designer',
+                'x-component-props': {
+                  icon: 'DeleteOutlined',
+                  type: 'link',
+                  size: 'small',
+                  confirm: {
+                    title: "{{t('Delete record')}}",
+                    content: "{{t('Are you sure you want to delete it?')}}",
                   },
-                  delete: {
-                    title: '{{ t("Delete") }}',
-                    'x-action': 'destroy',
-                    'x-component': 'Action',
-                    'x-designer': 'Action.Designer',
-                    'x-component-props': {
-                      icon: 'DeleteOutlined',
-                      type: 'link',
-                      size: 'small',
-                      confirm: {
-                        title: "{{t('Delete record')}}",
-                        content: "{{t('Are you sure you want to delete it?')}}",
-                      },
-                      useProps: '{{ useDestroyActionProps }}',
-                    },
-                  },
+                  useProps: '{{ useDestroyActionProps }}',
                 },
               },
             },
           },
+        },
+      },
         }
       },
       actions: {

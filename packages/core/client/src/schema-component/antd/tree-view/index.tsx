@@ -122,14 +122,14 @@ export const TreeView = connect(
                       }
                     }}
                   >
-                    {item[title].indexOf(searchValue) > -1 ? (
+                    {item[title]?.indexOf(searchValue) > -1 ? (
                       <>
                         {item[title].substring(0, item[title].indexOf(searchValue))}
                         <span className="site-tree-search-value">{searchValue}</span>
                         {item[title].slice(item[title].indexOf(searchValue) + searchValue.length)}
                       </>
                     ) : (
-                      <>{item[title]}</>
+                      <>{item[title]|| '--'}</>
                     )}
                   </CheckableTag>
                 </MemoTooltip>

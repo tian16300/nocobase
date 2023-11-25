@@ -36,6 +36,7 @@ export const SubTable: any = observer(
     const showMove = field?.componentProps?.showMove && field.editable;
     const showDel = field?.componentProps?.showDel && field.editable;
     const showAdd = field?.componentProps?.showAdd && field.editable;
+    const scrollY = field?.componentProps?.scrollY || 500;
     return (
       <div
         className={css`
@@ -87,6 +88,7 @@ export const SubTable: any = observer(
               showAdd={showAdd}
               pagination={false}
               rowSelection={{ type: 'none', hideSelectAll: true }}
+              scrollY={scrollY}
               footer={() =>
                 field.editable &&
                 showAdd && (

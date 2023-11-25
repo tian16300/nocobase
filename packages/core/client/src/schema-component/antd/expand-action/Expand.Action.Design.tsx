@@ -13,12 +13,13 @@ export const ExpandActionDesign = (props) => {
 
   return (
     <GeneralSchemaDesigner {...props} disableInitializer>
+      <SchemaSettings.ButtonEditor />
       <SchemaSettings.ModalItem
-        title={t('Edit button')}
+        title={t('展开收缩按钮设置')}
         schema={
           {
             type: 'object',
-            title: t('Edit button'),
+            title: t('展开收缩按钮设置'),
             properties: {
               titleExpand: {
                 'x-decorator': 'FormItem',
@@ -44,30 +45,6 @@ export const ExpandActionDesign = (props) => {
                 title: `${t('Button icon')} - ${t('Collapse all')}`,
                 default: iconCollapse,
               },
-              type: {
-                'x-decorator': 'FormItem',
-                'x-component': 'Radio.Group',
-                title: t('Button background color'),
-                default: fieldSchema?.['x-component-props']?.type || 'default',
-                enum: [
-                  { value: 'default', label: '{{t("Default")}}' },
-                  { value: 'primary', label: '{{t("Highlight")}}' },
-                  { value: 'danger', label: '{{t("Danger red")}}' },
-                  { value: 'text', label: '文本' },
-                  { value: 'link', label: '链接' }
-                ],
-              },
-              size:{
-                'x-decorator': 'FormItem',
-                'x-component': 'Radio.Group',
-                title: t('按钮尺寸'),
-                default: fieldSchema?.['x-component-props']?.size || 'default',
-                enum: [
-                  { value: 'small', label: '小' },
-                  { value: 'default', label: '中' },
-                  { value: 'large', label: '大' }
-                ]
-              }
             },
           } as ISchema
         }
@@ -75,16 +52,12 @@ export const ExpandActionDesign = (props) => {
           fieldSchema.title = t('Expand/Collapse');
           field.title = t('Expand/Collapse');
           field.componentProps.icon = iconExpand;
-          field.componentProps.type = type;
-          field.componentProps.size = size;
           fieldSchema['x-component-props'] = {
             ...(fieldSchema['x-component-props'] || {}),
             titleExpand,
             titleCollapse,
             iconExpand,
-            iconCollapse,
-            type,
-            size
+            iconCollapse
           };
           dn.emit('patch', {
             schema: {
@@ -96,6 +69,7 @@ export const ExpandActionDesign = (props) => {
           dn.refresh();
         }}
       />
+      <SchemaSettings.ActionScopeBind />
       <SchemaSettings.Divider />
       <SchemaSettings.Remove
         removeParentsIfNoChildren

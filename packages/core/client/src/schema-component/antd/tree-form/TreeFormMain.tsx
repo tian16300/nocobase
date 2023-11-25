@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import { CardItem, FixedBlockWrapper, useFixedBlock, useToken } from '..';
 import { FormProvider, RecursionField, useField, useFieldSchema } from '@formily/react';
@@ -12,6 +12,8 @@ import { useDesignable } from '../../hooks';
 import { CollectionProvider, IField } from '../../../collection-manager';
 import { useBlockRequestContext } from '../../../block-provider';
 import { createForm } from '@formily/core';
+import { default as cls } from 'classnames';
+import { set } from 'lodash';
 interface TreeNode {
   id: number;
   name: string;
@@ -26,21 +28,27 @@ function treeToArray(tree: TreeNode[], result: TreeNode[] = []): TreeNode[] {
   }
   return result;
 }
+const TreeFormBlockContext = createContext(null);
 export const TreeFormMain = (props) => {
   const { token } = useToken();
-  //   const { useProps } = props;
-  //   const { collection, group, pagination, fields, columnActions, ...others } = useProps?.();
+  const { useProps } = props;
+  const _props = useProps?.() || {};
+  const {
+    collection,
+    selectedRowKeys,
+    leftFlex: _leftFlex = 0.3,
+    rightFlex: _rightFlex = 0.3,
+  } = { ...props, ..._props } as any;
   const fieldSchema = useFieldSchema();
   const parent = useRecord();
-  const [record, setRecord] = useState({});
   const hasApproval = true;
-  const leftFlex = hasApproval ? 0.15 : 0.3;
+  // const leftFlex = hasApproval ? 0.15 : 0.3;
   const boxRef = useRef(null);
   const queryFormRef = useRef(null);
   const size = useSize(boxRef);
-  const designable = useDesignable();
   const { service } = useBlockRequestContext();
   const field: IField = useField();
+  const [refreshAction, setRefreshAction] = useState(false);
   // const onSelect = (selectedKeys, info) => {
   //   const selectedKey = selectedKeys[selectedKeys.length - 1];
   //   const record = field?.data?.dataSource?.find((item) => item.id === selectedKey);
@@ -59,21 +67,18 @@ export const TreeFormMain = (props) => {
       effects() {},
     });
   }, []);
-  useEffect(() => {
-    if (field?.data?.selectedRowKeys?.length) {
-      const selectedRowKeys = field?.data?.selectedRowKeys;
-      const selectedKey = selectedRowKeys[selectedRowKeys.length - 1];
-      const array = treeToArray(service?.data?.data || [], []);
-      const recordValue = array?.find((item) => item.id === selectedKey);
-      setRecord({
-        ...recordValue,
-        __parent: recordValue,
-      });
-    }
-  }, [field?.value]);
-  useEffect(() => {
-    console.log(updateForm.fields);
-  }, [JSON.stringify(record)]);
+  // useEffect(() => {
+  //   if (selectedRowKeys) {
+  //     const selectedKey = selectedRowKeys[selectedRowKeys.length - 1];
+  //     const array = treeToArray(service?.data?.data || [], []);
+  //     const recordValue = array?.find((item) => item.id === selectedKey);
+  //     setRecord({
+  //       ...recordValue,
+  //       __parent: recordValue,
+  //     });
+  //   }
+  // }, [selectedRowKeys, field]);
+
   const [userAction, setUserAction] = useState('create');
   const { height } = useFixedBlock();
   const otherHeight = field?.decoratorProps?.otherHeight;
@@ -83,6 +88,43 @@ export const TreeFormMain = (props) => {
    * TODO 获取项目信息
    */
   const prjRecord = {};
+
+  const [record, setRecord] = useState(null);
+  useEffect(() => {
+    if (record?.id) {
+      setUserAction('update');
+    } else {
+      setUserAction('create');
+    }
+  }, [record?.id]);
+  const [expandedKeys, setExpandedKeys] = useState(['root']);
+  const [leftFlex, setLeftFlex] = useState(_leftFlex);
+  const [rightFlex, setRightFlex] = useState(_rightFlex);
+  const { designable, dn } = useDesignable();
+  const onStopResize = ({ component }, key) => {
+    const flex = component.props.flex;
+    if (designable) {
+      const compProps = fieldSchema['x-component-props'] || {};
+      set(compProps, key, flex);
+      const schema: any = {
+        ['x-uid']: fieldSchema['x-uid'],
+      };
+      schema['x-component-props'] = compProps;
+      dn.emit('patch', {
+        schema,
+      });
+    } else {
+      switch (key) {
+        case 'leftFlex':
+          setLeftFlex(flex);
+          break;
+        case 'rightFlex':
+          setRightFlex(flex);
+          break;
+      }
+    }
+  };
+
   return (
     <CardItem
       ref={boxRef}
@@ -98,125 +140,155 @@ export const TreeFormMain = (props) => {
         height: isFixed ? vHeight : undefined,
       }}
     >
-      <div
-        className={
-          `filterForm ` +
-          css`
-            .ant-card {
-              box-shadow: none;
-              margin-bottom: 0;
-              .nb-action-bar {
-                display: ${designable ? 'flex' : 'none!important'};
-              }
-              .ant-card-body {
-                // padding: 0;
-                padding-top: 0;
-                padding-bottom: 0;
-              }
-            }
-          `
-        }
-        ref={queryFormRef}
-      >
-        <RecursionField name={'filterForm'} schema={fieldSchema.properties.filterForm} />
-      </div>
-      <ReflexContainer
-        orientation="vertical"
-        className={css`
-          border: 1px solid ${token.colorBorder};
-          height: 100%;
-          .pane-container:not(.multi-rows) {
-            height: 100%;
-            & > div:not(.multi-rows) {
-              height: 100%;
-              & > .nb-fixed-block,
-              & > .nb-fixed-block > .ant-nb-card-item {
-                height: 100%;
-              }
-              .ant-card {
-                box-shadow: none;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                flex-wrap: nowrap;
-                .ant-card-body {
-                  padding: ${token.padding}px;
-                  flex-grow: 1;
-                  display: flex;
-                  flex-direction: column;
-                  overflow: auto;
-                  .nb-action-bar + div {
-                    flex-grow: 1;
-                  }
-                }
-              }
-            }
-          }
-          &.reflex-container.vertical > .reflex-splitter {
-            border-left-color: ${token.colorBorder};
-            border-right-color: ${token.colorBorder};
-          }
-        `}
-      >
-        <ReflexElement className="left-tree" flex={leftFlex}>
-          <div className={'pane-container'}>
-            {/* <RecursionField name={'tree'} schema={fieldSchema.properties.tree} /> */}
-          </div>
-        </ReflexElement>
-        <ReflexSplitter />
-        <ReflexElement className={'main'}>
+      <CollectionProvider name={collection}>
+        <TreeFormBlockContext.Provider
+          value={{
+            userAction,
+            setUserAction,
+            record,
+            setRecord,
+            collection,
+            refreshAction,
+            setRefreshAction,
+            expandedKeys,
+            setExpandedKeys,
+          }}
+        >
           <div
-            ref={boxRef}
-            className={
-              'pane-container multi-rows ' +
+            className={cls(
+              `filterForm `,
               css`
-                padding: 10px;
-                .form-container {
-                  // overflow-x: hidden;
-                  .ant-formily-layout {
-                    width: 100%;
-                    overflow-x: hidden;
-                  }
-                }
                 .ant-card {
                   box-shadow: none;
                   margin-bottom: 0;
+                  .nb-action-bar {
+                    display: ${designable ? 'flex' : 'none!important'};
+                  }
+                  .ant-card-body {
+                    // padding: 0;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                  }
                 }
-              `
-            }
+              `,
+              !designable
+                ? css`
+                    .ant-nb-card-item {
+                      height: 44px;
+                      overflow: hidden;
+                    }
+                  `
+                : '',
+            )}
+            ref={queryFormRef}
           >
-            <div
-              className={css`
-                margin-bottom: 8px;
-              `}
-            >
-              <CollectionProvider name="bom">
-                <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
-              </CollectionProvider>
-            </div>
-            <div className="form-container">
-              {/* <RecordProvider record={record}  isMemo>
-                <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
-              </RecordProvider> */}
-
-              {userAction == 'create' && (
-                <CollectionProvider name="bom">
-                  <RecordProvider record={prjRecord}>
-                    <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
-                  </RecordProvider>
-                </CollectionProvider>
-              )}
-            </div>
-
-            {/* <RecursionField name={'table'} schema={fieldSchema.properties.table} /> */}
+            <RecursionField name={'filterForm'} schema={fieldSchema.properties.filterForm} />
           </div>
-        </ReflexElement>
-        {/* 有审批流程则显示 */}
-        {hasApproval && <ReflexSplitter />}
-        {hasApproval && (
-          <ReflexElement className="middle" flex={0.15}>
-            <div className={'pane-container'}>
-              {/* <RecursionField
+
+          <ReflexContainer
+            orientation="vertical"
+            className={css`
+              border: 1px solid ${token.colorBorder};
+              height: 100%;
+              .pane-container:not(.multi-rows) {
+                height: 100%;
+                & > div:not(.multi-rows) {
+                  height: 100%;
+                  & > .nb-fixed-block,
+                  & > .nb-fixed-block > .ant-nb-card-item {
+                    height: 100%;
+                  }
+                  .ant-card {
+                    box-shadow: none;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    flex-wrap: nowrap;
+                    .ant-card-body {
+                      padding: ${token.padding}px;
+                      flex-grow: 1;
+                      display: flex;
+                      flex-direction: column;
+                      overflow: auto;
+                      .nb-action-bar + div {
+                        flex-grow: 1;
+                      }
+                    }
+                  }
+                }
+              }
+              &.reflex-container.vertical > .reflex-splitter {
+                border-left-color: ${token.colorBorder};
+                border-right-color: ${token.colorBorder};
+              }
+            `}
+          >
+            <ReflexElement
+              className="left-tree"
+              flex={leftFlex}
+              onStopResize={(arg) => {
+                onStopResize(arg, 'leftFlex');
+              }}
+            >
+              <div className={'pane-container'}>
+                <RecursionField name={'tree'} schema={fieldSchema.properties.tree} />
+              </div>
+            </ReflexElement>
+            <ReflexSplitter />
+            <ReflexElement className={'main'}>
+              <div
+                ref={boxRef}
+                className={
+                  'pane-container multi-rows ' +
+                  css`
+                    padding: 10px;
+                    .form-container {
+                      // overflow-x: hidden;
+                      .ant-formily-layout {
+                        width: 100%;
+                        overflow-x: hidden;
+                      }
+                    }
+                    .ant-card {
+                      box-shadow: none;
+                      margin-bottom: 0;
+                    }
+                  `
+                }
+              >
+                <div
+                  className={css`
+                    margin-bottom: 8px;
+                  `}
+                >
+                  <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
+                </div>
+                <div className="form-container">
+                  <RecordProvider record={prjRecord}>
+                    <RecordProvider record={record}>
+                      {userAction == 'create' && (
+                        <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
+                      )}
+                      {userAction == 'update' && (
+                        <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
+                      )}
+                    </RecordProvider>
+                  </RecordProvider>
+                </div>
+              </div>
+            </ReflexElement>
+            {/* 有审批流程则显示 */}
+            {hasApproval && <ReflexSplitter />}
+            {hasApproval && (
+              <ReflexElement
+                className="middle"
+                flex={rightFlex}
+                onStopResize={(arg) => {
+                  onStopResize(arg, 'rightFlex');
+                }}
+              >
+                <div className={'pane-container'}>
+                  {/* <RecursionField
               name={'approveRecords'}
               schema={{
                 // type: 'void',
@@ -323,10 +395,16 @@ export const TreeFormMain = (props) => {
                 'x-uid': 'wl_info-approval-records',
               }}
             /> */}
-            </div>
-          </ReflexElement>
-        )}
-      </ReflexContainer>
+                </div>
+              </ReflexElement>
+            )}
+          </ReflexContainer>
+        </TreeFormBlockContext.Provider>
+      </CollectionProvider>
     </CardItem>
   );
+};
+
+export const useTreeFormBlockContext = () => {
+  return useContext(TreeFormBlockContext);
 };

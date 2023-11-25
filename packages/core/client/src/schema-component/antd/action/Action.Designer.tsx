@@ -1059,7 +1059,8 @@ export const ActionDesigner = (props) => {
   return (
     <GeneralSchemaDesigner {...restProps} disableInitializer draggable={isDraggable}>
       <MenuGroup>
-        <ButtonEditor {...buttonEditorProps} />
+        <ButtonEditor {...buttonEditorProps} />        
+        <ActionScopeBind />
         {isAddChildAction && <SetInheriteFields collectionName={name} />}
         {fieldSchema['x-action'] === 'submit' &&
           fieldSchema.parent?.['x-initializer'] === 'CreateFormActionInitializers' && <SaveMode />}
@@ -1074,11 +1075,80 @@ export const ActionDesigner = (props) => {
         {isValid(fieldSchema?.['x-action-settings']?.triggerWorkflows) && <WorkflowConfig />}
         {restProps.children}
         {isChildCollectionAction && <SchemaSettings.EnableChildCollections collectionName={name} />}
-
         {fieldSchema?.['x-action-settings']?.removable !== false && <RemoveButton {...removeButtonProps} />}
       </MenuGroup>
     </GeneralSchemaDesigner>
   );
 };
+
+function ActionScopeBind(props) {
+  const field = useField();
+  const fieldSchema = useFieldSchema();
+  const { dn } = useDesignable();
+  const { t } = useTranslation();
+  let defValue =  fieldSchema['x-component-props']?.['useProps'];
+  const initialValues = {};
+  if(defValue){
+    defValue = defValue.replace('{{','').replace('}}','');
+    initialValues['usePropsOption'] = defValue.trim();
+    initialValues['useProps'] = defValue.trim();
+  }
+  const enumOptions = [{
+    label:'刷新',
+    value:'useRefreshActionProps'
+  },{
+    label:'树表单新增操作',
+    value:'useTreeFormCreateActionProps'
+  },{
+    label:'树表单刷新操作',
+    value:'useTreeFormRefreshActionProps'
+  },{
+    label:'树表单展开收缩操作',
+    value:'useTreeFormExpandActionProps'
+  }]
+
+  return (
+    <SchemaSettings.ModalItem
+      title={t('功能绑定')}
+      schema={
+        {
+          type: 'object',
+          title: t('功能绑定'),
+          properties: {           
+            usePropsOption: {
+              type:'string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              title: t('功能选择'),
+              enum: enumOptions
+            }, 
+            useProps: {
+              type:'string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              title: t('自定义功能')
+            },
+          },
+        } as ISchema
+      }
+      initialValues={initialValues}
+      onSubmit={({ useProps, usePropsOption }) => {  
+        const funcName =   usePropsOption || useProps;  
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props'].useProps =`{{ ${funcName} }}`;
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            'x-component-props': {
+              ...fieldSchema['x-component-props'],
+            },
+          },
+        });
+        dn.refresh();
+      }}
+    />
+  );
+}
+SchemaSettings.ActionScopeBind = ActionScopeBind;
 SchemaSettings.ButtonEditor = ButtonEditor;
 ActionDesigner.ButtonEditor = ButtonEditor;
