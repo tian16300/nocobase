@@ -8,6 +8,7 @@ import { RecordProvider, useRecord } from '../record-provider';
 import { SchemaComponentOptions } from '../schema-component';
 import { BlockProvider, RenderChildrenWithAssociationFilter, useBlockRequestContext } from './BlockProvider';
 import { mergeFilter } from './SharedFilterProvider';
+import { flattenTree } from '@nocobase/utils';
 
 type Params = {
   filter?: any;
@@ -47,6 +48,23 @@ const InternalTableSelectorProvider = (props) => {
   const field = useField();
   const { resource, service } = useBlockRequestContext();
   const [expandFlag, setExpandFlag] = useState(false);
+  const [allIncludesChildren, setAllIncludesChildren] = useState([]);
+  useEffect(() => {
+    const data  = service?.data?.data;
+    if (data && data.length > 0) {
+      const keys = [];
+      const rows = flattenTree(data, []);
+      rows.forEach((row) => {
+        if(row.children && row.children.length){
+          keys.push(row[rowKey || 'id']);
+        }       
+      });
+      setAllIncludesChildren(keys);
+     
+    }else{
+      setAllIncludesChildren([]);
+    }
+  },[service?.data?.data]);
   // if (service.loading) {
   //   return <Spin />;
   // }
@@ -64,6 +82,7 @@ const InternalTableSelectorProvider = (props) => {
           setExpandFlag: () => {
             setExpandFlag(!expandFlag);
           },
+          allIncludesChildren
         }}
       >
         <RenderChildrenWithAssociationFilter {...props} />

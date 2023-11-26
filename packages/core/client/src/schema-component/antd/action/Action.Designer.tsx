@@ -1082,8 +1082,13 @@ export const ActionDesigner = (props) => {
 };
 
 function ActionScopeBind(props) {
+  const {type = 'action'} = props;
   const field = useField();
-  const fieldSchema = useFieldSchema();
+  const schema = useFieldSchema();
+  let fieldSchema = schema;
+  if(type === 'form'){
+    fieldSchema = schema?.properties?.form;
+  }
   const { dn } = useDesignable();
   const { t } = useTranslation();
   let defValue =  fieldSchema['x-component-props']?.['useProps'];
@@ -1105,6 +1110,9 @@ function ActionScopeBind(props) {
   },{
     label:'树表单展开收缩操作',
     value:'useTreeFormExpandActionProps'
+  },{
+    label:'树表单新增初始化',
+    value:'useTreeFormCreateProps'
   }]
 
   return (

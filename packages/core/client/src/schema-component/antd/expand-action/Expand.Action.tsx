@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { useFieldSchema } from '@formily/react';
 import { Button } from 'antd';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCompile } from '../../hooks';
 import { useTableBlockContext, useTableSelectorContext } from '../../../block-provider';
 import { Icon } from '../../../icon';
@@ -46,7 +46,9 @@ const actionDesignerCss = css`
 `;
 
 export const ExpandAction = (props) => {
-  const { expandFlag, size } = props;
+  const { useProps, ...others } = props;
+  const others1 = useProps?.()||{};
+  const { expandFlag, size, setExpandFlag} = {...others,...others1} as any;
   const schema = useFieldSchema();
   const ctxSelector = useTableSelectorContext();
   const ctxBlock = useTableBlockContext();
@@ -55,20 +57,21 @@ export const ExpandAction = (props) => {
   const { titleExpand, titleCollapse, iconExpand, iconCollapse } = schema['x-component-props'] || {};
   const [expandAll, setExpandAll] = useState((ctx?.expandFlag? true : false)|| expandFlag)
   const compile = useCompile();
+  const _handleActionClick = () => {
+    setExpandAll(!expandAll);
+    if(ctx && typeof ctx?.setExpandFlag === 'function'){
+      ctx?.setExpandFlag(!expandAll);
+    }
+    if(typeof setExpandFlag === 'function'){
+      setExpandFlag(!expandAll);
+    }
+  }
   return (
     <div className={actionDesignerCss}>
       {(
         <Button 
         size={size}
-          onClick={() => {
-            setExpandAll(!expandAll);
-            if(ctx && typeof ctx?.setExpandFlag === 'function'){
-              ctx?.setExpandFlag(!expandAll);
-            }
-            if(typeof props?.setExpandFlag === 'function'){
-              props?.setExpandFlag(!expandAll);
-            }
-          }}
+          onClick={_handleActionClick}
           icon={<Icon type={expandAll ? iconCollapse : iconExpand} />}
           type={props.type}
         >

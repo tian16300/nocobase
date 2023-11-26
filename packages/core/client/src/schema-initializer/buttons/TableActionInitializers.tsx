@@ -170,6 +170,19 @@ export const TableActionInitializers = {
             },
           },
         },
+        {
+          type: 'item',
+          title: '{{t("按钮操作")}}',
+          component: 'CustomizeActionInitializer',
+          schema: {
+            title: '{{ t("按钮操作") }}',
+            'x-component': 'Action',
+            'x-designer': 'Action.Designer',
+            'x-component-props': {
+              useProps: '{{ useCreateActionProps }}',
+            },
+          },
+        }
       ],
       visible: function useVisible() {
         const collection = useCollection();

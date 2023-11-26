@@ -1,4 +1,12 @@
-import { CardItem, Divider, TreeView, removeNullCondition, useDesignable, useToken, useTreeFormBlockContext } from '../..';
+import {
+  CardItem,
+  Divider,
+  TreeView,
+  removeNullCondition,
+  useDesignable,
+  useToken,
+  useTreeFormBlockContext,
+} from '../..';
 import { Button, Input, Space, Tag, Tooltip, Tree } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 import { DownOutlined, MoreOutlined } from '@ant-design/icons';
@@ -17,6 +25,7 @@ import {
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
 import { forEach } from 'lodash';
+import { flattenTree } from '@nocobase/utils';
 interface TreeNode {
   id: number;
   name: string;
@@ -34,14 +43,16 @@ function buildTree(
     parentKey: 'parentId',
   },
 ) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i][fieldNames.parentKey] === parentKey) {
-      const children = buildTree(arr, arr[i][fieldNames.key], [], level + 1, fieldNames);
-      if (children.length) {
-        arr[i].children = children;
+  if (arr && arr.length === 0) {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i][fieldNames.parentKey] === parentKey) {
+        const children = buildTree(arr, arr[i][fieldNames.key], [], level + 1, fieldNames);
+        if (children.length) {
+          arr[i].children = children;
+        }
+        arr[i].level = level;
+        tree.push(arr[i]);
       }
-      arr[i].level = level;
-      tree.push(arr[i]);
     }
   }
 
@@ -56,25 +67,19 @@ const treeEach = (tree, callback, { children }) => {
     }
   });
 };
-function treeToArray(tree: TreeNode[], result: TreeNode[] = []): TreeNode[] {
-  for (const node of tree) {
-    result.push(node);
-    if (node.children) {
-      treeToArray(node.children, result);
-    }
-  }
-  return result;
-}
+
 export const LeftTree = (props: any) => {
   const { useProps } = props;
   const { selectedRowKeys, onSelect, serviceRefreshAction } = useProps?.();
   const field: IField = useField();
-  const { resource, service } = useBlockRequestContext();
+  const blockCtx = useBlockRequestContext();
+  const { service } = blockCtx;
   // const [dataSource, setDataSource] = useState([]);
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const {expandedKeys, setExpandedKeys} = useTreeFormBlockContext();
+  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll } = useTreeFormBlockContext();
+  setBlockCtx(blockCtx);
   const collection = getCollection(field.decoratorProps.collection);
   const fieldNames = {
     key: 'id',
@@ -82,13 +87,14 @@ export const LeftTree = (props: any) => {
     children: 'children',
     parentKey: 'parentId',
   };
-  const [expandFlag, setExpandFlag] = useState(false);
+  // const [expandFlag, setExpandFlag] = useState(false);
   useEffect(() => {
     if (service.data?.data) {
       field.data = field.data || {};
-      const { key, title, children } = fieldNames;      
-      field.dataSource = buildTree(service.data?.data, null, [], 0, fieldNames);
-      const data = treeToArray(service.data?.data);
+      const { key, title, children } = fieldNames;
+      field.dataSource =service.data?.data;
+      // field.dataSource = buildTree(service.data?.data, null, [], 0, fieldNames);
+      const data = flattenTree(service.data?.data, []);
       field.data.list = data;
 
       field.value = 'root';
@@ -98,74 +104,26 @@ export const LeftTree = (props: any) => {
     fieldSchema.reduceProperties((buf, s) => {
       if (s['x-action'] === 'expandAll') {
         s['x-component-props'] = s['x-component-props'] || {};
-        s['x-component-props'].expandFlag = expandFlag;
+        s['x-component-props'].expandFlag = expandAll;
         s['x-component-props'].setExpandFlag = (arg) => {
-          setExpandFlag(arg);
+          setExpandAll(arg);
         };
       }
       setExpandSchema(s);
     });
   };
   setExpandSchema(fieldSchema);
-  const { getDataBlocks } = useFilterBlock();
   const handleSelect = (selectedKeys) => {
     field.data = field.data || {};
     field.data.selectedRowKeys = selectedKeys;
-    const { targets, uid } = findFilterTargets(fieldSchema);
-    const dataBlocks = getDataBlocks();
     const value = selectedKeys;
-    const  row = field?.data?.list.find((item) => item[fieldNames.key] === selectedKeys?.[0]);
-    // 如果是之前创建的区块是没有 x-filter-targets 属性的，所以这里需要判断一下避免报错
-    if (!targets || !targets.some((target) => dataBlocks.some((dataBlock) => dataBlock.uid === target.uid))) {
-      // 当用户已经点击过某一行，如果此时再把相连接的区块给删除的话，行的高亮状态就会一直保留。
-      // 这里暂时没有什么比较好的方法，只是在用户再次点击的时候，把高亮状态给清除掉。
-      //  setSelectedRow((prev) => (prev.length ? [] : prev));
-      onSelect?.(value[0], row);
-      return;
-    }else{
-      dataBlocks.forEach((block) => {
-        const target = targets.find((target) => target.uid === block.uid);
-        if (!target) return;
-  
-        const param = block.service.params?.[0] || {};
-        // 保留原有的 filter
-        const storedFilter = block.service.params?.[1]?.filters || {};
-  
-        if (!selectedKeys.length || selectedKeys?.[0] == 'root') {
-          delete storedFilter[uid];
-        } else {
-          storedFilter[uid] = {
-            $and: [
-              {
-                [target.field || fieldNames.key]: {
-                  [target.field ? '$in' : '$eq']: value,
-                },
-              },
-            ],
-          };
-        }
-  
-        const mergedFilter = mergeFilter([
-          ...Object.values(storedFilter).map((filter) => removeNullCondition(filter)),
-          block.defaultFilter,
-        ]);
-  
-        return block.doFilter(
-          {
-            ...param,
-            page: 1,
-            filter: mergedFilter,
-          },
-          { filters: storedFilter },
-        );
-      });
-      onSelect?.(value[0], row);
-    }
+    const row = field?.data?.list.find((item) => item[fieldNames.key] === selectedKeys?.[0]);
+    onSelect?.(value[0], row);
   };
   useEffect(() => {
     const defaultKeys = ['root'];
-    if (expandFlag) {
-      const data = buildTree(service.data?.data, null, [], 0, fieldNames);
+    const data = service.data?.data;
+    if (expandAll && data && data.length) {
       treeEach(
         data,
         (item) => {
@@ -178,19 +136,14 @@ export const LeftTree = (props: any) => {
       );
     }
     setExpandedKeys(defaultKeys);
-  }, [expandFlag, service.data?.data]);
-  useEffect(() => {
-    if(!service.loading){
-      service.refresh();
-    }
-  },[serviceRefreshAction]);
+  }, [expandAll, service.data?.data]);
+
+
   return (
-    <CardItem
-      {...props}
-      title={collection.title}     
-    >
+    <CardItem {...props} title={collection.title}>
       <TreeView
         {...props}
+        loading={service.loading}
         fieldNames={fieldNames}
         expandedKeys={expandedKeys}
         onExpand={setExpandedKeys}

@@ -1,5 +1,5 @@
 import { Divider, useDesignable, useToken } from '../..';
-import { Button, Dropdown, Input, Popconfirm, Space, Tag, Tooltip, Tree } from 'antd';
+import { Button, Dropdown, Input, Popconfirm, Space, Spin, Tag, Tooltip, Tree } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DashOutlined, DownOutlined, MoreOutlined } from '@ant-design/icons';
 import { IField, RecordProvider, css } from '@nocobase/client';
@@ -22,8 +22,7 @@ const treeEach = (tree, callback, { children }) => {
 
 export const TreeView = connect(
   (props: any = {}) => {
-    const { onSelect, treeData = [], expandedKeys, ...others } = props;
-
+    const { onSelect, treeData = [], expandedKeys, loading = true, ...others } = props;
     const { fieldNames } = props;
     const { key, title, parentKey } = fieldNames;
     const field: IField = useField();
@@ -71,7 +70,7 @@ export const TreeView = connect(
         onSelect(selectedKeys);
       }
     };
-    
+
     return (
       <div
         ref={boxRef}
@@ -82,85 +81,94 @@ export const TreeView = connect(
         <div ref={searchBoxRef}>
           <Search size="small" style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
         </div>
-        <Tree
-          showLine
-          switcherIcon={<DownOutlined />}
-          onExpand={onExpand}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
-          height={treeBoxHeight}
-          fieldNames={fieldNames}
-          selectable={false}
-          className={css`
-            .ant-tree-node-content-wrapper: hover {
-              background-color: transparent;
-            }
-            .ant-tree-list-holder {
-              overflow-x: hidden;
-            }
-          `}
-          titleRender={(item: any) => {
-            return (
-              <div
-                className={css`
-                  position: relative;
-                  .site-tree-search-value {
-                    color: ${token.colorWarning};
-                    font-weight: bold;
-                  }
-                `}
-              >
-                <MemoTooltip title={item[title] as any}>
-                  <CheckableTag
-                    key={item[key]}
-                    checked={selectedKeys.includes(item[key])}
-                    onChange={() => {
-                      handleSelect([item[key]]);
-                      if (item[key] !== selectedKeys[0]) {
-                        // onSelect?.(item[key]);
-                        field.value = item[key];
-                      }
-                    }}
-                  >
-                    {item[title]?.indexOf(searchValue) > -1 ? (
-                      <>
-                        {item[title].substring(0, item[title].indexOf(searchValue))}
-                        <span className="site-tree-search-value">{searchValue}</span>
-                        {item[title].slice(item[title].indexOf(searchValue) + searchValue.length)}
-                      </>
-                    ) : (
-                      <>{item[title]|| '--'}</>
-                    )}
-                  </CheckableTag>
-                </MemoTooltip>
-                <span
+        {loading && (
+          <div className={css`
+            text-align: center;
+          `}>
+            <Spin />
+          </div>
+        )}
+        {!loading && (
+          <Tree
+            showLine
+            switcherIcon={<DownOutlined />}
+            onExpand={onExpand}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+            height={treeBoxHeight}
+            fieldNames={fieldNames}
+            selectable={false}
+            className={css`
+              .ant-tree-node-content-wrapper: hover {
+                background-color: transparent;
+              }
+              .ant-tree-list-holder {
+                overflow-x: hidden;
+              }
+            `}
+            titleRender={(item: any) => {
+              return (
+                <div
                   className={css`
-                    position: absolute;
-                    top: 0;
-                    margin-left: 10px;
-                    text-wrap: nowrap;
-                    .ant-space-horizontal {
-                      gap: 0px !important;
-                    }
-                    .ant-btn,
-                    .ant-btn.ant-btn-sm {
-                      padding: 0 2px;
+                    position: relative;
+                    .site-tree-search-value {
+                      color: ${token.colorWarning};
+                      font-weight: bold;
                     }
                   `}
-                  hidden={!selectedKeys.includes(item[key])}
                 >
-                  {item[key] !== 'root' && (
-                    <RecordProvider record={item}>
-                      <RecursionField name={'recordActionBar'} schema={fieldSchema.properties.recordActions} />
-                    </RecordProvider>
-                  )}
-                </span>
-              </div>
-            );
-          }}
-          treeData={treeData}
-          {...others}
-        />
+                  <MemoTooltip title={item[title] as any}>
+                    <CheckableTag
+                      key={item[key]}
+                      checked={selectedKeys.includes(item[key])}
+                      onChange={() => {
+                        handleSelect([item[key]]);
+                        if (item[key] !== selectedKeys[0]) {
+                          // onSelect?.(item[key]);
+                          field.value = item[key];
+                        }
+                      }}
+                    >
+                      {item[title]?.indexOf(searchValue) > -1 ? (
+                        <>
+                          {item[title].substring(0, item[title].indexOf(searchValue))}
+                          <span className="site-tree-search-value">{searchValue}</span>
+                          {item[title].slice(item[title].indexOf(searchValue) + searchValue.length)}
+                        </>
+                      ) : (
+                        <>{item[title] || '--'}</>
+                      )}
+                    </CheckableTag>
+                  </MemoTooltip>
+                  <span
+                    className={css`
+                      position: absolute;
+                      top: 0;
+                      margin-left: 10px;
+                      text-wrap: nowrap;
+                      .ant-space-horizontal {
+                        gap: 0px !important;
+                      }
+                      .ant-btn,
+                      .ant-btn.ant-btn-sm {
+                        padding: 0 2px;
+                      }
+                    `}
+                    hidden={!selectedKeys.includes(item[key])}
+                  >
+                    {item[key] !== 'root' && (
+                      <RecordProvider record={item}>
+                        <RecursionField name={'recordActionBar'} schema={fieldSchema.properties.recordActions} />
+                      </RecordProvider>
+                    )}
+                  </span>
+                </div>
+              );
+            }}
+            treeData={treeData}
+            {...others}
+          />
+        )}
       </div>
     );
   },

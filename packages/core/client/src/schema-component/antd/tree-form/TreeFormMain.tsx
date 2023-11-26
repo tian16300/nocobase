@@ -84,6 +84,8 @@ export const TreeFormMain = (props) => {
   const otherHeight = field?.decoratorProps?.otherHeight;
   const isFixed = field?.decoratorProps?.isFixed ? field?.decoratorProps?.isFixed : false;
   const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+  const [blockCtx, setBlockCtx] = useState(null);
+  const [expandAll, setExpandAll] = useState(true);
   /**
    * TODO 获取项目信息
    */
@@ -152,6 +154,9 @@ export const TreeFormMain = (props) => {
             setRefreshAction,
             expandedKeys,
             setExpandedKeys,
+            blockCtx, 
+            setBlockCtx,
+            expandAll, setExpandAll
           }}
         >
           <div
@@ -266,7 +271,7 @@ export const TreeFormMain = (props) => {
                 <div className="form-container">
                   <RecordProvider record={prjRecord}>
                     <RecordProvider record={record}>
-                      {userAction == 'create' && (
+                      {['create','createAndAddChild'].includes(userAction) && (
                         <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
                       )}
                       {userAction == 'update' && (

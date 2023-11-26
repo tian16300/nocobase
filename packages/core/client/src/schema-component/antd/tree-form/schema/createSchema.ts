@@ -37,61 +37,61 @@ export const createSchema = (props) => {
           },
           name: 'tree-form',
         },
-      
+
         'x-component': 'TreeForm.Tree',
         'x-component-props': {
           useProps: '{{ useTreeFormBlockTreeItemProps }}',
         },
-        properties:{
-           recordActions: {
-        type: 'void',
-        title: '{{ t("Actions") }}',
-        'x-component': 'ActionBar',
-        'x-designer': 'GroupTable.GroupRecordActionDesigner',
         properties: {
-          actions: {
+          recordActions: {
             type: 'void',
-            'x-decorator': 'DndContext',
-            'x-component': 'Space',
-            'x-component-props': {
-              split: '',
-            },
+            title: '{{ t("Actions") }}',
+            'x-component': 'ActionBar',
+            'x-designer': 'GroupTable.GroupRecordActionDesigner',
             properties: {
-              add: {
-                title: '添加',
-                'x-action': 'create',
-                'x-designer': 'Action.Designer',
-                'x-component': 'Action',
-                'x-visible': '{{treeTable}}',
+              actions: {
+                type: 'void',
+                'x-decorator': 'DndContext',
+                'x-component': 'Space',
                 'x-component-props': {
-                  icon: 'pluscircleoutlined',
-                  type: 'link',
-                  size: 'small',
-                  addChild: true,
-                  useProps: '{{ useTreeFormAddChildActionProps }}',
+                  split: '',
                 },
-              },
-              delete: {
-                title: '{{ t("Delete") }}',
-                'x-action': 'destroy',
-                'x-component': 'Action',
-                'x-designer': 'Action.Designer',
-                'x-component-props': {
-                  icon: 'DeleteOutlined',
-                  type: 'link',
-                  size: 'small',
-                  confirm: {
-                    title: "{{t('Delete record')}}",
-                    content: "{{t('Are you sure you want to delete it?')}}",
+                properties: {
+                  add: {
+                    title: '添加',
+                    'x-action': 'create',
+                    'x-designer': 'Action.Designer',
+                    'x-component': 'Action',
+                    'x-visible': '{{treeTable}}',
+                    'x-component-props': {
+                      icon: 'pluscircleoutlined',
+                      type: 'link',
+                      size: 'small',
+                      addChild: true,
+                      useProps: '{{ useTreeFormAddChildActionProps }}',
+                    },
                   },
-                  useProps: '{{ useDestroyActionProps }}',
+                  delete: {
+                    title: '{{ t("Delete") }}',
+                    'x-action': 'destroy',
+                    'x-component': 'Action',
+                    'x-designer': 'Action.Designer',
+                    'x-component-props': {
+                      icon: 'DeleteOutlined',
+                      type: 'link',
+                      size: 'small',
+                      confirm: {
+                        title: "{{t('Delete record')}}",
+                        content: "{{t('Are you sure you want to delete it?')}}",
+                      },
+                      useProps: '{{ useDestroyActionProps }}',
+                    },
+                  },
                 },
               },
             },
           },
         },
-      },
-        }
       },
       actions: {
         type: 'void',
@@ -104,7 +104,7 @@ export const createSchema = (props) => {
         },
         properties: {},
       },
-     
+
       form: {
         type: 'void',
         properties: {

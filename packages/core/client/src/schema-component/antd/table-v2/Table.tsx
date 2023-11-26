@@ -804,10 +804,11 @@ export const Table: any = observer(
             columns={resizableColumns}
             expandable={{
               onExpand: (flag, record) => {
+                const rowKeys = expandedKeys || [];
                 const newKeys = flag
-                  ? [...expandedKeys, record[rowKey]]
-                  : expandedKeys.filter((i) => record[rowKey] !== i);
-                setExpandesKeys(newKeys);
+                  ? [...rowKeys, record[rowKey]]
+                  : rowKeys.filter((i) => record[rowKey] !== i);
+                setExpandesKeys(newKeys||[]);
                 onExpand?.(flag, record);
               },
               expandedRowKeys: expandedKeys,

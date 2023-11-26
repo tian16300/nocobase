@@ -25,6 +25,7 @@ export const FormDesigner = () => {
       <SchemaSettings.LinkageRules collectionName={name} />
       {/* 当 action 没有值的时候，说明是在用表单创建新数据，此时需要显示数据模板 */}
       {!action ? <SchemaSettings.DataTemplates collectionName={name} /> : null}
+      <SchemaSettings.ActionScopeBind type='form' />
       <SchemaSettings.Divider />
       <SchemaSettings.FormItemTemplate
         componentName={'FormItem'}
