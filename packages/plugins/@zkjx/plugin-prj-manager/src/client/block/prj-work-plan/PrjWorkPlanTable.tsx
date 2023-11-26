@@ -33,7 +33,7 @@ import { pick } from 'lodash';
 import { useDataSelectBlockContext } from '..';
 import template from 'lodash/template';
 import { useNavigate } from 'react-router';
-import { getValuesByPath } from '@nocobase/utils/client';
+import {  getValuesByPath } from '@nocobase/utils/client';
 import type { FormInstance } from 'antd/es/form';
 import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
@@ -211,11 +211,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         }
       `;
     }
-
-    // useEffect(()=>{
-    //   setDataSource(field?.value?.slice?.()?.filter?.(Boolean) || []);
-    // },[field?.value]);
-
     useEffect(() => {
       if (expandFlag) {
         setExpandesKeys(allIncludesChildren);
@@ -582,7 +577,6 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
      * @param row
      */
     const handleLocalSave = (row) => {
-      debugger;
       const newData = [...dataSource];
       const index = newData.findIndex((item) => row.rowKey === item.rowKey);
       const item = newData[index];

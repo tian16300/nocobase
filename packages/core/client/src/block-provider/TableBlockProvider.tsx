@@ -10,13 +10,13 @@ import { mergeFilter } from './SharedFilterProvider';
 import { findFilterTargets, useParsedFilter } from './hooks';
 
 export const TableBlockContext = createContext<any>({});
-export function getIdsWithChildren(nodes) {
+export function getIdsWithChildren(nodes, rowKey = 'id') {
   const ids = [];
   if (nodes) {
     for (const node of nodes) {
       if (node?.children && node.children.length > 0) {
-        ids.push(node.id);
-        ids.push(...getIdsWithChildren(node?.children));
+        ids.push(node[rowKey]);
+        ids.push(...getIdsWithChildren(node?.children, rowKey));
       }
     }
   }
@@ -35,16 +35,17 @@ interface Props {
   collection?: string;
 }
 
-const InternalTableBlockProvider = (props: Props) => {
-  const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, ...others } = props;
+const InternalTableBlockProvider = (props: any) => {
+  const { params, showIndex, dragSort, rowKey, childrenColumnName, fieldNames, ...others } = props as any;
   const field: any = useField();
   const { resource, service } = useBlockRequestContext();
   const fieldSchema = useFieldSchema();
   const { treeTable } = fieldSchema?.['x-decorator-props'] || {};
   const [expandFlag, setExpandFlag] = useState(fieldNames ? true : false);
+  const preProcessData = props?.preProcessData || ((data: any, ctx) => data||[]);
   const allIncludesChildren = useMemo(() => {
     if (treeTable !== false) {
-      const keys = getIdsWithChildren(service?.data?.data);
+      const keys = getIdsWithChildren(preProcessData(service?.data?.data, props), rowKey);
       return keys || [];
     }
   }, [service?.loading]);
@@ -140,8 +141,8 @@ export const useTableBlockProps = () => {
     if (!ctx?.service?.loading) {
       field.value = [];
       field.value = preProcessData(ctx?.service?.data?.data, ctx);
-      field.setInitialValue(preProcessData(ctx?.service?.data?.data, ctx));
       ctx.field.value = field.value;
+      // field.setInitialValue(preProcessData(ctx?.service?.data?.data, ctx));
       field.data = field.data || {};
       field.data.selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
       field.componentProps.pagination = field.componentProps.pagination || {};
