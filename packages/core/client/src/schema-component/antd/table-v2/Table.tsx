@@ -110,9 +110,41 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
         },
       } as TableColumnProps<any>;
     });
+    const [refresh, setRefresh] = useState(false);
+    const onResizeCell = (cellKey, width) => {
+      const column = (tableColumns||columns).find((col) => {
+        return col.dataIndex === cellKey;
+      });
+      if (designable) {
+        /** 保存宽度 */
+        const uid = column.key;
+        const columnSchema = schema['properties'][uid];
+        if (columnSchema) {
+          const props = columnSchema['x-component-props'] || {};
+          props['width'] = width;
+          const schemaData: any = {
+            ['x-uid']: columnSchema['x-uid'],
+          };
+          schemaData['x-component-props'] = props;
+          columnSchema['x-component-props'] = props;
+          dn.emit('patch', {
+            schema: schemaData,
+          });
+          setRefresh(!refresh);
+          dn.refresh();
+        }
+      }
+    };
   if (!exists) {
-    return columns;
+    return {
+      columns,
+      onResizeCell,
+      refresh,
+      setRefresh,
+      propCols
+    };
   }
+  
 
   const tableColumns = columns.concat({
     title: render(),
@@ -288,31 +320,7 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
       width: (handleItems.length > 3 ? 3 : handleItems.length) * 50
     });
   }  
-  const [refresh, setRefresh] = useState(false);
-  const onResizeCell = (cellKey, width) => {
-    const column = tableColumns.find((col) => {
-      return col.dataIndex === cellKey;
-    });
-    if (designable) {
-      /** 保存宽度 */
-      const uid = column.key;
-      const columnSchema = schema['properties'][uid];
-      if (columnSchema) {
-        const props = columnSchema['x-component-props'] || {};
-        props['width'] = width;
-        const schemaData: any = {
-          ['x-uid']: columnSchema['x-uid'],
-        };
-        schemaData['x-component-props'] = props;
-        columnSchema['x-component-props'] = props;
-        dn.emit('patch', {
-          schema: schemaData,
-        });
-        setRefresh(!refresh);
-        dn.refresh();
-      }
-    }
-  };
+ 
 
   
  
@@ -479,16 +487,17 @@ export const Table: any = observer(
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
     const columnsRef =  useRef(_columns);
+    debugger;
 
-    // useEffect(() => {
-    //   columnsRef.current = _columns;
-    // },[_columns]);
+    useEffect(() => {
+      columnsRef.current = _columns;
+    },[_columns]);
 
     const [procolsStr, setProcolsStr] = useState(JSON.stringify(proCols));
     useEffect(() => {
-      const proCols = _columns.map((item) => {
+      const proCols = _columns?.map((item) => {
         return  pick(item,['dataIndex','key', 'sortable', 'width'])
-      });
+      })||[];
       const value = JSON.stringify(proCols);
       if(value !== procolsStr){
         columnsRef.current = _columns;        
