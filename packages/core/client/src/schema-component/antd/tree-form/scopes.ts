@@ -1,9 +1,22 @@
 import { useField, useFieldSchema, useForm } from '@formily/react';
 import { useRecord, useRecordIndex } from '../../../record-provider';
-import { IField, useActionContext, useFilterByTk, useFormBlockContext, useFormBlockType } from '@nocobase/client';
-import { useEffect, useState } from 'react';
+import {
+  IField,
+  mergeFilter,
+  removeNullCondition,
+  transformToFilter,
+  useActionContext,
+  useCollectionManager,
+  useFilterBlock,
+  useFilterByTk,
+  useFormBlockContext,
+  useFormBlockType,
+} from '@nocobase/client';
+import { useEffect, useMemo, useState } from 'react';
 import { useTreeFormBlockContext } from './TreeFormMain';
-
+import { uid } from '@formily/shared';
+import { onFormValuesChange } from '@formily/core';
+import { isEmpty } from 'lodash';
 export const useTreeFormBlockProps = () => {
   const schema: any = useFieldSchema();
   const collection = schema.properties?.tree?.['x-decorator-props']?.collection;
@@ -58,7 +71,7 @@ export const useTreeFormExpandActionProps = () => {
   const { expandAll, setExpandAll } = useTreeFormBlockContext();
   return {
     expandFlag: expandAll,
-    setExpandFlag: setExpandAll
+    setExpandFlag: setExpandAll,
   };
 };
 
@@ -79,10 +92,33 @@ export const useTreeFormCreateProps = () => {
   const addChild = fieldSchema?.['x-component-props']?.addChild;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
+  const { field, filterFormLoaded, userAction } = useTreeFormBlockContext();
+  useEffect(() => {
+    if (filterFormLoaded) {
+      if(userAction == 'createAndAddChild'){
+        ctx?.form.reset();
+        ctx?.form.setInitialValues({
+          ...field.data?.filterFormValues,
+          parent: record,
+        });
+        console.log('useTreeFormCreateProps setInitialValues', 2);
+      }else if(userAction == 'create'){
+        ctx?.form.reset();
+        ctx?.form.setInitialValues({
+          ...field.data?.filterFormValues,
+        });
+        console.log('useTreeFormCreateProps setInitialValues', 2);
+      }
+    }    
+  }, [filterFormLoaded, userAction]);
 
   useEffect(() => {
     if (!ctx?.service?.loading) {
-      ctx.form?.setInitialValues(ctx.service?.data?.data);
+      ctx?.form.reset();
+      ctx?.form.setInitialValues({
+        ...field.data?.filterFormValues,
+      });  
+      console.log('useTreeFormCreateProps setInitialValues', 1);
     }
   }, [ctx?.service?.loading]);
   useEffect(() => {
@@ -121,7 +157,59 @@ export const useTreeFormCreateProps = () => {
     form: ctx.form,
   };
 };
+export const useTreeFormFilterProps = () => {
+  const form = useForm();
+  const ctx = useFormBlockContext();
+  const record = useRecord();
+  const { fieldSchema: actionFieldSchema } = useActionContext();
+  const fieldSchema = actionFieldSchema ? actionFieldSchema : useFieldSchema();
+  const addChild = fieldSchema?.['x-component-props']?.addChild;
+  const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
+  const { type } = useFormBlockType();
+  const {
+    blockCtx,
+    setFilterFormValues,
+    setFilterFormSchema,
+    doFilterByBlock,
+    treeBlock,
+    treeSchema,
+    field,
+    setFilterFormLoaded,
+  } = useTreeFormBlockContext();
+  field.data = field.data || {};
+  field.data.filterFormSchema = fieldSchema;
+  useEffect(() => {
+    if (!ctx?.service?.loading) {
+      const initialValues = ctx.service?.data?.data;
+      ctx.form?.setInitialValues(initialValues);
+    }
+  }, [ctx?.service?.loading]);
 
+  useEffect(() => {
+    if (ctx?.form) {
+      const id = uid();
+      ctx.form.addEffects(id, () => {
+        onFormValuesChange((form) => {
+          if (!isEmpty(form.values)) {
+            field.data.filterFormValues = form.values;
+            setFilterFormLoaded(true);
+          }
+          if (field.data?.blockCtx) {
+            field.data.filterFormValues = form.values;
+            doFilterByBlock(form.values, fieldSchema);
+          }
+        });
+      });
+
+      return () => {
+        ctx.form.removeEffects(id);
+      };
+    }
+  }, []);
+  return {
+    form: ctx.form,
+  };
+};
 export const useTreeFormRefreshActionProps = () => {
   const { blockCtx } = useTreeFormBlockContext();
   return {
@@ -132,5 +220,14 @@ export const useTreeFormRefreshActionProps = () => {
       blockCtx?.service?.refresh();
     },
   };
+};
+
+export const useTreeFormSaveAsNewVersionProps = () => {
+  // const { blockCtx } = useTreeFormBlockContext();
+  // return {
+  //   onClick: () => {
+  //     blockCtx?.service?.saveAsNewVersion();
+  //   },
+  // };
 };
 export { useTreeFormBlockContext };

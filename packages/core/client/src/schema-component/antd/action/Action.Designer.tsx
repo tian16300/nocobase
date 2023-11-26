@@ -6,7 +6,7 @@ import { Alert, Tree as AntdTree, ModalProps } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RemoteSelect, useCompile, useDesignable } from '../..';
+import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';
 import { FlagProvider } from '../../../flag-provider';
 import { useRecord } from '../../../record-provider';
@@ -1089,32 +1089,21 @@ function ActionScopeBind(props) {
   if(type === 'form'){
     fieldSchema = schema?.properties?.form;
   }
+  if(type === 'filter-form'){
+    const properties: any = schema?.properties;
+    const key = Object.keys(properties)[0];
+    fieldSchema = schema?.properties?.[key];
+  }
   const { dn } = useDesignable();
   const { t } = useTranslation();
-  let defValue =  fieldSchema['x-component-props']?.['useProps'];
+  let defValue =  fieldSchema?.['x-component-props']?.['useProps'];
   const initialValues = {};
   if(defValue){
     defValue = defValue.replace('{{','').replace('}}','');
     initialValues['usePropsOption'] = defValue.trim();
     initialValues['useProps'] = defValue.trim();
   }
-  const enumOptions = [{
-    label:'刷新',
-    value:'useRefreshActionProps'
-  },{
-    label:'树表单新增操作',
-    value:'useTreeFormCreateActionProps'
-  },{
-    label:'树表单刷新操作',
-    value:'useTreeFormRefreshActionProps'
-  },{
-    label:'树表单展开收缩操作',
-    value:'useTreeFormExpandActionProps'
-  },{
-    label:'树表单新增初始化',
-    value:'useTreeFormCreateProps'
-  }]
-
+  const enumOptions = [...treeFormBlockActionOptions]
   return (
     <SchemaSettings.ModalItem
       title={t('功能绑定')}
@@ -1134,8 +1123,18 @@ function ActionScopeBind(props) {
               type:'string',
               'x-decorator': 'FormItem',
               'x-component': 'Input',
-              title: t('自定义功能')
-            },
+              title: t('自定义功能'),
+              'x-reactions': [
+                {
+                  dependencies: ['.usePropsOption'],
+                  fulfill: {
+                    state: {
+                      value: '{{ $deps[0] }}',
+                    },
+                  },
+                },
+              ],
+            },        
           },
         } as ISchema
       }

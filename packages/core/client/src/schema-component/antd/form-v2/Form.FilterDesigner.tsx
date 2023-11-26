@@ -27,6 +27,7 @@ export const FilterDesigner = () => {
       />
       <SchemaSettings.LinkageRules collectionName={name} />
       <SchemaSettings.ConnectDataBlocks type={FilterBlockType.FORM} emptyDescription={t('No blocks to connect')} />
+      <SchemaSettings.ActionScopeBind type='filter-form' />
       <SchemaSettings.Divider />
       <SchemaSettings.Remove
         removeParentsIfNoChildren

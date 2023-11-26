@@ -65,7 +65,7 @@ export const FormItemInitializers = (props: any) => {
       title: '批量选择',
       component: 'DataBlockSelectorInitializer',
       schema: {
-        type: 'array',
+        type: 'void',
         title: `批量选择`,
         'x-decorator': 'FormItem',
         'x-designer': 'FormItem.Designer',
@@ -109,6 +109,19 @@ export const FormItemInitializers = (props: any) => {
               },
             },
           },
+        },
+      },
+    },    
+    {
+      type: 'item',
+      title: '{{t("按钮操作")}}',
+      component: 'CustomizeActionInitializer',
+      schema: {
+        type: 'void',
+        title: '{{ t("按钮操作") }}',
+        'x-component': 'Action',
+        'x-designer': 'FormItem.Designer',
+        'x-component-props': {
         },
       },
     },

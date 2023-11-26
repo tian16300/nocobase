@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plugin } from '../application/Plugin';
-import { SchemaComponentOptions, useDataBlockSelectorProps, useTreeFormAddChildActionProps, useTreeFormBlockProps, useTreeFormBlockTreeItemProps, useTreeFormCreateActionProps, useTreeFormCreateProps, useTreeFormExpandActionProps, useTreeFormRefreshActionProps, useTreeFormShowForm } from '../schema-component';
+import { SchemaComponentOptions, useDataBlockSelectorProps, useTreeFormAddChildActionProps, useTreeFormBlockProps, useTreeFormBlockTreeItemProps, useTreeFormCreateActionProps, useTreeFormCreateProps, useTreeFormExpandActionProps, useTreeFormFilterProps, useTreeFormRefreshActionProps, useTreeFormSaveAsNewVersionProps, useTreeFormShowForm } from '../schema-component';
 import { RecordLink, useParamsFromRecord, useSourceIdFromParentRecord, useSourceIdFromRecord } from './BlockProvider';
 import { CalendarBlockProvider, useCalendarBlockProps } from './CalendarBlockProvider';
 import { DetailsBlockProvider, useDetailsBlockProps } from './DetailsBlockProvider';
@@ -103,7 +103,9 @@ export class BlockSchemaComponentPlugin extends Plugin {
       useTreeFormBlockTreeItemProps,
       useTreeFormExpandActionProps,
       useTreeFormCreateProps,
-      useTreeFormRefreshActionProps
+      useTreeFormRefreshActionProps,
+      useTreeFormFilterProps,
+      useTreeFormSaveAsNewVersionProps
     });
   }
 }

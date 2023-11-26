@@ -25,6 +25,7 @@ import {
   useFormBlockContext,
   useTableBlockContext,
 } from '../../../block-provider';
+import { useTreeFormBlockContext } from '..';
 
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
@@ -244,28 +245,35 @@ export const useDataBlockSelectorProps = () => {
   const { form } = useFormBlockContext();
   const { selectedRows, toField, addTo } = useDataBlockSelectorActionContext();
   return {
-    onClick() {
+    async onClick() {
+      debugger;
       const rows = selectedRows;
       // 获取当前的bom_wl字段的值
       const currentBomWl = form.values[addTo] || [];
       const newRows = [];
       // const toField = toFieldRef.current;
-      rows.map((row) => {
+      const foreignKey = toField.foreignKey;
+      const targetKey = toField.targetKey || 'id';
+      rows.map(({[targetKey]: id, ...row}) => {
         const isExist = currentBomWl.find((item) => {
-          return item[toField.forienKey] === row[toField.targetKey];
+          return item[foreignKey] === id;
         });
         if (!isExist) {
           newRows.push({
             ...row,
             [toField.name]: {
+              id,
               ...row,
             },
-            [toField.forienKey]: row[toField.targetKey]
+            [foreignKey]: id
           });
          
         }
       });
       const newBomWl = [...currentBomWl, ...newRows];
+      // newBomWl.forEach((item,index) => {
+      //   return item.__index = index;
+      // });
       form.setValues({
         ...form.values,
         [addTo]: newBomWl

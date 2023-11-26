@@ -70,7 +70,7 @@ const treeEach = (tree, callback, { children }) => {
 
 export const LeftTree = (props: any) => {
   const { useProps } = props;
-  const { selectedRowKeys, onSelect, serviceRefreshAction } = useProps?.();
+  const {  onSelect } = useProps?.();
   const field: IField = useField();
   const blockCtx = useBlockRequestContext();
   const { service } = blockCtx;
@@ -78,8 +78,9 @@ export const LeftTree = (props: any) => {
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll } = useTreeFormBlockContext();
-  setBlockCtx(blockCtx);
+  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
+  formField.data = formField.data || {};
+  formField.data.blockCtx = blockCtx;
   const collection = getCollection(field.decoratorProps.collection);
   const fieldNames = {
     key: 'id',
@@ -91,15 +92,13 @@ export const LeftTree = (props: any) => {
   useEffect(() => {
     if (service.data?.data) {
       field.data = field.data || {};
-      const { key, title, children } = fieldNames;
       field.dataSource =service.data?.data;
-      // field.dataSource = buildTree(service.data?.data, null, [], 0, fieldNames);
       const data = flattenTree(service.data?.data, []);
       field.data.list = data;
 
       field.value = 'root';
     }
-  }, [service.loading, service.data?.data, fieldNames]);
+  }, [service.loading, service.data?.data]);
   const setExpandSchema = (fieldSchema) => {
     fieldSchema.reduceProperties((buf, s) => {
       if (s['x-action'] === 'expandAll') {

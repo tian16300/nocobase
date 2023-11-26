@@ -1,19 +1,20 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-import { CardItem, FixedBlockWrapper, useFixedBlock, useToken } from '..';
+import { CardItem, FixedBlockWrapper, removeNullCondition, useFixedBlock, useToken } from '..';
 import { FormProvider, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { css } from '@emotion/css';
 import { uid } from '@nocobase/utils';
 import { LeftTree } from './LeftTree';
 import { RecordProvider, useRecord } from '../../../record-provider';
-import { Divider, Space } from 'antd';
+import { Divider, Space, Spin } from 'antd';
 import { useSize } from 'ahooks';
 import { useDesignable } from '../../hooks';
-import { CollectionProvider, IField } from '../../../collection-manager';
-import { useBlockRequestContext } from '../../../block-provider';
+import { CollectionProvider, IField, useCollectionManager } from '../../../collection-manager';
+import { mergeFilter, useBlockRequestContext } from '../../../block-provider';
 import { createForm } from '@formily/core';
 import { default as cls } from 'classnames';
 import { set } from 'lodash';
+import { transformToFilter, useFilterBlock } from '@nocobase/client';
 interface TreeNode {
   id: number;
   name: string;
@@ -86,9 +87,74 @@ export const TreeFormMain = (props) => {
   const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
   const [blockCtx, setBlockCtx] = useState(null);
   const [expandAll, setExpandAll] = useState(true);
-  /**
-   * TODO 获取项目信息
-   */
+  const { getCollectionJoinField } = useCollectionManager();
+  const [filterFormLoaded, setFilterFormLoaded] = useState(true);
+  const treeSchema = fieldSchema.properties.tree;
+  // const [treeSchema, setTreeSchema] = useState(null);
+  const _filterFormSchema = fieldSchema.properties.filterForm;
+  const { getDataBlocks } = useFilterBlock();
+  const [treeBlock, setTreeBlock] = useState(null);
+
+  const filterFormValues = useMemo(() => {
+    return field.data?.filterFormValues || {};
+  }, [field]);
+  const filterFormSchema = useMemo(() => {
+    return field.data?.filterFormSchema || {};
+  }, [field]);
+
+  const doFilterParams = (formValues, fieldSchema, treeSchema) => {
+    if (formValues && fieldSchema && treeSchema) {
+      const param = treeSchema['x-decorator-props']['params'] || {};
+      // 保留原有的 filter
+      const storedFilter = {};
+      storedFilter['form'] = removeNullCondition(
+        transformToFilter(formValues, fieldSchema, getCollectionJoinField, collection),
+      );
+      const mergedFilter = mergeFilter([...Object.values(storedFilter).map((filter) => removeNullCondition(filter))]);
+      return {
+        ...param,
+        filter: mergedFilter,
+      };
+    }
+    return null;
+  };
+
+  const doFilterByBlock = () => {
+    if (!treeSchema) {
+      return;
+    }
+    const block = field.data?.blockCtx;
+    if (!block) {
+      return;
+    }
+
+    const filterFormValues = field.data?.filterFormValues;
+    const filterFormSchema = field.data?.filterFormSchema;
+    const param = block.service.params?.[0] || {};
+    // 保留原有的 filter
+    const storedFilter = block.service.params?.[1]?.filters || {};
+    storedFilter[fieldSchema['x-uid']] = removeNullCondition(
+      transformToFilter(filterFormValues, filterFormSchema, getCollectionJoinField, collection),
+    );
+    const mergedFilter = mergeFilter([...Object.values(storedFilter).map((filter) => removeNullCondition(filter))]);
+    block.service.run(
+      {
+        ...param,
+        filter: mergedFilter,
+      },
+      { filters: storedFilter },
+    );
+  };
+  useEffect(() => {
+    if (!filterFormLoaded) {
+      const filterFormValues = field.data?.filterFormValues;
+      const filterFormSchema = field.data?.filterFormSchema;
+      const params = doFilterParams(filterFormValues, filterFormSchema, treeSchema);
+      if (treeSchema && params) {
+        treeSchema['x-decorator-props']['params'] = params;
+      }
+    } 
+  }, [treeSchema, field]);
   const prjRecord = {};
 
   const [record, setRecord] = useState(null);
@@ -154,9 +220,17 @@ export const TreeFormMain = (props) => {
             setRefreshAction,
             expandedKeys,
             setExpandedKeys,
-            blockCtx, 
+            blockCtx,
             setBlockCtx,
-            expandAll, setExpandAll
+            expandAll,
+            setExpandAll,
+            filterFormValues,
+            doFilterByBlock,
+            treeBlock,
+            treeSchema,
+            field,
+            filterFormLoaded,
+            setFilterFormLoaded,
           }}
         >
           <div
@@ -236,7 +310,7 @@ export const TreeFormMain = (props) => {
               }}
             >
               <div className={'pane-container'}>
-                <RecursionField name={'tree'} schema={fieldSchema.properties.tree} />
+                {filterFormLoaded ? <RecursionField name={'tree'} schema={treeSchema} /> : <Spin />}
               </div>
             </ReflexElement>
             <ReflexSplitter />
@@ -269,16 +343,20 @@ export const TreeFormMain = (props) => {
                   <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
                 </div>
                 <div className="form-container">
-                  <RecordProvider record={prjRecord}>
-                    <RecordProvider record={record}>
-                      {['create','createAndAddChild'].includes(userAction) && (
-                        <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
-                      )}
-                      {userAction == 'update' && (
-                        <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
-                      )}
+                  {filterFormLoaded ? (
+                    <RecordProvider record={prjRecord}>
+                      <RecordProvider record={record}>
+                        {['create', 'createAndAddChild'].includes(userAction) && (
+                          <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
+                        )}
+                        {userAction == 'update' && (
+                          <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
+                        )}
+                      </RecordProvider>
                     </RecordProvider>
-                  </RecordProvider>
+                  ) : (
+                    <Spin />
+                  )}
                 </div>
               </div>
             </ReflexElement>

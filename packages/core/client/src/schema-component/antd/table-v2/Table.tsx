@@ -40,6 +40,7 @@ import { SubFormProvider } from '../association-field/hooks';
 import { ColumnFieldProvider } from './components/ColumnFieldProvider';
 import { extractIndex, isCollectionFieldComponent, isColumnComponent } from './utils';
 import { useAntdColumnResize } from 'react-antd-column-resize';
+import { pick } from 'lodash';
 const useArrayField = (props) => {
   const field = useField<ArrayField>();
   return (props.field || field) as ArrayField;
@@ -53,6 +54,7 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
   const { schemaInWhitelist } = useACLFieldWhitelist();
   const { designable, dn } = useDesignable();
   const { exists, render } = useSchemaInitializer(schema['x-initializer']);
+  const propCols = [];
   const columns = schema
     .reduceProperties((buf, s) => {
       if (isColumnComponent(s) && schemaInWhitelist(Object.values(s.properties || {}).pop())) {
@@ -71,6 +73,13 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
       if (collectionFields?.length > 0) {
         collectionName = getCollectionField(collectionFields?.[0]?.['x-collection-field'])?.target || name;
       }
+      propCols.push({
+        dataIndex,
+        key: s.name,
+        sorter: s['x-component-props']?.['sorter'],
+        width: 200,
+        ...s['x-component-props']
+      });
       //如果是字典 key 则为外键
       return {
         title: <RecursionField name={s.name} schema={s} onlyRenderSelf />,
@@ -266,12 +275,17 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
     tableColumns.push({
       title: '',
       key: 'actions',
-      width: (handleItems.length > 3 ? 3 : handleItems.length) * 36,
+      width: (handleItems.length > 3 ? 3 : handleItems.length) * 50,
       align: 'center',
       fixed: 'right',
       render: (v, record, index) => {
         return <TableRecordAction items={handleItems} index={index} record={record} />;
       },
+    });
+    propCols.push({
+      title: '',
+      key: 'actions',
+      width: (handleItems.length > 3 ? 3 : handleItems.length) * 50
     });
   }  
   const [refresh, setRefresh] = useState(false);
@@ -299,11 +313,15 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
       }
     }
   };
+
+  
  
   return {
     columns: tableColumns,
     onResizeCell,
-    refresh
+    refresh,
+    setRefresh,
+    propCols
   };
 };
 
@@ -410,7 +428,7 @@ export const Table: any = observer(
       ...others
     } = { ...others1, ...others2 } as any;
     const field = useArrayField(others);
-    const { columns, onResizeCell, refresh } = useTableColumns(others) as any;
+    const { columns: _columns, onResizeCell, refresh, setRefresh, proCols} = useTableColumns(others) as any;
     field.data = field.data || {};
     field.data.onResizeCell = onResizeCell;
     const schema = useFieldSchema();
@@ -460,16 +478,36 @@ export const Table: any = observer(
     useEffect(() => {
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
+    const columnsRef =  useRef(_columns);
 
+    // useEffect(() => {
+    //   columnsRef.current = _columns;
+    // },[_columns]);
+
+    const [procolsStr, setProcolsStr] = useState(JSON.stringify(proCols));
+    useEffect(() => {
+      const proCols = _columns.map((item) => {
+        return  pick(item,['dataIndex','key', 'sortable', 'width'])
+      });
+      const value = JSON.stringify(proCols);
+      if(value !== procolsStr){
+        columnsRef.current = _columns;        
+        setProcolsStr(JSON.stringify(proCols));
+
+      }
+    },[_columns]);
     const {
       resizableColumns,
       components: reSizeComponents,
       tableWidth,
       resetColumns,
-    } = useAntdColumnResize(() => {
-      return { columns, minWidth: 60 };
-    }, [field, onRowDragEnd, dragSort, refresh]);
+    } = useAntdColumnResize(
+      () => {  
+       const columns = columnsRef.current;
+      return { columns , minWidth: 60 };
+    }, [procolsStr]);
 
+  
     const components = useMemo(() => {
       return {
         header: {
@@ -518,7 +556,6 @@ export const Table: any = observer(
                 )}
                 onResize={onSaveCellWidth}
                 {...others}
-                // width={width}
               ></reSizeComponents.header.cell>
             );
           },

@@ -14,7 +14,7 @@ import { useCollection, useCollectionManager } from '../../collection-manager';
 import { useFilterBlock } from '../../filter-provider/FilterProvider';
 import { transformToFilter } from '../../filter-provider/utils';
 import { useRecord } from '../../record-provider';
-import { removeNullCondition, useActionContext, useCompile } from '../../schema-component';
+import { removeNullCondition, useActionContext, useCompile, useTreeFormBlockContext } from '../../schema-component';
 import { BulkEditFormItemValueType } from '../../schema-initializer/components';
 import { useCurrentUserContext } from '../../user';
 import { useLocalVariables, useVariables } from '../../variables';
@@ -116,6 +116,7 @@ export const useCreateActionProps = () => {
   const { t } = useTranslation();
   const action = actionField.componentProps.saveMode || 'create';
   const filterKeys = actionField.componentProps.filterKeys?.checked || [];
+  const { field: treeFormField } = useTreeFormBlockContext(); 
   return {
     async onClick() {
       const fieldNames = fields.map((field) => field.name);
@@ -187,6 +188,7 @@ export const useCreateActionProps = () => {
         actionField.data.loading = false;
         actionField.data.data = data;
         __parent?.service?.refresh?.();
+        treeFormField?.data?.blockCtx?.service?.refresh?.();
         if (!onSuccess?.successMessage) {
           message.success(t('Saved successfully'));
           await form.reset();
