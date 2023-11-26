@@ -37,6 +37,7 @@ import { useEventListener, useScroll, useSize } from 'ahooks';
 import { createForm, onFieldValueChange } from '@formily/core';
 import { dayjs, uid } from '@nocobase/utils';
 import { FullscreenAction } from './FullScreenAction';
+import { set } from 'lodash';
 
 const getColumnWidth = (dataSetLength: any, clientWidth: any) => {
   const columnWidth = clientWidth / dataSetLength > 35 ? Math.floor(clientWidth / dataSetLength) + 20 : 35;
@@ -167,7 +168,7 @@ const GanttRecordViewer = (props) => {
 export const Gantt: any = (props: any) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
   const { token } = useToken();
-  const { designable } = useDesignable();
+  const { designable, dn } = useDesignable();
   const api = useAPIClient();
   const currentTheme = api.auth.getOption('theme');
   const tableRowHeight = currentTheme === 'compact' ? 45 : 55;
@@ -213,10 +214,10 @@ export const Gantt: any = (props: any) => {
     height,
     ganttHeight: _ganttHeight = `calc(100% - ${headerHeight}px)`,
     rightSize,
-    setRightSize,
     timeRange,
     hasMultiBar = false,
     updateLocalTask,
+    
   } = {
     ...props,
     ...useProps(props),
@@ -424,7 +425,23 @@ export const Gantt: any = (props: any) => {
       setTaskListWidth(taskListRef.current.offsetWidth);
     }
   }, [taskListRef, listCellWidth]);
-
+  const [rightFlexSize, setRightFlexSize] = useState(rightSize); 
+  const onSetRightSize = ({ component }, key = 'rightSize') => {
+    const flex = component.props.flex;
+    if (designable) {
+      const compProps = fieldSchema['x-component-props'] || {};
+      set(compProps, key, flex);
+      const schema: any = {
+        ['x-uid']: fieldSchema['x-uid'],
+      };
+      schema['x-component-props'] = compProps;
+      dn.emit('patch', {
+        schema,
+      });
+    }else{
+      setRightFlexSize(flex);
+    }
+  };;
   useEffect(() => {
     if (wrapperRef.current) {
       const width = wrapperRef.current.offsetWidth - taskListWidth;
@@ -432,11 +449,11 @@ export const Gantt: any = (props: any) => {
     } else {
       const container = document.querySelector('.gantt-view-container') as HTMLDivElement;
       if (container) {
-        const width = (container.offsetWidth - 2 - 2) * rightSize - taskListWidth;
+        const width = (container.offsetWidth - 2 - 2) * rightFlexSize - taskListWidth;
         setSvgContainerWidth(width);
       }
     }
-  }, [wrapperRef, rightSize, taskListWidth]);
+  }, [wrapperRef, rightFlexSize, taskListWidth]);
 
   // const { height: containerHeight } = useSize(wrapperRef);
 
@@ -715,6 +732,7 @@ export const Gantt: any = (props: any) => {
   }, [isFullScreen]);
   flatTreeSchema(fieldSchema, isFullScreen);
   const size = useSize(wrapperRef);
+  
   // useEffect(() => {
   //   if (rightPaneRef.current) {
   //     handerResize({});
@@ -1024,7 +1042,7 @@ export const Gantt: any = (props: any) => {
       </div>
       <div className="gantt-view-container">
         <ReflexContainer orientation="vertical">
-          <ReflexElement className="left-pane" resizeWidth>
+          <ReflexElement className="left-pane" >
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={tableWrapperRef}>
               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
             </div>
@@ -1034,7 +1052,8 @@ export const Gantt: any = (props: any) => {
             ref={rightPaneRef}
             className="right-pane"
             resizeWidth
-            flex={rightSize}
+            flex={rightFlexSize}
+            onStopResize={onSetRightSize}
             // onStopResize={handerResize}
           >
             <div className="wrapper" onKeyDown={handleKeyDown} tabIndex={0} ref={wrapperRef}>

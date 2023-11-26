@@ -29,7 +29,7 @@ function treeToArray(tree: TreeNode[], result: TreeNode[] = []): TreeNode[] {
   }
   return result;
 }
-const TreeFormBlockContext = createContext(null);
+const TreeFormBlockContext = createContext<any>({});
 export const TreeFormMain = (props) => {
   const { token } = useToken();
   const { useProps } = props;
