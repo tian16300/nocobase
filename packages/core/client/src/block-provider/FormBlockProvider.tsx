@@ -130,7 +130,6 @@ export const useFormBlockProps = () => {
   const addChild = fieldSchema?.['x-component-props']?.addChild;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
-  // const { refreshAction, setRefreshAction } = useTreeFormBlockContext()||{};
 
   useEffect(() => {
     if (!ctx?.service?.loading) {

@@ -33,11 +33,13 @@ export const useTreeFormAddChildActionProps = () => {
   // const fieldSchema = useFieldSchema();
   // const addFormFieldSchema = fieldSchema.parent.parent.parent.properties.form.properties.add.properties.form;
   // const field = useField();
-  const { collection, record, setRecord, setUserAction } = useTreeFormBlockContext();
+  const { collection, record, setRecord, setUserAction, refeshForm } = useTreeFormBlockContext();
 
   return {
     onClick: (value) => {
       setUserAction('createAndAddChild');
+      refeshForm?.();
+
       // field.query('form.add.form').take((addForm: any)=>{
 
       // });
@@ -55,10 +57,12 @@ export const useTreeFormAddChildActionProps = () => {
   };
 };
 export const useTreeFormCreateActionProps = () => {
-  const { collection, record, setRecord, setUserAction } = useTreeFormBlockContext();
+  const { collection, record, setRecord, setUserAction, refeshForm } = useTreeFormBlockContext();
   return {
     onClick: (value) => {
       setUserAction('create');
+      refeshForm?.();
+
     },
   };
 };
@@ -101,13 +105,11 @@ export const useTreeFormCreateProps = () => {
           ...field.data?.filterFormValues,
           parent: record,
         });
-        console.log('useTreeFormCreateProps setInitialValues', 2);
       }else if(userAction == 'create'){
         ctx?.form.reset();
         ctx?.form.setInitialValues({
           ...field.data?.filterFormValues,
         });
-        console.log('useTreeFormCreateProps setInitialValues', 2);
       }
     }    
   }, [filterFormLoaded, userAction]);
@@ -118,15 +120,11 @@ export const useTreeFormCreateProps = () => {
       ctx?.form.setInitialValues({
         ...field.data?.filterFormValues,
       });  
-      console.log('useTreeFormCreateProps setInitialValues', 1);
     }
   }, [ctx?.service?.loading]);
   useEffect(() => {
     if (type == 'update') {
       ctx?.service?.run();
-      // if (setRefreshAction) {
-      //   setRefreshAction(!refreshAction);
-      // }
     }
   }, [JSON.stringify(record), type]);
   useEffect(() => {

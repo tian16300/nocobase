@@ -873,12 +873,14 @@ export const useUpdateActionProps = () => {
   const { fields, getField, name } = useCollection();
   const compile = useCompile();
   const actionField = useField();
-  const { updateAssociationValues } = useFormBlockContext();
+  const { updateAssociationValues, service } = useFormBlockContext();
   const { modal } = App.useApp();
   const data = useParamsFromRecord();
   const variables = useVariables();
   const localVariables = useLocalVariables({ currentForm: form });
   const { getActiveFieldsName } = useFormActiveFields() || {};
+  
+  const { field: treeFormField } = useTreeFormBlockContext(); 
 
   return {
     async onClick() {
@@ -928,7 +930,7 @@ export const useUpdateActionProps = () => {
       actionField.data = field.data || {};
       actionField.data.loading = true;
       const getFormBlockService = (__parent, collectionName) => {
-        const pColName = __parent.props.collection || __parent.props.resource;
+        const pColName = __parent?.props?.collection || __parent?.props?.resource;
         if (collectionName == pColName) {
           return __parent.service;
         } else if (__parent.__parent) {
@@ -954,6 +956,12 @@ export const useUpdateActionProps = () => {
         actionField.data.loading = false;
         const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource);
         service?.refresh?.();
+        treeFormField?.data?.blockCtx?.service?.refresh?.();
+        treeFormField?.data?.updateSucessCallback?.({
+          ...values,
+          ...overwriteValues,
+          ...assignedValues,
+        });
 
         // __parent?.service?.refresh?.();
         setVisible?.(false);

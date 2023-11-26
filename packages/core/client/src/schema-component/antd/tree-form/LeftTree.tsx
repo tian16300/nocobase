@@ -78,7 +78,7 @@ export const LeftTree = (props: any) => {
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
+  const { expandedKeys, setExpandedKeys, setBlockCtx,record, setRecord, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
   formField.data = formField.data || {};
   formField.data.blockCtx = blockCtx;
   const collection = getCollection(field.decoratorProps.collection);
@@ -90,13 +90,14 @@ export const LeftTree = (props: any) => {
   };
   // const [expandFlag, setExpandFlag] = useState(false);
   useEffect(() => {
-    if (service.data?.data) {
+    if (!service.loading) {
       field.data = field.data || {};
       field.dataSource =service.data?.data;
       const data = flattenTree(service.data?.data, []);
       field.data.list = data;
-
       field.value = 'root';
+      
+      
     }
   }, [service.loading, service.data?.data]);
   const setExpandSchema = (fieldSchema) => {

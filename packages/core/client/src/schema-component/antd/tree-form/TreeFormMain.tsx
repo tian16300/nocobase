@@ -137,6 +137,20 @@ export const TreeFormMain = (props) => {
       setLoadingFormBlock(true);
     },1000);
   }, [record?.id]);
+  const refeshForm = () => {
+    setLoadingFormBlock(false);
+    setTimeout(() => {
+      setLoadingFormBlock(true);
+    },1000);
+  };
+  field.data = field.data || {};
+  field.data.updateSucessCallback = (data) => {
+    // setLoadingFormBlock(false);
+     setRecord(data);
+    // setTimeout(() => {
+    //   setLoadingFormBlock(true);
+    // },1000);
+  };
   const [expandedKeys, setExpandedKeys] = useState(['root']);
   const [leftFlex, setLeftFlex] = useState(_leftFlex);
   const [rightFlex, setRightFlex] = useState(_rightFlex);
@@ -202,6 +216,7 @@ export const TreeFormMain = (props) => {
             field,
             filterFormLoaded,
             setFilterFormLoaded,
+            refeshForm
           }}
         >
           <div
