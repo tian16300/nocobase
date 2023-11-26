@@ -142,7 +142,7 @@ export const useTableBlockProps = () => {
       field.value = [];
       field.value = preProcessData(ctx?.service?.data?.data, ctx);
       ctx.field.value = field.value;
-      // field.setInitialValue(preProcessData(ctx?.service?.data?.data, ctx));
+      // field.setInitialValue(field.value);
       field.data = field.data || {};
       field.data.selectedRowKeys = ctx?.field?.data?.selectedRowKeys;
       field.componentProps.pagination = field.componentProps.pagination || {};

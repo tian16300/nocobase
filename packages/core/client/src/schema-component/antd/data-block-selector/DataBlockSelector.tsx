@@ -11,18 +11,15 @@ import { linkageAction } from '../action/utils';
 import { actionDesignerCss } from '../../../schema-initializer/components';
 import { Button, Select } from 'antd';
 import {
-  RecordPickerContext,
   RecordPickerDrawer,
-  RecordPickerProvider,
-  getLabelFormatValue,
   useFieldNames,
-  useLabelUiSchema,
 } from '../record-picker';
 import { unionBy } from 'lodash';
 import {
   WithoutFormFieldResource,
   useAssociation,
   useFormBlockContext,
+  useFormBlockType,
   useTableBlockContext,
 } from '../../../block-provider';
 import { useTreeFormBlockContext } from '..';
@@ -244,14 +241,13 @@ export const useDataBlockSelectorProps = () => {
   const { setVisible } = useActionContext();
   const { form } = useFormBlockContext();
   const { selectedRows, toField, addTo } = useDataBlockSelectorActionContext();
+  const { type } = useFormBlockType();
   return {
     async onClick() {
-      debugger;
       const rows = selectedRows;
       // 获取当前的bom_wl字段的值
       const currentBomWl = form.values[addTo] || [];
       const newRows = [];
-      // const toField = toFieldRef.current;
       const foreignKey = toField.foreignKey;
       const targetKey = toField.targetKey || 'id';
       rows.map(({[targetKey]: id, ...row}) => {
@@ -271,14 +267,8 @@ export const useDataBlockSelectorProps = () => {
         }
       });
       const newBomWl = [...currentBomWl, ...newRows];
-      // newBomWl.forEach((item,index) => {
-      //   return item.__index = index;
-      // });
-      form.setValues({
-        ...form.values,
-        [addTo]: newBomWl
-      });
-
+      const field = form.query(addTo).take();
+      field.setValue(newBomWl);
       setVisible(false);
     },
     disabled: false,
