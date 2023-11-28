@@ -1349,6 +1349,7 @@ export const useAssociationNames = () => {
       const isAssociationSubfield = s.name.includes('.');
       const isAssociationField =
         collectionField && ['hasOne', 'hasMany', 'belongsTo', 'belongsToMany'].includes(collectionField.type);
+      
 
       // 根据联动规则中条件的字段获取一些 appends
       if (s['x-linkage-rules']) {
@@ -1415,6 +1416,7 @@ export const useAssociationNames = () => {
           'AssociationField.Selector',
           'AssociationField.AddNewer',
           'TableField',
+          'DataBlockSelectorAction'
         ].includes(s['x-component'])
       ) {
         getAssociationAppends(s, str);

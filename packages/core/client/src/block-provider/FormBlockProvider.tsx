@@ -131,27 +131,13 @@ export const useFormBlockProps = () => {
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
 
+  
   useEffect(() => {
-    if (!ctx?.service?.loading) {
-      ctx.form?.setInitialValues(ctx.service?.data?.data);
-    }
-  }, [ctx?.service?.loading]);
-  useEffect(() => {
-    if (type == 'update') {
-      ctx?.service?.run();
-      // if (setRefreshAction) {
-      //   setRefreshAction(!refreshAction);
-      // }
-    }
-  }, [JSON.stringify(record), type]);
-  useEffect(() => {
-    if (type == 'create') {
-      if (addChild) {
-        ctx.form?.query('parent').take((field) => {
-          // field.readPretty = true;
-          field.value = new Proxy({ ...record }, {});
-        });
-      }
+    if (addChild) {
+      ctx.form?.query('parent').take((field) => {
+        field.disabled = true;
+        field.value = new Proxy({ ...record?.__parent }, {});
+      });
       if (inheritsKeys) {
         inheritsKeys.forEach((key) => {
           ctx.form?.query(key).take((field) => {
@@ -163,11 +149,14 @@ export const useFormBlockProps = () => {
           });
         });
       }
-      // if (setRefreshAction) {
-      //   setRefreshAction(!refreshAction);
-      // }
     }
-  }, [JSON.stringify(record), type, addChild, inheritsKeys]);
+  });
+
+  useEffect(() => {
+    if (!ctx?.service?.loading) {
+      ctx.form?.setInitialValues(ctx.service?.data?.data);
+    }
+  }, [ctx?.service?.loading]);
   return {
     form: ctx.form,
   };

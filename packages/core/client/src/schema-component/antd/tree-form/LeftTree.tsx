@@ -78,7 +78,7 @@ export const LeftTree = (props: any) => {
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const { expandedKeys, setExpandedKeys, setBlockCtx,record, setRecord, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
+  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
   formField.data = formField.data || {};
   formField.data.blockCtx = blockCtx;
   const collection = getCollection(field.decoratorProps.collection);

@@ -67,7 +67,8 @@ export const TreeFormMain = (props) => {
   const { getDataBlocks } = useFilterBlock();
   const [treeBlock, setTreeBlock] = useState(null);
   const [loadingFormBlock, setLoadingFormBlock] = useState(false);
-
+  const updateFormSchema = fieldSchema.properties.form.properties.update;
+ const updateFormField = field.query('form.update').take();
 
   const doFilterParams = (formValues, fieldSchema, treeSchema) => {
     if (formValues && fieldSchema && treeSchema) {
@@ -145,11 +146,7 @@ export const TreeFormMain = (props) => {
   };
   field.data = field.data || {};
   field.data.updateSucessCallback = (data) => {
-    // setLoadingFormBlock(false);
      setRecord(data);
-    // setTimeout(() => {
-    //   setLoadingFormBlock(true);
-    // },1000);
   };
   const [expandedKeys, setExpandedKeys] = useState(['root']);
   const [leftFlex, setLeftFlex] = useState(_leftFlex);
@@ -330,16 +327,14 @@ export const TreeFormMain = (props) => {
                 </div>
                 <div className="form-container">
                   {loadingFormBlock ? (
-                    <RecordProvider record={prjRecord}>
                       <RecordProvider record={record}>
                         {['create', 'createAndAddChild'].includes(userAction) && (
                           <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
                         )}
                         {userAction == 'update'  && (
-                          <RecursionField name={'update-form'} schema={fieldSchema.properties.form.properties.update} />
+                          <RecursionField name={'update-form'}  schema={updateFormSchema} />
                         )}
                       </RecordProvider>
-                    </RecordProvider>
                   ) : (
                     <Spin />
                   )}
