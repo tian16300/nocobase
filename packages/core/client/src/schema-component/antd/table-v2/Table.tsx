@@ -487,8 +487,6 @@ export const Table: any = observer(
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
     const columnsRef =  useRef(_columns);
-    debugger;
-
     useEffect(() => {
       columnsRef.current = _columns;
     },[_columns]);

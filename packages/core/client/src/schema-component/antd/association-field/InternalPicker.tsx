@@ -1,7 +1,7 @@
 import { observer, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { Input, Select, Space } from 'antd';
 import { differenceBy, unionBy } from 'lodash';
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import {
   FormProvider,
   RecordPickerContext,
@@ -117,7 +117,7 @@ export const InternalPicker = observer(
       const { setVisible } = useActionContext();
       const { multiple, selectedRows, onChange, options, collectionField } = useContext(RecordPickerContext);
       return {
-        onClick() {
+        async onClick() {
           if (multiple) {
             onChange(unionBy(selectedRows, options, collectionField?.targetKey || 'id'));
           } else {
@@ -187,7 +187,12 @@ export const InternalPicker = observer(
             <CollectionProvider name={collectionField?.target}>
               <FormProvider>
                 <TableSelectorParamsProvider params={{ filter: getFilter() }}>
-                  <SchemaComponentOptions scope={{ usePickActionProps, useTableSelectorProps }}>
+                  <SchemaComponentOptions
+                    scope={{
+                      usePickActionProps,
+                      useTableSelectorProps,
+                    }}
+                  >
                     <RecursionField
                       onlyRenderProperties
                       basePath={field.address}

@@ -245,8 +245,9 @@ export const useDataBlockSelectorProps = () => {
   return {
     async onClick() {
       const rows = selectedRows;
+      const field = form.query(addTo).take();
       // 获取当前的bom_wl字段的值
-      const currentBomWl = form.values[addTo] || [];
+      const currentBomWl = field.value||[];
       const newRows = [];
       const foreignKey = toField.foreignKey;
       const targetKey = toField.targetKey || 'id';
@@ -267,8 +268,8 @@ export const useDataBlockSelectorProps = () => {
         }
       });
       const newBomWl = [...currentBomWl, ...newRows];
-      const field = form.query(addTo).take();
-      field.setValue(newBomWl);
+     
+      field.onInput(newBomWl);
       setVisible(false);
     },
     disabled: false,
