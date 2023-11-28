@@ -50,7 +50,6 @@ export const TreeFormMain = (props) => {
   const { service } = useBlockRequestContext();
   const field: IField = useField();
   const [refreshAction, setRefreshAction] = useState(false);
-  
 
   const [userAction, setUserAction] = useState('create');
   const { height } = useFixedBlock();
@@ -68,7 +67,7 @@ export const TreeFormMain = (props) => {
   const [treeBlock, setTreeBlock] = useState(null);
   const [loadingFormBlock, setLoadingFormBlock] = useState(false);
   const updateFormSchema = fieldSchema.properties.form.properties.update;
- const updateFormField = field.query('form.update').take();
+  const updateFormField = field.query('form.update').take();
 
   const doFilterParams = (formValues, fieldSchema, treeSchema) => {
     if (formValues && fieldSchema && treeSchema) {
@@ -122,32 +121,34 @@ export const TreeFormMain = (props) => {
         treeSchema['x-decorator-props']['params'] = params;
       }
       setLoadingFormBlock(true);
-    } 
+    }
   }, [treeSchema, field]);
   const prjRecord = {};
 
-  const [record, setRecord] = useState(null);
+  const [record, setRecord] = useState<any>({});
   useEffect(() => {
-   setLoadingFormBlock(false);
+    setLoadingFormBlock(false);  
+    setTimeout(() => {
+      setLoadingFormBlock(true);
+    }, 1000);
     if (record?.id) {
       setUserAction('update');
     } else {
       setUserAction('create');
     }
-    setTimeout(() => {
-      setLoadingFormBlock(true);
-    },1000);
+  
   }, [record?.id]);
   const refeshForm = () => {
-    setLoadingFormBlock(false);
-    setTimeout(() => {
-      setLoadingFormBlock(true);
-    },1000);
+    // setLoadingFormBlock(false);
+    // setTimeout(() => {
+    //   setLoadingFormBlock(true);
+    // }, 1000);
   };
   field.data = field.data || {};
   field.data.updateSucessCallback = (data) => {
-     setRecord(data);
+    // setRecord(data);
   };
+  const form = createForm();
   const [expandedKeys, setExpandedKeys] = useState(['root']);
   const [leftFlex, setLeftFlex] = useState(_leftFlex);
   const [rightFlex, setRightFlex] = useState(_rightFlex);
@@ -213,7 +214,7 @@ export const TreeFormMain = (props) => {
             field,
             filterFormLoaded,
             setFilterFormLoaded,
-            refeshForm
+            refeshForm,
           }}
         >
           <div
@@ -327,14 +328,16 @@ export const TreeFormMain = (props) => {
                 </div>
                 <div className="form-container">
                   {loadingFormBlock ? (
-                      <RecordProvider record={record}>
+                    <>
+                      <RecordProvider record={record} isMemo={true}>
+                       
                         {['create', 'createAndAddChild'].includes(userAction) && (
                           <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
                         )}
-                        {userAction == 'update'  && (
-                          <RecursionField name={'update-form'}  schema={updateFormSchema} />
-                        )}
-                      </RecordProvider>
+                        {userAction == 'update' && <RecursionField name={'update-form'} schema={updateFormSchema} />}
+                       
+</RecordProvider>
+                    </>
                   ) : (
                     <Spin />
                   )}
