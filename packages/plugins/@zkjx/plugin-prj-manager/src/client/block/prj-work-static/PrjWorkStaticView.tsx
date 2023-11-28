@@ -362,6 +362,7 @@ export const PrjWorkStaticView = observer((props) => {
     });
     list.forEach((item, index) => {
       countShow.forEach(({ key, title }) => {
+        if(title!== '出差(天)')
         barData.push({
           userId: item.id,
           type: title,
@@ -369,6 +370,7 @@ export const PrjWorkStaticView = observer((props) => {
         });
       });
     });
+    
 
     return {
       userMap,
@@ -402,7 +404,7 @@ export const PrjWorkStaticView = observer((props) => {
       maxColumnWidth: 20,
       data: barData,
       // height: userGroupBarHeight,
-      autoFit: true,
+      autoFit: false,
       appendPadding: [24, 8, 12, 8],
       legend: {
         layout: 'horizontal',
