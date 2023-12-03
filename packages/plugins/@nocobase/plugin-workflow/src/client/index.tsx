@@ -42,6 +42,12 @@ export class WorkflowPlugin extends Plugin {
       Component: ApprovalWorkflow,
       aclSnippet: 'pm.workflow.approvalWorkflow',
     });
+    // this.app.pluginSettingsManager.add(`approvalWorkflow`, {
+    //   title: "审批流程", // 原 title
+    //   icon: "teamoutlined", // 原 icon
+    //   Component: ApprovalWorkflow,
+    //   aclSnippet: 'pm.workflow.approvalWorkflow',
+    // });
   }
 
   addScopes() {
