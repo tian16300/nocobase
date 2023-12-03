@@ -365,6 +365,7 @@ export const sequence: IField = {
       'x-component-props': {},
     },
   },
+  availableTypes: ['string'],
   hasDefaultValue: false,
   filterable: {
     operators: interfacesProperties.operators.string,
