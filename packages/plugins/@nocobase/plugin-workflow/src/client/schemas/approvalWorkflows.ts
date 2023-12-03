@@ -129,12 +129,12 @@ const workflowFieldset = {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
     required: true,
-    // 'x-display': true
+    'x-display': true
   },
   isApproval: {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
-    // 'x-display': true
+    'x-display': true
   },
   bussinessCollectionName: {
     'x-component': 'CollectionField',
@@ -149,7 +149,7 @@ const workflowFieldset = {
         dependencies: ['.bussinessCollectionName'],
         fulfill: {
           state: {
-            value:'{{ {"collection": $deps[0] ,"changed": ["approve_status"],"appends": ["updatedBy", "updatedBy.dept"],"condition": { "$and": []},"mode": 2} }}'
+            value:'{{ {"collection": $deps[0] ,"changed": [],"appends": ["updatedBy", "updatedBy.dept"],"condition": { "$and": [{"isApprovalAction":{"$eq": true}}]},"mode": 2} }}'
           }
         },
       },
@@ -258,10 +258,18 @@ export const approvalWorkflows: ISchema = {
                       isApproval: true,
                       config: {
                         collection: '',
-                        changed: ['approve_status'],
-                        appends: ['updatedBy', 'updatedBy.dept'],
+                        changed: [],
+                        appends: [[
+                          "updatedBy",
+                          "updatedBy.dept",
+                          "updatedBy.dept.supervisor"
+                        ]],
                         condition: {
-                          $and: [],
+                          $and: [{
+                            "isApprovalAction": {
+                                "$isTruly": true
+                            }
+                        }],
                         },
                         mode: 2,
                       },

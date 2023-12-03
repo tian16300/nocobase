@@ -9,11 +9,8 @@ import { useRecord } from '../../../record-provider';
 import { useLocalVariables, useVariables } from '../../../variables';
 import { linkageAction } from '../action/utils';
 import { actionDesignerCss } from '../../../schema-initializer/components';
-import { Button, Select } from 'antd';
-import {
-  RecordPickerDrawer,
-  useFieldNames,
-} from '../record-picker';
+import { Button, Select, Space } from 'antd';
+import { RecordPickerDrawer, useFieldNames } from '../record-picker';
 import { unionBy } from 'lodash';
 import {
   WithoutFormFieldResource,
@@ -42,15 +39,16 @@ export const DataBlockSelectorAction: any = (props: any) => {
   const field = useField();
   const toFieldRef = useRef(null);
   const [toField, setToField] = useState({});
+  const { form } = useFormBlockContext();
   useEffect(() => {
     if (addTo) {
       const target = getCollectionField(`${collection.name}.${addTo}`)?.target;
-      if(target){
+      if (target) {
         const temp = getCollectionFields(target).find((item) => item.target === tName);
         if (temp) {
           setToField(temp);
         }
-      }     
+      }
     }
   }, []);
 
@@ -86,6 +84,10 @@ export const DataBlockSelectorAction: any = (props: any) => {
     }
     onChange(newOptions);
   };
+  const handleEmpty = () => {
+    const field = form.query(addTo).take();
+    field.onInput([]);
+  }
 
   return (
     <div>
@@ -96,15 +98,17 @@ export const DataBlockSelectorAction: any = (props: any) => {
           addTo,
         }}
       >
-        
-        <Button
-          {...buttonProps}
-          onClick={() => {
-            setVisible(true);
-          }}
-        >
-          {field.title}
-        </Button>
+        <Space>
+          <Button
+            {...buttonProps}
+            onClick={() => {
+              setVisible(true);
+            }}
+          >
+            {field.title}
+          </Button>
+          <Button onClick={handleEmpty}>清空</Button>
+        </Space>
         {RecordPickerDrawer({
           multiple,
           onChange,
@@ -115,7 +119,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
           setVisible,
           fieldSchema,
           options,
-          collection: tName
+          collection: tName,
         })}
       </DataBlockSelectorActionContext.Provider>
     </div>
@@ -248,11 +252,11 @@ export const useDataBlockSelectorProps = () => {
       const rows = selectedRows;
       const field = form.query(addTo).take();
       // 获取当前的bom_wl字段的值
-      const currentBomWl = field.value||[];
+      const currentBomWl = field.value || [];
       const newRows = [];
       const foreignKey = toField.foreignKey;
       const targetKey = toField.targetKey || 'id';
-      rows.map(({[targetKey]: id, ...row}) => {
+      rows.map(({ [targetKey]: id, ...row }) => {
         const isExist = currentBomWl.find((item) => {
           return item[foreignKey] === id;
         });
@@ -263,13 +267,12 @@ export const useDataBlockSelectorProps = () => {
               id,
               ...row,
             },
-            [foreignKey]: id
+            [foreignKey]: id,
           });
-         
         }
       });
       const newBomWl = [...currentBomWl, ...newRows];
-     
+
       field.onInput(newBomWl);
       setVisible(false);
     },

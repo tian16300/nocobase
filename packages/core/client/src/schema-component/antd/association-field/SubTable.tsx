@@ -35,6 +35,7 @@ export const SubTable: any = observer(
     field.move = move;
     const showMove = field?.componentProps?.showMove && field.editable;
     const showDel = field?.componentProps?.showDel && field.editable;
+    const removeActionName = field?.componentProps?.removeActionName;
     const showAdd = field?.componentProps?.showAdd && field.editable;
     const scrollY = field?.componentProps?.scrollY || 500;
     return (
@@ -85,6 +86,7 @@ export const SubTable: any = observer(
               dragSort={showMove}
               showMove={showMove}
               showDel={showDel}
+              removeActionName={removeActionName}
               showAdd={showAdd}
               pagination={false}
               rowSelection={{ type: 'none', hideSelectAll: true }}

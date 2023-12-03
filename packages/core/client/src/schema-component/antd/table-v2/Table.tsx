@@ -46,7 +46,14 @@ const useArrayField = (props) => {
   return (props.field || field) as ArrayField;
 };
 
-const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove?: boolean; isSubTable?: boolean }) => {
+const useTableColumns = (props: {
+  showDel?: boolean;
+  removeActionName?: string;
+  showAdd?: boolean;
+  showMove?: boolean;
+  isSubTable?: boolean;
+}) => {
+  const { removeActionName = 'remove'} = props;
   const field = useArrayField(props);
   const schema = useFieldSchema();
   const { name } = useCollection();
@@ -78,7 +85,7 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
         key: s.name,
         sorter: s['x-component-props']?.['sorter'],
         width: 200,
-        ...s['x-component-props']
+        ...s['x-component-props'],
       });
       //如果是字典 key 则为外键
       return {
@@ -110,41 +117,40 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
         },
       } as TableColumnProps<any>;
     });
-    const [refresh, setRefresh] = useState(false);
-    const onResizeCell = (cellKey, width) => {
-      const column = (tableColumns||columns).find((col) => {
-        return col.dataIndex === cellKey;
-      });
-      if (designable) {
-        /** 保存宽度 */
-        const uid = column.key;
-        const columnSchema = schema['properties'][uid];
-        if (columnSchema) {
-          const props = columnSchema['x-component-props'] || {};
-          props['width'] = width;
-          const schemaData: any = {
-            ['x-uid']: columnSchema['x-uid'],
-          };
-          schemaData['x-component-props'] = props;
-          columnSchema['x-component-props'] = props;
-          dn.emit('patch', {
-            schema: schemaData,
-          });
-          setRefresh(!refresh);
-          dn.refresh();
-        }
+  const [refresh, setRefresh] = useState(false);
+  const onResizeCell = (cellKey, width) => {
+    const column = (tableColumns || columns).find((col) => {
+      return col.dataIndex === cellKey;
+    });
+    if (designable) {
+      /** 保存宽度 */
+      const uid = column.key;
+      const columnSchema = schema['properties'][uid];
+      if (columnSchema) {
+        const props = columnSchema['x-component-props'] || {};
+        props['width'] = width;
+        const schemaData: any = {
+          ['x-uid']: columnSchema['x-uid'],
+        };
+        schemaData['x-component-props'] = props;
+        columnSchema['x-component-props'] = props;
+        dn.emit('patch', {
+          schema: schemaData,
+        });
+        setRefresh(!refresh);
+        dn.refresh();
       }
-    };
+    }
+  };
   if (!exists) {
     return {
       columns,
       onResizeCell,
       refresh,
       setRefresh,
-      propCols
+      propCols,
     };
   }
-  
 
   const tableColumns = columns.concat({
     title: render(),
@@ -152,17 +158,25 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
     key: 'TABLE_COLUMN_INITIALIZER',
     render: designable ? () => <div style={{ minWidth: 300 }} /> : null,
   });
-  const TableRecordAction: React.FC<{ record: any; index: number; items: any[] }> = (props) => {
+  const TableRecordAction: React.FC<{ record: any; index: number; items: any[];  }> = (props) => {
     const { record, index, items } = props;
     const handleRemove = () => {
       action(() => {
-        spliceArrayState(field as any, {
-          startIndex: index,
-          deleteCount: 1,
-        });
-        field.value.splice(index, 1);
-        field.initialValue?.splice(index, 1);
-        return field.onInput(field.value);
+        const actionName = items.find((item) => item.key === 'remove')?.actionName|| 'remove';
+        const row = field.value[index];
+        if (actionName == 'remove' || !row.id) {
+          spliceArrayState(field as any, {
+            startIndex: index,
+            deleteCount: 1,
+          });
+          field.value.splice(index, 1);
+          field.initialValue?.splice(index, 1);
+          return field.onInput(field.value);
+        } else if (actionName == 'setRemoved') {
+          field.value[index] = field.value[index] || {};
+          field.value[index]['dataFlag'] = 'removed';
+          // return field.onInput(field.value);
+        }
       });
     };
     const handleAddNext = (record) => {
@@ -270,6 +284,7 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
     {
       key: 'remove',
       label: '删除',
+      actionName: removeActionName || 'remove',
       icon: <MinusCircleOutlined />,
     },
     {
@@ -311,25 +326,22 @@ const useTableColumns = (props: { showDel?: boolean; showAdd?: boolean; showMove
       align: 'center',
       fixed: 'right',
       render: (v, record, index) => {
-        return <TableRecordAction items={handleItems} index={index} record={record} />;
+        return <TableRecordAction items={handleItems} index={index} record={record}  />;
       },
     });
     propCols.push({
       title: '',
       key: 'actions',
-      width: (handleItems.length > 3 ? 3 : handleItems.length) * 50
+      width: (handleItems.length > 3 ? 3 : handleItems.length) * 50,
     });
-  }  
- 
+  }
 
-  
- 
   return {
     columns: tableColumns,
     onResizeCell,
     refresh,
     setRefresh,
-    propCols
+    propCols,
   };
 };
 
@@ -355,7 +367,6 @@ const SortableRow = (props) => {
       `,
     };
   }, [token.colorSettings]);
-
   const className =
     (active?.data.current?.sortable.index ?? -1) > (over?.data.current?.sortable?.index ?? -1)
       ? classObj.topActiveClass
@@ -436,7 +447,7 @@ export const Table: any = observer(
       ...others
     } = { ...others1, ...others2 } as any;
     const field = useArrayField(others);
-    const { columns: _columns, onResizeCell, refresh, setRefresh, proCols} = useTableColumns(others) as any;
+    const { columns: _columns, onResizeCell, refresh, setRefresh, proCols } = useTableColumns(others) as any;
     field.data = field.data || {};
     field.data.onResizeCell = onResizeCell;
     const schema = useFieldSchema();
@@ -486,35 +497,33 @@ export const Table: any = observer(
     useEffect(() => {
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
-    const columnsRef =  useRef(_columns);
+    const columnsRef = useRef(_columns);
     useEffect(() => {
       columnsRef.current = _columns;
-    },[_columns]);
+    }, [_columns]);
 
     const [procolsStr, setProcolsStr] = useState(JSON.stringify(proCols));
     useEffect(() => {
-      const proCols = _columns?.map((item) => {
-        return  pick(item,['dataIndex','key', 'sortable', 'width'])
-      })||[];
+      const proCols =
+        _columns?.map((item) => {
+          return pick(item, ['dataIndex', 'key', 'sortable', 'width']);
+        }) || [];
       const value = JSON.stringify(proCols);
-      if(value !== procolsStr){
-        columnsRef.current = _columns;        
+      if (value !== procolsStr) {
+        columnsRef.current = _columns;
         setProcolsStr(JSON.stringify(proCols));
-
       }
-    },[_columns]);
+    }, [_columns]);
     const {
       resizableColumns,
       components: reSizeComponents,
       tableWidth,
       resetColumns,
-    } = useAntdColumnResize(
-      () => {  
-       const columns = columnsRef.current;
-      return { columns , minWidth: 60 };
+    } = useAntdColumnResize(() => {
+      const columns = columnsRef.current;
+      return { columns, minWidth: 60 };
     }, [procolsStr]);
 
-  
     const components = useMemo(() => {
       return {
         header: {
@@ -622,9 +631,6 @@ export const Table: any = observer(
         },
       };
     }, [field, onRowDragEnd, dragSort]);
-
-
-   
 
     /**
      * 为没有设置 key 属性的 record 生成一个唯一的 key
@@ -802,6 +808,14 @@ export const Table: any = observer(
       }
       return value;
     }, [fixedBlock, tableHeight, tableWidth, scrollY]);
+    const setRowClassName = (record) => {
+      const isRemoved = record?.meta_status === 'removed';
+      const selectedClassName = selectedRow.includes(record[rowKey]) ? highlightRow : '';
+      return [
+        selectedClassName,
+        isRemoved?'isRemoved':''
+      ].join(' ');
+    };
     return (
       <div
         className={css`
@@ -826,6 +840,16 @@ export const Table: any = observer(
             .ant-table-cell-fix-right {
               overflow: hidden;
             }
+            tr.ant-table-row {
+              &.removed {
+                * {
+                  text-decoration: line-through;
+                  color: ${token.colorTextDisabled};
+                }
+                
+
+              }
+            }
           }
         `}
       >
@@ -842,17 +866,20 @@ export const Table: any = observer(
               onTableChange?.(pagination, filters, sorter, extra);
             }}
             onRow={onRow}
-            rowClassName={(record) => (selectedRow.includes(record[rowKey]) ? highlightRow : '')}
+            rowClassName={(record)=>{              
+             return [
+              selectedRow.includes(record[rowKey]) ? highlightRow : '',
+              record?.dataFlag !== 'removed'?record?.dataFlag:''
+            ].join('');
+            }}
             tableLayout={'auto'}
             scroll={scroll}
             columns={resizableColumns}
             expandable={{
               onExpand: (flag, record) => {
                 const rowKeys = expandedKeys || [];
-                const newKeys = flag
-                  ? [...rowKeys, record[rowKey]]
-                  : rowKeys.filter((i) => record[rowKey] !== i);
-                setExpandesKeys(newKeys||[]);
+                const newKeys = flag ? [...rowKeys, record[rowKey]] : rowKeys.filter((i) => record[rowKey] !== i);
+                setExpandesKeys(newKeys || []);
                 onExpand?.(flag, record);
               },
               expandedRowKeys: expandedKeys,

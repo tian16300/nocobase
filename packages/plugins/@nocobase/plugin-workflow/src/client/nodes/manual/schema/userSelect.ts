@@ -23,7 +23,7 @@ export const userSelect = {
           },
           {
             label: '指定部门',
-            value: 'dept',
+            value: 'depts',
           },
           {
             label: '指定角色',
@@ -42,7 +42,7 @@ export const userSelect = {
         'x-decorator': 'FormItem',
         'x-component': 'RemoteSelect',
         'x-component-props': {
-          multiple: true,
+          mode: 'multiple',
           fieldNames: {
             label: 'name',
             value: 'id',
@@ -58,7 +58,7 @@ export const userSelect = {
             dependencies: ['.ruleType'],
             fulfill: {
               state: {
-                visible: '{{$deps[0] === "dept"}}',
+                visible: '{{$deps[0] === "depts"}}',
               },
             },
           },

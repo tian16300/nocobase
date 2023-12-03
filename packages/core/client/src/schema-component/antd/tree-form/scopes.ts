@@ -5,12 +5,16 @@ import {
   mergeFilter,
   removeNullCondition,
   transformToFilter,
+  useAPIClient,
   useActionContext,
+  useBlockRequestContext,
+  useCollection,
   useCollectionManager,
   useFilterBlock,
   useFilterByTk,
   useFormBlockContext,
   useFormBlockType,
+  useRequest,
 } from '@nocobase/client';
 import { useEffect, useMemo, useState } from 'react';
 import { useTreeFormBlockContext } from './TreeFormMain';
@@ -229,3 +233,27 @@ export const useTreeFormSaveAsNewVersionProps = () => {
   // };
 };
 export { useTreeFormBlockContext };
+
+
+export const  useSubmitApprovalActionProps = () => {
+  const form = useForm();
+  const filterByTk = useFilterByTk();
+  const { field, resource, __parent } = useBlockRequestContext();
+
+  const ctx = useFormBlockContext();
+  const record =  useRecord();
+  const collection = useCollection();
+  const api = useAPIClient();
+ 
+  return {
+     onClick: async () => {
+      /**
+       * 先保存业务表的信息 再去触发审批流
+       */
+      
+      api.resource(collection.name,record[collection.filterTargetKey|| 'id']).submitApproval(ctx?.form?.values).then((res)=>{ 
+        console.log(res);
+       } );
+    },
+  };
+};

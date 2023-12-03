@@ -189,6 +189,7 @@ export const useCreateActionProps = () => {
   const collectValues = useCollectValuesToSubmit();
   const action = actionField.componentProps.saveMode || 'create';
   const filterKeys = actionField.componentProps.filterKeys?.checked || [];
+  const {field:treeFormField} = useTreeFormBlockContext();
   return {
     async onClick() {
       const { onSuccess, skipValidator, triggerWorkflows } = actionSchema?.['x-action-settings'] ?? {};

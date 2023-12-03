@@ -616,7 +616,7 @@ export const EditDataBlockSelectorAction = () => {
       return type == 'hasMany';
     })
     .map((item) => {
-      return { label: item.uiSchema.title, value: item.name };
+      return { label: item?.uiSchema?.title, value: item.name };
     });
   const initialValues = fieldSchema?.['x-component-props'];
   const isDataBlockSelectorActionField = fieldSchema?.['x-component'] === 'DataBlockSelectorAction';

@@ -355,6 +355,54 @@ export default class Processor {
       $scopes,
     };
   }
+  public async getUserIdsByRule(rule, nodeId: number) {
+    const { ruleType } = rule;
+    const isAll = ruleType === 'all';
+    const isDept = ruleType === 'depts';
+    const isRole = ruleType === 'roles';
+    const isUser = ruleType === 'users';
+    const transaction = this.transaction;
+    const repository = this.options.plugin.db.getRepository('users');
+    if (isAll) {
+      const [users] = await repository.findAndCount({ transaction });
+      return users.map((user) => user.id);
+    } else if (isDept) {
+      const depts = rule.depts || [];
+      const [users]  = await repository.findAndCount({ 
+        filter:{
+          dept:{
+            id:{
+              $in:depts
+            }
+          }
+        },
+        transaction });
+
+        return users.map((user) => user.id);
+    } else if (isRole) {
+      const roles = rule.roles || [];
+      const [users]  = await repository.findAndCount({ 
+        filter:{
+          roles:{
+            name:{
+              $in:roles
+            }
+          }
+        },
+        transaction });
+        return users.map((user) => user.id);
+    } else if (isUser) {
+      const users = rule.users || [];
+      return users;
+    } else if(/\{\{[\$|\w|.]+}\}/g.test(ruleType)){
+      const value = this.getParsedValue(ruleType, nodeId);
+      if(Array.isArray(value)){
+        return value;
+      }else{
+        return [value];
+      }
+    }
+  }
 
   public getParsedValue(value, sourceNodeId: number, additionalScope?: object) {
     const template = parse(value);

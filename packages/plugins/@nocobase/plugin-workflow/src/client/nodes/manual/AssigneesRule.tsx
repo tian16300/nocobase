@@ -36,7 +36,7 @@ export function AssigneesRule() {
           },
           {
             label: '指定部门',
-            value: 'dept',
+            value: 'depts',
           },
           {
             label: '指定角色',
@@ -55,7 +55,7 @@ export function AssigneesRule() {
         'x-decorator': 'FormItem',
         'x-component': 'RemoteSelect',
         'x-component-props': {
-          multiple: true,
+          mode: 'multiple',
           fieldNames: {
             label: 'name',
             value: 'id',
@@ -71,7 +71,7 @@ export function AssigneesRule() {
             dependencies: ['.ruleType'],
             fulfill: {
               state: {
-                visible: '{{$deps[0] === "dept"}}',
+                visible: '{{$deps[0] === "depts"}}',
               },
             },
           },

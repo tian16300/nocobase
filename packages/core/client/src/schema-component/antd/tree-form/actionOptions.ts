@@ -30,5 +30,9 @@ export const treeFormBlockActionOptions = [
   {
     label:'恢复',
     value:'useTreeFormRecoverProps'
-  }
+  },
+  {
+    label:'提交审核',
+    value:'useSubmitApprovalActionProps'
+  },
 ];

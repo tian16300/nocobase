@@ -84,6 +84,7 @@ export async function revision(context: Context, next) {
         description: origin.description,
         ...revisionData,
         type: origin.type,
+        isApproval: origin.isApproval,
         config:
           typeof trigger.duplicateConfig === 'function'
             ? await trigger.duplicateConfig(origin, { transaction })
