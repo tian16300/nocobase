@@ -13,6 +13,7 @@ import useStyles from './style';
 import { TopPartOfCalendar } from './top-part-of-calendar';
 import { dayjs } from '@nocobase/utils';
 import { useToken } from '../../../__builtins__';
+import { useGanttBlockContext } from 'packages/core/client/src/block-provider';
 export type CalendarProps = {
   dateSetup: DateSetup;
   locale: string;
@@ -319,6 +320,10 @@ export const Calendar: React.FC<CalendarProps> = ({
       // const bottomValue = `${getLocalDayOfWeek(date, locale, 'short')}, ${date.getDate().toString()}`;
       const bottomValue = `${date.getDate().toString()}`;
       const isThisDay = dayjs(date).isToday();
+      const classNames = ['calendarBottomText'];
+      if(isThisDay){
+        classNames.push('calendarThisBlockText');
+      }
       if (isThisDay) {
         bottomValues.push(
           <g key={date.getTime()}>
@@ -333,19 +338,19 @@ export const Calendar: React.FC<CalendarProps> = ({
             <text
               y={headerHeight * 0.8}
               x={columnWidth * i + columnWidth * 0.5}
-              className={cx(['calendarBottomText', 'calendarThisBlockText'])}
+              className={cx(classNames)}
             >
               {bottomValue}
             </text>
           </g>,
         );
-      } else {
+      }else {
         bottomValues.push(
           <text
             key={date.getTime()}
             y={headerHeight * 0.8}
             x={columnWidth * i + columnWidth * 0.5}
-            className={cx('calendarBottomText')}
+            className={cx(classNames)}
           >
             {bottomValue}
           </text>,

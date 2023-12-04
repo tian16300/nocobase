@@ -1,5 +1,5 @@
 import { ISchema, useForm } from '@formily/react';
-import { useActionContext, useRecord, useResourceActionContext, useResourceContext } from '@nocobase/client';
+import { useActionContext, useBlockContext, useBlockRequestContext, useRecord, useResourceActionContext, useResourceContext } from '@nocobase/client';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locale';
@@ -33,6 +33,20 @@ const collection = {
       },
     },
     {
+      type: 'belongsTo',
+      name: 'uiTemplate',
+      target: 'uiSchemaTemplates',
+      targetKey: 'key',
+      foreignKey: 'uiTemplateKey',
+      uiSchema: {
+        'x-component': 'RemoteSelect',
+        'x-component-props': {
+           useProps:'{{ getUiTemplates }}'
+        },
+        title: '关联UI模板',
+      },
+    },
+    {
       type: 'boolean',
       name: 'isApproval',
       interface: 'checkbox',
@@ -58,7 +72,7 @@ const collection = {
         },
         required: true,
       } as ISchema,
-      default: 'collection',
+      default: 'form',
     },
     {
       type: 'string',
@@ -129,17 +143,22 @@ const workflowFieldset = {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
     required: true,
-    'x-display': true
+    'x-display': true,
   },
   isApproval: {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
-    'x-display': true
+    'x-display': true,
   },
   bussinessCollectionName: {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
     required: true,
+  },
+  uiTemplate:{
+    'x-component': 'CollectionField',
+    'x-decorator': 'FormItem',
+    required: true
   },
   config: {
     'x-component': 'CollectionField',
@@ -149,12 +168,13 @@ const workflowFieldset = {
         dependencies: ['.bussinessCollectionName'],
         fulfill: {
           state: {
-            value:'{{ {"collection": $deps[0] ,"changed": [],"appends": ["updatedBy", "updatedBy.dept"],"condition": { "$and": [{"isApprovalAction":{"$eq": true}}]},"mode": 2} }}'
-          }
+            value:
+              '{{ {"collection": $deps[0] ,"changed": [],"appends": ["updatedBy", "updatedBy.dept"],"condition": { "$and": []},"mode": 2} }}',
+          },
         },
       },
     ],
-    'x-hidden': true
+    'x-hidden': true,
   },
   enabled: {
     'x-component': 'CollectionField',
@@ -208,6 +228,7 @@ export const approvalWorkflows: ISchema = {
             },
             sort: ['-createdAt'],
             except: ['config'],
+            appends:['uiTemplate']
           },
         },
       },
@@ -254,23 +275,13 @@ export const approvalWorkflows: ISchema = {
                   'x-decorator-props': {
                     initialValue: {
                       current: true,
-                      type: 'collection',
+                      type: 'form',
                       isApproval: true,
                       config: {
                         collection: '',
                         changed: [],
-                        appends: [[
-                          "updatedBy",
-                          "updatedBy.dept",
-                          "updatedBy.dept.supervisor"
-                        ]],
-                        condition: {
-                          $and: [{
-                            "isApprovalAction": {
-                                "$isTruly": true
-                            }
-                        }],
-                        },
+                        appends: [['updatedBy', 'updatedBy.dept', 'updatedBy.dept.supervisor']],
+                        condition: {},
                         mode: 2,
                       },
                     },
@@ -281,6 +292,7 @@ export const approvalWorkflows: ISchema = {
                     // type: workflowFieldset.type,
                     // isApproval: workflowFieldset.isApproval,
                     bussinessCollectionName: workflowFieldset.bussinessCollectionName,
+                    uiTemplate:workflowFieldset.uiTemplate,
                     config: workflowFieldset.config,
                     description: workflowFieldset.description,
                     options: workflowFieldset.options,
@@ -371,6 +383,7 @@ export const approvalWorkflows: ISchema = {
                 },
               },
             },
+           
             enabled: {
               type: 'void',
               'x-decorator': 'Table.Column.Decorator',
@@ -449,6 +462,7 @@ export const approvalWorkflows: ISchema = {
                             type: workflowFieldset.type,
                             isApproval: workflowFieldset.isApproval,
                             bussinessCollectionName: workflowFieldset.bussinessCollectionName,
+                            uiTemplate:workflowFieldset.uiTemplate,
                             enabled: workflowFieldset.enabled,
                             description: workflowFieldset.description,
                             options: workflowFieldset.options,

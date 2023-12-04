@@ -551,7 +551,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
       const { id, start, end, fieldCtx } = record;
       let plan_days = null;
       if(start && end){
-         plan_days = getWorkDays(start, end);
+         plan_days = getWorkDays(start, end, ctx.holidays||[]);
       }
       api
         .request({

@@ -9,13 +9,13 @@ function isUserKeyField(field) {
   return field.collectionName === 'users' && field.name === 'id';
 }
 
-export function AssigneesSelect({ multiple = false, value = [], onChange }) {
+export function AssigneesSelect({ multiple = true, value = [], onChange }) {
   const scope = useWorkflowVariableOptions({ types: [isUserKeyField] });
 
   return (
     <Variable.Input
       scope={scope}
-      value={value[0]}
+      value={value}
       onChange={(next) => {
         onChange([next]);
       }}
@@ -29,9 +29,10 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
           resource: 'users',
         }}
         manual={false}
-        value={value[0]}
+        mode='multiple'
+        value={value}
         onChange={(v) => {
-          onChange(v != null ? [v] : []);
+          onChange(v != null ? v : []);
         }}
       />
     </Variable.Input>

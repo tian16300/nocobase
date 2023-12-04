@@ -216,6 +216,8 @@ const InternalRemoteSelect = connect(
       }
       firstRun.current = true;
     };
+    console.log('remote select',value);
+   
 
     return (
       <Select
@@ -229,7 +231,7 @@ const InternalRemoteSelect = connect(
         onDropdownVisibleChange={onDropdownVisibleChange}
         objectValue={objectValue}
         value={value}
-        defaultValue={defaultValue}
+        // defaultValue={}
         {...others}
         loading={data! ? loading : true}
         options={mapOptionsToTags(options)}

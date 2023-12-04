@@ -70,10 +70,27 @@ export default function () {
         type: 'string',
         name: 'bussinessCollectionName',
       },
+
       {
         type: 'boolean',
         name: 'isApproval',
         defaultValue: false,
+      },
+      {
+        type: 'belongsTo',
+        name: 'uiTemplate',
+        target: 'uiSchemaTemplates',
+        targetKey: 'key',
+        foreignKey: 'uiTemplateKey',
+        uiSchema: {
+          'x-component': 'AssociationField',
+          'x-component-props': {
+            fieldNames: {
+              label: 'name',
+              value: 'key',
+            },
+          },
+        },
       },
       {
         type: 'hasMany',

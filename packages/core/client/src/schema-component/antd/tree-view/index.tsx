@@ -79,7 +79,7 @@ export const TreeView = connect(
         `}
       >
         <div ref={searchBoxRef}>
-          <Search size="small" style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
+          <Search  style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
         </div>
         {loading && (
           <div className={css`
@@ -90,8 +90,6 @@ export const TreeView = connect(
         )}
         {!loading && (
           <Tree
-            showLine
-            switcherIcon={<DownOutlined />}
             onExpand={onExpand}
             expandedKeys={expandedKeys}
             autoExpandParent={autoExpandParent}
@@ -114,6 +112,9 @@ export const TreeView = connect(
                     .site-tree-search-value {
                       color: ${token.colorWarning};
                       font-weight: bold;
+                    }
+                    .ant-tag{
+                      font-size: ${token.fontSize}px;
                     }
                   `}
                 >
@@ -166,6 +167,9 @@ export const TreeView = connect(
               );
             }}
             treeData={treeData}
+            draggable
+            // onDragEnter={onDragEnter}
+            // onDrop={onDrop}
             {...others}
           />
         )}

@@ -143,7 +143,6 @@ export function Node({ data }) {
   const { styles } = useStyles();
   const { getAriaLabel } = useGetAriaLabelOfAddButton(data);
   const { component: Component = NodeDefaultView } = instructions.get(data.type);
-
   return (
     <NodeContext.Provider value={data}>
       <div className={cx(styles.nodeBlockClass)}>

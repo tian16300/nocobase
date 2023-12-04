@@ -33,12 +33,6 @@ export const useFormSelectBlockProps = () => {
 export const useFormSelectOptionsProps = (props) => {
   const { resource, action, params, service, record } = useDataSelectBlockContext();
   const { filter = [], sort = [] } = params;
-  const field:IField = useField();
-  const schema:IField = useFieldSchema();
-  // schema.default = (record||{})[schema.name];
-  useEffect(()=>{
-    field.value =  (record||{})[schema.name];
-  },[record]);
   return {
     ...props,
     objectValue: true,
@@ -68,7 +62,7 @@ export const useFormSelectOptionsProps = (props) => {
       };
       await service.refresh();
     },
-    defaultValue:record
+    value: record
   };
 };
 const schemaForEach = (schema, callback) => {

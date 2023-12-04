@@ -1,9 +1,9 @@
 import { PageHeader as AntdPageHeader } from '@ant-design/pro-layout';
-import { Input, Spin } from 'antd';
+import { Card, Input, Spin } from 'antd';
 import React, { useContext, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAPIClient, useRequest, useSchemaTemplateManager } from '..';
-import { RemoteSchemaComponent, SchemaComponentContext } from '../schema-component';
+import { CollectionProvider, useAPIClient, useRequest, useSchemaTemplateManager } from '..';
+import {  RemoteSchemaComponent, SchemaComponentContext } from '../schema-component';
 
 const EditableTitle = (props) => {
   const [title, setTitle] = useState(props.title);
@@ -86,9 +86,13 @@ export const BlockTemplateDetails = () => {
         title={<EditableTitle filterByTk={key} title={data?.data?.name} />}
       />
       <div style={{ margin: 'var(--nb-spacing)' }}>
-        <SchemaComponentContext.Provider value={{ ...value, designable: true }}>
-          <RemoteSchemaComponent uid={data?.data?.uid} />
-        </SchemaComponentContext.Provider>
+        <Card>
+          <CollectionProvider name={data.data.collectionName}>
+            <SchemaComponentContext.Provider value={{ ...value, designable: true }}>
+              <RemoteSchemaComponent uid={data?.data?.uid} />
+            </SchemaComponentContext.Provider>
+          </CollectionProvider>
+        </Card>
       </div>
     </div>
   );

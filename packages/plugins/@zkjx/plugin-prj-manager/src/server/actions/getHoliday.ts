@@ -1,14 +1,12 @@
-// const request = require('request');
+import { dayjs } from "@nocobase/utils";
+
+var request = require('sync-request');
 /**
- * https://gitee.com/sk88/get_holiday/blob/master/index.js
+ *https://date.nager.at/Api
  */
-// export const getHoliday = (ctx)=>{
-//     const year = ctx.request.year || new Date().getFullYear();
-//     request.get(`https://fangjia.51240.com/${year}__fangjia/`, (err, response, body) => {
-//         if(err) return res.json({ err })
-//         return res.json( { 
-//           year,
-//           holiday: operation(body, year) 
-//         })
-//       })
-// }
+export const getHoliday = async (year)=>{
+    const url =`https://api.jiejiariapi.com/v1/holidays/${year}`;
+    const  res =  request('GET',url);
+    const body = res.getBody();
+    return JSON.parse(body);
+}

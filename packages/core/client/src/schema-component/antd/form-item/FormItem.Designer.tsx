@@ -77,7 +77,6 @@ export function Designer() {
   if (fieldSchema['x-read-pretty'] === true) {
     readOnlyMode = 'read-pretty';
   }
-  debugger;
   const fieldMode = field?.componentProps?.['mode'] || (isFileField ? 'FileManager' : 'Select');
   const isSelectFieldMode = isAssociationField && fieldMode === 'Select';
   const isSubTableFieldMode = isAssociationField && fieldMode === 'SubTable';

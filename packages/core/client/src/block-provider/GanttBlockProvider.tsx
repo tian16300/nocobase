@@ -2,16 +2,17 @@ import { useField } from '@formily/react';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useACLRoleContext } from '../acl/ACLProvider';
 import { useCollection, useCollectionManager } from '../collection-manager/hooks';
-import { useBlockRequestContext } from './BlockProvider';
+import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
-import { IField, useAssociationNames, useToken } from '..';
+import { IField, useAPIClient, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
 import { getWorkDays} from '../index';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import {flattenTree as flattenTree2} from '@nocobase/utils';
 
 export const GanttBlockContext = createContext<any>({});
-const getItemColor = (item, token) => {
+const getItemColor = (item, token, holidays) => {
   const { colorInfo, colorSuccess, colorWarning, colorError } = token;
   let alterProp = null;
   let color = colorInfo;
@@ -21,7 +22,7 @@ const getItemColor = (item, token) => {
     const a = dayjs(end),
       b = dayjs(real_end);
     if (b.isAfter(a)) {
-      const days = getWorkDays(real_end, end);
+      const days = getWorkDays(real_end, end, holidays);
       color = colorError;
       const message = `已延期${days}个工作日`;
       const type = 'error';
@@ -35,7 +36,7 @@ const getItemColor = (item, token) => {
   } else if (end && !real_end) {
     const a = dayjs(end);
     if (a.isAfter(today)) {
-      const days = getWorkDays(today.toISOString(), end);
+      const days = getWorkDays(today.toISOString(), end, holidays);
       if (typeof days == 'number' && days <= 3 && days > 0) {
         color = colorWarning;
         const message = `距离截止时间不到${days}个工作日`;
@@ -48,7 +49,7 @@ const getItemColor = (item, token) => {
         };
       }
     } else if (a.isBefore(today)) {
-      const days = getWorkDays(end, today.toISOString());
+      const days = getWorkDays(end, today.toISOString(), holidays);
       if (typeof days == 'number') {
         color = colorError;
         const message = `已延期${days}个工作日, 请补充实际完成时间！`;
@@ -144,7 +145,7 @@ const getTaskItem = (item, fieldNames, checkPermassion, ctx) => {
     // start: new Date(start ?? undefined),
     name: getValuesByPath(item, fieldNames.title) || '',
     id: item.id + '',
-    ...getItemColor(item, ctx.token),
+    ...getItemColor(item, ctx.token, ctx.holidays),
     isDisabled: disable,
     progress: getProgressValue(item, fieldNames),
     ...itemValues,
@@ -231,6 +232,47 @@ const InternalGanttBlockProvider = (props) => {
   const field: IField = useField();
   const { service } = useBlockRequestContext();
   const { token } = useToken();
+  const [holidays, setHolidays] = useState<any>([]);
+  const api = useAPIClient();
+  useEffect(() => {
+    if(!service.loading){
+      const data = flattenTree2(service.data?.data,[])||[];
+      const starts = data.slice(0, data.length).map((item)=>{
+        return item[fieldNames.start];
+      })
+      const ends =  data.slice(0, data.length).map((item)=>{
+        return item[fieldNames.start];
+      })
+      const dates = Array.from(new Set([...starts,...ends])).filter((date)=>{
+        return date;
+      }).map((date)=>{
+        return dayjs(date);
+      });
+      const minDate= dayjs.min(dates).startOf('year');
+      const maxDate = dayjs.max(dates).endOf('year');
+      const filter = {
+        year:{
+          $dateBetween:[minDate.toISOString(),maxDate.toISOString()]
+        }
+      }
+      api.request({
+        url:'holidays:list',
+        method:'get',
+        params:{
+          filter,
+          paginate:false
+        }
+      }).then((res)=>{
+        let dates = [];
+         (res.data?.data||[]).map(({holidayConfig})=>{
+         const keys =  Object.keys(holidayConfig);
+         dates = dates.concat(keys);
+        });
+        const value =   Array.from(new Set(dates));
+        setHolidays(value);
+      });
+    }
+  },[service.loading]);
 
   return (
     <GanttBlockContext.Provider
@@ -246,6 +288,7 @@ const InternalGanttBlockProvider = (props) => {
         rightSize,
         token,
         preProcessData,
+        holidays
       }}
     >
       {props.children}
@@ -431,6 +474,7 @@ export const GanttBlockProvider = (props) => {
         rowKey={rowKey}
         setRowKey={setRowKey}
       />
+      
     </TableBlockProvider>
   );
 };
@@ -522,7 +566,7 @@ export const useGanttBlockProps = (_props) => {
     });
     newTasks[index].start = start;
     newTasks[index].end = end;
-    Object.assign(newTasks[index], getItemColor(newTasks[index], ctx.token));
+    Object.assign(newTasks[index], getItemColor(newTasks[index], ctx.token, ctx.holidays));
     if (newTasks) {
       setTasks(newTasks);
       ctx.field.data = newTasks;

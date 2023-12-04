@@ -5,6 +5,7 @@ import { InputProps, TextAreaProps } from 'antd/es/input';
 import React from 'react';
 import { JSONTextAreaProps, Json } from './Json';
 import { ReadPretty } from './ReadPretty';
+import { Holiday } from './Holiday';
 
 export { ReadPretty as InputReadPretty } from './ReadPretty';
 
@@ -45,6 +46,7 @@ export const Input: ComposedInput = Object.assign(
     ),
     URL: connect(AntdInput, mapReadPretty(ReadPretty.URL)),
     JSON: connect(Json, mapReadPretty(ReadPretty.JSON)),
+    Holiday: connect(Holiday, mapReadPretty(ReadPretty.Holiday)),
     ReadPretty: ReadPretty.Input,
     ReadPrettyTextArea:ReadPretty.TextArea
 

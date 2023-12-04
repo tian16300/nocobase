@@ -45,9 +45,10 @@ export const uiSchemaTemplatesSchema: ISchema = {
       'x-decorator-props': {
         collection: 'uiSchemaTemplates',
         resource: 'uiSchemaTemplates',
+        resourceName: 'uiSchemaTemplates',
         action: 'list',
         params: {
-          pageSize: 20,
+          pageSize: 10,
           appends: ['collection'],
           sort: ['-createdAt'],
         },
@@ -66,6 +67,21 @@ export const uiSchemaTemplatesSchema: ISchema = {
             },
           },
           properties: {
+            filter: {
+              type: 'void',
+              title: '{{ t("Filter") }}',
+              'x-action': 'filter',
+              'x-designer': 'Filter.Action.Designer',
+              'x-component': 'Filter.Action',
+              'x-component-props': {
+                icon: 'FilterOutlined',
+                useProps: '{{ useFilterActionProps }}',
+              },
+              'x-align': 'left',
+              default: {
+                $and: [{ name: { $includes: '' } }],
+              },
+            },
             destroy: {
               title: '{{ t("Delete") }}',
               'x-action': 'destroy',

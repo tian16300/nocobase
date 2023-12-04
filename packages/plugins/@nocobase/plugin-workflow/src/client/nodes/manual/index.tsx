@@ -10,6 +10,7 @@ import { uid } from '@nocobase/utils';
 import { AssigneesRule } from './AssigneesRule';
 import { userSelect } from './schema/userSelect';
 import { approve } from './schema/approve';
+import { FieldVisibleConfig } from './FieldVisibleConfig';
 
 const MULTIPLE_ASSIGNED_MODE = {
   SINGLE: Symbol('single'),
@@ -49,31 +50,18 @@ export default {
       'x-decorator': 'FormItem',
       ...userSelect
     },
-    // assignees: {
-    //   type: 'array',
-    //   title: `{{t("Assignees", { ns: "${NAMESPACE}" })}}`,
-    //   'x-decorator': 'FormItem',
-    //   'x-component': 'AssigneesSelect',
-    //   'x-component-props': {
-    //     // multiple: true,
-    //   },
-    //   required: true,
-    //   default: [],
-    // },
     mode: {
       type: 'number',
       title: `{{t("Mode", { ns: "${NAMESPACE}" })}}`,
       'x-decorator': 'FormItem',
       'x-component': 'ModeConfig',
-      default: 1,
-      'x-reactions': {
-        dependencies: ['assignees'],
-        fulfill: {
-          state: {
-            visible: '{{$deps[0].length > 1}}',
-          },
-        },
-      },
+      default: 1
+    },
+    fieldVisible:{
+      type: 'array',
+      title:'字段权限设置',
+      'x-decorator': 'FormItem',
+      'x-component': 'FieldVisibleConfig',
     },
     // schema: {
     //   type: 'void',
@@ -104,6 +92,7 @@ export default {
     SchemaConfigButton,
     SchemaConfig,
     ModeConfig,
+    FieldVisibleConfig,
     AssigneesSelect,
     AssigneesRule
   },

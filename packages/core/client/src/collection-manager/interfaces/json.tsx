@@ -45,6 +45,23 @@ export const json: IField = {
   hasDefaultValue: true,
   properties: {
     ...defaultProps,
+    'uiSchema.x-component': {
+      type: 'string',
+      title: '组件',
+      'x-decorator': 'FormItem',
+      'x-component': 'Select',
+      enum: [
+        {
+          label: 'JSON',
+          value: 'Input.JSON',
+        },
+        {
+          label: '节假日展示',
+          value: 'Input.Holiday',
+        },
+      ],
+      default: 'Input.JSON'
+    },
     jsonb: {
       type: 'boolean',
       title: 'JSONB',

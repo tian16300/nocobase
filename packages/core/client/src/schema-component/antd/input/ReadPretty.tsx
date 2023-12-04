@@ -1,6 +1,6 @@
 import { css, cx } from '@emotion/css';
 import { usePrefixCls } from '@formily/antd-v5/esm/__builtins__';
-import { Typography } from 'antd';
+import { List, Space, Tag, Typography } from 'antd';
 import { InputProps, TextAreaProps } from 'antd/es/input';
 import cls from 'classnames';
 import React from 'react';
@@ -16,6 +16,7 @@ type Composed = {
   >;
   Html: any;
   JSON: React.FC<TextAreaProps & { space: number }>;
+  Holiday: React.FC<TextAreaProps & { space: number }>;
 };
 
 export const ReadPretty: Composed = () => null;
@@ -138,6 +139,55 @@ ReadPretty.JSON = (props) => {
       style={props.style}
     >
       {props.value != null ? JSON.stringify(props.value, null, props.space ?? 2) : ''}
+    </pre>
+  );
+};
+ReadPretty.Holiday = (props) => {
+  const prefixCls = usePrefixCls('json', props);
+  const values = Object.values(props.value || {}) || ([] as any);
+  const group = values.group(({ name }) => {
+    return name;
+  });
+  const groups = Object.keys(group).map((key) => {
+    return {
+      name: key,
+      dates: group[key],
+    };
+  });
+  return (
+    <pre
+      className={cx(
+        prefixCls,
+        props.className,
+        css`
+          margin-bottom: 0;
+          line-height: 1.5;
+          font-size: 90%;
+        `,
+      )}
+      style={props.style}
+    >
+      {props.value != null ? (
+        <List
+          dataSource={groups}
+          renderItem={(item) => (
+            <List.Item>
+              <List.Item.Meta
+                title={ <Space size={[0, 8]} wrap><Typography.Text>{item.name}</Typography.Text>&nbsp;&nbsp;<Typography.Text>共{item.dates.length}天</Typography.Text> </Space>}
+                description={
+                  <Space size={[0, 8]} wrap>
+                    {item.dates.map((t) => {
+                      return <Tag>{t.date}</Tag>;
+                    })}
+                  </Space>
+                }
+              />
+            </List.Item>
+          )}
+        />
+      ) : (
+        ''
+      )}
     </pre>
   );
 };

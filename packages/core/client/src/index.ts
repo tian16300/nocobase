@@ -16,11 +16,11 @@ import * as functions from '@formulajs/formulajs';
  * @param start 开始日期
  * @param end  结束日期
  */
-export const getWorkDays = (start: string | Date, end: string | Date) => {
+export const getWorkDays = (start: string | Date, end: string | Date, holidays = []) => {
   /**
    * 求 这一段时间内包含的节假日表
    */
-  return functions['NETWORKDAYS'](start, end, []);
+  return functions['NETWORKDAYS'](start, end, holidays);
 };
 export * from '@emotion/css';
 export * from './acl';

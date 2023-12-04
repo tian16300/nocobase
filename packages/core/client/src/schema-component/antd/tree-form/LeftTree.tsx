@@ -92,7 +92,12 @@ export const LeftTree = (props: any) => {
   useEffect(() => {
     if (!service.loading) {
       field.data = field.data || {};
-      field.dataSource =service.data?.data;
+      field.dataSource =[{
+        [fieldNames.key]: 'root',
+        [fieldNames.title]: '全部',
+        [fieldNames.parentKey]: null,
+        [fieldNames.children]: service.data?.data,
+      }];
       const data = flattenTree(service.data?.data, []);
       field.data.list = data;
       field.value = 'root';

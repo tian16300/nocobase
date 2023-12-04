@@ -8,8 +8,9 @@ import 'dayjs/plugin/minMax';
 import { dayjs, moment2str } from '@nocobase/utils';
 // import { ReportDetailModel, ReportModel } from './model';
 import * as functions from '@formulajs/formulajs';
-const getWorkDays = (start, end) => {
-  return functions['NETWORKDAYS'](start, end, []);
+import { getHoliday } from './actions/getHoliday';
+const getWorkDays = (start, end, holidays) => {
+  return functions['NETWORKDAYS'](start, end, holidays);
 };
 export class PluginPrjManagerServer extends Plugin {
   timer = null;
@@ -158,8 +159,21 @@ export class PluginPrjManagerServer extends Plugin {
       await this.countDays('task', model, options, 'start', 'end', 'plan_days');
       await this.countDays('task', model, options, 'real_start', 'real_end', 'real_days');
     });
-
-    /*定时任务 剩1天截止 */
+    this.app.db.on('holidays.afterSave', async (model, options) => {
+      /*同步节假日安排*/
+      const repo = this.app.db.getRepository('holidays');
+      const { year: date } = model;
+      const year = dayjs(date).year();
+      const json = await getHoliday(year);
+      const res = await repo.update({
+        filterByTk: model.get('id'),
+        values: {
+          holidayConfig: json
+        },
+        transaction: options.transaction
+      });
+      this.app.logger.info(`同步${year}年节假日成功`, res);
+    });
   }
   async countDays(collectionName, model, options, startName, endName, name) {
     if (model._changed.has(startName) || model._changed.has(endName) || model._changed.has(name)) {
@@ -168,7 +182,20 @@ export class PluginPrjManagerServer extends Plugin {
       const curValue = model.get(name);
       let days = null;
       if (start && end) {
-        days = getWorkDays(start, end);
+        const holidaysRes = await this.app.db.getRepository('holidays').find({
+          filter:{
+            year:{
+              $dateBetween:[start,end]
+            }
+          },
+          transaction: options.transaction
+        });
+        let keys = [];
+        holidaysRes.map(({holidayConfig})=>{
+          keys = keys.concat(Object.keys(holidayConfig));
+        });
+        const holidays = Array.from(new Set(keys));
+        days = getWorkDays(start, end, holidays);
       }
       if (curValue !== days) {
         await this.app.db.getRepository(collectionName).update({

@@ -40,7 +40,7 @@ export default defineCollection({
       target: 'collections',
       foreignKey: 'collectionName',
       targetKey: 'name',
-      onDelete: 'CASCADE',
+      onDelete: 'CASCADE'
     },
   ],
 });

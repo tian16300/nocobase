@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, css, cx, useToken, getWorkDays } from '@nocobase/client';
+import { Input, css, cx, useToken, getWorkDays, useGanttBlockContext } from '@nocobase/client';
 import { Col, Row, Space, Statistic } from 'antd';
 import { Task } from '@nocobase/client/src/schema-component/antd/gantt/types/public-types';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
@@ -16,6 +16,7 @@ const getYmd = (param) => {
 
 const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fontFamily }) => {
   const { token } = useToken();
+  const {holidays} = useGanttBlockContext();
   const style = {
     fontSize,
     fontFamily,
@@ -26,7 +27,7 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   // task.start && task.end
   //   ? Math.round(((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24)) * 10) / 10
   //   : null;
-  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end,holidays) : null;
   if (typeof duration !== 'number') {
     duration = null;
   }
@@ -34,7 +35,7 @@ const TaskItem: React.FC<{ task; fontSize; fontFamily }> = ({ task, fontSize, fo
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
+    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end,holidays) : null;
     if (typeof prjDuration !== 'number') {
       prjDuration = null;
     }
@@ -202,6 +203,8 @@ export const TooltipContent: React.FC<{
   fontFamily: string;
 }> = ({ task, fontSize, fontFamily }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
+  
+  const {holidays} = useGanttBlockContext();
   const style = {
     fontSize,
     fontFamily,
@@ -210,7 +213,7 @@ export const TooltipContent: React.FC<{
   const isProject = type == 'project';
   let projectBar = null;
 
-  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end, holidays) : null;
   if (typeof duration !== 'number') {
     duration = null;
   }
@@ -218,7 +221,7 @@ export const TooltipContent: React.FC<{
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
+    let prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end, holidays) : null;
     if (typeof prjDuration !== 'number') {
       prjDuration = null;
     }

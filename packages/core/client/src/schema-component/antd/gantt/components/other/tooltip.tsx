@@ -7,7 +7,7 @@ import useStyles from './style';
 import { Alert, Col, Row, Space, Statistic } from 'antd';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import { useToken } from '../../../__builtins__';
-import { getWorkDays } from '../../../../../index';
+import { getWorkDays, useGanttBlockContext } from '../../../../../index';
 export type TooltipProps = {
   task: BarTask;
   arrowIndent: number;
@@ -119,6 +119,7 @@ export const StandardTooltipContent: React.FC<{
 }> = ({ task, fontSize, fontFamily }) => {
   const { wrapSSR, componentCls, hashId } = useStyles();
   const { token } = useToken();
+  const {holidays} = useGanttBlockContext();
   const style = {
     fontSize,
     fontFamily,
@@ -126,13 +127,13 @@ export const StandardTooltipContent: React.FC<{
   const { type } = task;
   const isProject = type == 'project';
   let projectBar = null;
-  let duration = task.start && task.end ? getWorkDays(task.start, task.end) : null;
+  let duration = task.start && task.end ? getWorkDays(task.start, task.end, holidays) : null;
   duration = typeof duration == 'number' ? duration : null;
   let prjDuration = null;
   projectBar = (task as any).projectBar;
 
   if (isProject && projectBar) {
-    prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end) : null;
+    prjDuration = projectBar.start && projectBar.end ? getWorkDays(projectBar.start, projectBar.end, holidays) : null;
     prjDuration = typeof prjDuration == 'number' ? prjDuration : null;
   }
   return wrapSSR(

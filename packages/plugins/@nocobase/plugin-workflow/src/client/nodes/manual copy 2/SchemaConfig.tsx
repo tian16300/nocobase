@@ -25,6 +25,7 @@ import {
   useCompile,
   useFormActiveFields,
   useFormBlockContext,
+  useRecord,
   useSchemaOptionsContext,
 } from '@nocobase/client';
 import { Registry, lodash } from '@nocobase/utils/client';
@@ -112,7 +113,8 @@ function SimpleDesigner() {
   );
 }
 
-function AddBlockButton(props: any) {
+
+export function AddBlockButton(props: any) {
   const { collections } = useCollectionManager();
   const current = useNodeContext();
   const nodes = useAvailableUpstreams(current);
@@ -390,7 +392,7 @@ function useSubmit() {
   };
 }
 
-export function SchemaConfig({ value, onChange }) {
+export function SchemaConfig({ value, onChange, footer, useSubmitAction }) {
   const ctx = useContext(SchemaComponentContext);
   const trigger = useTrigger();
   const node = useNodeContext();
@@ -448,6 +450,29 @@ export function SchemaConfig({ value, onChange }) {
                   },
                 },
               },
+              footer: (footer)?
+                {
+                  type: 'void',
+                  'x-component': 'Action.Drawer.Footer',
+                  properties: {
+                    cancel: {
+                      title: '{{t("Cancel")}}',
+                      'x-component': 'Action',
+                      'x-component-props': {
+                        useAction: '{{ cm.useCancelAction }}',
+                      },
+                    },
+                    submit: {
+                      title: '{{t("Submit")}}',
+                      'x-component': 'Action',
+                      'x-component-props': {
+                        type: 'primary',
+                        useAction: '{{ useSubmitAction }}',
+                      },
+                    },
+                  },
+                
+              }:null
             },
           },
         },
@@ -469,7 +494,6 @@ export function SchemaConfig({ value, onChange }) {
     },
     [form, onChange, schema],
   );
-
   return (
     <SchemaComponentContext.Provider
       value={{
@@ -515,6 +539,7 @@ export function SchemaConfig({ value, onChange }) {
           scope={{
             useSubmit,
             useDetailsBlockProps: useFormBlockContext,
+            useSubmitAction
           }}
         />
       </SchemaInitializerProvider>
@@ -522,13 +547,16 @@ export function SchemaConfig({ value, onChange }) {
   );
 }
 
+
 export function SchemaConfigButton(props) {
-  const { workflow } = useFlowContext();
+  const { workflow: flowWorkFlow } = useFlowContext();
+  const record = useRecord();
+  const workflow = flowWorkFlow || record;
   const [visible, setVisible] = useState(false);
   return (
     <>
-      <Button type="primary" onClick={() => setVisible(true)} disabled={false}>
-        {workflow.executed ? lang('View user interface') : lang('Configure user interface')}
+      <Button type={props.type || 'primary'} onClick={() => setVisible(true)} disabled={false}>
+        {workflow?.executed ? lang('View user interface') : lang('Configure user interface')}
       </Button>
       <ActionContextProvider value={{ visible, setVisible, formValueChanged: false }}>
         {props.children}

@@ -102,24 +102,23 @@ export const PrjWorkPlanProvider = (props) => {
   };
   const preProcessData = usePrjWorkPlanProcessData;
 
-  const groupField: any = useMemo(()=>{
+  const groupField: any = useMemo(() => {
     return getGroupField(collection, group);
-  },[collection,group]) ;
+  }, [collection, group]);
   /* 首先获取 项目阶段 */
-  const options = useMemo(()=>{
-    const {target} = groupField;
+  const options = useMemo(() => {
+    const { target } = groupField;
     return {
       collection: target,
       resource: target,
       action: 'list',
-    }
-
-  },[groupField])
-  const params = useMemo(()=>{
+    };
+  }, [groupField]);
+  const params = useMemo(() => {
     return {
-      ...getBlockParams(groupField, record)
-    }
-  },[groupField])
+      ...getBlockParams(groupField, record),
+    };
+  }, [groupField]);
 
   const [editing, setEditing] = useState(false);
   const [isFullscreen, setIsFullScreen] = useState(false);
@@ -128,33 +127,40 @@ export const PrjWorkPlanProvider = (props) => {
     setRightSize(props.rightSize);
   }, [props.rightSize]);
   const containerRef = useRef<HTMLDivElement>();
-  const  getPopupContainer = ()=>{
+  const getPopupContainer = () => {
     return containerRef.current;
-  }
-  
- 
-
+  };
 
   /* 获取项目任务 */
   return (
-    <div ref={containerRef} className={css`width:100%;height:100%`}>
-      <BlockProvider name={options.collection} {...options} params={params} runWhenParamsChanged>
-        <PrjWorkPlanGanttProvider
-          {...props}
-          rightSize={rightSize}
-          setRightSize={setRightSize}
-          editing={editing}
-          setEditing={setEditing}
-          groupField={groupField}
-          group={group}
-          setGroup={setGroup}
-          preProcessData={preProcessData}
-          isFullscreen={isFullscreen}
-          setIsFullScreen={setIsFullScreen}
-          getPopupContainer={getPopupContainer}
-          name={collection}
-        ></PrjWorkPlanGanttProvider>
-      </BlockProvider>
+    <div
+      ref={containerRef}
+      className={css`
+        width: 100%;
+        height: 100%;
+      `}
+    >
+      {service.loading || !record?.id ? (
+        <Spin />
+      ) : (
+        <BlockProvider name={options.collection} {...options} params={params}>
+          <PrjWorkPlanGanttProvider
+            {...props}
+            rightSize={rightSize}
+            setRightSize={setRightSize}
+            editing={editing}
+            setEditing={setEditing}
+            groupField={groupField}
+            group={group}
+            setGroup={setGroup}
+            preProcessData={preProcessData}
+            isFullscreen={isFullscreen}
+            setIsFullScreen={setIsFullScreen}
+            getPopupContainer={getPopupContainer}
+            name={collection}
+          ></PrjWorkPlanGanttProvider>
+        </BlockProvider>
+      )}
     </div>
   );
 };
@@ -222,22 +228,34 @@ const PrjWorkPlanGanttProvider = (props) => {
         service,
         isFullscreen,
         setIsFullScreen,
-        groupFieldCtx
+        groupFieldCtx,
       }}
     >
-      {!service?.loading && (
+      {record?.id && !service.loading ? (
         <GanttBlockProvider
           {...others}
           setEditing={setEditing}
           editing={editing}
           isFullscreen={isFullscreen}
           setIsFullScreen={setIsFullScreen}
-          params={params}
+          params={{...params,filter: {
+            $and: [
+              {
+                prj: {
+                  id: {
+                    $eq: record.id,
+                  },
+                },
+              },
+            ],
+          }}}
           sort={sort}
           groupField={groupFieldCtx}
           groupData={parentData}
           rowKey="rowKey"
         ></GanttBlockProvider>
+      ) : (
+        <Spin />
       )}
     </PrjWorkPlanProviderContext.Provider>
   );

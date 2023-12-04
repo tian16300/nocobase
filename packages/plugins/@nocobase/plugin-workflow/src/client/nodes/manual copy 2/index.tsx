@@ -6,10 +6,6 @@ import { NAMESPACE } from '../../locale';
 import { SchemaConfig, SchemaConfigButton } from './SchemaConfig';
 import { ModeConfig } from './ModeConfig';
 import { AssigneesSelect } from './AssigneesSelect';
-import { uid } from '@nocobase/utils';
-import { AssigneesRule } from './AssigneesRule';
-import { userSelect } from './schema/userSelect';
-import { approve } from './schema/approve';
 
 const MULTIPLE_ASSIGNED_MODE = {
   SINGLE: Symbol('single'),
@@ -32,34 +28,22 @@ if (!initializerGroup.children.find((item) => item.key === 'workflowTodos')) {
 }
 
 export default {
-  title: `{{t("审批节点", { ns: "${NAMESPACE}" })}}`,
+  title: `{{t("Manual", { ns: "${NAMESPACE}" })}}`,
   type: 'manual',
   group: 'manual',
   description: `{{t("Could be used for manually submitting data, and determine whether to continue or exit. Workflow will generate a todo item for assigned user when it reaches a manual node, and continue processing after user submits the form.", { ns: "${NAMESPACE}" })}}`,
   fieldset: {
-    assigneesRule: {
-      type: 'object',
-      title: `审批人`,
+    assignees: {
+      type: 'array',
+      title: `{{t("Assignees", { ns: "${NAMESPACE}" })}}`,
       'x-decorator': 'FormItem',
-      ...userSelect
+      'x-component': 'AssigneesSelect',
+      'x-component-props': {
+        mode: 'multiple',
+      },
+      required: true,
+      default: [],
     },
-    copyToRule:{
-      type: 'object',
-      title: `抄送人`,
-      'x-decorator': 'FormItem',
-      ...userSelect
-    },
-    // assignees: {
-    //   type: 'array',
-    //   title: `{{t("Assignees", { ns: "${NAMESPACE}" })}}`,
-    //   'x-decorator': 'FormItem',
-    //   'x-component': 'AssigneesSelect',
-    //   'x-component-props': {
-    //     // multiple: true,
-    //   },
-    //   required: true,
-    //   default: [],
-    // },
     mode: {
       type: 'number',
       title: `{{t("Mode", { ns: "${NAMESPACE}" })}}`,
@@ -75,24 +59,19 @@ export default {
         },
       },
     },
-    // schema: {
-    //   type: 'void',
-    //   title: `{{t("User interface", { ns: "${NAMESPACE}" })}}`,
-    //   'x-decorator': 'FormItem',
-    //   'x-component': 'SchemaConfigButton',
-    //   properties: {
-    //     approve: {
-    //       type: 'object',
-    //       'x-component': 'SchemaConfig',
-    //       default: approve,
-    //     },
-    //     schema: {
-    //       type: 'object',
-    //       'x-component': 'SchemaConfig',
-    //       default: {},
-    //     },
-    //   },
-    // },
+    schema: {
+      type: 'void',
+      title: `{{t("User interface", { ns: "${NAMESPACE}" })}}`,
+      'x-decorator': 'FormItem',
+      'x-component': 'SchemaConfigButton',
+      properties: {
+        schema: {
+          type: 'object',
+          'x-component': 'SchemaConfig',
+          default: null,
+        },
+      },
+    },
     forms: {
       type: 'object',
       default: {},
@@ -105,7 +84,6 @@ export default {
     SchemaConfig,
     ModeConfig,
     AssigneesSelect,
-    AssigneesRule
   },
   useVariables({ key, title, config }, { types, fieldNames = defaultFieldNames }) {
     const compile = useCompile();
@@ -118,6 +96,7 @@ export default {
     const options = formKeys
       .map((formKey) => {
         const form = config.forms[formKey];
+
         const fieldsOptions = getCollectionFieldOptions({
           fields: form.collection?.fields,
           collection: form.collection,
