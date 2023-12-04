@@ -25,6 +25,9 @@ const toValue = (value, placeholder) => {
   }
   return value;
 };
+function isObject(value) {
+  return typeof value === 'object' && value !== null;
+}
 export const ReadPrettyInternalViewer: React.FC = observer(
   (props: any) => {
     const fieldSchema = useFieldSchema();
@@ -46,12 +49,14 @@ export const ReadPrettyInternalViewer: React.FC = observer(
     const ellipsisWithTooltipRef = useRef<IEllipsisWithTooltipRef>();
     const renderRecords = () =>
       toArr(props.value).map((record, index, arr) => {
-        // const val = toValue(compile(getValuesByPath(record, fieldNames?.label || 'label')), 'N/A');
+        const value = record?.[fieldNames?.label || 'label'];
         const label = isTreeCollection
           ? transformNestedData(record)
               .map((o) => getValuesByPath(o, fieldNames?.label || 'label'))
               .join(' / ')
-          : getValuesByPath(record, fieldNames?.label || 'label');
+          : isObject(value)
+          ? JSON.stringify(value)
+          : value;
         const val = toValue(compile(label), 'N/A');
         const labelUiSchema = useLabelUiSchema(
           record?.__collection || collectionField?.target,
