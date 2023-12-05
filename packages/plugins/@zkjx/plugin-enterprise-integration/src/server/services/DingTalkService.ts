@@ -114,7 +114,7 @@ export class DingTalkService {
                         dingUserId:userid
                     }
                 });
-            }else if(!userid){
+            }else if(!user.dingUserId){
                 ++updateCount;
                return await repo.update({
                     filterByTk: user.id,
