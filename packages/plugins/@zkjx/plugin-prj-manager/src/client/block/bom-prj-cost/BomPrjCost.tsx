@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlockItem, GeneralSchemaDesigner, SchemaSettings, useCollection, useSchemaTemplate } from '@nocobase/client';
+import { BlockItem, GeneralSchemaDesigner, SchemaSettingsDivider, SchemaSettingsRemove, useCollection, useSchemaTemplate } from '@nocobase/client';
 
 export const BomPrjCost = (props) => {
   return (
@@ -16,8 +16,8 @@ BomPrjCost.Designer = () => {
   const { name, title, sortable } = useCollection();
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

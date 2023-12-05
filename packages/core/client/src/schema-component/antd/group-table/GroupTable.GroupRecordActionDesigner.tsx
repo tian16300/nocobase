@@ -3,12 +3,12 @@ import { useFieldSchema } from '@formily/react';
 import { Space } from 'antd';
 import React from 'react';
 import { DragHandler } from '../..';
-import { useSchemaInitializer } from '../../../schema-initializer';
 import { useGetAriaLabelOfDesigner } from '../../../schema-settings/hooks/useGetAriaLabelOfDesigner';
+import {  useSchemaInitializerRender } from '../../../application';
 
 export const GroupTableGroupRecordActionDesigner = (props: any) => {
   const fieldSchema = useFieldSchema();
-  const { render } = useSchemaInitializer(fieldSchema['x-initializer']);
+  const { render } = useSchemaInitializerRender(fieldSchema['x-initializer']);
   const { getAriaLabel } = useGetAriaLabelOfDesigner();
   return (
     <div className={'general-schema-designer'}>

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { SchemaInitializer } from '../../../schema-initializer';
 import { CollectionProvider, useCollection, useCollectionManager } from '../../../collection-manager';
-import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
+import { GeneralSchemaDesigner, SchemaSettingsActionModalItem, SchemaSettingsButtonEditor } from '../../../schema-settings';
 import { RecursionField, observer, useField, useFieldSchema, useForm } from '@formily/react';
 import { useCompile, useDesignable } from '../../hooks';
 import { Action, ActionContextProvider, useActionContext } from '../action';
@@ -144,7 +143,7 @@ DataBlockSelectorAction.Initializer = () => {
 
   return (
     <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettings.ActionModalItem
+      <SchemaSettingsActionModalItem
         title="批量选择"
         schema={{
           type: 'object',
@@ -192,8 +191,8 @@ DataBlockSelectorAction.Designer = (props) => {
     <>
       {isDataBlockSelectorActionField && (
         <>
-          <SchemaSettings.ButtonEditor />
-          <SchemaSettings.ActionModalItem
+          <SchemaSettingsButtonEditor />
+          <SchemaSettingsActionModalItem
             title="批量选择"
             schema={{
               type: 'object',

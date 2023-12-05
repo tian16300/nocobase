@@ -1,11 +1,11 @@
 import { merge } from '@formily/shared';
 import React from 'react';
-import { SchemaInitializer } from '..';
+import { SchemaInitializerItem } from '../../application';
 
 export const DataBlockSelectorInitializer = (props) => {
     const { item, schema, insert } = props;
     return (      
-      <SchemaInitializer.Item
+      <SchemaInitializerItem
         onClick={() => {
           const s = merge(schema || {}, item.schema || {});
           item?.schemaInitialize?.(s);

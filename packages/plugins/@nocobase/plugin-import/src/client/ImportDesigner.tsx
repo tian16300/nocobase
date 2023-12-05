@@ -1,7 +1,15 @@
 import { ArrayItems } from '@formily/antd-v5';
 import type { ISchema } from '@formily/react';
 import { useField, useFieldSchema } from '@formily/react';
-import { GeneralSchemaDesigner, SchemaSettings, useDesignable } from '@nocobase/client';
+import {
+  GeneralSchemaDesigner,
+  SchemaSettingsActionModalItem,
+  SchemaSettingsButtonEditor,
+  SchemaSettingsDivider,
+  SchemaSettingsModalItem,
+  SchemaSettingsRemove,
+  useDesignable,
+} from '@nocobase/client';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShared } from './useShared';
@@ -19,7 +27,7 @@ export const ImportDesigner = () => {
 
   return (
     <GeneralSchemaDesigner disableInitializer>
-      {/* <SchemaSettings.ModalItem
+      {/* <SchemaSettingsModalItem
         title={t('Edit button')}
         schema={
           {
@@ -83,8 +91,8 @@ export const ImportDesigner = () => {
           dn.refresh();
         }}
       /> */}
-      <SchemaSettings.ButtonEditor />
-      <SchemaSettings.ActionModalItem
+      <SchemaSettingsButtonEditor />
+      <SchemaSettingsActionModalItem
         title={t('Importable fields')}
         schema={schema}
         initialValues={{ ...(fieldSchema?.['x-action-settings']?.importSettings ?? {}) }}
@@ -107,8 +115,8 @@ export const ImportDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={(s) => {
           return s['x-component'] === 'Space' || s['x-component'].endsWith('ActionBar');

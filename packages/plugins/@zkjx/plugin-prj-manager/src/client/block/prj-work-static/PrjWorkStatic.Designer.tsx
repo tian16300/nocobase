@@ -4,7 +4,8 @@ import {
   SchemaComponentOptions,
   GeneralSchemaDesigner,
   SchemaSettings,
-  useCollection
+  useCollection,
+  SchemaSettingsRemove
 } from '@nocobase/client';
 
 export const PrjWorkStaticDesigner = () => {
@@ -12,7 +13,7 @@ export const PrjWorkStaticDesigner = () => {
   const fieldSchema = useFieldSchema();
   return (
     <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettings.Remove
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

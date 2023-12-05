@@ -6,9 +6,6 @@ import {
   FormBlockProvider,
   FormV2,
   IField,
-  PluginManagerContext,
-  ReadPrettyFormItemInitializers,
-  RecordBlockInitializers,
   SchemaComponent,
   SchemaComponentContext,
   useDesignable,
@@ -105,9 +102,7 @@ export const ApprovalWorkflow  = ()=>{
             OpenDrawer,
             ExecutionStatusSelect,
             FormV2,
-            FormBlockProvider,
-            ReadPrettyFormItemInitializers,
-            RecordBlockInitializers
+            FormBlockProvider
            
 
           }}
@@ -128,27 +123,18 @@ export const ApprovalWorkflow  = ()=>{
 
 
 export const WorkflowProvider = (props) => {
-  const pmCtx = useContext(PluginManagerContext);
   const cmCtx = useContext(CollectionManagerContext);
   return (
-    <PluginManagerContext.Provider
+    <CollectionManagerContext.Provider
       value={{
-        components: {
-          ...pmCtx?.components,
+        ...cmCtx,
+        interfaces: {
+          ...cmCtx.interfaces,
+          expression: expressionField,
         },
       }}
     >
-      <CollectionManagerContext.Provider
-        value={{
-          ...cmCtx,
-          interfaces: {
-            ...cmCtx.interfaces,
-            expression: expressionField,
-          },
-        }}
-      >
-        <WorkflowContext.Provider value={{ triggers, instructions }}>{props.children}</WorkflowContext.Provider>
-      </CollectionManagerContext.Provider>
-    </PluginManagerContext.Provider>
+      <WorkflowContext.Provider value={{ triggers, instructions }}>{props.children}</WorkflowContext.Provider>
+    </CollectionManagerContext.Provider>
   );
 };

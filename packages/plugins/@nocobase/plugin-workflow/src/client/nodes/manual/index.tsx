@@ -1,11 +1,11 @@
-import { BlockInitializers, SchemaInitializerItemOptions, useCollectionManager, useCompile } from '@nocobase/client';
+import { SchemaInitializerItemType, useCollectionManager, useCompile } from '@nocobase/client';
 
 import { CollectionBlockInitializer } from '../../components/CollectionBlockInitializer';
-import { defaultFieldNames, getCollectionFieldOptions } from '../../variable';
 import { NAMESPACE } from '../../locale';
-import { SchemaConfig, SchemaConfigButton } from './SchemaConfig';
-import { ModeConfig } from './ModeConfig';
+import { defaultFieldNames, getCollectionFieldOptions } from '../../variable';
 import { AssigneesSelect } from './AssigneesSelect';
+import { ModeConfig } from './ModeConfig';
+import { SchemaConfig, SchemaConfigButton } from './SchemaConfig';
 import { uid } from '@nocobase/utils';
 import { AssigneesRule } from './AssigneesRule';
 import { userSelect } from './schema/userSelect';
@@ -19,18 +19,6 @@ const MULTIPLE_ASSIGNED_MODE = {
   ALL_PERCENTAGE: Symbol('all percentage'),
   ANY_PERCENTAGE: Symbol('any percentage'),
 };
-
-// TODO(optimize): change to register way
-const initializerGroup = BlockInitializers.items.find((group) => group.key === 'media');
-if (!initializerGroup.children.find((item) => item.key === 'workflowTodos')) {
-  initializerGroup.children.push({
-    key: 'workflowTodos',
-    type: 'item',
-    title: `{{t("Workflow todos", { ns: "${NAMESPACE}" })}}`,
-    component: 'WorkflowTodoBlockInitializer',
-    icon: 'CheckSquareOutlined',
-  } as any);
-}
 
 export default {
   title: `{{t("审批节点", { ns: "${NAMESPACE}" })}}`,
@@ -135,7 +123,7 @@ export default {
         }
       : null;
   },
-  useInitializers(node): SchemaInitializerItemOptions | null {
+  useInitializers(node): SchemaInitializerItemType | null {
     const { getCollection } = useCollectionManager();
     const formKeys = Object.keys(node.config.forms ?? {});
     if (!formKeys.length || node.config.mode) {
@@ -149,18 +137,20 @@ export default {
 
         return fields.length
           ? ({
+              name: form.title ?? formKey,
               type: 'item',
               title: form.title ?? formKey,
-              component: CollectionBlockInitializer,
+              Component: CollectionBlockInitializer,
               collection: form.collection,
               dataSource: `{{$jobsMapByNodeKey.${node.key}.${formKey}}}`,
-            } as SchemaInitializerItemOptions)
+            } as SchemaInitializerItemType)
           : null;
       })
       .filter(Boolean);
 
     return forms.length
       ? {
+          name: 'forms',
           key: 'forms',
           type: 'subMenu',
           title: node.title,

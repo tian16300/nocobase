@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { defaultTheme } from '../global-theme';
 import { useToken } from '../schema-component';
 
-const CSSVariableProvider = ({ children }) => {
+export const CSSVariableProvider = ({ children }) => {
   const { token } = useToken();
 
   const colorBgScrollTrack = token.colorFillTertiary;

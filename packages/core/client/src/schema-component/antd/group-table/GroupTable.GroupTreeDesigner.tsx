@@ -8,7 +8,7 @@ import { useCollection, useCollectionManager } from '../../../collection-manager
 import { useSortFields } from '../../../collection-manager/action-hooks';
 import { FilterBlockType } from '../../../filter-provider/utils';
 import { RecordProvider, useRecord } from '../../../record-provider';
-import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
+import { GeneralSchemaDesigner, SchemaSettingsBlockTitleItem, SchemaSettingsConnectDataBlocks, SchemaSettingsDataScope, SchemaSettingsDivider, SchemaSettingsModalItem, SchemaSettingsRemove, SchemaSettingsSelectItem, SchemaSettingsSwitchItem, SchemaSettingsTemplate } from '../../../schema-settings';
 import { useSchemaTemplate } from '../../../schema-templates';
 import { useDesignable } from '../../hooks';
 import { removeNullCondition } from '../filter';
@@ -96,8 +96,8 @@ export const GroupTreeDesigner = () => {
     // fix https://nocobase.height.app/T-2259
     <RecordProvider parent={record} record={{}}>
       <GeneralSchemaDesigner template={template} title={title || name}>
-        <SchemaSettings.BlockTitleItem />
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsBlockTitleItem />
+        <SchemaSettingsSwitchItem
           title={t('Fix block')}
           checked={fieldSchema['x-decorator-props']?.fixedBlock}
           onChange={async (fixedBlock) => {
@@ -115,7 +115,7 @@ export const GroupTreeDesigner = () => {
           }}
         />
         {fieldSchema['x-decorator-props']?.fixedBlock ? (
-        <SchemaSettings.ModalItem
+        <SchemaSettingsModalItem
           title={t('设置固定区块属性')}
           schema={fixedBlockPropsSchema}
           onSubmit={onFixedBlockPropsSubmit}
@@ -123,7 +123,7 @@ export const GroupTreeDesigner = () => {
       ) : null}
         {/* <FixedBlockDesignerItem /> */}
         {collection?.tree && collectionField?.collectionName === collectionField?.target && (
-          <SchemaSettings.SwitchItem
+          <SchemaSettingsSwitchItem
             title={t('Tree table')}
             defaultChecked={true}
             checked={treeCollection ? field.decoratorProps.treeTable !== false : false}
@@ -143,7 +143,7 @@ export const GroupTreeDesigner = () => {
           />
         )}
         {sortable && (
-          <SchemaSettings.SwitchItem
+          <SchemaSettingsSwitchItem
             title={t('Enable drag and drop sorting')}
             checked={field.decoratorProps.dragSort}
             onChange={(dragSort) => {
@@ -159,14 +159,14 @@ export const GroupTreeDesigner = () => {
             }}
           />
         )}
-        <SchemaSettings.DataScope
+        <SchemaSettingsDataScope
           collectionName={name}
           defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
           form={form}
           onSubmit={onDataScopeSubmit}
         />
         {!dragSort && (
-          <SchemaSettings.ModalItem
+          <SchemaSettingsModalItem
             title={t('Set default sorting rules')}
             components={{ ArrayItems }}
             schema={
@@ -259,7 +259,7 @@ export const GroupTreeDesigner = () => {
             }}
           />
         )}
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           title={t('Records per page')}
           value={field.decoratorProps?.params?.pageSize || 20}
           options={[
@@ -283,13 +283,13 @@ export const GroupTreeDesigner = () => {
             });
           }}
         />
-        <SchemaSettings.ConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
-        {supportTemplate && <SchemaSettings.Divider />}
+        <SchemaSettingsConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
+        {supportTemplate && <SchemaSettingsDivider />}
         {supportTemplate && (
-          <SchemaSettings.Template componentName={'Table'} collectionName={name} resourceName={defaultResource} />
+          <SchemaSettingsTemplate componentName={'Table'} collectionName={name} resourceName={defaultResource} />
         )}
-        <SchemaSettings.Divider />
-        <SchemaSettings.Remove
+        <SchemaSettingsDivider />
+        <SchemaSettingsRemove
           removeParentsIfNoChildren
           breakRemoveOn={{
             'x-component': 'Grid',

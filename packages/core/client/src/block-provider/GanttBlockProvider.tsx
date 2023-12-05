@@ -6,10 +6,10 @@ import { BlockProvider, useBlockRequestContext } from './BlockProvider';
 import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAPIClient, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
-import { getWorkDays} from '../index';
+import { getWorkDays } from '../index';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import {flattenTree as flattenTree2} from '@nocobase/utils';
+import { flattenTree as flattenTree2 } from '@nocobase/utils';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token, holidays) => {
@@ -235,44 +235,50 @@ const InternalGanttBlockProvider = (props) => {
   const [holidays, setHolidays] = useState<any>([]);
   const api = useAPIClient();
   useEffect(() => {
-    if(!service.loading){
-      const data = flattenTree2(service.data?.data,[])||[];
-      const starts = data.slice(0, data.length).map((item)=>{
+    if (!service.loading) {
+      const data = flattenTree2(service.data?.data, []) || [];
+      const starts = data.slice(0, data.length).map((item) => {
         return item[fieldNames.start];
-      })
-      const ends =  data.slice(0, data.length).map((item)=>{
-        return item[fieldNames.start];
-      })
-      const dates = Array.from(new Set([...starts,...ends])).filter((date)=>{
-        return date;
-      }).map((date)=>{
-        return dayjs(date);
       });
-      const minDate= dayjs.min(dates).startOf('year');
-      const maxDate = dayjs.max(dates).endOf('year');
-      const filter = {
-        year:{
-          $dateBetween:[minDate.toISOString(),maxDate.toISOString()]
-        }
-      }
-      api.request({
-        url:'holidays:list',
-        method:'get',
-        params:{
-          filter,
-          paginate:false
-        }
-      }).then((res)=>{
-        let dates = [];
-         (res.data?.data||[]).map(({holidayConfig})=>{
-         const keys =  Object.keys(holidayConfig);
-         dates = dates.concat(keys);
+      const ends = data.slice(0, data.length).map((item) => {
+        return item[fieldNames.start];
+      });
+      const dates = Array.from(new Set([...starts, ...ends]))
+        .filter((date) => {
+          return date;
+        })
+        .map((date) => {
+          return dayjs(date);
         });
-        const value =   Array.from(new Set(dates));
-        setHolidays(value);
-      });
+      if (dates.length > 0) {
+        const minDate = dayjs.min(dates).startOf('year');
+        const maxDate = dayjs.max(dates).endOf('year');
+        const filter = {
+          year: {
+            $dateBetween: [minDate.toISOString(), maxDate.toISOString()],
+          },
+        };
+        api
+          .request({
+            url: 'holidays:list',
+            method: 'get',
+            params: {
+              filter,
+              paginate: false,
+            },
+          })
+          .then((res) => {
+            let dates = [];
+            (res.data?.data || []).map(({ holidayConfig }) => {
+              const keys = Object.keys(holidayConfig);
+              dates = dates.concat(keys);
+            });
+            const value = Array.from(new Set(dates));
+            setHolidays(value);
+          });
+      }
     }
-  },[service.loading]);
+  }, [service.loading]);
 
   return (
     <GanttBlockContext.Provider
@@ -288,7 +294,7 @@ const InternalGanttBlockProvider = (props) => {
         rightSize,
         token,
         preProcessData,
-        holidays
+        holidays,
       }}
     >
       {props.children}
@@ -427,24 +433,25 @@ export const GanttBlockProvider = (props) => {
   }, [props.params.filter]);
   const params = useMemo(() => {
     const _appends = Array.from(new Set([...(props.params.appends || [])]));
-    const _params:any = {
-     filter: filter,
-     tree: true,
-     paginate: false,
-     appends: _appends,
-   };
+    const _params: any = {
+      filter: filter,
+      tree: true,
+      paginate: false,
+      appends: _appends,
+    };
 
-    if(sortVisible){
+    if (sortVisible) {
       const sortField: any = _fields.filter((field) => {
         return field.name == sort;
       })[0];
-      const sortName = typeof sortField?.sortName == 'function' ? sortField?.sortName(sortField) : sortField?.name || sort;
-      _params.sort = '-'+sortName;
-    }else if(sort){
+      const sortName =
+        typeof sortField?.sortName == 'function' ? sortField?.sortName(sortField) : sortField?.name || sort;
+      _params.sort = '-' + sortName;
+    } else if (sort) {
       _params.sort = sort;
     }
     return {
-     ..._params
+      ..._params,
     };
   }, [filter, sort]);
   return (
@@ -474,7 +481,6 @@ export const GanttBlockProvider = (props) => {
         rowKey={rowKey}
         setRowKey={setRowKey}
       />
-      
     </TableBlockProvider>
   );
 };

@@ -4,7 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { FixedBlockDesignerItem, useCompile, useDesignable } from '../..';
 import { useFormBlockContext, useGanttBlockContext } from '../../../block-provider';
 import { useCollection } from '../../../collection-manager';
-import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
+import {
+  GeneralSchemaDesigner,
+  SchemaSettingsBlockTitleItem,
+  SchemaSettingsDataScope,
+  SchemaSettingsDivider,
+  SchemaSettingsModalItem,
+  SchemaSettingsRemove,
+  SchemaSettingsSelectItem,
+  SchemaSettingsTemplate,
+} from '../../../schema-settings';
 import { useSchemaTemplate } from '../../../schema-templates';
 
 const useOptions = (type = 'string') => {
@@ -62,9 +71,8 @@ export const GanttDesigner = () => {
   const groupValue = fieldSchema?.['x-decorator-props']?.['group'];
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
-      <SchemaSettings.BlockTitleItem />
-      <FixedBlockDesignerItem />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsBlockTitleItem />
+      <SchemaSettingsSelectItem
         title={t('Title field')}
         value={fieldNames.title}
         options={useTitleFields()}
@@ -85,7 +93,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('默认分组')}
         value={groupValue}
         options={useGroupFields()}
@@ -103,7 +111,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Time scale')}
         value={fieldNames.range || 'day'}
         options={[
@@ -133,7 +141,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Start date field')}
         value={fieldNames.start}
         options={useOptions('date')}
@@ -152,7 +160,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('End date field')}
         value={fieldNames.end}
         options={useOptions('date')}
@@ -171,7 +179,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Progress field')}
         value={fieldNames.progress}
         options={useOptions('float')}
@@ -190,7 +198,7 @@ export const GanttDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.ModalItem
+      <SchemaSettingsModalItem
         title={t('设置面板属性')}
         schema={
           {
@@ -222,7 +230,7 @@ export const GanttDesigner = () => {
         }}
       />
 
-      <SchemaSettings.DataScope
+      <SchemaSettingsDataScope
         collectionName={name}
         defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
         form={form}
@@ -240,10 +248,10 @@ export const GanttDesigner = () => {
           });
         }}
       />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Template componentName={'Gantt'} collectionName={name} resourceName={defaultResource} />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsDivider />
+      <SchemaSettingsTemplate componentName={'Gantt'} collectionName={name} resourceName={defaultResource} />
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

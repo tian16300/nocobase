@@ -1,6 +1,5 @@
 import { Plugin } from '@nocobase/client';
 import { FormLayout } from '@formily/antd-v5';
-import { DataItemSelectBlockProvider, DataSelectBlockProvider, PrjPlanCompareBlockProvider } from './provider';
 import {
   BomPrjCost,
   DataItemSelect,
@@ -37,7 +36,6 @@ export class PluginPrjManagerClient extends Plugin {
       useFormSelectBlockProps,
       useFormSelectOptionsProps,
       useDataSelectBlockContext,
-
       useDataSelectTabsProps,
       usePrjPlanCompareOptionsProps,
       usePrjPlanCompareTableBlockProps,
@@ -61,7 +59,25 @@ export class PluginPrjManagerClient extends Plugin {
       PrjBomTree
 
     });
-    this.app.addProviders([DataSelectBlockProvider, PrjPlanCompareBlockProvider,DataItemSelectBlockProvider]);
+    this.addSchemaInitializers();
+  }
+  addSchemaInitializers(){
+    const blockInitializers = this.app.schemaInitializerManager.get('BlockInitializers');    
+    blockInitializers?.add('dataBlocks.dataItemSelectBlock', {
+      icon: 'CheckSquareOutlined',
+      title: '下拉列表',
+      Component: 'DataItemSelect.initializer'
+    });
+    blockInitializers?.add('otherBlocks.dataSelectBlock', {
+      icon: 'CheckSquareOutlined',
+      title: '项目详情',
+      Component: 'DataSelect.initializer'
+    });
+    blockInitializers?.add('otherBlocks.prjPlanCompareBlock', {
+      icon: 'CheckSquareOutlined',
+      title: '计划对比',
+      Component: 'PrjPlanCompare.initializer'
+    });
   }
 }
 

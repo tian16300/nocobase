@@ -41,7 +41,6 @@ export * from './RecordAssociationBlockInitializer';
 export * from './RecordAssociationGridCardBlockInitializer';
 export * from './RecordAssociationListBlockInitializer';
 export * from './RecordAssociationCalendarBlockInitializer';
-export * from './RecordAssociationGanttBlockInitializer';
 export * from './RecordAssociationDetailsBlockInitializer';
 export * from './RecordAssociationFormBlockInitializer';
 export * from './RecordFormBlockInitializer';

@@ -15,7 +15,15 @@ import {
   useSchemaTemplate,
   useSortFields,
   removeNullCondition,
-  useFormBlockContext
+  useFormBlockContext,
+  SchemaSettingsBlockTitleItem,
+  SchemaSettingsSwitchItem,
+  SchemaSettingsDataScope,
+  SchemaSettingsModalItem,
+  SchemaSettingsConnectDataBlocks,
+  SchemaSettingsDivider,
+  SchemaSettingsTemplate,
+  SchemaSettingsRemove
 } from '@nocobase/client';
 import { useDataSelectBlockContext } from './DataSelectFieldProvider';
 
@@ -76,9 +84,9 @@ export const DataSelectDesigner = () => {
 
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
-      <SchemaSettings.BlockTitleItem />
+      <SchemaSettingsBlockTitleItem />
       {collection?.tree && collectionField?.collectionName === collectionField?.target && (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           title={t('Tree table')}
           defaultChecked={true}
           checked={treeCollection ? field.decoratorProps.treeTable !== false : false}
@@ -97,14 +105,14 @@ export const DataSelectDesigner = () => {
           }}
         />
       )}
-      <SchemaSettings.DataScope
+      <SchemaSettingsDataScope
         collectionName={name}
         defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
         form={form}
         onSubmit={onDataScopeSubmit}
       />
       {/* <FixedBlockDesignerItem /> */}
-      <SchemaSettings.ModalItem
+      <SchemaSettingsModalItem
         title={t('Set default sorting rules')}
         components={{ ArrayItems }}
         schema={
@@ -196,13 +204,13 @@ export const DataSelectDesigner = () => {
           service.run({ ...service.params?.[0], sort: sortArr });
         }}
       />
-      <SchemaSettings.ConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
-      {supportTemplate && <SchemaSettings.Divider />}
+      <SchemaSettingsConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
+      {supportTemplate && <SchemaSettingsDivider />}
       {supportTemplate && (
-        <SchemaSettings.Template componentName={'Select'} collectionName={name} resourceName={defaultResource} />
+        <SchemaSettingsTemplate componentName={'Select'} collectionName={name} resourceName={defaultResource} />
       )}
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

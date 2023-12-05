@@ -24,8 +24,8 @@ function UpdateFormDesigner() {
 
   return (
     <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettings.BlockTitleItem />
-      <SchemaSettings.ActionModalItem
+      <SchemaSettingsBlockTitleItem />
+      <SchemaSettingsActionModalItem
         title={t('Filter settings', { ns: NAMESPACE })}
         schema={{
           name: 'filter',
@@ -55,9 +55,9 @@ function UpdateFormDesigner() {
           dn.refresh();
         }}
       />
-      <SchemaSettings.LinkageRules collectionName={name} />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsLinkageRules collectionName={name} />
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

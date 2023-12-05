@@ -12,11 +12,11 @@ function CreateFormDesigner() {
 
   return (
     <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettings.BlockTitleItem />
-      <SchemaSettings.LinkageRules collectionName={name} />
-      <SchemaSettings.DataTemplates collectionName={name} />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsBlockTitleItem />
+      <SchemaSettingsLinkageRules collectionName={name} />
+      <SchemaSettingsDataTemplates collectionName={name} />
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

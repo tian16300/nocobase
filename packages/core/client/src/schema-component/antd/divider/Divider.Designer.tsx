@@ -1,5 +1,5 @@
 import React from "react";
-import { GeneralSchemaDesigner, SchemaSettings } from "../../../schema-settings";
+import { GeneralSchemaDesigner, SchemaSettingsRemove } from "../../../schema-settings";
 import { useTranslation } from "react-i18next";
 
 
@@ -11,7 +11,7 @@ export const Designer = () => {
     return (
       <GeneralSchemaDesigner>
         
-        <SchemaSettings.Remove
+        <SchemaSettingsRemove
           key="remove"
           removeParentsIfNoChildren
           confirm={{

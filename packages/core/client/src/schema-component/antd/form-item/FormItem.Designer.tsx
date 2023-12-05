@@ -10,7 +10,7 @@ import { useFormBlockContext } from '../../../block-provider/FormBlockProvider';
 import { Collection, useCollection, useCollectionManager } from '../../../collection-manager';
 import { useRecord } from '../../../record-provider';
 import { GeneralSchemaItems } from '../../../schema-items/GeneralSchemaItems';
-import { GeneralSchemaDesigner, SchemaSettings, isPatternDisabled } from '../../../schema-settings';
+import { GeneralSchemaDesigner, SchemaSettingsDataFormat, SchemaSettingsDataScope, SchemaSettingsDefaultValue, SchemaSettingsDivider, SchemaSettingsItem, SchemaSettingsModalItem, SchemaSettingsModalItem, SchemaSettingsRemove, SchemaSettingsSelectItem, SchemaSettingsSortingRule, SchemaSettingsSwitchItem, isPatternDisabled } from '../../../schema-settings';
 import { ActionType } from '../../../schema-settings/LinkageRules/type';
 import { VariableInput, getShouldChange } from '../../../schema-settings/VariableInput/VariableInput';
 import useIsAllowToSetDefaultValue from '../../../schema-settings/hooks/useIsAllowToSetDefaultValue';
@@ -92,7 +92,7 @@ export function Designer() {
     <GeneralSchemaDesigner>
       <GeneralSchemaItems />
       {!form?.readPretty && isFileField ? (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           key="quick-upload"
           title={t('Quick upload')}
           checked={fieldSchema['x-component-props']?.quickUpload !== (false as boolean)}
@@ -112,7 +112,7 @@ export function Designer() {
         />
       ) : null}
       {!form?.readPretty && isFileField ? (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           key="select-file"
           title={t('Select file')}
           checked={fieldSchema['x-component-props']?.selectFile !== (false as boolean)}
@@ -132,7 +132,7 @@ export function Designer() {
         />
       ) : null}
       {form && !form?.readPretty && validateSchema && (
-        <SchemaSettings.ModalItem
+        <SchemaSettingsModalItem
           title={t('Set validation rules')}
           components={{ ArrayCollapse, FormLayout }}
           schema={
@@ -249,9 +249,9 @@ export function Designer() {
           }}
         />
       )}
-      {isAllowToSetDefaultValue() && <SchemaSettings.DefaultValue />}
+      {isAllowToSetDefaultValue() && <SchemaSettingsDefaultValue />}
       {isSelectFieldMode && (
-        <SchemaSettings.ModalItem
+        <SchemaSettingsModalItem
           title={'追加字段'}
           initialValues={{
             appends: fieldSchema['x-component-props']?.service?.params?.appends,
@@ -297,10 +297,10 @@ export function Designer() {
 
             dn.refresh();
           }}
-        ></SchemaSettings.ModalItem>
+        ></SchemaSettingsModalItem>
       )}
       {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && (
-        <SchemaSettings.DataScope
+        <SchemaSettingsDataScope
           collectionName={collectionField?.target}
           defaultFilter={fieldSchema?.['x-component-props']?.service?.params?.filter || {}}
           form={form}
@@ -333,9 +333,9 @@ export function Designer() {
           }}
         />
       )}
-      {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && <SchemaSettings.SortingRule />}
+      {(isSelectFieldMode || isSubTableFieldMode) && !field.readPretty && <SchemaSettingsSortingRule />}
       {showFieldMode && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="field-mode"
           title={t('Field component')}
           options={fieldModeOptions}
@@ -368,7 +368,7 @@ export function Designer() {
       )}
       {showFieldMode && isSubTableFieldMode && (
         <>
-          <SchemaSettings.ModalItem
+          <SchemaSettingsModalItem
             title="子表格设置"
             schema={{
               type: 'object',
@@ -444,11 +444,11 @@ export function Designer() {
               });
               refresh();
             }}
-          ></SchemaSettings.ModalItem>
+          ></SchemaSettingsModalItem>
         </>
       )}
       {showModeSelect && (
-        <SchemaSettings.Item title="Popup size">
+        <SchemaSettingsItem title="Popup size">
           <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
             {t('Popup size')}
             <Select
@@ -476,10 +476,10 @@ export function Designer() {
               style={{ textAlign: 'right', minWidth: 100 }}
             />
           </div>
-        </SchemaSettings.Item>
+        </SchemaSettingsItem>
       )}
       {!field.readPretty && isAssociationField && ['Picker'].includes(fieldMode) && (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           key="allowAddNew"
           title={t('Allow add new data')}
           checked={fieldSchema['x-add-new'] as boolean}
@@ -521,7 +521,7 @@ export function Designer() {
         />
       )}
       {!field.readPretty && isAssociationField && ['Select'].includes(fieldMode) && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="add-mode"
           title={t('Quick create')}
           options={[
@@ -572,7 +572,7 @@ export function Designer() {
         />
       )}
       {isAssociationField && IsShowMultipleSwitch() ? (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           key="multiple"
           title={t('Allow multiple')}
           checked={
@@ -597,7 +597,7 @@ export function Designer() {
         />
       ) : null}
       {IsShowMultipleSwitch() && isSubFormMode ? (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           key="allowDissociate"
           title={t('Allow dissociate')}
           checked={fieldSchema['x-component-props']?.allowDissociate !== false}
@@ -622,7 +622,7 @@ export function Designer() {
 
       {/* 至少选几条 最大选多少条 */}
       {((isAssociationField && isMultiple) || isSubTableFieldMode) && (
-        <SchemaSettings.ModalItem
+        <SchemaSettingsModalItem
           title={t('设置数组长度')}
           schema={{
             type: 'object',
@@ -658,11 +658,11 @@ export function Designer() {
             });
             dn.refresh();
           }}
-        ></SchemaSettings.ModalItem>
+        ></SchemaSettingsModalItem>
       )}
 
       {field.readPretty && options.length > 0 && fieldSchema['x-component'] === 'CollectionField' && !isFileField && (
-        <SchemaSettings.SwitchItem
+        <SchemaSettingsSwitchItem
           title={t('Enable link')}
           checked={fieldSchema['x-component-props']?.enableLink !== false}
           onChange={(flag) => {
@@ -686,7 +686,7 @@ export function Designer() {
 
       <EditDataBlockSelectorAction />
       {form && !form?.readPretty && !isPatternDisabled(fieldSchema) && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="pattern"
           title={t('Pattern')}
           options={[
@@ -741,7 +741,7 @@ export function Designer() {
         />
       )}
       {options.length > 0 && isAssociationField && fieldMode !== 'SubTable' && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="title-field"
           title={t('Title field')}
           options={options}
@@ -777,10 +777,10 @@ export function Designer() {
           }}
         />
       )}
-      {isDateField && <SchemaSettings.DataFormat fieldSchema={fieldSchema} />}
+      {isDateField && <SchemaSettingsDataFormat fieldSchema={fieldSchema} />}
 
       {isAttachmentField && field.readPretty && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="size"
           title={t('Size')}
           options={[
@@ -807,7 +807,7 @@ export function Designer() {
       )}
 
       {isAssociationField && ['Tag'].includes(fieldMode) && (
-        <SchemaSettings.SelectItem
+        <SchemaSettingsSelectItem
           key="title-field"
           title={t('Tag color field')}
           options={colorFieldOptions}
@@ -828,8 +828,8 @@ export function Designer() {
           }}
         />
       )}
-      {collectionField && <SchemaSettings.Divider />}
-      <SchemaSettings.Remove
+      {collectionField && <SchemaSettingsDivider />}
+      <SchemaSettingsRemove
         key="remove"
         removeParentsIfNoChildren
         confirm={{

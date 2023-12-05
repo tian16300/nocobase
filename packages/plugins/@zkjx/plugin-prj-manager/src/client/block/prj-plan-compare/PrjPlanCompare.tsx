@@ -7,9 +7,12 @@ import {
   IField,
   Icon,
   SchemaInitializer,
+  SchemaInitializerItem,
   css,
   useBlockRequestContext,
   useGanttBlockContext,
+  useSchemaInitializer,
+  useSchemaInitializerItem,
   useTableBlockContext,
   useTableSize,
   useToken,
@@ -62,11 +65,12 @@ PrjPlanCompare.Wrap = ({ children }) => {
 PrjPlanCompare.Designer = Gantt.Designer;
 PrjPlanCompare.Decorator = PrjPlanCompareProvider;
 
-PrjPlanCompare.initializer = (props) => {
-  const { insert } = props;
+PrjPlanCompare.initializer = () => {
+  const itemConfig = useSchemaInitializerItem();
+  const { insert } = useSchemaInitializer();
   return (
-    <SchemaInitializer.Item
-      {...props}
+    <SchemaInitializerItem
+      {...itemConfig}
       icon={<TableOutlined />}
       onClick={() => {
         const s = createPrjPlanCompare();

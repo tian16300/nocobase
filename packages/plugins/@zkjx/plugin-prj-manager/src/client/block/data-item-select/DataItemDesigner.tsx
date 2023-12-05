@@ -16,7 +16,10 @@ import {
   useSortFields,
   removeNullCondition,
   useFormBlockContext,
-  SchemaSettingOptions
+  SchemaSettingOptions,
+  SchemaSettingsDivider,
+  SchemaSettingsRemove,
+  SchemaSettingsBlockTitleItem
 } from '@nocobase/client';
 import { useDataItemSelectBlockContext } from './DataItemSelectFieldProvider';
 
@@ -80,134 +83,10 @@ export const DataItemDesigner = () => {
 
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
-      <SchemaSettingOptions.EditTitle />
-      <SchemaSettingOptions.EditTitleField />
-      {/* {collection?.tree && collectionField?.collectionName === collectionField?.target && (
-        <SchemaSettings.SwitchItem
-          title={t('Tree table')}
-          defaultChecked={true}
-          checked={treeCollection ? field.decoratorProps.treeTable !== false : false}
-          onChange={(flag) => {
-            field.decoratorProps.treeTable = flag;
-            fieldSchema['x-decorator-props'].treeTable = flag;
-            const params = {
-              ...service.params?.[0],
-              tree: flag ? true : null,
-            };
-            dn.emit('patch', {
-              schema: fieldSchema,
-            });
-            dn.refresh();
-            service.run(params);
-          }}
-        />
-      )}
-      <SchemaSettings.DataScope
-        collectionName={name}
-        defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
-        form={form}
-        onSubmit={onDataScopeSubmit}
-      />
-      {<FixedBlockDesignerItem /> }
-      <SchemaSettings.ModalItem
-        title={t('Set default sorting rules')}
-        components={{ ArrayItems }}
-        schema={
-          {
-            type: 'object',
-            title: t('Set default sorting rules'),
-            properties: {
-              sort: {
-                type: 'array',
-                default: sort,
-                'x-component': 'ArrayItems',
-                'x-decorator': 'FormItem',
-                items: {
-                  type: 'object',
-                  properties: {
-                    space: {
-                      type: 'void',
-                      'x-component': 'Space',
-                      properties: {
-                        sort: {
-                          type: 'void',
-                          'x-decorator': 'FormItem',
-                          'x-component': 'ArrayItems.SortHandle',
-                        },
-                        field: {
-                          type: 'string',
-                          enum: sortFields,
-                          required: true,
-                          'x-decorator': 'FormItem',
-                          'x-component': 'Select',
-                          'x-component-props': {
-                            style: {
-                              width: 260,
-                            },
-                          },
-                        },
-                        direction: {
-                          type: 'string',
-                          'x-decorator': 'FormItem',
-                          'x-component': 'Radio.Group',
-                          'x-component-props': {
-                            optionType: 'button',
-                          },
-                          enum: [
-                            {
-                              label: t('ASC'),
-                              value: 'asc',
-                            },
-                            {
-                              label: t('DESC'),
-                              value: 'desc',
-                            },
-                          ],
-                        },
-                        remove: {
-                          type: 'void',
-                          'x-decorator': 'FormItem',
-                          'x-component': 'ArrayItems.Remove',
-                        },
-                      },
-                    },
-                  },
-                },
-                properties: {
-                  add: {
-                    type: 'void',
-                    title: t('Add sort field'),
-                    'x-component': 'ArrayItems.Addition',
-                  },
-                },
-              },
-            },
-          } as ISchema
-        }
-        onSubmit={({ sort }) => {
-          const sortArr = sort.map((item) => {
-            return item.direction === 'desc' ? `-${item.field}` : item.field;
-          });
-          const params = field.decoratorProps.params || {};
-          params.sort = sortArr;
-          field.decoratorProps.params = params;
-          fieldSchema['x-decorator-props']['params'] = params;
-          dn.emit('patch', {
-            schema: {
-              ['x-uid']: fieldSchema['x-uid'],
-              'x-decorator-props': fieldSchema['x-decorator-props'],
-            },
-          });
-          service.run({ ...service.params?.[0], sort: sortArr });
-        }}
-      />
-      <SchemaSettings.ConnectDataBlocks type={FilterBlockType.TABLE} emptyDescription={t('No blocks to connect')} />
-      {supportTemplate && <SchemaSettings.Divider />}
-      {supportTemplate && (
-        <SchemaSettings.Template componentName={'Select'} collectionName={name} resourceName={defaultResource} />
-      )} */}
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsBlockTitleItem />
+      
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

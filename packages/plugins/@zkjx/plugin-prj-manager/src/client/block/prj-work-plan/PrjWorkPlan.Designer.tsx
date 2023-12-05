@@ -2,6 +2,13 @@ import {
   FixedBlockDesignerItem,
   GeneralSchemaDesigner,
   SchemaSettings,
+  SchemaSettingsBlockTitleItem,
+  SchemaSettingsDataScope,
+  SchemaSettingsDivider,
+  SchemaSettingsModalItem,
+  SchemaSettingsRemove,
+  SchemaSettingsSelectItem,
+  SchemaSettingsTemplate,
   useCollection,
   useCompile,
   useDesignable,
@@ -74,9 +81,9 @@ export const PrjWorkPlanDesigner = () => {
   });
   return (
     <GeneralSchemaDesigner template={template} title={title || name}>
-      <SchemaSettings.BlockTitleItem />
+      <SchemaSettingsBlockTitleItem />
       <FixedBlockDesignerItem />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Title field')}
         value={fieldNames.title}
         options={useTitleFields()}
@@ -97,7 +104,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('默认分组')}
         value={groupValue}
         options={useGroupFields()}
@@ -115,7 +122,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Time scale')}
         value={fieldNames.range || 'day'}
         options={[
@@ -145,7 +152,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Start date field')}
         value={fieldNames.start}
         options={useOptions('date')}
@@ -164,7 +171,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('End date field')}
         value={fieldNames.end}
         options={useOptions('date')}
@@ -183,7 +190,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.SelectItem
+      <SchemaSettingsSelectItem
         title={t('Progress field')}
         value={fieldNames.progress}
         options={useOptions('float')}
@@ -202,7 +209,7 @@ export const PrjWorkPlanDesigner = () => {
           dn.refresh();
         }}
       />
-      <SchemaSettings.ModalItem
+      <SchemaSettingsModalItem
         title={t('设置其他属性')}
         schema={
           {
@@ -248,7 +255,7 @@ export const PrjWorkPlanDesigner = () => {
         }}
       />
 
-      <SchemaSettings.DataScope
+      <SchemaSettingsDataScope
         collectionName={name}
         defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}
         form={form}
@@ -266,10 +273,10 @@ export const PrjWorkPlanDesigner = () => {
           });
         }}
       />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Template componentName={'Gantt'} collectionName={name} resourceName={defaultResource} />
-      <SchemaSettings.Divider />
-      <SchemaSettings.Remove
+      <SchemaSettingsDivider />
+      <SchemaSettingsTemplate componentName={'Gantt'} collectionName={name} resourceName={defaultResource} />
+      <SchemaSettingsDivider />
+      <SchemaSettingsRemove
         removeParentsIfNoChildren
         breakRemoveOn={{
           'x-component': 'Grid',

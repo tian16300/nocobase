@@ -30,7 +30,6 @@ const useLazyLoadDisplayAssociationFieldsOfForm = () => {
   const formValue = _.cloneDeep(isInSubForm || isInSubTable ? subFormValue : form.values);
   const collectionFieldRef = useRef(null);
   const sourceCollectionFieldRef = useRef(null);
-  console.log('useLazyLoadDisplayAssociationFieldsOfForm 加载');
 
   if (collectionFieldRef.current == null && isDisplayField(schemaName)) {
     collectionFieldRef.current = getCollectionJoinField(`${name}.${schemaName}`);

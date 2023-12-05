@@ -1,8 +1,7 @@
-import { useFieldSchema } from '@formily/react';
 import React from 'react';
+import { GeneralSchemaDesigner } from '../../../schema-settings';
 import { useTranslation } from 'react-i18next';
 import { useCollection, useCollectionManager } from '../../../collection-manager';
-import { GeneralSchemaDesigner, SchemaSettings } from '../../../schema-settings';
 import {
   EditComponent,
   EditDataBlockSelectorAction,
@@ -16,33 +15,5 @@ import {
 import { DataBlockSelectorAction } from '..';
 
 export const FilterFormDesigner = () => {
-  const { getCollectionJoinField } = useCollectionManager();
-  const { getField } = useCollection();
-  const { t } = useTranslation();
-  const fieldSchema = useFieldSchema();
-  const collectionField = getField(fieldSchema['name']) || getCollectionJoinField(fieldSchema['x-collection-field']);
-
-  return (
-    <GeneralSchemaDesigner>
-      <EditTitle />
-      <EditDescription />
-      <EditTooltip />
-      <EditValidationRules />
-      <EditComponent />
-      <SchemaSettings.DefaultValue />
-      <EditOperator />
-      <EditTitleField />
-      {collectionField ? <SchemaSettings.Divider /> : null}
-      <SchemaSettings.Remove
-        key="remove"
-        removeParentsIfNoChildren
-        confirm={{
-          title: t('Delete field'),
-        }}
-        breakRemoveOn={{
-          'x-component': 'Grid',
-        }}
-      />
-    </GeneralSchemaDesigner>
-  );
+  return <GeneralSchemaDesigner schemaSettings="FilterFormItemSettings"></GeneralSchemaDesigner>;
 };
