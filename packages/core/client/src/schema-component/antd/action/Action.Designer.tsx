@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
 import { usePlugin } from '../../../application/hooks';
 import { useSchemaToolbar } from '../../../application/schema-toolbar';
-import {  SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
+import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';
 import { FlagProvider } from '../../../flag-provider';
 import { useRecord } from '../../../record-provider';
@@ -82,7 +82,6 @@ const MenuGroup = (props) => {
     <SchemaSettingsItemGroup title={`${t('Customize')} > ${actionTitle}`}>{props.children}</SchemaSettingsItemGroup>
   );
 };
-
 
 function SaveMode() {
   const { dn } = useDesignable();
@@ -840,7 +839,7 @@ function WorkflowConfig() {
 }
 
 const SetInheriteFields = (props) => {
-  const {collectionName: pCollectionName} = props;
+  const { collectionName: pCollectionName } = props;
   const { dn } = useDesignable();
   const { t } = useTranslation();
   const field = useField();
@@ -889,7 +888,7 @@ const SetInheriteFields = (props) => {
               'x-decorator': 'FormItem',
               'x-component': 'Select',
               'x-component-props': {
-                options: collectionList
+                options: collectionList,
               },
             },
             selectAll: {
@@ -942,7 +941,7 @@ const SetInheriteFields = (props) => {
                   },
                 },
               ],
-              default: inheritValues
+              default: inheritValues,
             },
           },
         } as ISchema
@@ -952,7 +951,7 @@ const SetInheriteFields = (props) => {
         field.componentProps.inheritsKeys = fields;
         fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
         fieldSchema['x-component-props'].inheritsKeys = fields;
-        fieldSchema['x-component-props']
+        fieldSchema['x-component-props'];
         fieldSchema['x-component-props'].treeData = treeData;
         dn.emit('patch', {
           schema: {
@@ -967,6 +966,45 @@ const SetInheriteFields = (props) => {
     />
   );
 };
+
+function SchemaActionScopeBind(props) {
+  const { t } = useTranslation();
+  const { initialValues, onSubmit } = props;
+  const enumOptions = [...treeFormBlockActionOptions,{
+    label: '钉钉同步员工',
+    value: 'syncUsersFromDingTalk',
+  
+  }]
+  return (
+    <SchemaSettingsModalItem
+      title={t('功能绑定')}
+      schema={
+        {
+          type: 'object',
+          title: t('功能绑定'),
+          properties: {
+            usePropsOption: {
+              type: 'string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              title: t('功能选择'),
+              enum: enumOptions,
+            },
+            useProps: {
+              type: 'string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              title: t('自定义功能'),
+            },
+          },
+        } as ISchema
+      }
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
 export const actionSettingsItems: SchemaSettingOptions['items'] = [
   {
     name: 'Customize',
@@ -1006,6 +1044,40 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
           return {
             ...linkageRulesProps,
             collectionName: name,
+          };
+        },
+      },
+      {
+        name: 'actionScopeBind',
+        Component: SchemaActionScopeBind,
+        useComponentProps() {
+          const fieldSchema = useFieldSchema();
+          const { dn } = useDesignable();
+          let defValue = fieldSchema['x-component-props']?.['useProps'];
+          const initialValues = {};
+          if (defValue) {
+            defValue = defValue.replace('{{', '').replace('}}', '');
+            initialValues['usePropsOption'] = defValue.trim();
+            initialValues['useProps'] = defValue.trim();
+          }
+          
+          const onSubmit = ({ useProps, usePropsOption }) => {
+            const funcName = usePropsOption || useProps;
+            fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            fieldSchema['x-component-props'].useProps = `{{ ${funcName} }}`;
+            dn.emit('patch', {
+              schema: {
+                ['x-uid']: fieldSchema['x-uid'],
+                'x-component-props': {
+                  ...fieldSchema['x-component-props'],
+                },
+              },
+            });
+            dn.refresh();
+          }
+          return {
+            initialValues,
+            onSubmit,
           };
         },
       },
@@ -1156,6 +1228,5 @@ export const ActionDesigner = (props) => {
     ></GeneralSchemaDesigner>
   );
 };
-
 
 ActionDesigner.RemoveButton = RemoveButton;

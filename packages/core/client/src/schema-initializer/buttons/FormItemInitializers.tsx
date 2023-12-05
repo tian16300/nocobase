@@ -35,6 +35,7 @@ const AssociatedFields = () => {
     readPretty: true,
     block: 'Form',
   });
+  const { t } = useTranslation();
   if (associationFields.length === 0) return null;
   const schema: any = [
     {
