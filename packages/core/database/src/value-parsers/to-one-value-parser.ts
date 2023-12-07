@@ -11,8 +11,23 @@ export class ToOneValueParser extends BaseValueParser {
     const key = this.ctx.column.dataIndex[1];
     const repository = this.field.database.getRepository(this.field.target) as Repository;
     let instance = _instance;
+    const isDict = 'dic' == this.field.options?.interface;    
     if (!instance) {
-      instance = await repository.findOne({ filter: { [key]: this.trim(value), transaction } });
+      let filter:any = {
+        [key]: this.trim(value)
+      }
+      if(isDict){
+        filter = {
+          $and:[{
+            [key]: this.trim(value)
+
+          },{
+            dicCode: this.field.options?.dicCode   
+          }]
+        }
+
+      }
+      instance = await repository.findOne({ filter: filter, transaction });
     }
     if (instance) {
       this.value = instance.get(this.field.targetKey || 'id');

@@ -16,6 +16,7 @@ export class PluginEnterpriseIntegrationServer extends Plugin {
     });
     this.dingTalkService = new DingTalkService(this.app, this.cache);
     this.app.resourcer.registerActionHandler('users:syncFromDingTalk', this.dingTalkService.syncUserListFromDingTalk.bind(this.dingTalkService));
+    this.app.resourcer.registerActionHandler('notifications:sendMsgToUserByDing', this.dingTalkService.sendMsgToUserByDing.bind(this.dingTalkService));
   }
 
   async install(options?: InstallOptions) {}

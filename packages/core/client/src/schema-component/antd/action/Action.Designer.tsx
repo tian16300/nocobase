@@ -974,6 +974,9 @@ function SchemaActionScopeBind(props) {
     label: '钉钉同步员工',
     value: 'syncUsersFromDingTalk',
   
+  },{
+    label: '发送消息给对应用户',
+    value: 'sendMsgToUserByDing'
   }]
   return (
     <SchemaSettingsModalItem

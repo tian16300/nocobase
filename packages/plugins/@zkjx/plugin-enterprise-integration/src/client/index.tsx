@@ -1,5 +1,5 @@
 import { Plugin } from '@nocobase/client';
-import { syncUsersFromDingTalk } from './scopes/syncUsersFromDingTalk';
+import *  as scopes from './scopes';
 
 export class PluginEnterpriseIntegrationClient extends Plugin {
   async afterAdd() {
@@ -11,7 +11,7 @@ export class PluginEnterpriseIntegrationClient extends Plugin {
   // You can get and modify the app instance here
   async load() {
     console.log(this.app);
-    this.app.addScopes({syncUsersFromDingTalk});
+    this.app.addScopes(scopes);
     // this.app.addComponents({})
     // this.app.addScopes({})
     // this.app.addProvider()

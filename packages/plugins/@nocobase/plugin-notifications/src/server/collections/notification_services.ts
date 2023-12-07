@@ -19,7 +19,7 @@ export default {
     {
       title: '配置信息',
       type: 'json',
-      name: 'options',
+      name: 'options'
     },
   ],
 } as CollectionOptions;
