@@ -165,14 +165,16 @@ export class PluginPrjManagerServer extends Plugin {
       const { year: date } = model;
       const year = dayjs(date).year();
       const json = await getHoliday(year);
-      const res = await repo.update({
-        filterByTk: model.get('id'),
-        values: {
-          holidayConfig: json
-        },
-        transaction: options.transaction
-      });
-      this.app.logger.info(`同步${year}年节假日成功`, res);
+      if(json){
+        const res = await repo.update({
+          filterByTk: model.get('id'),
+          values: {
+            holidayConfig: json
+          },
+          transaction: options.transaction
+        });
+        this.app.logger.info(`同步${year}年节假日成功`, res);
+      }     
     });
   }
   async countDays(collectionName, model, options, startName, endName, name) {
