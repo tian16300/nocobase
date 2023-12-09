@@ -7,8 +7,10 @@ import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAPIClient, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
 import { getWorkDays } from '../index';
+import { getWorkDays } from '../index';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { flattenTree as flattenTree2 } from '@nocobase/utils';
 import { flattenTree as flattenTree2 } from '@nocobase/utils';
 
 export const GanttBlockContext = createContext<any>({});
@@ -250,7 +252,7 @@ const InternalGanttBlockProvider = (props) => {
         .map((date) => {
           return dayjs(date);
         });
-      if (dates.length > 0) {
+      if (dates.length) {
         const minDate = dayjs.min(dates).startOf('year');
         const maxDate = dayjs.max(dates).endOf('year');
         const filter = {
