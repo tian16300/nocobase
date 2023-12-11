@@ -7,7 +7,9 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
+import { useApp } from '../../../application';
 import { usePlugin } from '../../../application/hooks';
+import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { useSchemaToolbar } from '../../../application/schema-toolbar';
 import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';
@@ -31,7 +33,6 @@ import {
 import { DefaultValueProvider } from '../../../schema-settings/hooks/useIsAllowToSetDefaultValue';
 import { useLinkageAction } from './hooks';
 import { requestSettingsSchema } from './utils';
-import { useApp } from '../../../application';
 
 const Tree = connect(
   AntdTree,
@@ -1218,7 +1219,7 @@ export const ActionDesigner = (props) => {
   const fieldSchema = useFieldSchema();
   const isDraggable = fieldSchema?.parent['x-component'] !== 'CollectionField';
   const settingsName = `ActionSettings:${fieldSchema['x-action']}`;
-  const defaultActionSettings = 'ActionSettings';
+  const defaultActionSettings = schemaSettings || 'ActionSettings';
   const hasAction = app.schemaSettingsManager.has(settingsName);
   const isAddChildAction = fieldSchema['x-component-props']?.addChild;
   return (

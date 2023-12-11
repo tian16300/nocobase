@@ -10,6 +10,7 @@ import {
   Button,
   Cascader,
   CascaderProps,
+  ConfigProvider,
   Dropdown,
   Empty,
   MenuItemProps,
@@ -955,6 +956,7 @@ export const SchemaSettingsModalItem: FC<SchemaSettingsModalItemProps> = (props)
   const { theme } = useGlobalTheme();
   const ctx = useContext(BlockRequestContext);
   const upLevelActiveFields = useFormActiveFields();
+  const { locale } = useContext(ConfigProvider.ConfigContext);
 
   if (hidden) {
     return null;
@@ -991,7 +993,9 @@ export const SchemaSettingsModalItem: FC<SchemaSettingsModalItemProps> = (props)
                             `}
                           >
                             <APIClientProvider apiClient={apiClient}>
-                              <SchemaComponent components={components} scope={scope} schema={schema} />
+                              <ConfigProvider locale={locale}>
+                                <SchemaComponent components={components} scope={scope} schema={schema} />
+                              </ConfigProvider>
                             </APIClientProvider>
                           </FormLayout>
                         </SchemaComponentOptions>

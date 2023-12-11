@@ -20,6 +20,7 @@ import { useCollectMenuItems, useMenuItem } from '../../../hooks/useMenuItem';
 import { useProps } from '../../hooks/useProps';
 import { MenuDesigner } from './Menu.Designer';
 import { findKeysByUid, findMenuItem } from './util';
+import { useMenuTranslation } from './locale';
 
 const subMenuDesignerCss = css`
   position: relative;
@@ -507,7 +508,7 @@ export const Menu: ComposedMenu = observer(
 
 Menu.Item = observer(
   (props) => {
-    const { t } = useTranslation();
+    const { t } = useMenuTranslation();
     const { pushMenuItem } = useCollectMenuItems();
     const { icon, children, hidden, ...others } = props;
     const schema = useFieldSchema();
@@ -565,7 +566,7 @@ Menu.Item = observer(
 
 Menu.URL = observer(
   (props) => {
-    const { t } = useTranslation();
+    const { t } = useMenuTranslation();
     const { pushMenuItem } = useCollectMenuItems();
     const { icon, children, ...others } = props;
     const schema = useFieldSchema();
@@ -619,7 +620,7 @@ Menu.URL = observer(
 
 Menu.SubMenu = observer(
   (props) => {
-    const { t } = useTranslation();
+    const { t } = useMenuTranslation();
     const { Component, getMenuItems } = useMenuItem();
     const { pushMenuItem } = useCollectMenuItems();
     const { icon, children, ...others } = props;
