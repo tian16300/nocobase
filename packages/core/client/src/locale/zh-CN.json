@@ -40,6 +40,9 @@
   "Unconnected": "未连接",
   "System settings": "系统设置",
   "System title": "系统名称",
+  "System simple title": "系统简称",  
+  "Company Name":"公司名称",
+  "PoweredBy":"版权声明",
   "Setting": "设置",
   "Settings": "设置",
   "Enable": "启用",
@@ -99,7 +102,7 @@
   "Expand all": "全部展开",
   "Expand/Collapse": "展开/折叠",
   "Default collapse": "默认展开",
-  "Tree collection": "树结构表",
+  "Tree collection": "树结构表",  
   "Tree table": "树表格",
   "Parent ID": "父记录ID",
   "Parent": "父记录",
@@ -828,5 +831,11 @@
   "Execute": "执行",
   "Please use a valid SELECT or WITH AS statement": "请使用有效的 SELECT 或 WITH AS 语句",
   "Please confirm the SQL statement first": "请先确认 SQL 语句",
-  "Automatically drop objects that depend on the collection (such as views), and in turn all objects that depend on those objects": "自动删除依赖于该表的对象,以及依赖这些对象的对象"
+  "Automatically drop objects that depend on the collection (such as views), and in turn all objects that depend on those objects": "自动删除依赖于该表的对象,以及依赖这些对象的对象",
+  "Dic Name":"字典名称",
+  "Dic Code":"字典编码",
+  "DicItem Name":"名称",
+  "DicItem Value":"数据值",
+  "Group Table":"分组表格",  
+  "Tree Form": "树表单"
 }

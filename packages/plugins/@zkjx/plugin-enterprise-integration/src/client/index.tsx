@@ -1,5 +1,6 @@
 import { Plugin } from '@nocobase/client';
 import *  as scopes from './scopes';
+import { IntergrationPluginSettingPage } from './page';
 
 export class PluginEnterpriseIntegrationClient extends Plugin {
   async afterAdd() {
@@ -10,8 +11,12 @@ export class PluginEnterpriseIntegrationClient extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
-    console.log(this.app);
     this.app.addScopes(scopes);
+    this.app.pluginSettingsManager.add('integration',{
+      title: "第三方应用设置", // 原 title
+      icon: "SettingOutlined", // 原 icon
+      Component: IntergrationPluginSettingPage, // 原 tab component
+    });
     // this.app.addComponents({})
     // this.app.addScopes({})
     // this.app.addProvider()

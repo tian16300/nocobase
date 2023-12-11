@@ -16,13 +16,11 @@ export class DingTalkService {
     this.cache = cache;
   }
   async init() {
-    const repo = this.app.db.getRepository('app_key_mgr');
-    const appKeyModel = await repo.findOne({
-      filter: {
-        appType: 'dingTalk',
-      },
+    const repo = this.app.db.getRepository('systemSettings');
+    const sys = await repo.findOne({
+      filterByTk: 1
     });
-    this.appKey = appKeyModel;
+    this.appKey = sys.options?.appConfig;
   }
   async getAccessToken() {
     await this.init();
@@ -78,7 +76,6 @@ export class DingTalkService {
     //先获取管理员列表
     const metaUrl = `https://oapi.dingtalk.com/topapi/v2/department/listsub?access_token=${accessToken}`;
     const deptListRes = await axios.post(metaUrl);
-    let addCount = 0;
     let updateCount = 0;
     const promises = [];
     //再获取部门员工
@@ -120,19 +117,7 @@ export class DingTalkService {
                       $or: filters,
                     },
                   });
-                  if (!user) {
-                    ++addCount;
-                    promises.push(
-                      repo.create({
-                        values: {
-                          nickname: name,
-                          phone: mobile,
-                          job_number,
-                          dingUserId: userid,
-                        },
-                      }),
-                    );
-                  } else if (!user.dingUserId) {
+                  if (user && !user.dingUserId) {
                     ++updateCount;
                     promises.push(
                       repo.update({
@@ -150,8 +135,8 @@ export class DingTalkService {
       });
     }
 
-    const results = await Promise.all(promises);
-    ctx.body = `同步成功，新增${addCount}条，更新${updateCount}条`;
+    await Promise.all(promises);
+    ctx.body = `同步成功，更新${updateCount}条`;
     await next();
   }
   /* 发送消息通知 */

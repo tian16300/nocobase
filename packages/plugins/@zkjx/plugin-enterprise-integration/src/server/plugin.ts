@@ -1,6 +1,6 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
 import { DingTalkService } from './services/DingTalkService';
-
+import path from 'path';
 export class PluginEnterpriseIntegrationServer extends Plugin {
   dingTalkService: DingTalkService;
   cache: any;
@@ -9,6 +9,16 @@ export class PluginEnterpriseIntegrationServer extends Plugin {
   beforeLoad() {}
 
   async load() {
+    await this.db.import({
+      directory: path.resolve(__dirname, 'collections'),
+    });
+    await this.db.addMigrations({
+      namespace: this.name,
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
     this.cache = await this.app.cacheManager.createCache({
       name: 'integration',
       prefix: 'integration',

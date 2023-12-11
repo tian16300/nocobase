@@ -10,6 +10,13 @@ export class PluginCompanyInfoServer extends Plugin {
     await this.db.import({
       directory: path.resolve(__dirname, 'collections'),
     });
+    await this.db.addMigrations({
+      namespace: this.name,
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
   }
   async install(options?: InstallOptions) {
     const repo = this.db.getRepository<any>('collections');

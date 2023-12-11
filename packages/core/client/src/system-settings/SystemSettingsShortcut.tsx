@@ -8,7 +8,10 @@ import { useSystemSettings } from '.';
 import { i18n, useAPIClient, useRequest } from '..';
 import locale from '../locale';
 import { SchemaComponent, useActionContext } from '../schema-component';
-
+import {
+  FormGrid,
+  FormItem
+} from '@formily/antd-v5'
 const langs = Object.keys(locale).map((lang) => {
   return {
     label: `${locale[lang].label} (${lang})`,
@@ -79,67 +82,80 @@ const schema: ISchema = {
       type: 'void',
       title: '{{t("System settings")}}',
       properties: {
-        title: {
-          type: 'string',
-          title: "{{t('System title')}}",
-          'x-decorator': 'FormItem',
-          'x-component': 'Input',
-          required: true,
-        },
-        simpleTitle: {
-          type: 'string',
-          title: "{{t('System simple title')}}",
-          'x-decorator': 'FormItem',
-          'x-component': 'Input',
-          required: false,
-        },
-        companyName: {
-          type: 'string',
-          title: "{{t('Company Name')}}",
-          'x-decorator': 'FormItem',
-          'x-component': 'Input',
-          required: false,
-        },
-        poweredBy: {
-          type: 'string',
-          title: "{{t('PoweredBy')}}",
-          'x-decorator': 'FormItem',
-          'x-component': 'Input',
-          required: false,
-        },
-        logo: {
-          type: 'string',
-          title: "{{t('Logo')}}",
-          'x-decorator': 'FormItem',
-          'x-component': 'Upload.Attachment',
+        grid: {
+          type: 'void',
+          'x-component': 'FormGrid',
           'x-component-props': {
-            action: 'attachments:create',
-            multiple: false,
-            // accept: 'jpg,png'
+            maxColumns: 2,
+            minColumns: 2
           },
+          properties: {
+            title: {
+              type: 'string',
+              title: "{{t('System title')}}",
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              required: true,
+            },
+            simpleTitle: {
+              type: 'string',
+              title: "{{t('System simple title')}}",
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              required: false,
+            },
+            companyName: {
+              type: 'string',
+              title: "{{t('Company Name')}}",
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              required: false,
+            },
+            poweredBy: {
+              type: 'string',
+              title: "{{t('PoweredBy')}}",
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              required: false,
+            },
+            enabledLanguages: {
+              type: 'array',
+              title: '{{t("Enabled languages")}}',
+              'x-component': 'Select',
+              'x-component-props': {
+                mode: 'multiple',
+              },
+              'x-decorator': 'FormItem',
+              'x-decorator-props':{ gridSpan: 2 },
+              enum: langs,
+              'x-reactions': (field) => {
+                field.dataSource = langs.map((item) => {
+                  let label = item.label;
+                  if (field.value?.[0] === item.value) {
+                    label += `(${i18n.t('Default')})`;
+                  }
+                  return {
+                    label,
+                    value: item.value,
+                  };
+                });
+              },
+            },        
+            logo: {
+              type: 'string',
+              title: "{{t('Logo')}}",
+              'x-decorator': 'FormItem',
+              'x-decorator-props':{ gridSpan: 2 },
+              'x-component': 'Upload.Attachment',
+              'x-component-props': {
+                action: 'attachments:create',
+                multiple: false,
+                // accept: 'jpg,png'
+              },
+            }
+          }
         },
-        enabledLanguages: {
-          type: 'array',
-          title: '{{t("Enabled languages")}}',
-          'x-component': 'Select',
-          'x-component-props': {
-            mode: 'multiple',
-          },
-          'x-decorator': 'FormItem',
-          enum: langs,
-          'x-reactions': (field) => {
-            field.dataSource = langs.map((item) => {
-              let label = item.label;
-              if (field.value?.[0] === item.value) {
-                label += `(${i18n.t('Default')})`;
-              }
-              return {
-                label,
-                value: item.value,
-              };
-            });
-          },
-        },
+        
         // allowSignUp: {
         //   type: 'boolean',
         //   default: true,
@@ -189,6 +205,7 @@ export const SystemSettingsPane = () => {
     <Card bordered={false}>
       <SchemaComponent
         scope={{ useSaveSystemSettingsValues, useSystemSettingsValues, useCloseAction }}
+        components={{ FormGrid, FormItem }}
         schema={schema}
       />
     </Card>

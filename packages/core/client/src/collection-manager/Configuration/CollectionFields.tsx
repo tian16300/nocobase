@@ -65,6 +65,7 @@ const CurrentFields = (props) => {
   const { [targetKey]: filterByTk, titleField, template } = useRecord();
   const [loadingRecord, setLoadingRecord] = React.useState<any>(null);
   const { refreshCM, isTitleField, getTemplate } = useCollectionManager();
+  const targetTemplate = getTemplate(template);
   const { token } = useToken();
   const iconStyle = css`
     .anticon {
