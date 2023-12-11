@@ -7,10 +7,8 @@ import { TableBlockProvider } from './TableBlockProvider';
 import { IField, useAPIClient, useAssociationNames, useToken } from '..';
 import { dayjs, getValuesByPath } from '@nocobase/utils/client';
 import { getWorkDays } from '../index';
-import { getWorkDays } from '../index';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { flattenTree as flattenTree2 } from '@nocobase/utils';
 import { flattenTree as flattenTree2 } from '@nocobase/utils';
 
 export const GanttBlockContext = createContext<any>({});

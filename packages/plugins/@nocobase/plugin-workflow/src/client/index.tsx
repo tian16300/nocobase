@@ -18,16 +18,18 @@ import { Registry } from '@nocobase/utils/client';
 
 import { ExecutionPage } from './ExecutionPage';
 import { WorkflowPage } from './WorkflowPage';
-import { WorkflowPane,ApprovalWorkflow, WorkflowProvider } from './WorkflowProvider';
-import { DynamicExpression } from './components/DynamicExpression';
-import { instructions } from './nodes';
-import { addActionButton, addBlockButton } from './nodes/manual/SchemaConfig';
-import { WorkflowTodo } from './nodes/manual/WorkflowTodo';
-import { WorkflowTodoBlockInitializer } from './nodes/manual/WorkflowTodoBlockInitializer';
-import { addCustomFormField } from './nodes/manual/forms/custom';
-import { getTriggersOptions, triggers } from './triggers';
-import { useTriggerWorkflowsActionProps } from './triggers/form';
-import { NAMESPACE } from './locale';
+import { WorkflowPane } from './WorkflowPane';
+import { Trigger } from './triggers';
+import CollectionTrigger from './triggers/collection';
+import ScheduleTrigger from './triggers/schedule';
+import { Instruction } from './nodes';
+import CalculationInstruction from './nodes/calculation';
+import ConditionInstruction from './nodes/condition';
+import QueryInstruction from './nodes/query';
+import CreateInstruction from './nodes/create';
+import UpdateInstruction from './nodes/update';
+import DestroyInstruction from './nodes/destroy';
+import { useTriggerWorkflowsActionProps } from './hooks/useTriggerWorkflowActionProps';
 import { getWorkflowDetailPath, getWorkflowExecutionsPath } from './constant';
 import { NAMESPACE } from './locale';
 
@@ -54,18 +56,6 @@ export default class extends Plugin {
       Component: WorkflowPane,
       aclSnippet: 'pm.workflow.workflows',
     });
-    this.app.pluginSettingsManager.add(`approvalWorkflow`, {
-      title: "审批流程", // 原 title
-      icon: "teamoutlined", // 原 icon
-      Component: ApprovalWorkflow,
-      aclSnippet: 'pm.workflow.approvalWorkflow',
-    });
-    // this.app.pluginSettingsManager.add(`approvalWorkflow`, {
-    //   title: "审批流程", // 原 title
-    //   icon: "teamoutlined", // 原 icon
-    //   Component: ApprovalWorkflow,
-    //   aclSnippet: 'pm.workflow.approvalWorkflow',
-    // });
 
     this.triggers.register('collection', new CollectionTrigger());
     this.triggers.register('schedule', new ScheduleTrigger());

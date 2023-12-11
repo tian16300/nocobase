@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
 import { useApp } from '../../../application';
 import { usePlugin } from '../../../application/hooks';
-import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { useSchemaToolbar } from '../../../application/schema-toolbar';
 import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';

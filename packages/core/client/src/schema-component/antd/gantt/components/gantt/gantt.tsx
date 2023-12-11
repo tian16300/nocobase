@@ -879,6 +879,7 @@ export const Gantt: any = (props: any) => {
               display: flex;
               position: relative;
               font-size: 14px;
+              margin-right: 6px;
               .ant-formily-item-label {
                 line-height: 32px;
                 min-height: 30px;
@@ -886,9 +887,14 @@ export const Gantt: any = (props: any) => {
                 display: flex;
                 color: rgba(0, 0, 0, 0.88);
               }
+              .ant-formily-item-label{
+                // min-width: 90px!important;
+                max-width:90px!important;
+                width:auto!important;
+              }
              .ant-formily-item-label-content {
-                overflow: hidden;
-                text-overflow: ellipsis;
+                // overflow: hidden;
+                // text-overflow: ellipsis;
                 white-space: nowrap;
             }
              .ant-formily-item-control {
@@ -902,7 +908,6 @@ export const Gantt: any = (props: any) => {
               width: 100%;
               min-height: 30px;
               line-height: 30px;
-              max-width:160px;
           }
 
             }
@@ -917,9 +922,6 @@ export const Gantt: any = (props: any) => {
             // }
             + .gantt-view-container {
               margin-top: 24px;
-            }
-            .ant-formily-item-control-content-component {
-              min-width: 120px;
             }
           }
         `,
@@ -1007,13 +1009,9 @@ export const Gantt: any = (props: any) => {
               .ant-formily-layout {
                 .nb-form-item {
                   display: inline-flex;
-                  margin-right: 8px;
                   &:last-child {
                     margin-right: 0;
                   }
-                }
-                .ant-formily-item-control {
-                  width: 140px;
                 }
               }
             `}
