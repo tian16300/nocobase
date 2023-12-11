@@ -2,7 +2,6 @@
 import Util from '@alicloud/tea-util';
 import dingtalkoauth2_1_0, * as $dingtalkoauth2_1_0 from '@alicloud/dingtalk/oauth2_1_0';
 import OpenApi, * as $OpenApi from '@alicloud/openapi-client';
-import * as $tea from '@alicloud/tea-typescript';
 
 export default class Client {
   /**

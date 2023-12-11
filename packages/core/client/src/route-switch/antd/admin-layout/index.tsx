@@ -442,8 +442,8 @@ export const InternalAdminLayout = (props: any) => {
                     position: relative;
                     z-index: 1;
                     overflow-y: auto;
-                    height: 100vh;
-                    max-height: 100vh;
+                    height: calc(100vh - 50px);
+                    max-height: calc(100vh - 50px);
                     > div {
                       position: relative;
                     }

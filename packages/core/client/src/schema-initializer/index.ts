@@ -99,3 +99,5 @@ export class SchemaInitializerPlugin extends Plugin {
     this.app.schemaInitializerManager.add(tabPaneInitializersForBulkEditFormBlock);
   }
 }
+
+export {formItemInitializers}

@@ -8,6 +8,7 @@
   "dependencies": {
     "@ant-design/cssinjs": "^1.11.1",
     "@ant-design/icons": "^5.1.4",
+    "@ant-design/pro-components": "^2.6.43",
     "@ant-design/pro-layout": "^7.16.11",
     "@antv/g2plot": "^2.4.18",
     "@antv/s2": "^1.52.0",

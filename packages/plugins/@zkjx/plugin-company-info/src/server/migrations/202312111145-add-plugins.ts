@@ -11,6 +11,7 @@ export default class extends Migration {
     const PluginModel = db.getModel('applicationPlugins');
     await db.sequelize.transaction(async (transaction) => {
       await [
+        '@nocobase/plugin-notifications',
         '@zkjx/plugin-enterprise-integration',
       ].reduce(
         (promise, packageName) =>
