@@ -76,7 +76,7 @@ export const formItemInitializers = new SchemaInitializer({
       
       title: '批量选择',
       name:'dataBlockSelectorAction',
-      Component: 'DataBlockSelectorInitializer',
+      Component: 'DataBlockSelectorAction.Initializer',
       schema: {
         type: 'void',
         title: `批量选择`,

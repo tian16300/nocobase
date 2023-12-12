@@ -29,6 +29,7 @@ import { removeNullCondition } from '../filter';
 import { DynamicComponentProps } from '../filter/DynamicComponent';
 import { getTempFieldState } from '../form-v2/utils';
 import { useColorFields } from '../table-v2/Table.Column.Designer';
+import { EditDataBlockSelectorAction } from './SchemaSettingOptions';
 
 export const formItemSettings = new SchemaSettings({
   name: 'FormItemSettings',
@@ -349,15 +350,15 @@ export const formItemSettings = new SchemaSettings({
       useVisible: useShowFieldMode,
     },
     {
-       name: 'subFieldProps',
-       Component: SchemaSettingsModalItem,
+      name: 'subFieldProps',
+      Component: SchemaSettingsModalItem,
       useComponentProps() {
         const { t } = useTranslation();
         const field = useField<Field>();
         const fieldSchema = useFieldSchema();
         const { dn } = useDesignable();
 
-        const schema ={
+        const schema = {
           type: 'object',
           title: '子表格设置',
           properties: {
@@ -395,14 +396,16 @@ export const formItemSettings = new SchemaSettings({
                 },
               ],
               default: 'remove',
-              'x-reactions':[{
-                dependencies: ['showDel'],
-                fulfill: {
-                  state: {
-                    visible: '{{$deps[0]}}',
+              'x-reactions': [
+                {
+                  dependencies: ['showDel'],
+                  fulfill: {
+                    state: {
+                      visible: '{{$deps[0]}}',
+                    },
                   },
                 },
-              }]
+              ],
             },
             scrollY: {
               type: 'number',
@@ -411,7 +414,7 @@ export const formItemSettings = new SchemaSettings({
               'x-component': 'InputNumber',
             },
           },
-        }
+        };
 
         return {
           schema: schema,
@@ -443,11 +446,11 @@ export const formItemSettings = new SchemaSettings({
         const isSubTableFieldMode = fieldSchema['x-component-props']?.mode === 'SubTable';
         const showModeItem = showFieldMode && isSubTableFieldMode;
         return showModeItem;
-      }
+      },
     },
     {
       name: 'popupSize',
-      type: 'item',
+      type: 'select',
       useComponentProps() {
         const { t } = useTranslation();
         const field = useField<Field>();
@@ -455,35 +458,23 @@ export const formItemSettings = new SchemaSettings({
         const { dn } = useDesignable();
         return {
           title: t('Popup size'),
-          children: (
-            <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-              {t('Popup size')}
-              <Select
-                bordered={false}
-                options={[
-                  { label: t('Small'), value: 'small' },
-                  { label: t('Middle'), value: 'middle' },
-                  { label: t('Large'), value: 'large' },
-                ]}
-                value={
-                  fieldSchema?.['x-component-props']?.['openSize'] ??
-                  (fieldSchema?.['x-component-props']?.['openMode'] == 'modal' ? 'large' : 'middle')
-                }
-                onChange={(value) => {
-                  field.componentProps.openSize = value;
-                  fieldSchema['x-component-props'] = field.componentProps;
-                  dn.emit('patch', {
-                    schema: {
-                      'x-uid': fieldSchema['x-uid'],
-                      'x-component-props': fieldSchema['x-component-props'],
-                    },
-                  });
-                  dn.refresh();
-                }}
-                style={{ textAlign: 'right', minWidth: 100 }}
-              />
-            </div>
-          ),
+          options: [
+            { label: t('Small'), value: 'small' },
+            { label: t('Middle'), value: 'middle' },
+            { label: t('Large'), value: 'large' },
+          ],
+          value: field?.componentProps?.openSize,
+          onChange(value) {
+            field.componentProps.openSize = value;
+            fieldSchema['x-component-props'] = field.componentProps;
+            dn.emit('patch', {
+              schema: {
+                'x-uid': fieldSchema['x-uid'],
+                'x-component-props': fieldSchema['x-component-props'],
+              },
+            });
+            dn.refresh();
+          },
         };
       },
       useVisible() {
@@ -939,6 +930,15 @@ export const formItemSettings = new SchemaSettings({
         return !!collectionField;
       },
     },
+    {
+      name: 'dataSelectorActionField',
+      Component: EditDataBlockSelectorAction,
+      useVisible() {
+        const fieldSchema = useFieldSchema();
+        return fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
+      },
+    },
+
     {
       name: 'remove',
       type: 'remove',

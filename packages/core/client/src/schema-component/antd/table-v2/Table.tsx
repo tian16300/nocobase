@@ -31,6 +31,7 @@ import {
   useCollection,
   useCollectionManager,
   useSchemaInitializer,
+  useSchemaInitializerRender,
   useTableBlockContext,
   useTableSelectorContext,
 } from '../../../';
@@ -60,7 +61,7 @@ const useTableColumns = (props: {
   const { getCollectionField } = useCollectionManager();
   const { schemaInWhitelist } = useACLFieldWhitelist();
   const { designable, dn } = useDesignable();
-  const { exists, render } = useSchemaInitializer(schema['x-initializer']);
+  const { exists, render } = useSchemaInitializerRender(schema['x-initializer'], schema['x-initializer-props']);
   const propCols = [];
   const columns = schema
     .reduceProperties((buf, s) => {
@@ -498,15 +499,14 @@ export const Table: any = observer(
       setSelectedRowKeys(ctx?.field?.data?.selectedRowKeys);
     }, [ctx?.field?.data?.selectedRowKeys]);
     const columnsRef = useRef(_columns);
-    useEffect(() => {
-      columnsRef.current = _columns;
-    }, [_columns]);
-
+    /**
+     * 重新触发渲染
+     */
     const [procolsStr, setProcolsStr] = useState(JSON.stringify(proCols));
     useEffect(() => {
       const proCols =
-        _columns?.map((item) => {
-          return pick(item, ['dataIndex', 'key', 'sortable', 'width']);
+        _columns?.slice(0, _columns.length).map((item) => {
+          return pick(item, ['dataIndex', 'key', 'sorter', 'width', 'fixed']);
         }) || [];
       const value = JSON.stringify(proCols);
       if (value !== procolsStr) {
@@ -664,10 +664,7 @@ export const Table: any = observer(
         return (rowKey ?? defaultRowKey)(record)?.toString();
       }
     };
-    if (rowSelection) {
-      rowSelection.columnWidth = 80;
-      rowSelection.fixed = 'left';
-    }
+    
     const restProps = {
       rowSelection: rowSelection
         ? {
@@ -769,12 +766,14 @@ export const Table: any = observer(
                 </div>
               );
             },
-            ...rowSelection,
-            columnWidth: 80,
-            fixed: 'left',
+            ...rowSelection
           }
         : undefined,
     };
+    if (restProps.rowSelection) {
+      restProps.rowSelection.columnWidth = 65;
+      restProps.rowSelection.fixed = 'left';
+    }
     const SortableWrapper = useCallback<React.FC>(
       ({ children }) => {
         return dragSort
@@ -848,6 +847,11 @@ export const Table: any = observer(
                 }
                 
 
+              }
+            }
+            .ant-table-thead th.ant-table-column-has-sorters .resizable-title{
+              .ant-table-column-sorters,.ant-table-column-title{
+                position:initial;
               }
             }
           }

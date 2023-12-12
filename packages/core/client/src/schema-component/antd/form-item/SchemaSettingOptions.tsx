@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { useFormBlockContext } from '../../../block-provider';
 import { useCollection, useCollectionManager } from '../../../collection-manager';
 import {
+  SchemaSettingsActionModalItem,
+  SchemaSettingsButtonEditor,
   SchemaSettingsModalItem,
   SchemaSettingsSelectItem,
   SchemaSettingsSwitchItem,
@@ -624,12 +626,10 @@ export const EditDataBlockSelectorAction = () => {
       return { label: item?.uiSchema?.title, value: item.name };
     });
   const initialValues = fieldSchema?.['x-component-props'];
-  const isDataBlockSelectorActionField = fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
   return (
     <>
-      {isDataBlockSelectorActionField && <SchemaSettingsButtonEditor />}
-      {isDataBlockSelectorActionField && (
-        <SchemaSettingsActionModalItem
+      <SchemaSettingsButtonEditor />    
+        <SchemaSettingsModalItem
           title="批量选择"
           schema={{
             type: 'object',
@@ -668,7 +668,7 @@ export const EditDataBlockSelectorAction = () => {
             dn.refresh();
           }}
         />
-      )}
+      
     </>
   );
 };

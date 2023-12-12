@@ -17,7 +17,6 @@ import { EditDataBlockSelectorAction, useEnsureOperatorsValid } from './SchemaSe
 import useLazyLoadAssociationFieldOfForm from './hooks/useLazyLoadAssociationFieldOfForm';
 import useLazyLoadDisplayAssociationFieldsOfForm from './hooks/useLazyLoadDisplayAssociationFieldsOfForm';
 import useParseDefaultValue from './hooks/useParseDefaultValue';
-import { Designer } from './FormItem.Designer';
 
 export const FormItem: any = observer(
   (props: any) => {

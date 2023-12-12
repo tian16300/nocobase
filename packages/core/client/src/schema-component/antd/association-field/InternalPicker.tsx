@@ -86,9 +86,9 @@ export const InternalPicker = observer(
       }
       return [];
     }, [value, fieldNames?.label]);
-
+    const size = props.openSize || 'small';
     const pickerProps = {
-      size: 'small',
+      size: size,
       fieldNames,
       multiple: multiple !== false && ['o2m', 'm2m'].includes(collectionField?.interface),
       association: {
@@ -181,6 +181,7 @@ export const InternalPicker = observer(
         <ActionContextProvider
           value={{
             openMode: 'drawer',
+            openSize: size,
             visible: visibleSelector,
             setVisible: setVisibleSelector,
           }}

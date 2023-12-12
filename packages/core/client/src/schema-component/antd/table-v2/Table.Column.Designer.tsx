@@ -453,11 +453,15 @@ export const TableColumnDesigner = (props) => {
       )}
       <SchemaSettingsSelectItem
         title={t('列固定')}
-        value={field.componentProps.fixed}
+        value={(!field.componentProps.fixed || field.componentProps.fixed == 'false')?'false':field.componentProps.fixed }
         onChange={(fixed) => {
+          if(fixed == 'false'){
+            fixed = false;
+          }
           const schema: ISchema = {
             ['x-uid']: columnSchema['x-uid'],
           };
+
           columnSchema['x-component-props'] = {
             ...columnSchema['x-component-props'],
             fixed,
@@ -476,7 +480,7 @@ export const TableColumnDesigner = (props) => {
         options={[
           {
             label: '无',
-            value: '',
+            value: 'false',
           },
           {
             label: '左侧固定',

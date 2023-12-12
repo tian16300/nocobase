@@ -19,6 +19,8 @@ import {
   useTableBlockContext,
 } from '../../../block-provider';
 import { useTreeFormBlockContext } from '..';
+import { SchemaInitializer, useSchemaInitializerItem } from '../../../application';
+import { ActionInitializer, BlockInitializer } from '../../../schema-initializer';
 
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
@@ -130,44 +132,18 @@ DataBlockSelectorAction.Provider = () => {};
  * @returns
  */
 DataBlockSelectorAction.Initializer = () => {
-  const { name, title } = useCollection();
-  const { getCollectionFields } = useCollectionManager();
-  const fields = getCollectionFields(name);
-  const addToFields = fields
-    .filter(({ type }) => {
-      type == 'hasMany';
-    })
-    .map((item) => {
-      return { label: item.uiSchema.title, value: item.name };
-    });
+  const collection = useCollection();
+  const itemConfig = useSchemaInitializerItem();
 
-  return (
-    <GeneralSchemaDesigner title={title || name}>
-      <SchemaSettingsActionModalItem
-        title="批量选择"
-        schema={{
-          type: 'object',
-          properties: {
-            collection: {
-              type: 'string',
-              title: '选择数据表',
-              'x-component': 'CollectionSelect',
-            },
-            addTo: {
-              type: 'string',
-              title: '添加到',
-              'x-component': 'Select',
-              enum: addToFields,
-            },
-          },
-        }}
-        onSubmit={(values) => {
-          console.log(values);
-        }}
-      />
-    </GeneralSchemaDesigner>
-  );
+  const schema = {};
+  if (collection && schema['x-acl-action']) {
+    schema['x-acl-action'] = `${collection.name}:${schema['x-acl-action']}`;
+    schema['x-decorator'] = 'ACLActionProvider';
+  }
+
+  return <BlockInitializer {...itemConfig} schema={schema} item={itemConfig} />; 
 };
+
 
 DataBlockSelectorAction.Designer = (props) => {
   const fieldSchema = useFieldSchema();
