@@ -10,9 +10,10 @@ import {
 } from '@ant-design/pro-components';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
-import { LeftOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Input as AntdInput, Space } from 'antd';
+import React, {  createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { LeftOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Input as AntdInput, Space, Steps, message, Card } from 'antd';
+import { Schema } from '@formily/json-schema';
 import {
   FormV2,
   SchemaComponent,
@@ -33,12 +34,21 @@ import {
   SchemaComponentProvider,
   useSchemaInitializerRender,
   useSchemaOptionsContext,
+  createDesignable,
+  SchemaComponentContext,
+  useToken,
+  css,
+  FormBlockContext,
+  RecordProvider,
 } from '@nocobase/client';
 import { createForm } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
 import { FormProvider, FormConsumer, useForm } from '@formily/react';
 import { uid } from '@nocobase/utils';
 import { observer, useField, useFieldSchema } from '@formily/react';
+import { DesignSchemaView, SelectDataModel } from './components';
+
+const ApprovalSettingContext = createContext<any>({});
 type FormValue = {
   jobInfo: {
     name: string;
@@ -206,6 +216,14 @@ const AddBlockButton = observer(() => {
   const { render } = useSchemaInitializerRender(fieldSchema['x-initializer']);
   return render();
 });
+const SchemaConfigSettingDesign = (props) => {
+  return (
+    <div>
+      {props.children}
+      <AddBlockButton />
+    </div>
+  );
+};
 const SchemaConfigSetting = (_props) => {
   const { useProps, ...others } = _props;
   const props = { ...useProps(), ...others } as any;
@@ -223,9 +241,29 @@ export const useSchemaConfigSettingProps = () => {
   const { values } = useForm();
   return {
     resourceName: values?.collection,
-    collection: values?.collection
+    collection: values?.collection,
   };
 };
+
+const steps = [
+  {
+    title: '选择数据模型',
+   
+  },
+  {
+    title: '模板设置',
+   
+  },
+  {
+    title: '流程设置',
+    content: 'First-content',
+  },
+  {
+    title: '完成',
+    content: 'First-content',
+  },
+];
+
 export const AddProvalSetting = () => {
   //   const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
   //   useEffect(() => {
@@ -242,7 +280,37 @@ export const AddProvalSetting = () => {
   const formStep = FormStep.createFormStep();
   const { scope, components } = useSchemaOptionsContext();
   const { designable } = useDesignable();
+  const [schemaConfig, setSchemaConfig] = useState(null);
+  const { token } = useToken();
+  const [current, setCurrent] = useState(0);
 
+  const next = () => {
+    setCurrent(current + 1);
+  };
+
+  const prev = () => {
+    setCurrent(current - 1);
+  };
+  const contentStyle: React.CSSProperties = {
+    lineHeight: '260px',
+    textAlign: 'center',
+    color: token.colorTextTertiary,
+    backgroundColor: token.colorFillAlter,
+    borderRadius: token.borderRadiusLG,
+    border: `1px dashed ${token.colorBorder}`,
+    marginTop: 16,
+  };
+
+  const items = steps.map((item) => ({ key: item.title, title: item.title }));
+  const record = new Proxy({},{});
+  const [dataModel, SetDataModel] = useState(null);
+  const handleNext = ()=>{
+    if(current == 0){
+      SetDataModel(form.values);
+    }
+    next();
+    
+  };
   return (
     <div
       style={{
@@ -292,10 +360,12 @@ export const AddProvalSetting = () => {
           breadcrumb: {},
         }}
       >
-        <SchemaComponentProvider
+        <ApprovalSettingContext.Provider value={{ form }}>
+          {/* <SchemaComponentProvider
           components={{ ...components, SchemaConfigSetting, FormStep, AddBlockButton }}
           scope={{ ...scope, formStep, useSchemaConfigSettingProps }}
           designable={designable}
+         
         >
           <SchemaComponent schema={schema} />
           <FormConsumer>
@@ -312,6 +382,7 @@ export const AddProvalSetting = () => {
                 <Button
                   disabled={!formStep.allowNext}
                   onClick={() => {
+                    保存上面的信息
                     formStep.next();
                   }}
                 >
@@ -328,8 +399,47 @@ export const AddProvalSetting = () => {
               </FormButtonGroup>
             )}
           </FormConsumer>
-        </SchemaComponentProvider>
+        </SchemaComponentProvider> */}
+          {/* <FormProvider form={form}> */}
+          <FormBlockContext.Provider value={{form}} >
+            <RecordProvider record={record}>
+            <Steps current={current} items={items} />
+            {/* <div style={contentStyle}>{steps[current].content}</div> */}
+            <Card
+              className={css`
+                margin-top: 16px;
+              `}
+            >
+            
+              { current == 0 &&  <SelectDataModel value={dataModel}   />}
+              { current == 1 && <DesignSchemaView />}
+            </Card>
+            <div style={{ marginTop: 24 }}>
+              {current > 0 && (
+                <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
+                  上一步
+                </Button>
+              )}
+              {current < steps.length - 1 && (
+                <Button type="primary" onClick={handleNext}>
+                  下一步
+                </Button>
+              )}
+              {current === steps.length - 1 && (
+                <Button type="primary" onClick={() => message.success('Processing complete!')}>
+                  已完成
+                </Button>
+              )}
+            </div>
+            </RecordProvider>
+            </FormBlockContext.Provider>
+          {/* </FormProvider> */}
+        </ApprovalSettingContext.Provider>
       </PageContainer>
     </div>
   );
+};
+
+export const useApprovalSettingContext = () => {
+  return useContext(ApprovalSettingContext);
 };

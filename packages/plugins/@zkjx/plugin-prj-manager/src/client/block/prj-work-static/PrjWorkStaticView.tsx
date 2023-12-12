@@ -203,6 +203,7 @@ export const PrjWorkStaticView = observer((props) => {
     if (item.value1) {
       item.value1 = item.value1 / item.unit;
     }
+
     const text = item.tooltip(item);
     return (value) => {
       return value == null ? (
@@ -269,8 +270,8 @@ export const PrjWorkStaticView = observer((props) => {
           </>
         );
       },
-      detail: result.report.filter(({ isBussinessTrip }) => {
-        return isBussinessTrip;
+      detail: result.report.filter(({ isBusinessTrip }) => {
+        return isBusinessTrip;
       }),
       detail1: result.trip,
       detailTitle: '出差明细',
@@ -361,15 +362,22 @@ export const PrjWorkStaticView = observer((props) => {
       return b.all - a.all;
     });
     list.forEach((item, index) => {
-      countShow.forEach(({ key, title }) => {
-        if(title!== '出差(天)')
+      const header =  countShow.slice(0,countShow.length);
+      // header.reverse();
+      header.forEach(({ key, title }, index) => {
+        const user =  userMap.get(item.id)
+        if(['all','comp','overTime'].includes(key))
         barData.push({
+          user: user,
+          name: user.nickname,
           userId: item.id,
+          group: key == 'all'?'all':'other',
           type: title,
           value: item[key],
         });
       });
     });
+    // barData.sort((a, b) => {return });
     
 
     return {
@@ -379,17 +387,19 @@ export const PrjWorkStaticView = observer((props) => {
       annotations,
     };
   };
-  const { userMap, list, barData } = groupByUser(result);
+  const { userMap, list, barData, annotations } = groupByUser(result);
   const userGroupBar = {
     plot: Column,
     config: {
       isStack: false,
-      xField: 'userId',
+      xField: 'name',
       yField: 'value',
       seriesField: 'type',
+      isGroup: true,    
+      // groupField:'group',
       label: {
         // 可手动配置 label 数据标签位置
-        position: 'middle', // 'top', 'bottom', 'middle'
+        position: 'top', // 'top', 'bottom', 'middle'
         // 可配置附加的布局方法
         layout: [
           // 柱形图数据标签位置自动调整
@@ -400,24 +410,31 @@ export const PrjWorkStaticView = observer((props) => {
           { type: 'adjust-color' },
         ],
       },
-      minColumnWidth: 20,
-      maxColumnWidth: 20,
+      minColumnWidth: 26,
+      maxColumnWidth: 26,
       data: barData,
       // height: userGroupBarHeight,
-      autoFit: false,
-      appendPadding: [24, 8, 12, 8],
+      // autoFit: false,
+      marginRatio: 0,
+      // appendPadding: 10,
+      dodgePadding: 4,
+      // intervalPadding: 6,
+      // appendPadding: [24, 8, 12, 8],
+      // intervalPadding: 0,
+      // dodgePadding: 0,
       legend: {
         layout: 'horizontal',
         position: 'top-right',
         offsetY: 8,
       },
       meta: {
-        userId: {
-          formatter(value) {
-            return userMap.get(value).nickname;
+        name: {
+          formatter(value, index) {
+            return value;
+            // return userMap.get(value).nickname;
           },
         },
-      },
+      }
     },
   };
 
@@ -570,7 +587,7 @@ export const PrjWorkStaticView = observer((props) => {
           <Title level={5}>各成员工时分布</Title>
         </Divider>
         <div className={'g2plot-wrapper ' + css``} ref={chartWrapRef}>
-          <G2PlotRenderer ref={chartRef} {...userGroupBar} />
+          {<G2PlotRenderer ref={chartRef}  {...userGroupBar} />}
         </div>
       </div>
       <RecordDetail></RecordDetail>

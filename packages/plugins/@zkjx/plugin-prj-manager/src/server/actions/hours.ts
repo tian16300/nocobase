@@ -36,7 +36,7 @@ export const hoursCount = async (ctx, next) => {
           },
         }
       },
-      appends: ['report', 'report.status', 'createdBy'],
+      appends: ['report', 'report.status', 'report.user'],
     });
 
     const business = ctx.db.getRepository('business_trip');
@@ -70,9 +70,9 @@ export const hoursCount = async (ctx, next) => {
             isBusinessTrip: temp.isBusinessTrip,
             __collection: 'reportDetail',
             sourceFrom: isFromSystem,
-            user: temp.createdBy,
+            user: temp.report?.user,
             content: temp.content,
-            reportTitle: temp.report.title
+            reportTitle: temp.report?.title
           };
         })
       ],
