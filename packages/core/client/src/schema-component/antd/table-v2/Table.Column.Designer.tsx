@@ -102,6 +102,7 @@ export const TableColumnDesigner = (props) => {
     readOnlyMode = 'read-pretty';
   }
   const isSelectFieldMode = isAssociationField && fieldMode === 'Select';
+  const isPickerFieldMode = isAssociationField && fieldMode === 'Picker';
 
   return (
     <GeneralSchemaDesigner disableInitializer>
@@ -305,6 +306,29 @@ export const TableColumnDesigner = (props) => {
           }}
         />
       )}
+      {isPickerFieldMode && (
+       <SchemaSettingsSelectItem
+       title={'弹窗尺寸'}
+       value={field.componentProps?.openSize || 'small'}
+       onChange={(value) => {
+        field.componentProps.openSize = value;
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props']['openSize'] = value;
+        dn.emit('patch', {
+          schema: {
+            'x-uid': fieldSchema['x-uid'],
+            'x-component-props': fieldSchema['x-component-props'],
+          },
+        });
+        dn.refresh();
+       }}
+       options={[
+        { label: t('Small'), value: 'small' },
+        { label: t('Middle'), value: 'middle' },
+        { label: t('Large'), value: 'large' },
+       ]}
+     />
+      )}
 
       {['Tag'].includes(fieldMode) && (
         <SchemaSettingsSelectItem
@@ -451,6 +475,7 @@ export const TableColumnDesigner = (props) => {
           defaultChecked
         />
       )}
+      
       <SchemaSettingsSelectItem
         title={t('列固定')}
         value={(!field.componentProps.fixed || field.componentProps.fixed == 'false')?'false':field.componentProps.fixed }

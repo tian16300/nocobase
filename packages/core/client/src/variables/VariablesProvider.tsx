@@ -125,9 +125,11 @@ const VariablesProvider = ({ children }) => {
         }
       }
 
+      console.log('getValue useCallback 变化');
+
       return compile(_.isFunction(current) ? current() : current);
     },
-    [getCollectionJoinField],
+    [getCollectionJoinField]
   );
 
   /**
@@ -217,7 +219,7 @@ const VariablesProvider = ({ children }) => {
      * @param localVariables 局部变量，解析完成后会被清除
      * @returns
      */
-    async (str: string, localVariables?: VariableOption | VariableOption[], params?: any) => {
+    async (str: string, localVariables?: VariableOption | VariableOption[]) => {
       if (!isVariable(str)) {
         return str;
       }
@@ -225,9 +227,10 @@ const VariablesProvider = ({ children }) => {
       let value = null;
       await onLocalVariablesReady(localVariables, async () => {
         const path = getPath(str);
-        value = await getValue(path, params);
+        value = await getValue(path);
+        console.log('onLocalVariablesReady  getValue 变化', path, value);
       });
-
+    
       return uniq(filterEmptyValues(value));
     },
     [getValue, onLocalVariablesReady],
@@ -252,7 +255,7 @@ const VariablesProvider = ({ children }) => {
           };
         }
       });
-
+      console.log('getCollectionField useCallback 变化');
       return result;
     },
     [getCollectionJoinField, onLocalVariablesReady],
