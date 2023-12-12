@@ -10,7 +10,7 @@ import {
 } from '@ant-design/pro-components';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import React, {  createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { LeftOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Input as AntdInput, Space, Steps, message, Card } from 'antd';
 import { Schema } from '@formily/json-schema';
@@ -40,6 +40,7 @@ import {
   css,
   FormBlockContext,
   RecordProvider,
+  useSchemaComponentContext,
 } from '@nocobase/client';
 import { createForm } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
@@ -248,11 +249,9 @@ export const useSchemaConfigSettingProps = () => {
 const steps = [
   {
     title: '选择数据模型',
-   
   },
   {
     title: '模板设置',
-   
   },
   {
     title: '流程设置',
@@ -280,9 +279,49 @@ export const AddProvalSetting = () => {
   const formStep = FormStep.createFormStep();
   const { scope, components } = useSchemaOptionsContext();
   const { designable } = useDesignable();
-  const [schemaConfig, setSchemaConfig] = useState(null);
   const { token } = useToken();
   const [current, setCurrent] = useState(0);
+ 
+  const schema = new Schema({
+    name: uid(),
+    type: 'void',
+    required: true,
+    'x-component': 'ApprovalSchemaConfigSetting',
+    'x-component-props': {},
+    properties: {
+      form: {
+        type: 'void',
+        'x-decorator': 'FormBlockProvider',
+        'x-decorator-props': {
+          collection: 'bom',
+          resourceName: 'bom',
+        },
+        'x-acl-action': ``,
+        'x-component': 'FormV2',
+        'x-component-props': {
+          useProps: '{{ useFormBlockProps }}',
+        },
+        properties: {
+          grid: {
+            type: 'void',
+            'x-component': 'Grid',
+            'x-initializer': 'FormItemInitializers',
+            properties: {},
+          },
+        },
+      },
+    },
+  });
+  const { refresh } = useSchemaComponentContext();
+  const dn = createDesignable({
+    refresh,
+    current: schema
+  })
+  
+  // const [schemaJSON, setSchemaJSON] = useState(dfSchema);
+  const [schemaEntry, setSchemaEntry] = useState(null);
+
+  
 
   const next = () => {
     setCurrent(current + 1);
@@ -302,14 +341,22 @@ export const AddProvalSetting = () => {
   };
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
-  const record = new Proxy({},{});
-  const [dataModel, SetDataModel] = useState(null);
-  const handleNext = ()=>{
-    if(current == 0){
-      SetDataModel(form.values);
+  const record = new Proxy({}, {});
+  const [dataModel, setDataModel] = useState({});
+  const vRef = useRef<any>({});
+  vRef.current = {};
+  const handleNext = () => {
+    if (current == 0) {
+      const values = form.values;
+      setDataModel(values);
+    }else if(current == 1){ 
+      debugger;
+      console.log(schemaEntry?.toJSON());
+
+      // setSchemaJSON();
     }
+
     next();
-    
   };
   return (
     <div
@@ -360,7 +407,7 @@ export const AddProvalSetting = () => {
           breadcrumb: {},
         }}
       >
-        <ApprovalSettingContext.Provider value={{ form }}>
+        <ApprovalSettingContext.Provider value={{ form,dataModel, setDataModel, schema, dn }}>
           {/* <SchemaComponentProvider
           components={{ ...components, SchemaConfigSetting, FormStep, AddBlockButton }}
           scope={{ ...scope, formStep, useSchemaConfigSettingProps }}
@@ -401,38 +448,46 @@ export const AddProvalSetting = () => {
           </FormConsumer>
         </SchemaComponentProvider> */}
           {/* <FormProvider form={form}> */}
-          <FormBlockContext.Provider value={{form}} >
-            <RecordProvider record={record}>
-            <Steps current={current} items={items} />
-            {/* <div style={contentStyle}>{steps[current].content}</div> */}
-            <Card
-              className={css`
-                margin-top: 16px;
-              `}
-            >
+          {/* <FormBlockContext.Provider value={{form}} > */}
+          {/* <RecordProvider record={record}> */}
+          <Steps current={current} items={items} />
+          {/* <div style={contentStyle}>{steps[current].content}</div> */}
+          <Card
+            className={css`
+              margin-top: 16px;
+            `}
+          >
+            {current == 0 && <SelectDataModel  />}
+            {current == 1 && <DesignSchemaView ref={vRef} />}
+          </Card>
+          <div style={{ marginTop: 24 }}>
+          <FormConsumer>
+            {
+              (form) =>{
+                return <>
+                  {current > 0 && (
+                      <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
+                        上一步
+                      </Button>
+                    )}
+                    {current < steps.length - 1 && (
+                      <Button type="primary" onClick={handleNext}>
+                        下一步
+                      </Button>
+                    )}
+                    {current === steps.length - 1 && (
+                      <Button type="primary" onClick={() => message.success('Processing complete!')}>
+                        已完成
+                      </Button>
+                    )}
+                </>
+
+              }}
             
-              { current == 0 &&  <SelectDataModel value={dataModel}   />}
-              { current == 1 && <DesignSchemaView />}
-            </Card>
-            <div style={{ marginTop: 24 }}>
-              {current > 0 && (
-                <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
-                  上一步
-                </Button>
-              )}
-              {current < steps.length - 1 && (
-                <Button type="primary" onClick={handleNext}>
-                  下一步
-                </Button>
-              )}
-              {current === steps.length - 1 && (
-                <Button type="primary" onClick={() => message.success('Processing complete!')}>
-                  已完成
-                </Button>
-              )}
-            </div>
-            </RecordProvider>
-            </FormBlockContext.Provider>
+          </FormConsumer>
+          </div>
+          {/* </RecordProvider> */}
+          {/* </FormBlockContext.Provider> */}
           {/* </FormProvider> */}
         </ApprovalSettingContext.Provider>
       </PageContainer>

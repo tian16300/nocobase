@@ -2,6 +2,7 @@ import { Plugin } from '@nocobase/client';
 import { getApprovalAddPath, getApprovalDetailPath } from './hooks';
 import { AddProvalSetting, ApprovalDetailPage } from './page';
 import React from 'react';
+import { ApprovalSchemaConfigSetting, useApprovalFormBlockProps, useApprovalSchemaSettingProps } from './page/components';
 
 export class PluginWorkflowApprovalClient extends Plugin {
   async afterAdd() {
@@ -12,6 +13,13 @@ export class PluginWorkflowApprovalClient extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
+    this.app.addScopes({
+      useApprovalFormBlockProps,
+      useApprovalSchemaSettingProps
+    })
+    this.app.addComponents({
+      ApprovalSchemaConfigSetting
+    })
     this.app.router.add('admin.workflow.approval.id', {
       path: getApprovalDetailPath(':id'),
       element: <ApprovalDetailPage />,

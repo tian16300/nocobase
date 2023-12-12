@@ -2,21 +2,32 @@
 
 import React, { useEffect } from 'react';
 
-import { SchemaComponent, SchemaComponentProvider, useFormBlockContext, useSchemaOptionsContext } from '@nocobase/client';
+import { FormProvider, IField, SchemaComponent, SchemaComponentProvider, useFormBlockContext, useSchemaOptionsContext } from '@nocobase/client';
 
-import { useForm } from '@formily/react';
+import { useForm, useField } from '@formily/react';
 
 import { useApprovalSettingContext } from '../AddProvalSetting';
+export const useApprovalFormBlockProps = ()=>{
+  const field: IField = useField();
+  const {form,dataModel, setDataModel} = useApprovalSettingContext();
 
-export const SelectDataModel = (props) => {
-  const {value} = props;
-  const ctx = useFormBlockContext();
-  const { scope, components } = useSchemaOptionsContext();
+  useEffect(()=>{
+    setDataModel(field?.value);
+    
+    console.log('useApprovalFormBlockProps 变化', field.value);
+
+  },[])
+  return {
+    form,
+    initialValues: dataModel
+  };
+}
+export const SelectDataModel = () => {
   const schema = {
-    type: 'void',
-    'x-componet': 'FormV2',
-    'x-componet-props': {
-      useProps: '{{ useFormBlockProps }}',
+    type: 'object',
+    'x-component': 'FormV2',
+    'x-component-props': {
+      useProps: '{{ useApprovalFormBlockProps }}'
     },
     properties: {
       collection: {
@@ -65,12 +76,11 @@ export const SelectDataModel = (props) => {
     },
   };
 
-  useEffect(()=>{
-    ctx.form.setInitialValues(value);
-  },[value]);
+  // useEffect(()=>{
+  //   form.setInitialValues(value);
+  // },[value]);
   return (
-    <SchemaComponentProvider components={{ ...components }} scope={{ ...scope }}>
-      <SchemaComponent schema={schema} />
-    </SchemaComponentProvider>
+   
+    <SchemaComponent schema={schema} />
   );
 };

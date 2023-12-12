@@ -1,69 +1,77 @@
 // 主要处理新建和编辑的场景
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import { CardItem, CollectionProvider, SchemaComponent, SchemaComponentProvider, useDesignable, useSchemaInitializerRender, useSchemaOptionsContext } from '@nocobase/client';
+import {
+  CardItem,
+  CollectionProvider,
+  SchemaComponent,
+  SchemaComponentProvider,
+  createDesignable,
+  useDesignable,
+  useProps,
+  useSchemaComponentContext,
+  useSchemaInitializerRender,
+  useSchemaOptionsContext,
+} from '@nocobase/client';
 
-
-import { observer, useField, useFieldSchema, useForm } from '@formily/react';
+import { observer, useField, useFieldSchema, useForm, RecursionField, Schema } from '@formily/react';
 import { useApprovalSettingContext } from '../AddProvalSetting';
+import { uid } from '@nocobase/utils';
 
 const AddBlockButton = observer(() => {
   const fieldSchema = useFieldSchema();
   const { render } = useSchemaInitializerRender(fieldSchema['x-initializer']);
   return render();
 });
-const SchemaConfigSetting = (props) => {  
-  const { collection } = props;
+export const ApprovalSchemaConfigSetting = ({ children }) => {
+  const fieldSchema = useFieldSchema();
+  const { refresh } = useSchemaComponentContext();
+  const dn = createDesignable({
+    refresh,
+    current: fieldSchema.properties.form.properties.grid,
+  })
   return (
-    <CollectionProvider name={collection}>
-    {props.children}
-    <AddBlockButton />
-  </CollectionProvider>
+    <div>
+      {children}
+      <AddBlockButton />
+    </div>
   );
 };
-
-export const DesignSchemaView = () => {
-  const { form } = useApprovalSettingContext();
-  const { scope, components } = useSchemaOptionsContext();
-  const collection = form.values.collection;
-  const schema = {
-    name:'root',
-    type: 'object',
-    required: true,
-    'x-decorator': 'FormItem',
-    'x-component': 'SchemaConfigSetting',
-    'x-component-props': {
-      collection: collection
-    },
-    properties: {
-      form: {
-        type: 'void',
-        'x-decorator': 'FormBlockProvider',
-        'x-decorator-props': {
-          resourceName: collection,
-          collection: collection,
-        },
-        'x-acl-action': ``,
-        'x-component': 'FormV2',
-        'x-component-props': {
-          useProps: '{{ useFormBlockProps }}',
-        },
-        properties: {
-          grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'FormItemInitializers',
-            properties: {},
-          },
-        },
-      },
-    },
+export const useApprovalSchemaSettingProps = () => {
+  return {
+    resourceName: 'bom',
+    collection: 'bom',
   };
+};
+export const DesignSchemaView = (props, ref) => {
+  const { form, dataModel, schema } = useApprovalSettingContext();
+  const { scope, components } = useSchemaOptionsContext();
+  const collection = dataModel.collection;
+ 
   const {designable} = useDesignable();
+  // const schema = new Schema(schemaJSON);
+  // ref.shema = schema;
+  
+  
+  // const schema = new Schema({
+  //   [uid()]:schemaJSON
+  // });
+  // useEffect(()=>{
+  //   setSchemaJSON(schema.toJSON());
+  // },[schema.toJSON()])
+
+
+
   return (
-    <SchemaComponentProvider components={{ ...components, SchemaConfigSetting, AddBlockButton }} scope={{ ...scope }} designable={designable}>
-      <SchemaComponent schema={schema} />
-    </SchemaComponentProvider>
+    <div>
+      <SchemaComponentProvider
+        components={{ ...components, ApprovalSchemaConfigSetting }}
+        scope={{ ...scope }}
+        designable={designable}
+      >
+        <SchemaComponent schema={schema} />
+      </SchemaComponentProvider>
+    </div>
   );
 };
