@@ -59,6 +59,21 @@ const SubTable = observer(
     // const schema = useFieldSchema();
     // return <div>{props.children}</div>;
     const { valueType, recordList } = usePrjWorkProviderContext();
+    const [all, setAll] = useState(null);
+
+    useEffect(() => {
+      const total = recordList.reduce((prev, curr) => {
+        const hours = curr.hours;
+        if (typeof hours == 'number') {
+          return prev + hours;
+        } else {
+          return prev + 0;
+        }
+      }, 0);
+      setAll(total);
+
+    }, [valueType, recordList]);
+
     const columns: any = [
       { title: '序号', dataIndex: 'index', key: 'index', width: 50, render: renderIndex },
       {
@@ -67,8 +82,11 @@ const SubTable = observer(
         key: 'user',
         width: 100,
         render: (val, record) => {
-          return <div>{val?.nickname}</div>;
+          return <div>{val?.nickname}<br /> {record.totalHours} 小时<br /> {transformHourToDays(record.totalHours)} 天</div>;
         },
+        onCell(record,index){
+          return {rowSpan: record.rowSpan}
+        }
       },
       { title: '工时(h)', dataIndex: 'hours', key: 'hours', width: 70 },
       {
@@ -134,6 +152,9 @@ const SubTable = observer(
           dataSource={recordList}
           pagination={false}
           scroll={{ y: 'calc(100% - 47px)' }}
+          footer={() => {
+            return all?(<div>合计 <strong>{all}</strong> 小时, <strong>{transformHourToDays(all)}</strong> 天</div>):<></>
+          }}
           size="middle"
         />
       </div>
@@ -216,7 +237,7 @@ export const PrjWorkStaticView = observer((props) => {
                 showDetails(item.key, item.detail, item.detail1);
               }}
             >
-              <CountUp end={value} separator="," />
+              <CountUp end={value} separator=","   decimals={1} />
             </a>
           ) : (
             value
@@ -226,8 +247,37 @@ export const PrjWorkStaticView = observer((props) => {
     };
   };
   const showDetails = (key, detail, detail1) => {
+   
     ctx.setValueType(key);
-    ctx.setRecordList([...detail, ...(detail1 || [])]);
+    const records = [...detail, ...(detail1 || [])];
+    records.sort((a,b)=>{ return a.user.id - b.user.id});
+
+    const userMap = new Map();
+    records.forEach((record)=>{
+      const userid = record.user.id;
+      const rowSpan = userMap.get(userid);
+      if(!rowSpan){
+        /* 计算 rowSpan 首行设置 单元格 */
+        const subList = records.filter(({user})=>{return userid == user.id});
+        const value = subList.length;
+        const total = subList.reduce((prev,curr)=>{
+          const hours = curr.hours;
+          if(typeof hours == 'number'){
+            return prev + hours
+          }else{
+            return prev + 0
+          }
+          }, 0);
+     
+        userMap.set(userid, value);
+        record.rowSpan = value;
+        record.totalHours = total;
+      }else{
+        record.rowSpan = 0;
+      }
+    })
+    ctx.setRecordList(records);
+
     setVisible(true);
   };
 
@@ -482,10 +532,10 @@ export const PrjWorkStaticView = observer((props) => {
                   );
                 }}
               >
-                <CountUp end={value} separator="," />
+                <CountUp end={value} separator=","  decimals={1}/>
               </a>
             ) : (
-              <CountUp end={value} separator="," />
+              <CountUp end={value} separator="," decimals={1} />
             )}
           </Tooltip>
         );
