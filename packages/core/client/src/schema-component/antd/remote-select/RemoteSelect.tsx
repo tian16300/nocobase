@@ -22,6 +22,7 @@ export type RemoteSelectProps<P = any> = SelectProps<P, any> & {
   targetField?: any;
   service: ResourceActionOptions<P>;
   CustomDropdownRender?: (v: any) => any;
+  multiple?: boolean;
 };
 
 const InternalRemoteSelect = connect(

@@ -15,12 +15,14 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
   return (
     <Variable.Input
       scope={scope}
-      value={value[0]}
+      value={value}
       onChange={(next) => {
         onChange([next]);
       }}
     >
       <RemoteSelect
+        
+        multiple={true}
         fieldNames={{
           label: 'nickname',
           value: 'id',
@@ -28,10 +30,11 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
         service={{
           resource: 'users',
         }}
-        manual={false}
-        value={value[0]}
+        manual={true}
+       
+        value={value}
         onChange={(v) => {
-          onChange(v != null ? [v] : []);
+          onChange(v != null ? v : []);
         }}
       />
     </Variable.Input>

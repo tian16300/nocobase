@@ -2,7 +2,7 @@ import { Plugin } from '@nocobase/client';
 import { getApprovalAddPath, getApprovalDetailPath } from './hooks';
 import { AddProvalSetting, ApprovalDetailPage } from './page';
 import React from 'react';
-import { ApprovalSchemaConfigSetting, useApprovalFormBlockProps, useApprovalSchemaSettingProps } from './page/components';
+import { useApprovalFormBlockProps } from './page/components';
 import WorkflowPlugin from '@nocobase/plugin-workflow';
 import { Approval } from './nodes';
 import CopyTo from './nodes/copyTo';
@@ -33,14 +33,13 @@ export class PluginWorkflowApprovalClient extends Plugin {
   }
   addScopes() {
     this.app.addScopes({
-      useApprovalFormBlockProps,
-      useApprovalSchemaSettingProps
+      useApprovalFormBlockProps
     })
   }
   addComponents() {
-    this.app.addComponents({
-      ApprovalSchemaConfigSetting
-    })
+    // this.app.addComponents({
+    //   ApprovalSchemaConfigSetting
+    // })
     this.app.addComponents({
       AddProvalSetting,
       ApprovalDetailPage

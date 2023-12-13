@@ -6,11 +6,8 @@ import {
   CollectionBlockInitializer,
   Instruction,
 } from '@nocobase/plugin-workflow/client';
-
-import { SchemaConfig, SchemaConfigButton } from './SchemaConfig';
-import { ModeConfig } from './ModeConfig';
-import { AssigneesSelect } from './AssigneesSelect';
 import { NAMESPACE } from '../../../locale';
+import { AssigneeRoles, AssigneesSelect, FieldVisibleConfig } from '../components';
 
 const MULTIPLE_ASSIGNED_MODE = {
   SINGLE: Symbol('single'),
@@ -26,6 +23,26 @@ export class Approval extends Instruction {
   group = 'manual';
   description = `{{t("Could be used for manually submitting data, and determine whether to continue or exit. Workflow will generate a todo item for assigned user when it reaches a manual node, and continue processing after user submits the form.", { ns: "${NAMESPACE}" })}}`;
   fieldset = {
+    rule: {
+      title: '设置审批人',
+      type: 'string',
+      'x-decorator': 'FormItem',
+      'x-component': 'Select',
+      enum: [
+        {
+          label: '指定人',
+          value: '1',
+        },
+        {
+          label: '发起人的主管',
+          value: '2',
+        },
+        {
+          label: '角色',
+          value: '3',
+        },
+      ],
+    },
     assignees: {
       type: 'array',
       title: `{{t("Assignees", { ns: "${NAMESPACE}" })}}`,
@@ -36,45 +53,49 @@ export class Approval extends Instruction {
       },
       required: true,
       default: [],
-    },
-    mode: {
-      type: 'number',
-      title: `{{t("Mode", { ns: "${NAMESPACE}" })}}`,
-      'x-decorator': 'FormItem',
-      'x-component': 'ModeConfig',
-      default: 1,
-      'x-reactions': {
-        dependencies: ['assignees'],
-        fulfill: {
-          state: {
-            visible: '{{$deps[0].length > 1}}',
+      'x-reactions': [
+        {
+          dependencies: ['rule'],
+          fulfill: {
+            state: {
+              visible: '{{$deps[0]  == 1}}',
+            },
           },
         },
-      },
+      ],
     },
-    schema: {
-      type: 'void',
-      title: `{{t("User interface", { ns: "${NAMESPACE}" })}}`,
+    AssigneeRoles: {
+      type: 'array',
+      title: `{{t("角色", { ns: "${NAMESPACE}" })}}`,
       'x-decorator': 'FormItem',
-      'x-component': 'SchemaConfigButton',
-      properties: {
-        schema: {
-          type: 'object',
-          'x-component': 'SchemaConfig',
-          default: null,
-        },
+      'x-component': 'AssigneeRoles',
+      'x-component-props': {
+        multiple: true,
       },
+      required: true,
+      default: [],
+      'x-reactions': [
+        {
+          dependencies: ['rule'],
+          fulfill: {
+            state: {
+              visible: '{{$deps[0]  == 3}}',
+            },
+          },
+        },
+      ],
     },
-    forms: {
-      type: 'object',
-      default: {},
-    },
+    visibleFields:{
+      title: '显示字段设置',
+      type: 'array',
+      'x-decorator': 'FormItem',
+      'x-component': 'FieldVisibleConfig',
+    }
   };
   components = {
-    SchemaConfigButton,
-    SchemaConfig,
-    ModeConfig,
     AssigneesSelect,
+    AssigneeRoles,
+    FieldVisibleConfig
   };
   useVariables({ key, title, config }, { types, fieldNames = defaultFieldNames }) {
     // eslint-disable-next-line react-hooks/rules-of-hooks

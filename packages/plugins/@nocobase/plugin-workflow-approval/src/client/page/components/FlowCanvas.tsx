@@ -17,21 +17,21 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 // import { lang } from './locale';
 // import { executionSchema } from './schemas/executions';
 import useStyles from './style';
+import { useFlowContext } from '@nocobase/plugin-workflow/client';
 // import { linkNodes } from './utils';
 // import { getWorkflowDetailPath } from './constant';
 
 
 export function FlowCanvas() {
-  const params = {id: 94};
+  const {workflow } = useFlowContext();
   const { styles } = useStyles();
-
   return (
     <div className={cx(styles.workflowPageClass)}>
       <SchemaComponent
         schema={{
           type: 'void',
           properties: {
-            [`provider_${params.id}`]: {
+            [`provider_${workflow.id}`]: {
               type: 'void',
               'x-decorator': 'ResourceActionProvider',
               'x-decorator-props': {
@@ -44,7 +44,7 @@ export function FlowCanvas() {
                   resource: 'workflows',
                   action: 'get',
                   params: {
-                    filter: { id: params.id },
+                    filter: { id: workflow.id },
                     appends: [
                       'nodes',
                       'revisions.id',

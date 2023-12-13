@@ -2,15 +2,15 @@ import React from 'react';
 import { RemoteSelect, Variable } from '@nocobase/client';
 import { useWorkflowVariableOptions } from '@nocobase/plugin-workflow/client';
 
-function isUserKeyField(field) {
+function isRoleKeyField(field) {
   if (field.isForeignKey) {
-    return field.target === 'users';
+    return field.target === 'roles';
   }
-  return field.collectionName === 'users' && field.name === 'id';
+  return field.collectionName === 'roles' && field.name === 'name';
 }
 
-export function AssigneesSelect({ multiple = false, value = [], onChange }) {
-  const scope = useWorkflowVariableOptions({ types: [isUserKeyField] });
+export function AssigneeRoles({ multiple = false, value = [], onChange }) {
+  const scope = useWorkflowVariableOptions({ types: [isRoleKeyField] });
 
   return (
     <Variable.Input
@@ -22,11 +22,11 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
     >
       <RemoteSelect
         fieldNames={{
-          label: 'nickname',
-          value: 'id',
+          label: 'title',
+          value: 'name',
         }}
         service={{
-          resource: 'users',
+          resource: 'roles',
         }}
         manual={false}
         value={value[0]}
