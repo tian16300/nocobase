@@ -2,6 +2,7 @@
   "name": "@nocobase/plugin-workflow-approval",
   "version": "0.17.0-alpha.3",
   "main": "dist/server/index.js",
+  "private": true,
   "dependencies": {},
   "peerDependencies": {
     "@nocobase/client": "0.x",
