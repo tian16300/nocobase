@@ -189,14 +189,6 @@ export default class extends Instruction {
       }
 
 
-
-
-      //创建消息记录  
-      // const assignees = [...new Set(processor.getParsedValue(config.assigneesRule.ruleType, node.id) || [])];
-      console.log('assignees', assignees);
-      console.log('assignees', copyto);
-
-
     }
     return job;
   }
