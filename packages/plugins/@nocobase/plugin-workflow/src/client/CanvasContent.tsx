@@ -9,9 +9,9 @@ import { lang } from './locale';
 import useStyles from './style';
 import { TriggerConfig } from './triggers';
 
-export function CanvasContent({ entry, triggerTypes }) {
+export function CanvasContent({ entry}) {
   const { styles } = useStyles();
-  const { workflow } = useFlowContext();
+  const { workflow, triggerTypes } = useFlowContext();
   const [zoom, setZoom] = React.useState(100);
 
   return (
@@ -36,7 +36,7 @@ export function CanvasContent({ entry, triggerTypes }) {
                 `}
               />
             ) : null}
-            <TriggerConfig />
+            <TriggerConfig  />
             <div
               className={cx(
                 styles.branchBlockClass,
@@ -45,7 +45,7 @@ export function CanvasContent({ entry, triggerTypes }) {
                 `,
               )}
             >
-              <Branch entry={entry} triggerTypes={triggerTypes} />
+              <Branch entry={entry}  />
             </div>
             <div className={styles.terminalClass}>{lang('End')}</div>
           </div>

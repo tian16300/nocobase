@@ -45,7 +45,7 @@ function ExecutionResourceProvider({ request, filter = {}, ...others }) {
 
 
 export function WorkflowCanvas(props) {
-  const {triggerTypes} = props;
+  const {triggerTypes, exceptTypes} = props;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const app = useApp();
@@ -157,6 +157,8 @@ export function WorkflowCanvas(props) {
         workflow,
         nodes,
         refresh,
+        triggerTypes,
+        exceptTypes
       }}
     >
       <div className="workflow-toolbar">
@@ -245,7 +247,7 @@ export function WorkflowCanvas(props) {
           </ActionContextProvider>
         </aside>
       </div>
-      <CanvasContent entry={entry} triggerTypes={triggerTypes} />
+      <CanvasContent entry={entry}  />
     </FlowContext.Provider>
   );
 }

@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import useStyles from './style';
 import { WorkflowCanvas } from './WorkflowCanvas';
+import { uid } from '@nocobase/utils';
 
 export const WorkflowPage = () => {
   const params = useParams<any>();
@@ -12,6 +13,7 @@ export const WorkflowPage = () => {
     <div className={cx(styles.workflowPageClass)}>
       <SchemaComponent
         schema={{
+          name:uid(),
           type: 'void',
           properties: {
             [`provider_${params.id}`]: {
@@ -40,6 +42,9 @@ export const WorkflowPage = () => {
                 },
               },
               'x-component': 'WorkflowCanvas',
+              'x-component-props':{
+                exceptTypes:['approval', 'copyTo']
+              }
             },
           },
         }}

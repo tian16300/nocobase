@@ -14,19 +14,19 @@ interface AddButtonProps {
   upstream;
   branchIndex?: number | null;
   [key: string]: any;
-  triggerTypes: string[] | null;
 }
 
 export function AddButton(props: AddButtonProps) {
-  const { upstream, branchIndex = null, triggerTypes } = props;
+  const { upstream, branchIndex = null } = props;
   const { instructions } = usePlugin(WorkflowPlugin);
   const compile = useCompile();
   const api = useAPIClient();
-  const { workflow, refresh } = useFlowContext() ?? {};
-  const instructionList = Array.from(instructions.getValues()) as Instruction[];
+  const { workflow, refresh, triggerTypes, exceptTypes = [] } = useFlowContext() ?? {};
+  const _instructionList = Array.from(instructions.getValues()) as Instruction[];
   const { styles } = useStyles();
 
   const groups = useMemo(() => {
+    const instructionList = _instructionList.filter(({type})=>{ return !exceptTypes.includes(type)})
     if (!triggerTypes) {
       return [
         { key: 'control', label: `{{t("Control", { ns: "${NAMESPACE}" })}}` },
@@ -78,7 +78,7 @@ export function AddButton(props: AddButtonProps) {
           };
         });
     }
-  }, [branchIndex, instructionList, upstream, workflow, triggerTypes]);
+  }, [branchIndex, _instructionList, upstream, workflow, triggerTypes, exceptTypes]);
   const resource = useMemo(() => {
     if (!workflow) {
       return null;
