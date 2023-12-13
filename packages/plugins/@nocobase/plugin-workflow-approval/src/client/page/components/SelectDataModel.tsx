@@ -2,32 +2,42 @@
 
 import React, { useEffect } from 'react';
 
-import { FormProvider, IField, SchemaComponent, SchemaComponentProvider, useFormBlockContext, useSchemaOptionsContext } from '@nocobase/client';
+import {
+  FormProvider,
+  IField,
+  SchemaComponent,
+  SchemaComponentOptions,
+  SchemaComponentProvider,
+  css,
+  useFormBlockContext,
+  useSchemaOptionsContext,
+} from '@nocobase/client';
 
 import { useForm, useField } from '@formily/react';
 
 import { useApprovalSettingContext } from '../AddProvalSetting';
-export const useApprovalFormBlockProps = ()=>{
+export const useApprovalFormBlockProps = () => {
   const field: IField = useField();
-  const {form,dataModel, setDataModel} = useApprovalSettingContext();
+  const { form, collection, setCollection, appends, setAppends } = useApprovalSettingContext();
 
-  useEffect(()=>{
-    setDataModel(field?.value);
-    
-    console.log('useApprovalFormBlockProps 变化', field.value);
-
-  },[])
+  useEffect(() => {
+    setCollection(field?.value);
+  }, []);
   return {
     form,
-    initialValues: dataModel
+    initialValues: {
+      collection,
+      appends
+    },
   };
-}
+};
 export const SelectDataModel = () => {
+  const { form, collection, setCollection, appends, setAppends } = useApprovalSettingContext();
   const schema = {
     type: 'object',
     'x-component': 'FormV2',
     'x-component-props': {
-      useProps: '{{ useApprovalFormBlockProps }}'
+      useProps: '{{ useApprovalFormBlockProps }}',
     },
     properties: {
       collection: {
@@ -36,18 +46,7 @@ export const SelectDataModel = () => {
         required: true,
         'x-decorator': 'FormItem',
         'x-component': 'CollectionSelect',
-        'x-reactions': [
-          {
-            target: ['schemaConfig.form'],
-            fullfill: {
-              schema: {
-                'x-decorator-props.resourceName': '{{ $self.value}}',
-                'x-decorator-props.collection': '{{ $self.value}}',
-                'x-acl-action': '{{$self.value+":create"}}',
-              },
-            },
-          },
-        ],
+        default: collection,
       },
       appends: {
         type: 'array',
@@ -59,8 +58,11 @@ export const SelectDataModel = () => {
           multiple: true,
           useCollection() {
             const { values } = useForm();
+            setCollection(values?.collection);
+            setAppends(values?.appends);
             return values?.collection;
           },
+          default:appends
         },
         'x-reactions': [
           {
@@ -70,17 +72,20 @@ export const SelectDataModel = () => {
                 visible: '{{!!$deps[0]}}',
               },
             },
-          },
+          }
         ],
       },
     },
   };
-
-  // useEffect(()=>{
-  //   form.setInitialValues(value);
-  // },[value]);
   return (
-   
-    <SchemaComponent schema={schema} />
+    <div className={css`
+      width: 600px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    `}>
+      <SchemaComponentOptions scope={{ useApprovalFormBlockProps }}>
+        <SchemaComponent schema={schema} />
+      </SchemaComponentOptions>
+    </div>
   );
 };

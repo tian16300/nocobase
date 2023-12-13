@@ -26,11 +26,11 @@ export default class extends Plugin {
     /* 人工处理 */
     workflow.instructions.register(manualInstruction.type, manualInstruction);
     /* 审批处理 */
-    const approvalInstruction = new Approval();
-    workflow.instructions.register(approvalInstruction.type, approvalInstruction);
+    // const approvalInstruction = new Approval();
+    // workflow.instructions.register(approvalInstruction.type, approvalInstruction);
     /* 抄送处理 */
-    const copyTo = new CopyTo();
-    workflow.instructions.register(copyTo.type, copyTo);
+    // const copyTo = new CopyTo();
+    // workflow.instructions.register(copyTo.type, copyTo);
     
     this.app.schemaInitializerManager.add(addBlockButton);
     this.app.schemaInitializerManager.add(addActionButton);

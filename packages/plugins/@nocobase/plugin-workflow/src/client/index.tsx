@@ -32,7 +32,7 @@ import DestroyInstruction from './nodes/destroy';
 import { useTriggerWorkflowsActionProps } from './hooks/useTriggerWorkflowActionProps';
 import { getWorkflowDetailPath, getWorkflowExecutionsPath } from './constant';
 import { NAMESPACE } from './locale';
-
+import { WorkflowCanvas } from './WorkflowCanvas';
 export default class extends Plugin {
   triggers = new Registry<Trigger>();
   instructions = new Registry<Instruction>();
@@ -76,6 +76,7 @@ export default class extends Plugin {
 
   addComponents() {
     this.app.addComponents({
+      WorkflowCanvas,
       WorkflowPage,
       ExecutionPage,
     });

@@ -7,12 +7,13 @@ import {
   ProFormText,
   StepsForm,
   PageContainer,
+  FooterToolbar,
 } from '@ant-design/pro-components';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { LeftOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Input as AntdInput, Space, Steps, message, Card } from 'antd';
+import { Button, Input as AntdInput, Space, Divider, Steps, message, Card } from 'antd';
 import { Schema } from '@formily/json-schema';
 import {
   FormV2,
@@ -41,13 +42,18 @@ import {
   FormBlockContext,
   RecordProvider,
   useSchemaComponentContext,
+  useAPIClient,
+  IField,
 } from '@nocobase/client';
-import { createForm } from '@formily/core';
+import { createForm, onFieldChange } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
 import { FormProvider, FormConsumer, useForm } from '@formily/react';
 import { uid } from '@nocobase/utils';
-import { observer, useField, useFieldSchema } from '@formily/react';
+import { observer, useField, useFieldSchema,  } from '@formily/react';
 import { DesignSchemaView, SelectDataModel } from './components';
+import { config, createSchema } from './schema/config';
+import { FlowCanvas } from './components/FlowCanvas';
+import { set } from 'packages/core/actions/src/actions';
 
 const ApprovalSettingContext = createContext<any>({});
 type FormValue = {
@@ -264,64 +270,77 @@ const steps = [
 ];
 
 export const AddProvalSetting = () => {
-  //   const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
-  //   useEffect(() => {
-  //     waitTime(1000).then(() => {
-  //       // 编辑场景下需要使用formMapRef循环设置formData
-  //       formMapRef?.current?.forEach((formInstanceRef) => {
-  //         formInstanceRef?.current?.setFieldsValue(formValue);
-  //       });
-  //     });
-  //   }, []);
   const [flowName, setFlowName] = useState('流程名称');
   const [edit, setEdit] = useState(false);
-  const form = createForm();
-  const formStep = FormStep.createFormStep();
-  const { scope, components } = useSchemaOptionsContext();
-  const { designable } = useDesignable();
-  const { token } = useToken();
-  const [current, setCurrent] = useState(0);
  
-  const schema = new Schema({
-    name: uid(),
-    type: 'void',
-    required: true,
-    'x-component': 'ApprovalSchemaConfigSetting',
-    'x-component-props': {},
-    properties: {
-      form: {
-        type: 'void',
-        'x-decorator': 'FormBlockProvider',
-        'x-decorator-props': {
-          collection: 'bom',
-          resourceName: 'bom',
-        },
-        'x-acl-action': ``,
-        'x-component': 'FormV2',
-        'x-component-props': {
-          useProps: '{{ useFormBlockProps }}',
-        },
-        properties: {
-          grid: {
-            type: 'void',
-            'x-component': 'Grid',
-            'x-initializer': 'FormItemInitializers',
-            properties: {},
-          },
-        },
-      },
-    },
+  const { token } = useToken();
+  const [current, setCurrent] = useState(2);
+  const [dn, setDn] = useState<any>(null);
+  const [record,setRecord] = useState<any>({
+    "options": {},
+    "id": 94,
+    "createdAt": "2023-12-13T11:19:16.156Z",
+    "updatedAt": "2023-12-13T11:19:16.156Z",
+    "key": "xmif7z2wamo",
+    "title": "流程名称测试",
+    "enabled": false,
+    "description": null,
+    "type": "form",
+    "useTransaction": null,
+    "executed": 0,
+    "allExecuted": 0,
+    "current": true,
+    "bussinessCollectionName": "bom",
+    "isApproval": true,
+    "uiTemplateKey": null
+});
+  const [schemaJSON, setSchemaJSON] = useState<any>(null);
+  const [collection, setCollection] = useState('bom');  
+  const [appends, setAppends] = useState([]);
+  const [created, setCreated] = useState<any>(true);
+  const api = useAPIClient();
+  const form = createForm({
+   
   });
-  const { refresh } = useSchemaComponentContext();
-  const dn = createDesignable({
-    refresh,
-    current: schema
-  })
-  
-  // const [schemaJSON, setSchemaJSON] = useState(dfSchema);
-  const [schemaEntry, setSchemaEntry] = useState(null);
+  const handleSave = async () => {
+    const data = {      
+      ...record,
+      title: flowName,
+      bussinessCollectionName: collection,
+      isApproval: true,      
+      enabled: false,
+      type: 'form',
+      current: true,
+      config:{
+        collection: collection,
+        appends: appends
+      },
+    };
+    if(!data.id){
+     const res =  await api.resource('workflows').create({
+        values: data
+      });
+    }else{
+      const res =  await api.resource('workflows').update({
+        filterByTk: data.id,
+        values: data
+      });
+    }
+  };
 
-  
+  const schema = useMemo(() => {
+    if (!schemaJSON) {
+      return null;
+    } else {
+      return new Schema(schemaJSON);
+    }
+  }, [schemaJSON]);
+  useEffect(() => {
+    if (collection) {
+      const json = createSchema(collection);
+      setSchemaJSON(json);
+    }
+  }, [collection]);
 
   const next = () => {
     setCurrent(current + 1);
@@ -341,27 +360,33 @@ export const AddProvalSetting = () => {
   };
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
-  const record = new Proxy({}, {});
-  const [dataModel, setDataModel] = useState({});
   const vRef = useRef<any>({});
   vRef.current = {};
-  const handleNext = () => {
+  const handleNext = async () => {
     if (current == 0) {
-      const values = form.values;
-      setDataModel(values);
-    }else if(current == 1){ 
-      debugger;
-      console.log(schemaEntry?.toJSON());
-
-      // setSchemaJSON();
+      // const values = form.values;
+      // setDataModel(values);
+      /**
+       * 1. 选择数据模型
+       */
+      // 创建 workflow 数据模型
+      /**
+       * 保存数据
+       */
+      await handleSave();
+     
+    } else if (current == 1) {
+      if(schema){
+        setSchemaJSON(schema.toJSON());
+      }     
     }
-
     next();
   };
   return (
     <div
       style={{
         background: '#F5F7FA',
+        height: '100%',
       }}
     >
       <PageContainer
@@ -380,7 +405,6 @@ export const AddProvalSetting = () => {
                   >
                     <AntdInput
                       value={flowName}
-                      size="large"
                       onChange={(e) => {
                         setFlowName(e.target.value);
                       }}
@@ -406,90 +430,52 @@ export const AddProvalSetting = () => {
           ),
           breadcrumb: {},
         }}
+        className={css`
+          height: 100%;
+          .ant-pro-footer-bar {
+            z-index: 2;
+          }
+        `}
       >
-        <ApprovalSettingContext.Provider value={{ form,dataModel, setDataModel, schema, dn }}>
-          {/* <SchemaComponentProvider
-          components={{ ...components, SchemaConfigSetting, FormStep, AddBlockButton }}
-          scope={{ ...scope, formStep, useSchemaConfigSettingProps }}
-          designable={designable}
-         
-        >
-          <SchemaComponent schema={schema} />
-          <FormConsumer>
-            {() => (
-              <FormButtonGroup>
-                <Button
-                  disabled={!formStep.allowBack}
-                  onClick={() => {
-                    formStep.back();
-                  }}
-                >
-                  上一步
-                </Button>
-                <Button
-                  disabled={!formStep.allowNext}
-                  onClick={() => {
-                    保存上面的信息
-                    formStep.next();
-                  }}
-                >
-                  下一步
-                </Button>
-                <Button
-                  disabled={formStep.allowNext}
-                  onClick={() => {
-                    formStep.submit(console.log);
-                  }}
-                >
-                  提交
-                </Button>
-              </FormButtonGroup>
-            )}
-          </FormConsumer>
-        </SchemaComponentProvider> */}
-          {/* <FormProvider form={form}> */}
-          {/* <FormBlockContext.Provider value={{form}} > */}
-          {/* <RecordProvider record={record}> */}
-          <Steps current={current} items={items} />
-          {/* <div style={contentStyle}>{steps[current].content}</div> */}
+        <ApprovalSettingContext.Provider value={{ form, collection, setCollection,appends, setAppends, schema, dn, setDn }}>
           <Card
             className={css`
-              margin-top: 16px;
+              height: 100%;
             `}
           >
-            {current == 0 && <SelectDataModel  />}
-            {current == 1 && <DesignSchemaView ref={vRef} />}
+            <Steps current={current} items={items} />
+            <Divider></Divider>
+            <div className={css``}>
+              {current == 0 && <SelectDataModel />}
+              {current == 1 && <DesignSchemaView ref={vRef} />}
+              {current == 2 && <FlowCanvas />}
+            </div>
           </Card>
-          <div style={{ marginTop: 24 }}>
-          <FormConsumer>
-            {
-              (form) =>{
-                return <>
-                  {current > 0 && (
-                      <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
-                        上一步
-                      </Button>
-                    )}
-                    {current < steps.length - 1 && (
-                      <Button type="primary" onClick={handleNext}>
-                        下一步
-                      </Button>
-                    )}
-                    {current === steps.length - 1 && (
-                      <Button type="primary" onClick={() => message.success('Processing complete!')}>
-                        已完成
-                      </Button>
-                    )}
-                </>
-
-              }}
-            
-          </FormConsumer>
-          </div>
-          {/* </RecordProvider> */}
-          {/* </FormBlockContext.Provider> */}
-          {/* </FormProvider> */}
         </ApprovalSettingContext.Provider>
+        <FooterToolbar
+          style={{
+            zIndex: 2,
+            lineHeight: '56px',
+          }}
+        >
+          <div>
+            {current > 0 && (
+              <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
+                上一步
+              </Button>
+            )}
+            {current < steps.length - 1 && (
+              <Button type="primary" onClick={handleNext}>
+                下一步
+              </Button>
+            )}
+            {current === steps.length - 1 && (
+              <Button type="primary" onClick={() => message.success('Processing complete!')}>
+                已完成
+              </Button>
+            )}
+          </div>
+        </FooterToolbar>
       </PageContainer>
     </div>
   );

@@ -21,16 +21,10 @@ import { uid } from '@nocobase/utils';
 
 const AddBlockButton = observer(() => {
   const fieldSchema = useFieldSchema();
-  const { render } = useSchemaInitializerRender(fieldSchema['x-initializer']);
+  const { render } = useSchemaInitializerRender(fieldSchema['x-initializer']); 
   return render();
 });
 export const ApprovalSchemaConfigSetting = ({ children }) => {
-  const fieldSchema = useFieldSchema();
-  const { refresh } = useSchemaComponentContext();
-  const dn = createDesignable({
-    refresh,
-    current: fieldSchema.properties.form.properties.grid,
-  })
   return (
     <div>
       {children}
@@ -45,9 +39,9 @@ export const useApprovalSchemaSettingProps = () => {
   };
 };
 export const DesignSchemaView = (props, ref) => {
-  const { form, dataModel, schema } = useApprovalSettingContext();
+  const {  schema } = useApprovalSettingContext();
   const { scope, components } = useSchemaOptionsContext();
-  const collection = dataModel.collection;
+  
  
   const {designable} = useDesignable();
   // const schema = new Schema(schemaJSON);
@@ -70,7 +64,7 @@ export const DesignSchemaView = (props, ref) => {
         scope={{ ...scope }}
         designable={designable}
       >
-        <SchemaComponent schema={schema} />
+        <SchemaComponent schema={schema} memoized  />
       </SchemaComponentProvider>
     </div>
   );

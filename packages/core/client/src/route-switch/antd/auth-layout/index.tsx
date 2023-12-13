@@ -70,7 +70,7 @@ export function AuthLayout(props: any) {
           </Card>
         </div>
         <div className="powered-by" style={{ position: 'absolute', bottom: '10px', width: '100%' }}>
-        <PoweredBy />
+        <PoweredBy  />
         </div>
       </div>
     </div>

@@ -14,10 +14,11 @@ interface AddButtonProps {
   upstream;
   branchIndex?: number | null;
   [key: string]: any;
+  triggerTypes: string[] | null;
 }
 
 export function AddButton(props: AddButtonProps) {
-  const { upstream, branchIndex = null } = props;
+  const { upstream, branchIndex = null, triggerTypes } = props;
   const { instructions } = usePlugin(WorkflowPlugin);
   const compile = useCompile();
   const api = useAPIClient();
@@ -26,41 +27,58 @@ export function AddButton(props: AddButtonProps) {
   const { styles } = useStyles();
 
   const groups = useMemo(() => {
-    return [
-      { key: 'control', label: `{{t("Control", { ns: "${NAMESPACE}" })}}` },
-      { key: 'collection', label: `{{t("Collection operations", { ns: "${NAMESPACE}" })}}` },
-      { key: 'manual', label: `{{t("Manual", { ns: "${NAMESPACE}" })}}` },
-      { key: 'extended', label: `{{t("Extended types", { ns: "${NAMESPACE}" })}}` },
-    ]
-      .filter((group) => instructionList.filter((item) => item.group === group.key).length)
-      .map((group) => {
-        const groupInstructions = instructionList.filter(
-          (item) =>
-            item.group === group.key &&
-            (item.isAvailable ? item.isAvailable({ workflow, upstream, branchIndex }) : true),
-        );
+    if (!triggerTypes) {
+      return [
+        { key: 'control', label: `{{t("Control", { ns: "${NAMESPACE}" })}}` },
+        { key: 'collection', label: `{{t("Collection operations", { ns: "${NAMESPACE}" })}}` },
+        { key: 'manual', label: `{{t("Manual", { ns: "${NAMESPACE}" })}}` },
+        { key: 'extended', label: `{{t("Extended types", { ns: "${NAMESPACE}" })}}` },
+      ]
+        .filter((group) => instructionList.filter((item) => item.group === group.key).length)
+        .map((group) => {
+          const groupInstructions = instructionList.filter(
+            (item) =>
+              item.group === group.key &&
+              (item.isAvailable ? item.isAvailable({ workflow, upstream, branchIndex }) : true),
+          );
 
-        return {
-          ...group,
-          type: 'group',
-          children: groupInstructions.map((item) => ({
+          return {
+            ...group,
+            type: 'group',
+            children: groupInstructions.map((item) => ({
+              role: 'button',
+              'aria-label': item.type,
+              key: item.type,
+              label: item.title,
+              type: item.options ? 'subMenu' : null,
+              children: item.options
+                ? item.options.map((option) => ({
+                    role: 'button',
+                    'aria-label': option.key,
+                    key: option.key,
+                    label: option.label,
+                  }))
+                : null,
+            })),
+          };
+        });
+    } else {
+      return instructionList
+        .filter(
+          (item) =>
+            triggerTypes.includes(item.type) &&
+            (item.isAvailable ? item.isAvailable({ workflow, upstream, branchIndex }) : true),
+        )
+        .map((item) => {
+          return {
             role: 'button',
             'aria-label': item.type,
             key: item.type,
             label: item.title,
-            type: item.options ? 'subMenu' : null,
-            children: item.options
-              ? item.options.map((option) => ({
-                  role: 'button',
-                  'aria-label': option.key,
-                  key: option.key,
-                  label: option.label,
-                }))
-              : null,
-          })),
-        };
-      });
-  }, [branchIndex, instructionList, upstream, workflow]);
+          };
+        });
+    }
+  }, [branchIndex, instructionList, upstream, workflow, triggerTypes]);
   const resource = useMemo(() => {
     if (!workflow) {
       return null;

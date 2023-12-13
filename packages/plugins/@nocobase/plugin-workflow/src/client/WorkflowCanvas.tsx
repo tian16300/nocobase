@@ -42,7 +42,10 @@ function ExecutionResourceProvider({ request, filter = {}, ...others }) {
   return <ResourceActionProvider {...props} />;
 }
 
-export function WorkflowCanvas() {
+
+
+export function WorkflowCanvas(props) {
+  const {triggerTypes} = props;
   const navigate = useNavigate();
   const { t } = useTranslation();
   const app = useApp();
@@ -158,12 +161,12 @@ export function WorkflowCanvas() {
     >
       <div className="workflow-toolbar">
         <header>
-          <Breadcrumb
+          {/* <Breadcrumb
             items={[
               { title: <Link to={app.pluginSettingsManager.getRoutePath(from)}>{historyRouteName}</Link> },
               { title: <strong>{workflow.title}</strong> },
             ]}
-          />
+          /> */}
         </header>
         <aside>
           <div className="workflow-versions">
@@ -242,7 +245,7 @@ export function WorkflowCanvas() {
           </ActionContextProvider>
         </aside>
       </div>
-      <CanvasContent entry={entry} />
+      <CanvasContent entry={entry} triggerTypes={triggerTypes} />
     </FlowContext.Provider>
   );
 }
