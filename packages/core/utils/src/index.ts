@@ -21,6 +21,7 @@ export * from './toposort';
 export * from './uid';
 export * from './url';
 export * from './measure-execution-time';
-export * from './flattenTree';export * from './perf-hooks';
+export * from './flattenTree';
+// export * from './perf-hooks';
 
 export { dayjs, lodash, zhCn };

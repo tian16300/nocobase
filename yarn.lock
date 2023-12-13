@@ -633,7 +633,7 @@
     "@antv/util" "~2.0.5"
     tslib "^2.0.0"
 
-"@antv/g2plot@^2.2.11", "@antv/g2plot@^2.4.18":
+"@antv/g2plot@^2.2.11", "@antv/g2plot@^2.4.31":
   version "2.4.31"
   resolved "https://registry.npmmirror.com/@antv/g2plot/-/g2plot-2.4.31.tgz#b444aee07d06939949eaa8ba8f8e93f948634aa5"
   dependencies:
