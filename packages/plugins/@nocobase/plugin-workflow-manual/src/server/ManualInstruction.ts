@@ -15,18 +15,6 @@ export interface ManualConfig {
   schema: { [key: string]: any };
   forms: { [key: string]: FormType };
   assignees?: (number | string)[];
-  assigneesRule?: {
-    ruleType: 'depts'|'roles'|'users'| string;
-    depts?: number[];
-    roles?: number[];
-    users?: number[];
-  };
-  copyToRule?: {
-    ruleType: 'depts'|'roles'|'users'| string;
-    depts?: number[];
-    roles?: number[];
-    users?: number[];
-  };
   mode?: number;
 }
 
@@ -105,95 +93,31 @@ export default class extends Instruction {
 
   async run(node, prevJob, processor: Processor) {
     const { mode, ...config } = node.config as ManualConfig;
-    /**
-     * 查找
-     */
-    const transaction = processor.transaction;
-    const workflowModel = await processor.execution.getWorkflow();
-    const isApproval = workflowModel.get('isApproval');
+    const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
+
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
       result: mode ? [] : null,
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
-    if (!isApproval) {
-      const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
-      // NOTE: batch create users jobs
-      const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-      await UserJobModel.bulkCreate(
-        assignees.map((userId) => ({
-          userId,
-          jobId: job.id,
-          nodeId: node.id,
-          executionId: job.executionId,
-          workflowId: node.workflowId,
-          status: JOB_STATUS.PENDING,
-        })),
-        {
-          transaction: processor.transaction,
-        },
-      );
 
-     
-    }else{
-      /**
-       *  查找审批人，抄送人
-       */
-      const collectionName = workflowModel.get('bussinessCollectionName');
-      const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
-      const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
-      const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
-      //创建审批记录
-      /**
-       * 查询审批汇总表有无记录 有则更新 无则创建
-       * 添加审批记录
-       */
-      const ApprovalModel = processor.options.plugin.db.getRepository('approval');
-      const ApprovalRecord = await ApprovalModel.findOne({
-        filter:{
-          bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
-          bussinessCode: bussinessCode
-          /**
-           * 业务编号
-           */
-          // bussinessCode:
-
-        },
+    // NOTE: batch create users jobs
+    const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
+    await UserJobModel.bulkCreate(
+      assignees.map((userId) => ({
+        userId,
+        jobId: job.id,
+        nodeId: node.id,
+        executionId: job.executionId,
+        workflowId: node.workflowId,
+        status: JOB_STATUS.PENDING,
+      })),
+      {
         transaction: processor.transaction,
-      });
-      const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
-      const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
-      if(!ApprovalRecord){
-        ApprovalModel.create({
-          values:{
-            bussinessCollectionName: collectionName,
-            type: collectionName,
-            bussinessCode: bussinessCode,
-            submitterId: submitterId,
-            submitDate: submitDate,
-            submit_status:'1',
-            current_approval_users_id: assignees,
-            approval_record:[{
-              approval_users_id:assignees,
-              approval_status:'1',
-              current: true
-            }]
-          },
-          transaction: processor.transaction
-        });
-      }
+      },
+    );
 
-
-
-
-      //创建消息记录  
-      // const assignees = [...new Set(processor.getParsedValue(config.assigneesRule.ruleType, node.id) || [])];
-      console.log('assignees', assignees);
-      console.log('assignees', copyto);
-
-
-    }
     return job;
   }
 
