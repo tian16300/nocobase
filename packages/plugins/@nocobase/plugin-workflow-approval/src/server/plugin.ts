@@ -1,19 +1,50 @@
-import { InstallOptions, Plugin } from '@nocobase/server';
+import { Plugin } from '@nocobase/server';
+import actions from '@nocobase/actions';
+import { HandlerType } from '@nocobase/resourcer';
+import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
 
-export class PluginWorkflowApprovalServer extends Plugin {
-  afterAdd() {}
+import jobsCollection from './collecions/jobs';
+import usersCollection from './collecions/users';
+import usersJobsCollection from './collecions/users_jobs';
+import { submit } from './actions';
 
-  beforeLoad() {}
+import ApprovalInstruction from './ApprovalInstruction';
+import CopyToInstruction from './CopyToInstruction';
 
-  async load() {}
+export default class extends Plugin {
+  workflow: WorkflowPlugin;
 
-  async install(options?: InstallOptions) {}
+  async load() {
+    this.app.db.collection(usersJobsCollection);
+    this.app.db.extendCollection(usersCollection);
+    this.app.db.extendCollection(jobsCollection);
 
-  async afterEnable() {}
+    this.app.resource({
+      name: 'users_jobs',
+      actions: {
+        list: {
+          filter: {
+            $or: [
+              {
+                'workflow.enabled': true,
+              },
+              {
+                'workflow.enabled': false,
+                status: {
+                  $ne: JOB_STATUS.PENDING,
+                },
+              },
+            ],
+          },
+          handler: actions.list as HandlerType,
+        },
+        submit,
+      },
+    });
 
-  async afterDisable() {}
-
-  async remove() {}
+    const workflowPlugin = this.app.getPlugin('workflow') as WorkflowPlugin;
+    this.workflow = workflowPlugin;
+    workflowPlugin.instructions.register('approval', new ApprovalInstruction(workflowPlugin));
+    workflowPlugin.instructions.register('copyTo', new CopyToInstruction(workflowPlugin));
+  }
 }
-
-export default PluginWorkflowApprovalServer;
