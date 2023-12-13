@@ -44,6 +44,8 @@ import {
   useSchemaComponentContext,
   useAPIClient,
   IField,
+  useApp,
+  useAppPluginLoad,
 } from '@nocobase/client';
 import { createForm, onFieldChange } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
@@ -55,7 +57,7 @@ import { config, createSchema } from './schema/config';
 import { FlowCanvas } from './components/FlowCanvas';
 import { set } from 'packages/core/actions/src/actions';
 import { FlowContext } from '@nocobase/plugin-workflow/client';
-
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 const ApprovalSettingContext = createContext<any>({});
 type FormValue = {
   jobInfo: {
@@ -115,8 +117,12 @@ const steps = [
   },
 ];
 
-export const AddProvalSetting = () => {
-  const [flowName, setFlowName] = useState('流程名称');
+export const AddProvalSetting = (props) => {
+  const {app} = props;
+  const params = useParams<any>();
+  
+  const [searchParams] = useSearchParams();
+  const [flowName, setFlowName] = useState('审批单名称');
   const [edit, setEdit] = useState(false);
  
   const { token } = useToken();
@@ -130,9 +136,10 @@ export const AddProvalSetting = () => {
   const [initialSchema, setInitialSchema] = useState<any>(null);
   const [loading, setLoading] = useState<any>(false);
   const api = useAPIClient();
-  const form = createForm({});
+  const form = createForm({});  
+  const navigate = useNavigate();
   const nodes = [];
-  const params = useMemo(()=>{
+  const _params = useMemo(()=>{
     return {      
       ...workflow,
       title: flowName,
@@ -147,17 +154,33 @@ export const AddProvalSetting = () => {
       },
     }
   },[workflow,flowName,collection, appends  ]);
+  useEffect(()=>{
+    const filterByTk =  searchParams.get('id');
+    if(filterByTk){
+      api.resource('workflows').get({
+        filterByTk: filterByTk,
+        appends: ['nodes', 'revisions.id', 'revisions.createdAt', 'revisions.current', 'revisions.executed', 'revisions.enabled']
+      }).then((res)=>{
+        const data = res.data?.data;
+        setWorkFlow(data);
+        setFlowName(data.title);
+        setCollection(data.bussinessCollectionName);
+        setAppends(data.config?.appends);
+      })
+    }
+  },[searchParams.get('id')]);
   const handleSave = async () => {  
     setLoading(true);
-    if(!params.id){
+    if(!_params.id){
      const res =   await api.resource('workflows').create({
-        values: params
+        values: _params
       });
+      navigate(app.router.get('admin.workflow.approval.form').path+'?id='+res.data?.data?.id);
       return res.data?.data;
     }else{
       const res =  await api.resource('workflows').update({
-        filterByTk: params.id,
-        values: params
+        filterByTk: _params.id,
+        values: _params
       });
       return res.data?.data?.[0];
     }

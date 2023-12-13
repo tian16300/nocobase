@@ -1,5 +1,5 @@
 import { Plugin } from '@nocobase/client';
-import { getApprovalAddPath, getApprovalDetailPath } from './hooks';
+import { getApprovalDetailPath, getApprovalSettingPath } from './hooks';
 import { AddProvalSetting, ApprovalDetailPage } from './page';
 import React from 'react';
 import { useApprovalFormBlockProps } from './page/components';
@@ -50,9 +50,11 @@ export class PluginWorkflowApprovalClient extends Plugin {
       path: getApprovalDetailPath(':id'),
       element: <ApprovalDetailPage />,
     });
-    this.app.router.add('admin.workflow.approval.add', {
-      path: getApprovalAddPath(),
-      Component: AddProvalSetting
+    this.app.router.add('admin.workflow.approval.form', {
+      path: getApprovalSettingPath(),
+      Component: ()=>{
+        return <AddProvalSetting app={this.app} />
+      },
     });
   }
 }

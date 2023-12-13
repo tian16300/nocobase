@@ -14,7 +14,11 @@ export const useApprovalContext = () => {
 };
 export const ApprovalDetailPage = () => {
   const [workflow, setWorkflow] = useState<any>({ id: 108 });
-  const [approval, setApproval] = useState<any>({});
+  const [approval, setApproval] = useState<any>({
+    id:1,
+    status: '待审批',
+    currentIndex: 1,
+  });
 
   return (
     <ApprovalContext.Provider
@@ -78,9 +82,7 @@ const View = () => {
             </Card>
           </Col>
           <Col span={16}>
-            <Card title="详情" bordered={false} size="small">
-              Card content
-            </Card>
+            <ApprovalFlowNodeDetail ></ApprovalFlowNodeDetail>
           </Col>
           <Col span={8}>
             <Card
@@ -112,9 +114,12 @@ const View = () => {
 };
 
 const ApprovalFlowSteps = () => {
-  const { workflow } = useApprovalContext();
-  const api = useAPIClient();
+  const { workflow, approval } = useApprovalContext();
   const [nodes, setNodes] = useState<any[]>([]);
+  const currentIndex = useMemo(() => {
+    return approval?.currentIndex || 0;
+  }, [approval]);
+  const api = useAPIClient();
   useEffect(() => {
     if (workflow?.id)
       api
@@ -146,8 +151,12 @@ const ApprovalFlowSteps = () => {
           title: node.title,
           description: (
             <>
-              <div>审批人</div>
-              <div>2017-01-10 12:00</div>
+              <div>
+                周毛毛 <DingdingOutlined style={{ color: '#007fff' }} />
+              </div>
+              <div>
+                <a>催一下</a>
+              </div>
             </>
           ),
         };
@@ -157,5 +166,29 @@ const ApprovalFlowSteps = () => {
       },
     ];
   }, [nodes]);
-  return <Steps size="small" progressDot current={0} items={stepItems} />;
+  return <Steps size="small" progressDot current={currentIndex} items={stepItems} />;
+};
+
+const ApprovalFlowNodeDetail = () => {
+  const { workflow, approval } = useApprovalContext();
+  const api = useAPIClient();
+  useEffect(() => {
+    if (workflow?.id)
+      api
+        .resource('users_jobs')
+        .list({
+          filter: {
+            workflowId: workflow.id,
+            type: 'approval',
+          },
+        })
+        .then((res) => {
+          // setNodes(res.data?.data);
+        });
+  }, [approval?.id]);
+  return (
+    <Card title="详情" bordered={false} size="small">
+      Card content
+    </Card>
+  );
 };
