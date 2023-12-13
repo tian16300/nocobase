@@ -1,6 +1,6 @@
 {
   "name": "@zkjx/plugin-prj-manager",
-  "version": "0.17.0-alpha.5",
+  "version": "0.17.0-alpha.6",
   "main": "dist/server/index.js",
   "private": true,
   "dependencies": {
