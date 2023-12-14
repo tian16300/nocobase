@@ -104,7 +104,7 @@ export const FormBlockProvider = (props) => {
   const createFlag =
     (currentCollection.name === (collection?.name || collection) && !isDetailBlock) || !currentCollection.name;
   /* */
-  const params = { ...props.params };
+ 
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
       <TemplateBlockProvider>

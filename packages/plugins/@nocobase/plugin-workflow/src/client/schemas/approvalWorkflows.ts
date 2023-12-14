@@ -1,5 +1,12 @@
 import { ISchema, useForm } from '@formily/react';
-import { useActionContext, useBlockContext, useBlockRequestContext, useRecord, useResourceActionContext, useResourceContext } from '@nocobase/client';
+import {
+  useActionContext,
+  useBlockContext,
+  useBlockRequestContext,
+  useRecord,
+  useResourceActionContext,
+  useResourceContext,
+} from '@nocobase/client';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locale';
@@ -41,7 +48,7 @@ const collection = {
       uiSchema: {
         'x-component': 'RemoteSelect',
         'x-component-props': {
-           useProps:'{{ getUiTemplates }}'
+          useProps: '{{ getUiTemplates }}',
         },
         title: '关联UI模板',
       },
@@ -155,10 +162,10 @@ const workflowFieldset = {
     'x-decorator': 'FormItem',
     required: true,
   },
-  uiTemplate:{
+  uiTemplate: {
     'x-component': 'CollectionField',
     'x-decorator': 'FormItem',
-    required: true
+    required: true,
   },
   config: {
     'x-component': 'CollectionField',
@@ -228,7 +235,7 @@ export const approvalWorkflows: ISchema = {
             },
             sort: ['-createdAt'],
             except: ['config'],
-            appends:['uiTemplate']
+            appends: ['uiTemplate'],
           },
         },
       },
@@ -266,72 +273,8 @@ export const approvalWorkflows: ISchema = {
               'x-component': 'Action',
               'x-component-props': {
                 type: 'primary',
-              },
-              properties: {
-                drawer: {
-                  type: 'void',
-                  'x-component': 'Action.Drawer',
-                  'x-decorator': 'Form',
-                  'x-decorator-props': {
-                    initialValue: {
-                      current: true,
-                      type: 'form',
-                      isApproval: true,
-                      config: {
-                        collection: '',
-                        changed: [],
-                        appends: [['updatedBy', 'updatedBy.dept', 'updatedBy.dept.supervisor']],
-                        condition: {},
-                        mode: 2,
-                      },
-                    },
-                  },
-                  title: '{{t("Add new")}}',
-                  properties: {
-                    title: workflowFieldset.title,
-                    // type: workflowFieldset.type,
-                    // isApproval: workflowFieldset.isApproval,
-                    bussinessCollectionName: workflowFieldset.bussinessCollectionName,
-                    uiTemplate:workflowFieldset.uiTemplate,
-                    config: workflowFieldset.config,
-                    description: workflowFieldset.description,
-                    options: workflowFieldset.options,
-                    footer: {
-                      type: 'void',
-                      'x-component': 'Action.Drawer.Footer',
-                      properties: {
-                        cancel: {
-                          title: '{{ t("Cancel") }}',
-                          'x-component': 'Action',
-                          'x-component-props': {
-                            useAction: '{{ cm.useCancelAction }}',
-                          },
-                        },
-                        submit: {
-                          title: '{{ t("Submit") }}',
-                          'x-component': 'Action',
-                          'x-component-props': {
-                            type: 'primary',
-                            useAction: '{{ cm.useCreateAction }}',
-                          },
-                        },
-                      },
-                    },
-                  },
-                  ['x-linkage-rules']: [
-                    {
-                      condition: {
-                        $and: [],
-                      },
-                      actions: [
-                        {
-                          targetFields: ['type', 'isApproval'],
-                          operator: 'hidden',
-                        },
-                      ],
-                    },
-                  ],
-                },
+                useProps: '{{ useApprovalWorkflowFormActionProps }}',
+                formType:'add'
               },
             },
             delete: {
@@ -383,7 +326,7 @@ export const approvalWorkflows: ISchema = {
                 },
               },
             },
-           
+
             enabled: {
               type: 'void',
               'x-decorator': 'Table.Column.Decorator',
@@ -436,9 +379,11 @@ export const approvalWorkflows: ISchema = {
                   properties: {
                     configure: {
                       type: 'void',
-                      'x-component': 'WorkflowLink',
+                      'x-component': 'Action.Link',
+                      title: '{{ t("配置") }}',
                       'x-component-props': {
-                        params: '?from=approvalWorkflow',
+                        useProps: '{{ useApprovalWorkflowFormActionProps }}',
+                        current: 2
                       },
                     },
                     update: {
@@ -447,63 +392,73 @@ export const approvalWorkflows: ISchema = {
                       'x-component': 'Action.Link',
                       'x-component-props': {
                         type: 'primary',
-                      },
-                      properties: {
-                        drawer: {
-                          type: 'void',
-                          'x-component': 'Action.Drawer',
-                          'x-decorator': 'Form',
-                          'x-decorator-props': {
-                            useValues: '{{ cm.useValuesFromRecord }}',
-                          },
-                          title: '{{ t("Edit") }}',
-                          properties: {
-                            title: workflowFieldset.title,
-                            type: workflowFieldset.type,
-                            isApproval: workflowFieldset.isApproval,
-                            bussinessCollectionName: workflowFieldset.bussinessCollectionName,
-                            uiTemplate:workflowFieldset.uiTemplate,
-                            enabled: workflowFieldset.enabled,
-                            description: workflowFieldset.description,
-                            options: workflowFieldset.options,
-                            footer: {
-                              type: 'void',
-                              'x-component': 'Action.Drawer.Footer',
-                              properties: {
-                                cancel: {
-                                  title: '{{ t("Cancel") }}',
-                                  'x-component': 'Action',
-                                  'x-component-props': {
-                                    useAction: '{{ cm.useCancelAction }}',
-                                  },
-                                },
-                                submit: {
-                                  title: '{{ t("Submit") }}',
-                                  'x-component': 'Action',
-                                  'x-component-props': {
-                                    type: 'primary',
-                                    useAction: '{{ cm.useUpdateAction }}',
-                                  },
-                                },
-                              },
-                            },
-                          },
-                          ['x-linkage-rules']: [
-                            {
-                              condition: {
-                                $and: [],
-                              },
-                              actions: [
-                                {
-                                  targetFields: ['type', 'isApproval'],
-                                  operator: 'hidden',
-                                },
-                              ],
-                            },
-                          ],
-                        },
+                        useProps: '{{ useApprovalWorkflowFormActionProps }}'
+
                       },
                     },
+                    // update: {
+                    //   type: 'void',
+                    //   title: '{{ t("Edit") }}',
+                    //   'x-component': 'Action.Link',
+                    //   'x-component-props': {
+                    //     type: 'primary',
+                    //   },
+                    //   properties: {
+                    //     drawer: {
+                    //       type: 'void',
+                    //       'x-component': 'Action.Drawer',
+                    //       'x-decorator': 'Form',
+                    //       'x-decorator-props': {
+                    //         useValues: '{{ cm.useValuesFromRecord }}',
+                    //       },
+                    //       title: '{{ t("Edit") }}',
+                    //       properties: {
+                    //         title: workflowFieldset.title,
+                    //         type: workflowFieldset.type,
+                    //         isApproval: workflowFieldset.isApproval,
+                    //         bussinessCollectionName: workflowFieldset.bussinessCollectionName,
+                    //         uiTemplate: workflowFieldset.uiTemplate,
+                    //         enabled: workflowFieldset.enabled,
+                    //         description: workflowFieldset.description,
+                    //         options: workflowFieldset.options,
+                    //         footer: {
+                    //           type: 'void',
+                    //           'x-component': 'Action.Drawer.Footer',
+                    //           properties: {
+                    //             cancel: {
+                    //               title: '{{ t("Cancel") }}',
+                    //               'x-component': 'Action',
+                    //               'x-component-props': {
+                    //                 useAction: '{{ cm.useCancelAction }}',
+                    //               },
+                    //             },
+                    //             submit: {
+                    //               title: '{{ t("Submit") }}',
+                    //               'x-component': 'Action',
+                    //               'x-component-props': {
+                    //                 type: 'primary',
+                    //                 useAction: '{{ cm.useUpdateAction }}',
+                    //               },
+                    //             },
+                    //           },
+                    //         },
+                    //       },
+                    //       ['x-linkage-rules']: [
+                    //         {
+                    //           condition: {
+                    //             $and: [],
+                    //           },
+                    //           actions: [
+                    //             {
+                    //               targetFields: ['type', 'isApproval'],
+                    //               operator: 'hidden',
+                    //             },
+                    //           ],
+                    //         },
+                    //       ],
+                    //     },
+                    //   },
+                    // },
                     revision: {
                       type: 'void',
                       title: `{{t("Duplicate", { ns: "${NAMESPACE}" })}}`,

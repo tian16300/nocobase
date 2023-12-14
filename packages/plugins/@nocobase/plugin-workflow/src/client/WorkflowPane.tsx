@@ -8,15 +8,18 @@ import OpenDrawer from './components/OpenDrawer';
 import { workflowSchema } from './schemas/workflows';
 import { ExecutionStatusSelect } from './components/ExecutionStatusSelect';
 import WorkflowPlugin from '.';
+import { approvalWorkflows } from './schemas/approvalWorkflows';
+import { useApprovalWorkflowFormActionProps } from './useApprovalWorkflowFormActionProps';
 
-export function WorkflowPane() {
+export function WorkflowPane({ isApproval }) {
+  const schema = isApproval ? approvalWorkflows : workflowSchema;
   const ctx = useContext(SchemaComponentContext);
   const { getTriggersOptions } = usePlugin(WorkflowPlugin);
   return (
     <Card bordered={false}>
       <SchemaComponentContext.Provider value={{ ...ctx, designable: false }}>
         <SchemaComponent
-          schema={workflowSchema}
+          schema={schema}
           components={{
             WorkflowLink,
             ExecutionResourceProvider,
@@ -26,6 +29,8 @@ export function WorkflowPane() {
           }}
           scope={{
             getTriggersOptions,
+            useApprovalWorkflowFormActionProps,
+
           }}
         />
       </SchemaComponentContext.Provider>

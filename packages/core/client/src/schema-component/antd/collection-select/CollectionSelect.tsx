@@ -4,12 +4,13 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelfAndChildrenCollections } from '../../../collection-manager/action-hooks';
 import { useCollection, useCollectionManager } from '../../../collection-manager/hooks';
-import { useCompile } from '../../hooks';
+import { useCompile, useProps } from '../../hooks';
 import { FilterContext } from '../filter/context';
 
 export type CollectionSelectProps = SelectProps<any, any> & {
   filter?: (item: any, index: number, array: any[]) => boolean;
   isTableOid?: boolean;
+  useProps?: () => any;
 };
 
 function useOptions({ filter, isTableOid }: CollectionSelectProps) {
@@ -39,9 +40,10 @@ function useOptions({ filter, isTableOid }: CollectionSelectProps) {
 }
 
 export const CollectionSelect = connect(
-  (props: CollectionSelectProps) => {
+  (originalProps: CollectionSelectProps) => {
+    const props = useProps(originalProps);
     const { filter, ...others } = props;
-    const options = useOptions(props);
+    const options = useOptions(props) as any;
     const { t } = useTranslation();
     return (
       <Select
@@ -53,7 +55,7 @@ export const CollectionSelect = connect(
         {...others}
         showSearch
         filterOption={(input, option) =>
-          (option?.label.toLowerCase() ?? '').includes(input.toLocaleLowerCase()) ||
+          ((option?.label as any).toLowerCase() ?? '').includes(input.toLocaleLowerCase()) ||
           (option?.value.toString().toLowerCase() ?? '').includes(input.toLocaleLowerCase())
         }
         options={options}

@@ -138,9 +138,9 @@ export const workflowSchema: ISchema = {
           params: {
             filter: {
               current: true,
-              // isApproval:{
-              //   $not: true
-              // }
+              isApproval:{
+                $not: true
+              }
             },
             sort: ['-createdAt'],
             except: ['config'],

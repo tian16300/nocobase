@@ -77,6 +77,16 @@ export default function () {
         defaultValue: false,
       },
       {
+        name: 'uiTemplateKey',
+        type: 'string',
+        isForeignKey: true,
+        uiSchema: {
+          type: 'string',
+          title: 'uiTemplateKey',
+          'x-read-pretty': true,
+        },
+      },
+      {
         type: 'belongsTo',
         name: 'uiTemplate',
         target: 'uiSchemaTemplates',

@@ -51,13 +51,14 @@ import { createForm, onFieldChange } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
 import { FormProvider, FormConsumer, useForm } from '@formily/react';
 import { uid } from '@nocobase/utils';
-import { observer, useField, useFieldSchema,  } from '@formily/react';
+import { observer, useField, useFieldSchema } from '@formily/react';
 import { DesignSchemaView, SelectDataModel } from './components';
 import { config, createSchema } from './schema/config';
 import { FlowCanvas } from './components/FlowCanvas';
 import { set } from 'packages/core/actions/src/actions';
 import { FlowContext } from '@nocobase/plugin-workflow/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { SettingOutlined } from '@ant-design/icons';
 const ApprovalSettingContext = createContext<any>({});
 type FormValue = {
   jobInfo: {
@@ -107,95 +108,104 @@ export const useSchemaConfigSettingProps = () => {
 
 const steps = [
   {
-    title: '选择数据模型'
+    title: '选择数据模型',
   },
   {
-    title: '显示设置'
+    title: '显示设置',
   },
   {
-    title: '流程设置'
+    title: '流程设置',
   },
 ];
 
 export const AddProvalSetting = (props) => {
-  const {app} = props;
-  const params = useParams<any>();
-  
+  const { app } = props;
   const [searchParams] = useSearchParams();
   const [flowName, setFlowName] = useState('审批单名称');
   const [edit, setEdit] = useState(false);
- 
-  const { token } = useToken();
-  const [current, setCurrent] = useState(0);
+  const currentIndex = searchParams.get('current')?Number(searchParams.get('current')).valueOf():0;
+  const [current, setCurrent] = useState(currentIndex);
   const [dn, setDn] = useState<any>(null);
   const [workflow, setWorkFlow] = useState<any>(null);
-  
-  const [collection, setCollection] = useState(null);  
+  const [collection, setCollection] = useState(null);
   const [appends, setAppends] = useState([]);
   const [isAllowNext, setIsAllowNext] = useState<any>(false);
   const [initialSchema, setInitialSchema] = useState<any>(null);
+  const [uiTemplateKey, setUiTemplateKey] = useState<any>(null);
   const [loading, setLoading] = useState<any>(false);
   const api = useAPIClient();
-  const form = createForm({});  
+  const form = createForm({});
   const navigate = useNavigate();
   const nodes = [];
-  const _params = useMemo(()=>{
-    return {      
+  const _params = useMemo(() => {
+    return {
       ...workflow,
       title: flowName,
       bussinessCollectionName: collection,
-      isApproval: true,      
+      isApproval: true,
       enabled: false,
       type: 'form',
       current: true,
-      config:{
+      config: {
         collection: collection,
-        appends: appends
+        appends: appends,
       },
+    };
+  }, [workflow, flowName, collection, appends]);
+  useEffect(() => {
+    const filterByTk = searchParams.get('id');
+    if (filterByTk) {
+      api
+        .resource('workflows')
+        .get({
+          filterByTk: filterByTk,
+          appends: [
+            'nodes',
+            'revisions.id',
+            'revisions.createdAt',
+            'revisions.current',
+            'revisions.executed',
+            'revisions.enabled',
+            'uiTemplate'
+          ],
+        })
+        .then((res) => {
+          const data = res.data?.data;
+          setWorkFlow(data);
+          setFlowName(data.title);
+          setCollection(data.bussinessCollectionName);
+          setAppends(data.config?.appends);
+          setUiTemplateKey(data?.uiTemplateKey);
+        });
     }
-  },[workflow,flowName,collection, appends  ]);
-  useEffect(()=>{
-    const filterByTk =  searchParams.get('id');
-    if(filterByTk){
-      api.resource('workflows').get({
-        filterByTk: filterByTk,
-        appends: ['nodes', 'revisions.id', 'revisions.createdAt', 'revisions.current', 'revisions.executed', 'revisions.enabled']
-      }).then((res)=>{
-        const data = res.data?.data;
-        setWorkFlow(data);
-        setFlowName(data.title);
-        setCollection(data.bussinessCollectionName);
-        setAppends(data.config?.appends);
-      })
-    }
-  },[searchParams.get('id')]);
-  const handleSave = async () => {  
+  }, [searchParams.get('id')]);
+  const handleSave = async () => {
     setLoading(true);
-    if(!_params.id){
-     const res =   await api.resource('workflows').create({
-        values: _params
+    if (!_params.id) {
+      const res = await api.resource('workflows').create({
+        values: {
+          ..._params
+        },
       });
-      navigate(app.router.get('admin.workflow.approval.form').path+'?id='+res.data?.data?.id);
+      setLoading(false);
+      navigate(app.router.get('admin.workflow.approvalSetting.form').path + '?id=' + res.data?.data?.id);
       return res.data?.data;
-    }else{
-      const res =  await api.resource('workflows').update({
+    } else {
+      const res = await api.resource('workflows').update({
         filterByTk: _params.id,
-        values: _params
+        values: _params,
       });
+      
+      setLoading(false);
       return res.data?.data?.[0];
     }
   };
 
-  useEffect(()=>{
-    if(current == 0 && collection){
+  useEffect(() => {
+    if (current == 0 && collection) {
       setIsAllowNext(true);
     }
-  },[
-    current,
-    collection
-  ]);
-
- 
+  }, [current, collection]);
 
   const next = () => {
     setCurrent(current + 1);
@@ -204,47 +214,77 @@ export const AddProvalSetting = (props) => {
   const prev = () => {
     setCurrent(current - 1);
   };
-  
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
   const vRef = useRef<any>({});
   vRef.current = {};
   const handleNext = async () => {
-   
     if (current == 0) {
-      // const values = form.values;
-      // setDataModel(values);
-      /**
-       * 1. 选择数据模型
-       */
-      // 创建 workflow 数据模型
-      /**
-       * 保存数据
-       */
       const res = await handleSave();
       setWorkFlow(res);
-      if(!initialSchema){
-        setInitialSchema(createSchema(res.bussinessCollectionName));    
-      } 
-      setTimeout(()=>{
-        setLoading(false);
+      if (!uiTemplateKey) {
+        setInitialSchema(createSchema(res.bussinessCollectionName));
+      }
+      setTimeout(() => {
         next();
-      }, 1000)
-      
-    
-     
+      }, 1000);
     } else if (current == 1) {
-      if(workflow?.id){
+      if (workflow?.id) {
+        /* 保存区块模板 */
+       
+        if (!uiTemplateKey) {
+          const uiSchemaJson = initialSchema;
+          api
+            .resource('uiSchemas')
+            .create({
+              values: uiSchemaJson,
+            })
+            .then((res) => {
+              /* 保存 uitemplateKey */
+              // api.resource('uiSchemas')
+              api
+                .resource('uiSchemaTemplates')
+                .create({
+                  values: {
+                    name: flowName + '_' + '显示设置',
+                    uid: res.data.data['x-uid'],
+                    resourceName: collection,
+                    collectionName: collection,
+                    componentName: 'ReadPrettyFormItem',
+                  },
+                })
+                .then((res) => {
+                  const uiTemplate = res.data.data;
+                  setUiTemplateKey(uiTemplate.key);
+                  api
+                    .resource('workflows')
+                    .update({
+                      filterByTk: workflow.id,
+                      updateAssociationValues:['uiTemplate'],
+                      values: {
+                        uiTemplateKey: uiTemplate.key,
+                        uiTemplate:uiTemplate,
+                      },
+                    })
+                    .then((res) => {                
+                      // setWorkFlow({
+                      //   ...workflow,
+                      //   uiTemplateKey: uiTemplate.key
+                      // });
+                   
+                    });
+                });
+            });
+        }
         next();
-      }      
+      }
     }
-   
   };
-  useEffect(()=>{
-    if(collection){
-      setInitialSchema(createSchema(collection));  
-    }
-  },[collection]);
+  // useEffect(() => {
+  //   if (collection) {
+  //     setInitialSchema(createSchema(collection));
+  //   }
+  // }, [collection]);
   return (
     <div
       style={{
@@ -259,7 +299,13 @@ export const AddProvalSetting = (props) => {
           title: (
             <>
               <Space>
-                <Button icon={<LeftOutlined />} type="text"></Button>
+                <Button
+                  icon={<LeftOutlined />}
+                  type="text"
+                  onClick={() => {
+                    navigate(-1);
+                  }}
+                ></Button>
                 {edit ? (
                   <span
                     style={{
@@ -269,10 +315,10 @@ export const AddProvalSetting = (props) => {
                   >
                     <AntdInput
                       value={flowName}
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         setFlowName(e.target.value);
                       }}
-                      onBlur={() => {
+                      onBlur={() => {                       
                         setEdit(false);
                       }}
                     ></AntdInput>
@@ -292,7 +338,22 @@ export const AddProvalSetting = (props) => {
               </Space>
             </>
           ),
-          breadcrumb: {},
+          breadcrumb: {
+            items: [
+              {
+                href: app.pluginSettingsManager.getRoutePath('approvalSetting'),
+                title: (
+                  <>
+                    <SettingOutlined />
+                    <span>审批设置</span>
+                  </>
+                ),
+              },
+              {
+                title: '当前位置',
+              },
+            ],
+          },
         }}
         className={css`
           height: 100%;
@@ -301,29 +362,49 @@ export const AddProvalSetting = (props) => {
           }
         `}
       >
-        <ApprovalSettingContext.Provider value={{ form, collection, setCollection,  appends,  setAppends,  workflow, initialSchema, setInitialSchema, dn, setDn }}>
-        <FlowContext.Provider  value={{
-           workflow,
-            nodes
-
-        }
-          
-        }>
-          <Card
-            className={css`
-              height: 100%;
-            `}
+        <ApprovalSettingContext.Provider
+          value={{
+            form,
+            collection,
+            setCollection,
+            appends,
+            setAppends,
+            workflow,
+            initialSchema,
+            setInitialSchema,
+            uiTemplateKey,
+            dn,
+            setDn,
+          }}
+        >
+          <FlowContext.Provider
+            value={{
+              workflow,
+              nodes,
+            }}
           >
-            <div>
-              <div className={css`width:80%; margin:0 auto;`}><Steps current={current} items={items} /></div>
-            </div>
-            <Divider></Divider>
-            <div className={css``}>
-              {current == 0 && <SelectDataModel />}
-              {current == 1 && workflow?.id && <DesignSchemaView />}
-              {current == 2 && <FlowCanvas />}
-            </div>
-          </Card>
+            <Card
+              className={css`
+                height: 100%;
+              `}
+            >
+              <div>
+                <div
+                  className={css`
+                    width: 80%;
+                    margin: 0 auto;
+                  `}
+                >
+                  <Steps current={current} items={items} />
+                </div>
+              </div>
+              <Divider></Divider>
+              <div className={css``}>
+                {current == 0 && <SelectDataModel />}
+                {current == 1 && workflow?.id && <DesignSchemaView />}
+                {current == 2 && workflow?.id && <FlowCanvas />}
+              </div>
+            </Card>
           </FlowContext.Provider>
         </ApprovalSettingContext.Provider>
         <FooterToolbar
@@ -344,8 +425,11 @@ export const AddProvalSetting = (props) => {
               </Button>
             )}
             {current === steps.length - 1 && (
-              <Button type="primary" onClick={() => message.success('已配置完成!')}>
-                已完成
+              <Button type="primary" onClick={async () =>{
+                await handleSave();
+                message.success('已保存!')
+              } }>
+                保存
               </Button>
             )}
           </div>

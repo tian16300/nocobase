@@ -2,3 +2,7 @@ export const getApprovalDetailPath = (id: string | number, params?:string) => `/
 export const getApprovalSettingPath = () => {
     return `/admin/approval/settings`;
 };
+
+export const getApprovalSettingListPath = () => {
+    return `/admin/approval/settingslist`;
+};

@@ -1,12 +1,12 @@
 import { Plugin } from '@nocobase/client';
-import { getApprovalDetailPath, getApprovalSettingPath } from './hooks';
-import { AddProvalSetting, ApprovalDetailPage } from './page';
+import { getApprovalDetailPath,  getApprovalSettingListPath, getApprovalSettingPath } from './hooks';
+import { AddProvalSetting, ApprovalDetailPage, ApprovalSettingListPage } from './page';
 import React from 'react';
 import { useApprovalFormBlockProps } from './page/components';
 import WorkflowPlugin from '@nocobase/plugin-workflow';
 import { Approval } from './nodes';
 import CopyTo from './nodes/copyTo';
-
+import { SettingOutlined } from '@ant-design/icons';
 export class PluginWorkflowApprovalClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -46,16 +46,28 @@ export class PluginWorkflowApprovalClient extends Plugin {
     });
   }
   addRoutes(){
+    /**
+     * 审批设置 列表界面
+     */
+    this.app.pluginSettingsManager.add('approvalSetting', {
+      title: '审批设置',
+      icon: 'SettingOutlined',
+      Component: ()=>{
+        return <ApprovalSettingListPage app={this.app} />
+     },
+     aclSnippet: 'pm.workflow.workflows',
+    });
     this.app.router.add('admin.workflow.approval.id', {
       path: getApprovalDetailPath(':id'),
       element: <ApprovalDetailPage />,
     });
-    this.app.router.add('admin.workflow.approval.form', {
+    this.app.router.add('admin.workflow.approvalSetting.form', {
       path: getApprovalSettingPath(),
       Component: ()=>{
         return <AddProvalSetting app={this.app} />
       },
     });
+
   }
 }
 
