@@ -11,5 +11,5 @@ export * from './TableSelectorProvider';
 export * from './FormFieldProvider';
 export * from './DetailsBlockProvider';
 export * from './GanttBlockProvider';
-export * from './SharedFilterProvider';
+export * from './ApplyBlockProvider';
 export * from './hooks';

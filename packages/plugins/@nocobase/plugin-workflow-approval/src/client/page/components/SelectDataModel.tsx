@@ -19,14 +19,15 @@ import { useForm, useField, Schema } from '@formily/react';
 
 import { useApprovalSettingContext } from '../AddProvalSetting';
 import { uid } from '@nocobase/utils';
-import Collection from 'packages/core/server/src/plugin-manager/options/collection';
 export const useApprovalFormBlockProps = () => {
   const field: IField = useField();
-  const { form, workflow,setCollection, setAppends, } = useApprovalSettingContext();
+  const { form, workflow,collection, setCollection } = useApprovalSettingContext();
   const ctx = useFormBlockContext();
   useEffect(() => {
     if (workflow?.config && ctx?.form) {
-      ctx.form.setInitialValues(workflow.config);
+      ctx.form.setInitialValues({
+        collection
+      });
     }
   }, [workflow?.config]);
   useEffect(() => {
@@ -34,9 +35,8 @@ export const useApprovalFormBlockProps = () => {
     ctx.form.addEffects(id, () => {
       onFormValuesChange((form)=>{
         const values = form.values;
-       const {collection, appends} = values;
+       const {collection} = values;
        setCollection(collection);
-       setAppends(appends);
       })
     });
     return () => {
@@ -86,31 +86,7 @@ export const SelectDataModel = () => {
                 //  disabled: '{{isCollectionDisabled}}'
                  useProps:'{{isCollectionDisabled}}'
               }
-            },
-            appends: {
-              type: 'array',
-              title: '待使用关系数据',
-              'x-decorator': 'FormItem',
-              'x-component': 'AppendsTreeSelect',
-              'x-component-props': {
-                title: 'Preload associations',
-                multiple: true,
-                useCollection() {
-                  const { values } = useForm();
-                  return values?.collection;
-                },
-              },
-              'x-reactions': [
-                {
-                  dependencies: ['collection'],
-                  fulfill: {
-                    state: {
-                      visible: '{{!!$deps[0]}}',
-                    },
-                  },
-                },
-              ],
-            },
+            }
           },
         },
       },

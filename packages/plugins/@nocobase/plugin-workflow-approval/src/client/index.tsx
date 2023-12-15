@@ -1,4 +1,4 @@
-import { Plugin } from '@nocobase/client';
+import { Plugin, SchemaInitializer, useSchemaInitializer } from '@nocobase/client';
 import { getApprovalDetailPath,  getApprovalSettingListPath, getApprovalSettingPath } from './hooks';
 import { AddProvalSetting, ApprovalDetailPage, ApprovalSettingListPage } from './page';
 import React from 'react';
@@ -7,6 +7,9 @@ import WorkflowPlugin from '@nocobase/plugin-workflow';
 import { Approval } from './nodes';
 import CopyTo from './nodes/copyTo';
 import { SettingOutlined } from '@ant-design/icons';
+import { ApplyAction, useApplyFormActionProps, useApprovalApplyFormBlockProps } from './blocks/ApplyAction';
+import { createActionForm } from './blocks/schema/createActionForm';
+// export * from './providers';
 export class PluginWorkflowApprovalClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -33,7 +36,10 @@ export class PluginWorkflowApprovalClient extends Plugin {
   }
   addScopes() {
     this.app.addScopes({
-      useApprovalFormBlockProps
+      useApprovalFormBlockProps,
+      useApprovalApplyFormBlockProps,
+      useApplyFormActionProps,
+
     })
   }
   addComponents() {
@@ -42,8 +48,23 @@ export class PluginWorkflowApprovalClient extends Plugin {
     // })
     this.app.addComponents({
       AddProvalSetting,
-      ApprovalDetailPage
+      ApprovalDetailPage,
+      ApplyAction
     });
+    /* 增加提交申请操作 */
+    this.schemaInitializerManager.addItem(
+      'UpdateFormActionInitializers', // 示例，已存在的 schema initializer
+      'customize.approvalApply', // 向 otherBlocks 分组内添加 custom
+      {
+        name:'approvalApply',
+        type: 'item',
+        title: '{{t("提交申请")}}',
+        Component: 'CustomizeActionInitializer',
+        schema:createActionForm()
+      },
+    );
+ 
+
   }
   addRoutes(){
     /**

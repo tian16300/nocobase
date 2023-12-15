@@ -120,79 +120,79 @@ export default class extends Instruction {
       upstreamId: prevJob?.id ?? null,
     });
     if (!isApproval) {
-      const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
-      // NOTE: batch create users jobs
-      const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-      await UserJobModel.bulkCreate(
-        assignees.map((userId) => ({
-          userId,
-          jobId: job.id,
-          nodeId: node.id,
-          executionId: job.executionId,
-          workflowId: node.workflowId,
-          status: JOB_STATUS.PENDING,
-        })),
-        {
-          transaction: processor.transaction,
-        },
-      );
+      // const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
+      // // NOTE: batch create users jobs
+      // const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
+      // await UserJobModel.bulkCreate(
+      //   assignees.map((userId) => ({
+      //     userId,
+      //     jobId: job.id,
+      //     nodeId: node.id,
+      //     executionId: job.executionId,
+      //     workflowId: node.workflowId,
+      //     status: JOB_STATUS.PENDING,
+      //   })),
+      //   {
+      //     transaction: processor.transaction,
+      //   },
+      // );
 
      
     }else{
       /**
        *  查找审批人，抄送人
        */
-      const collectionName = workflowModel.get('bussinessCollectionName');
-      const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
-      const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
-      const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
-      //创建审批记录
-      /**
-       * 查询审批汇总表有无记录 有则更新 无则创建
-       * 添加审批记录
-       */
-      const ApprovalModel = processor.options.plugin.db.getRepository('approval');
-      const ApprovalRecord = await ApprovalModel.findOne({
-        filter:{
-          bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
-          bussinessCode: bussinessCode
-          /**
-           * 业务编号
-           */
-          // bussinessCode:
+      // const collectionName = workflowModel.get('bussinessCollectionName');
+      // const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
+      // const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
+      // const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
+      // //创建审批记录
+      // /**
+      //  * 查询审批汇总表有无记录 有则更新 无则创建
+      //  * 添加审批记录
+      //  */
+      // const ApprovalModel = processor.options.plugin.db.getRepository('approval');
+      // const ApprovalRecord = await ApprovalModel.findOne({
+      //   filter:{
+      //     bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
+      //     bussinessCode: bussinessCode
+      //     /**
+      //      * 业务编号
+      //      */
+      //     // bussinessCode:
 
-        },
-        transaction: processor.transaction,
-      });
-      const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
-      const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
-      if(!ApprovalRecord){
-        ApprovalModel.create({
-          values:{
-            bussinessCollectionName: collectionName,
-            type: collectionName,
-            bussinessCode: bussinessCode,
-            submitterId: submitterId,
-            submitDate: submitDate,
-            submit_status:'1',
-            current_approval_users_id: assignees,
-            approval_record:[{
-              approval_users_id:assignees,
-              approval_status:'1',
-              current: true
-            }]
-          },
-          transaction: processor.transaction
-        });
-      }
-
-
+      //   },
+      //   transaction: processor.transaction,
+      // });
+      // const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
+      // const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
+      // if(!ApprovalRecord){
+      //   ApprovalModel.create({
+      //     values:{
+      //       bussinessCollectionName: collectionName,
+      //       type: collectionName,
+      //       bussinessCode: bussinessCode,
+      //       submitterId: submitterId,
+      //       submitDate: submitDate,
+      //       submit_status:'1',
+      //       current_approval_users_id: assignees,
+      //       approval_record:[{
+      //         approval_users_id:assignees,
+      //         approval_status:'1',
+      //         current: true
+      //       }]
+      //     },
+      //     transaction: processor.transaction
+      //   });
+      // }
 
 
-      //创建消息记录  
-      // const assignees = [...new Set(processor.getParsedValue(config.assigneesRule.ruleType, node.id) || [])];
-      console.log('assignees', assignees);
-      console.log('assignees', copyto);
+
+
+      // //创建消息记录  
+      // // const assignees = [...new Set(processor.getParsedValue(config.assigneesRule.ruleType, node.id) || [])];
+      // console.log('assignees', assignees);
+      // console.log('assignees', copyto);
 
 
     }
@@ -201,28 +201,28 @@ export default class extends Instruction {
 
   async resume(node, job, processor: Processor) {
     // NOTE: check all users jobs related if all done then continue as parallel
-    const { assignees = [], mode } = node.config as ManualConfig;
+    // const { assignees = [], mode } = node.config as ManualConfig;
 
-    const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-    const distribution = await UserJobModel.count({
-      where: {
-        jobId: job.id,
-      },
-      group: ['status'],
-      transaction: processor.transaction,
-    });
+    // const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
+    // const distribution = await UserJobModel.count({
+    //   where: {
+    //     jobId: job.id,
+    //   },
+    //   group: ['status'],
+    //   transaction: processor.transaction,
+    // });
 
-    const submitted = distribution.reduce(
-      (count, item) => (item.status !== JOB_STATUS.PENDING ? count + item.count : count),
-      0,
-    );
-    const status = job.status || (getMode(mode).getStatus(distribution, assignees) ?? JOB_STATUS.PENDING);
-    const result = mode ? (submitted || 0) / assignees.length : job.latestUserJob?.result ?? job.result;
-    processor.logger.debug(`manual resume job and next status: ${status}`);
-    job.set({
-      status,
-      result,
-    });
+    // const submitted = distribution.reduce(
+    //   (count, item) => (item.status !== JOB_STATUS.PENDING ? count + item.count : count),
+    //   0,
+    // );
+    // const status = job.status || (getMode(mode).getStatus(distribution, assignees) ?? JOB_STATUS.PENDING);
+    // const result = mode ? (submitted || 0) / assignees.length : job.latestUserJob?.result ?? job.result;
+    // processor.logger.debug(`manual resume job and next status: ${status}`);
+    // job.set({
+    //   status,
+    //   result,
+    // });
 
     return job;
   }

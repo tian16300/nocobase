@@ -114,82 +114,88 @@ export default class extends Instruction {
      */
     const transaction = processor.transaction;
     const workflowModel = await processor.execution.getWorkflow();
-    const isApproval = workflowModel.get('isApproval');
+    // const isApproval = workflowModel.get('isApproval');
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
       result: mode ? [] : null,
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
-    if (!isApproval) {
-      const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
-      // NOTE: batch create users jobs
-      const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-      await UserJobModel.bulkCreate(
-        assignees.map((userId) => ({
-          userId,
-          jobId: job.id,
-          nodeId: node.id,
-          executionId: job.executionId,
-          workflowId: node.workflowId,
-          status: JOB_STATUS.PENDING,
-        })),
-        {
-          transaction: processor.transaction,
-        },
-      );
+    /* 申请人 提交审批申请 字段 workflowId relatedCollection relatedId */
+    /* 标题 《申请人》提交的《工作流名称》申请 */
+    /* 创建申请 */
+
+
+    /*  */
+    // if (!isApproval) {
+      // const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
+      // // NOTE: batch create users jobs
+      // const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
+      // await UserJobModel.bulkCreate(
+      //   assignees.map((userId) => ({
+      //     userId,
+      //     jobId: job.id,
+      //     nodeId: node.id,
+      //     executionId: job.executionId,
+      //     workflowId: node.workflowId,
+      //     status: JOB_STATUS.PENDING,
+      //   })),
+      //   {
+      //     transaction: processor.transaction,
+      //   },
+      // );
 
      
-    }else{
+    // }else{
       /**
        *  查找审批人，抄送人
        */
-      const collectionName = workflowModel.get('bussinessCollectionName');
-      const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
-      const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
-      const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
+      // const collectionName = workflowModel.get('bussinessCollectionName');
+      // const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
+      // const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
+      // const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
       //创建审批记录
       /**
        * 查询审批汇总表有无记录 有则更新 无则创建
        * 添加审批记录
        */
-      const ApprovalModel = processor.options.plugin.db.getRepository('approval');
-      const ApprovalRecord = await ApprovalModel.findOne({
-        filter:{
-          bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
-          bussinessCode: bussinessCode
-          /**
-           * 业务编号
-           */
-          // bussinessCode:
+      // const ApprovalModel = processor.options.plugin.db.getRepository('approval');
+      // const ApprovalRecord = await ApprovalModel.findOne({
+      //   filter:{
+      //     bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
+      //     bussinessCode: bussinessCode
+      //     /**
+      //      * 业务编号
+      //      */
+      //     // bussinessCode:
 
-        },
-        transaction: processor.transaction,
-      });
-      const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
-      const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
-      if(!ApprovalRecord){
-        ApprovalModel.create({
-          values:{
-            bussinessCollectionName: collectionName,
-            type: collectionName,
-            bussinessCode: bussinessCode,
-            submitterId: submitterId,
-            submitDate: submitDate,
-            submit_status:'1',
-            current_approval_users_id: assignees,
-            approval_record:[{
-              approval_users_id:assignees,
-              approval_status:'1',
-              current: true
-            }]
-          },
-          transaction: processor.transaction
-        });
-      }
+      //   },
+      //   transaction: processor.transaction,
+      // });
+      // const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
+      // const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
+      // if(!ApprovalRecord){
+      //   ApprovalModel.create({
+      //     values:{
+      //       bussinessCollectionName: collectionName,
+      //       type: collectionName,
+      //       bussinessCode: bussinessCode,
+      //       submitterId: submitterId,
+      //       submitDate: submitDate,
+      //       submit_status:'1',
+      //       current_approval_users_id: assignees,
+      //       approval_record:[{
+      //         approval_users_id:assignees,
+      //         approval_status:'1',
+      //         current: true
+      //       }]
+      //     },
+      //     transaction: processor.transaction
+      //   });
+      // }
 
 
-    }
+    // }
     return job;
   }
 

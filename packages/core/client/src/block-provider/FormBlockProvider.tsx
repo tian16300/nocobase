@@ -11,6 +11,7 @@ import { BlockProvider, useBlockRequestContext, useFilterByTk, useParamsFromReco
 import { getValuesByPath } from '@nocobase/utils/client';
 import { FormActiveFieldsProvider } from './hooks';
 import { TemplateBlockProvider } from './TemplateBlockProvider';
+import { ApplyBlockProvider } from './ApplyBlockProvider';
 
 export const FormBlockContext = createContext<any>({});
 
@@ -104,14 +105,16 @@ export const FormBlockProvider = (props) => {
   const createFlag =
     (currentCollection.name === (collection?.name || collection) && !isDetailBlock) || !currentCollection.name;
   /* */
- 
+
   return (
     (detailFlag || createFlag || isCusomeizeCreate) && (
       <TemplateBlockProvider>
         <BlockProvider name={props.name || 'form'} {...props} block={'form'}>
-          <FormActiveFieldsProvider name="form">
-            <InternalFormBlockProvider {...props} />
-          </FormActiveFieldsProvider>
+          <ApplyBlockProvider>
+            <FormActiveFieldsProvider name="form">
+              <InternalFormBlockProvider {...props} />
+            </FormActiveFieldsProvider>
+          </ApplyBlockProvider>
         </BlockProvider>
       </TemplateBlockProvider>
     )
@@ -131,7 +134,6 @@ export const useFormBlockProps = () => {
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
 
-  
   useEffect(() => {
     if (addChild) {
       ctx.form?.query('parent').take((field) => {

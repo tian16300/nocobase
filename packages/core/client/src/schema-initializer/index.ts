@@ -17,7 +17,7 @@ export {
   useRecordCollectionDataSourceItems,
   useTableColumnInitializerFields,
 } from './utils';
-
+export * from './components';
 import { Plugin } from '../application/Plugin';
 import {
   bulkEditFormItemInitializers,

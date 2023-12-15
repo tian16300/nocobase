@@ -123,7 +123,7 @@ export const AddProvalSetting = (props) => {
   const [searchParams] = useSearchParams();
   const [flowName, setFlowName] = useState('审批单名称');
   const [edit, setEdit] = useState(false);
-  const currentIndex = searchParams.get('current')?Number(searchParams.get('current')).valueOf():0;
+  const currentIndex = searchParams.get('current') ? Number(searchParams.get('current')).valueOf() : 0;
   const [current, setCurrent] = useState(currentIndex);
   const [dn, setDn] = useState<any>(null);
   const [workflow, setWorkFlow] = useState<any>(null);
@@ -138,20 +138,32 @@ export const AddProvalSetting = (props) => {
   const navigate = useNavigate();
   const nodes = [];
   const _params = useMemo(() => {
+    /* 提交申请 */
     return {
+      enabled: false,
       ...workflow,
       title: flowName,
       bussinessCollectionName: collection,
       isApproval: true,
-      enabled: false,
-      type: 'form',
+      type: 'collection',
       current: true,
       config: {
-        collection: collection,
-        appends: appends,
+        appends: ['applyUserDept', 'applyUser', 'currentApprovalUsers', 'applyResults', 'images', 'files'],
+        collection: 'approval_apply',
+        changed: [],
+        condition: {
+          $and: [
+            {
+              relatedCollection: {
+                $eq: collection,
+              },
+            },
+          ],
+        },
+        mode: 1,
       },
     };
-  }, [workflow, flowName, collection, appends]);
+  }, [workflow, flowName, collection]);
   useEffect(() => {
     const filterByTk = searchParams.get('id');
     if (filterByTk) {
@@ -166,7 +178,7 @@ export const AddProvalSetting = (props) => {
             'revisions.current',
             'revisions.executed',
             'revisions.enabled',
-            'uiTemplate'
+            'uiTemplate',
           ],
         })
         .then((res) => {
@@ -174,7 +186,6 @@ export const AddProvalSetting = (props) => {
           setWorkFlow(data);
           setFlowName(data.title);
           setCollection(data.bussinessCollectionName);
-          setAppends(data.config?.appends);
           setUiTemplateKey(data?.uiTemplateKey);
         });
     }
@@ -184,7 +195,7 @@ export const AddProvalSetting = (props) => {
     if (!_params.id) {
       const res = await api.resource('workflows').create({
         values: {
-          ..._params
+          ..._params,
         },
       });
       setLoading(false);
@@ -195,7 +206,7 @@ export const AddProvalSetting = (props) => {
         filterByTk: _params.id,
         values: _params,
       });
-      
+
       setLoading(false);
       return res.data?.data?.[0];
     }
@@ -231,7 +242,7 @@ export const AddProvalSetting = (props) => {
     } else if (current == 1) {
       if (workflow?.id) {
         /* 保存区块模板 */
-       
+
         if (!uiTemplateKey) {
           const uiSchemaJson = initialSchema;
           api
@@ -260,18 +271,17 @@ export const AddProvalSetting = (props) => {
                     .resource('workflows')
                     .update({
                       filterByTk: workflow.id,
-                      updateAssociationValues:['uiTemplate'],
+                      updateAssociationValues: ['uiTemplate'],
                       values: {
                         uiTemplateKey: uiTemplate.key,
-                        uiTemplate:uiTemplate,
+                        uiTemplate: uiTemplate,
                       },
                     })
-                    .then((res) => {                
+                    .then((res) => {
                       // setWorkFlow({
                       //   ...workflow,
                       //   uiTemplateKey: uiTemplate.key
                       // });
-                   
                     });
                 });
             });
@@ -318,7 +328,7 @@ export const AddProvalSetting = (props) => {
                       onChange={async (e) => {
                         setFlowName(e.target.value);
                       }}
-                      onBlur={() => {                       
+                      onBlur={() => {
                         setEdit(false);
                       }}
                     ></AntdInput>
@@ -425,10 +435,13 @@ export const AddProvalSetting = (props) => {
               </Button>
             )}
             {current === steps.length - 1 && (
-              <Button type="primary" onClick={async () =>{
-                await handleSave();
-                message.success('已保存!')
-              } }>
+              <Button
+                type="primary"
+                onClick={async () => {
+                  await handleSave();
+                  message.success('已保存!');
+                }}
+              >
                 保存
               </Button>
             )}
