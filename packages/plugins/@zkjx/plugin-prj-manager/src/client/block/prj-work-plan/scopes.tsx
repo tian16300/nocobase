@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import {
-  groupData,
   useAPIClient,
   useBlockRequestContext,
   useRecord,
@@ -12,6 +11,7 @@ import { useField, useFieldSchema } from '@formily/react';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Button, Modal, Space, message } from 'antd';
 import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
+import { groupData } from '@nocobase/plugin-gantt/client';
 const addIndex = (children, parentIndex) => {
   if (children) {
     children.forEach((child, index) => {

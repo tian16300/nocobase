@@ -1,10 +1,9 @@
 import { ArrayTable } from '@formily/antd-v5';
-import { onFieldInputValueChange, onFieldValueChange } from '@formily/core';
+import { onFieldValueChange } from '@formily/core';
 import { ISchema, connect, mapProps, useField, useFieldSchema, useForm, useFormEffects } from '@formily/react';
 import { isValid, uid } from '@formily/shared';
 import { Alert, Tree as AntdTree, ModalProps } from 'antd';
-import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
 import { useApp } from '../../../application';
@@ -13,10 +12,8 @@ import { useSchemaToolbar } from '../../../application/schema-toolbar';
 import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';
 import { FlagProvider } from '../../../flag-provider';
-import { useRecord } from '../../../record-provider';
 import { SchemaSettingOpenModeSchemaItems } from '../../../schema-items';
 import { useCollectionState } from '../../../schema-settings/DataTemplates/hooks/useCollectionState';
-import { useSyncFromForm } from '../../../schema-settings/DataTemplates/utils';
 import { GeneralSchemaDesigner } from '../../../schema-settings/GeneralSchemaDesigner';
 import {
   SchemaSettingsActionModalItem,
@@ -45,27 +42,10 @@ const Tree = connect(
       field.value = checkedKeys;
     };
     field.onCheck = onCheck;
-    const form = useForm();
     return {
       ...props,
       checkedKeys,
       onCheck,
-      treeData: props?.treeData.map((v: any) => {
-        if (form.values.duplicateMode === 'quickDulicate') {
-          const children = v?.children?.map((k) => {
-            return {
-              ...k,
-              disabled: false,
-            };
-          });
-          return {
-            ...v,
-            disabled: false,
-            children,
-          };
-        }
-        return v;
-      }),
     };
   }),
 );
@@ -555,7 +535,6 @@ function SkipValidation() {
     />
   );
 }
-
 function AfterSuccess() {
   const { dn } = useDesignable();
   const { t } = useTranslation();
@@ -624,7 +603,6 @@ function AfterSuccess() {
     />
   );
 }
-
 function RemoveButton(
   props: {
     onConfirmOk?: ModalProps['onOk'];
@@ -1111,17 +1089,6 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
             openMode: isPopupAction,
             openSize: isPopupAction,
           };
-        },
-      },
-      {
-        name: 'updateMode',
-        Component: UpdateMode,
-        useVisible() {
-          const fieldSchema = useFieldSchema();
-          const isUpdateModePopupAction = ['customize:bulkUpdate', 'customize:bulkEdit'].includes(
-            fieldSchema['x-action'],
-          );
-          return isUpdateModePopupAction;
         },
       },
       {

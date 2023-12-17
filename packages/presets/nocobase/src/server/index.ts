@@ -38,11 +38,17 @@ export class PresetNocoBase extends Plugin {
     'theme-editor',
     'graph-collection-manager',
     'mobile-client',
-    'audit-logs',
+    'audit-logs',    
+    'custom-request',
+    'action-bulk-update',
+    'action-bulk-edit',
+    'gantt',
+    'kanban',
+    'action-duplicate',
+    'action-print',
     'company-info',
     'dic-manager',
-    'prj-manager',
-    'custom-request'
+    'prj-manager'
   ];
 
   localPlugins = [

@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BlockProvider,
-  GanttBlockProvider,
   css,
   useAPIClient,
   useBlockRequestContext,
@@ -14,6 +13,7 @@ import { useDataSelectBlockContext } from '../data-select';
 import { usePrjWorkPlanProcessData } from './scopes';
 import { Field } from '@nocobase/database';
 import { Spin } from 'antd';
+import { GanttBlockProvider } from '@nocobase/plugin-gantt/client';
 
 const PrjWorkPlanProviderContext = createContext<any>({});
 const PrjWorkFormProviderContext = createContext<any>({});

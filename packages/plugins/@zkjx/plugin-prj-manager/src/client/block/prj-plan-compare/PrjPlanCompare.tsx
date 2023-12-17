@@ -3,14 +3,12 @@ import { PrjPlanCompareProvider } from './PrjPlanCompareProvider';
 import {
   CardItem,
   EllipsisWithTooltip,
-  Gantt,
   IField,
   Icon,
   SchemaInitializer,
   SchemaInitializerItem,
   css,
   useBlockRequestContext,
-  useGanttBlockContext,
   useSchemaInitializer,
   useSchemaInitializerItem,
   useTableBlockContext,
@@ -26,6 +24,7 @@ import { useAuthTranslation } from '../../locale';
 import { default as classNames } from 'classnames';
 import { dayjs } from '@nocobase/utils';
 import { ZoomInOutlined } from '@ant-design/icons';
+import { Gantt, useGanttBlockContext } from '@nocobase/plugin-gantt/client';
 export const PrjPlanCompare = () => {
   return <></>;
 };

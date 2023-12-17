@@ -1,7 +1,7 @@
 import React from 'react';
-import { Input, css, cx, useToken, getWorkDays, useGanttBlockContext } from '@nocobase/client';
+import { Input, css, cx, useToken, getWorkDays} from '@nocobase/client';
 import { Col, Row, Space, Statistic } from 'antd';
-import { Task } from '@nocobase/client/src/schema-component/antd/gantt/types/public-types';
+import { Task, useGanttBlockContext } from '@nocobase/plugin-gantt/client';
 import { CalendarOutlined, CarryOutOutlined } from '@ant-design/icons';
 import useStyles from './style';
 import { dayjs } from '@nocobase/utils';

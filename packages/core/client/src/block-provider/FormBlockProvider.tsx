@@ -16,6 +16,7 @@ import { ApplyBlockProvider } from './ApplyBlockProvider';
 export const FormBlockContext = createContext<any>({});
 
 const InternalFormBlockProvider = (props) => {
+  const ctx = useFormBlockContext();
   const { action, readPretty, params, association } = props;
   const field = useField();
   const form = useMemo(
@@ -30,6 +31,7 @@ const InternalFormBlockProvider = (props) => {
   const record = useRecord();
   const formBlockValue = useMemo(() => {
     return {
+      ...ctx,
       params,
       action,
       form,

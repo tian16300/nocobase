@@ -8,7 +8,6 @@ import {
   Icon,
   useAPIClient,
   useBlockRequestContext,
-  useGanttBlockContext,
   useRequest,
   useTableBlockContext,
   useTableSize,
@@ -36,6 +35,7 @@ import { useNavigate } from 'react-router';
 import {  getValuesByPath } from '@nocobase/utils/client';
 import type { FormInstance } from 'antd/es/form';
 import { usePrjWorkPlanProviderContext } from './PrjWorkPlanProvider';
+import { useGanttBlockContext } from '@nocobase/plugin-gantt/client';
 const EditableContext = React.createContext<FormInstance<any> | null>(null);
 export const components = {
   body: {

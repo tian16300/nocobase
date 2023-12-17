@@ -1,4 +1,4 @@
-import { IField, useGanttBlockContext, useTableBlockProps } from '@nocobase/client';
+import { IField,  useTableBlockProps } from '@nocobase/client';
 import { useField, useFieldSchema } from '@formily/react';
 import { useEffect } from 'react';
 import { usePrjPlanCompareProviderContext } from './PrjPlanCompareProvider';
@@ -148,7 +148,6 @@ export const preProcessData = (data, ctx) => {
           return stage_dicId == item.stage_dicId;
         })[0];
         const hasDiff = getDiff(item, cpItem)||{};
-        debugger;
         return {
           ...item,
           name: item.title,

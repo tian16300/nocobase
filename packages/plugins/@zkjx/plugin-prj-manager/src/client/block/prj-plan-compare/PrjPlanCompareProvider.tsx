@@ -1,9 +1,10 @@
-import { BlockProvider, GanttBlockProvider, RecordProvider, css, useBlockRequestContext } from '@nocobase/client';
+import { BlockProvider,  RecordProvider, css, useBlockRequestContext } from '@nocobase/client';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useField } from '@formily/react';
 import { preProcessData } from './scopes';
 import { TooltipContent } from './TooltipContent';
+import { GanttBlockProvider } from '@nocobase/plugin-gantt/client';
 
 const PrjPlanCompareBlockContext = createContext<any>({});
 // declare interface BlockProviderProps {

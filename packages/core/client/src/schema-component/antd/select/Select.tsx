@@ -101,8 +101,8 @@ const filterOption = (input, option) => (option?.label ?? '').toLowerCase().incl
 
 const InternalSelect = connect(
   (props: Props) => {
-    const { useProps,...others1 } = props;
-    const {...others2 } = useProps?.() || {};
+    // const { useProps,...others1 } = props;
+    // const {...others2 } = useProps(props);
     const {
       objectValue, 
       loading, 
@@ -113,7 +113,7 @@ const InternalSelect = connect(
       multiple,
       mode,
       ...others
-    } = { ...others1, ...others2 } as any;
+    } = useProps(props);
     let mode1: any = multiple ? 'multiple' : mode;
     if (mode1 && !['multiple', 'tags'].includes(mode1)) {
       mode1 = undefined;

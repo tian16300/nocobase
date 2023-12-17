@@ -13,12 +13,12 @@ import {
   useCompile,
   useDesignable,
   useFormBlockContext,
-  useGanttBlockContext,
   useSchemaTemplate,
 } from '@nocobase/client';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useGanttBlockContext } from '@nocobase/plugin-gantt/client';
 
 const useOptions = (type = 'string') => {
   const compile = useCompile();
