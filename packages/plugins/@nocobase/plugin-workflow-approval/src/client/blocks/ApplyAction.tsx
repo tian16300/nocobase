@@ -14,7 +14,9 @@ import {
   useApplyBlockContext,
   useCollection,
   useFilterByTk,
+  useFormBlockContext,
   useFormBlockProps,
+  useFormBlockType,
   useLocalVariables,
   useRecord,
   useSchemaTemplate,
@@ -28,11 +30,42 @@ import { observer, RecursionField, useField, useFieldSchema, useForm } from '@fo
  * 提交申请功能区域  用户点击提交申请 出现表单填写区域 申请标题  申请理由 附件 图片
  */
 export const useApprovalApplyFormBlockProps = () => {
-  const ctx = useFormBlockProps();
-  //  return 'xxx发起的工作流名称申请';
-  const { apply, workflow, formActionType } = useApplyBlockContext();
+  const ctx = useFormBlockContext();
+  const record = useRecord();
+  const { fieldSchema: actionFieldSchema } = useActionContext();
+  const fieldSchema = actionFieldSchema ? actionFieldSchema : useFieldSchema();
+  // const addChild = fieldSchema?.['x-component-props']?.addChild;
+  // const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
+  // const { type } = useFormBlockType();
+  // const {name} = useCollection();
+
+  // useEffect(() => {
+  //   if (addChild) {
+  //     ctx.form?.query('parent').take((field) => {
+  //       field.disabled = true;
+  //       field.value = new Proxy({ ...record?.__parent }, {});
+  //     });
+  //     if (inheritsKeys) {
+  //       inheritsKeys.forEach((key) => {
+  //         ctx.form?.query(key).take((field) => {
+  //           const value = record[key];
+  //           if (value && typeof value == 'object') {
+  //             // field.readPretty = true;
+  //             field.value = new Proxy({ ...value }, {});
+  //           }
+  //         });
+  //       });
+  //     }
+  //   }
+  // });
+  useEffect(() => {
+    ctx.form?.setInitialValues({
+      relatedCollection: record.__collectionName,
+      related_data_id: record.__parent.id
+    });
+  }, []);
   return {
-    ...ctx,
+    form: ctx.form,
   };
 };
 export const useApplyFormActionProps = () => {
@@ -43,7 +76,7 @@ export const useApplyFormActionProps = () => {
     icon: 'PlusOutlined',
   };
 };
-export const ApplyAction: any =  observer(
+export const ApplyAction: any = observer(
   (props: any) => {
     const [visible, setVisible] = useState(false);
     const collection = useCollection();
@@ -74,22 +107,22 @@ export const ApplyAction: any =  observer(
     }, [field, linkageRules, localVariables, variables]);
     return (
       <div className={actionDesignerCss}>
-        <ActionContextProvider value={{ ...ctx, visible, setVisible }}>          
-        <CollectionProvider name={currentCollection}>
-          <CreateAction
-            {...props}
-            onClick={(name) => {
-              setVisible(true);
-              setCurrentCollection(currentCollection);
-            }}
-          />
+        <ActionContextProvider value={{ ...ctx, visible, setVisible }}>
+          <CollectionProvider name={currentCollection}>
+            <CreateAction
+              {...props}
+              onClick={(name) => {
+                setVisible(true);
+                setCurrentCollection(currentCollection);
+              }}
+            />
             <RecursionField schema={fieldSchema} basePath={field.address} onlyRenderProperties />
           </CollectionProvider>
         </ActionContextProvider>
-       </div>
+      </div>
     );
   },
   { displayName: 'ApplyAction' },
-);;
+);
 
 ApplyAction.Designer = Action.Designer;

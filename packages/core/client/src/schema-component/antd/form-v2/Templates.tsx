@@ -40,7 +40,6 @@ const useDataTemplates = () => {
   const { t } = useTranslation();
   const { duplicateData } = useFormBlockContext();
   const { getCollectionJoinField } = useCollectionManager();
-  console.log(useFormBlockContext());
   if (duplicateData) {
     return duplicateData;
   }
