@@ -64,7 +64,7 @@ export const useApprovalApplyFormBlockProps = () => {
       related_data_id: record.__parent.id
     });
   }, []);
-  return {
+  return {                                                                                                      
     form: ctx.form,
   };
 };
@@ -124,5 +124,18 @@ export const ApplyAction: any = observer(
   },
   { displayName: 'ApplyAction' },
 );
+
+export  const useCreateActionProps = () => {
+  // const { onClick } = useCAP();
+  const actionField: any = useField();
+  const { getPrimaryKey } = useCollection();
+  const primaryKey = getPrimaryKey();
+  return {
+    async onClick() {
+      
+    
+    },
+  };
+};
 
 ApplyAction.Designer = Action.Designer;

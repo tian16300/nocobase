@@ -111,6 +111,24 @@ const schema: ISchema = {
                 useAction: '{{ useSaveSystemSettingsValues }}',
               },
             },
+            test: {
+              title: '{{t("测试")}}',
+              'x-component': 'Action',
+              'x-component-props': {
+                type: 'default',
+                // htmlType: 'submit',
+                useProps: '{{ useTestSystemActionToken }}',
+              },
+            },
+            addAttendceColumns: {
+              title: '{{t("创建考勤统计表")}}',
+              'x-component': 'Action',
+              'x-component-props': {
+                type: 'default',
+                // htmlType: 'submit',
+                useProps: '{{ useAddAttendceCollectionActionProps }}',
+              },
+            }
           },
         },
       },

@@ -83,7 +83,7 @@ export const createActionForm = () => {
                     'x-component-props': {
                       type: 'primary',
                       htmlType: 'submit',
-                      useProps: '{{ useCreateActionProps }}',
+                      useProps: '{{ useCreateApplyActionProps }}',
                     },
                   },
                 },

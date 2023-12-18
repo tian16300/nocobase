@@ -15,21 +15,30 @@ export class DingTalkService {
     this.app = app;
     this.cache = cache;
   }
-  async init() {
-    const repo = this.app.db.getRepository('systemSettings');
-    const sys = await repo.findOne({
-      filterByTk: 1
-    });
-    this.appKey = sys.options?.appConfig;
+  async init(values) {
+    this.appKey = values;
   }
-  async getAccessToken() {
-    await this.init();
+  async getAccessToken(ctx?, next?) {
+    if (ctx && ctx.action.params) {
+      const token = await this.getAccessTokenByValues(ctx.action.params);
+      ctx.body = token;
+      await next();
+    } else {
+      const repo = this.app.db.getRepository('systemSettings');
+      const sys = await repo.findOne({
+        filterByTk: 1,
+      });
+      const token = await this.getAccessTokenByValues(sys.options?.appConfig);
+      return token;
+    }
+  }
+  async getAccessTokenByValues(values) {
+    await this.init(values);
     let token = await this.getTokenFromCache();
     if (!token) {
       token = await this.getNewToken();
       await this.storeTokenToCache(token);
     }
-
     return token;
   }
 
@@ -150,8 +159,28 @@ export class DingTalkService {
       msg,
     });
     /* 增加消息日志 */
-    
+
     ctx.body = response.data;
     await next();
+  }
+  /* 获取考勤列 */
+  async getAttenceColumnFromDing(){
+    const access_token = await this.getAccessToken();
+    /* 获取考勤列 */
+   const res = await  axios.post(`https://oapi.dingtalk.com/topapi/attendance/getattcolumns?access_token=${access_token}`); 
+    return res;
+  }
+  /* 获取考勤统计数据 */
+  async syncAttendceFromDing(ctx, next){
+    const params = ctx.action.params;
+    const { from_date } = params;
+    if(params && from_date){
+      /**
+       * 
+       */
+
+    }else{
+      /* */
+    }
   }
 }
