@@ -42,6 +42,11 @@ export class PluginEnterpriseIntegrationServer extends Plugin {
     );
     /* 钉钉考勤表创建 */
     this.app.resourcer.registerActionHandler('systemSettings:addAttendCollection', this.addAttendCollection.bind(this));
+    /* 钉钉考勤数据同步 */
+    this.app.resourcer.registerActionHandler(
+      'systemSettings:syncAttendData',
+      this.dingTalkService.syncAttendData.bind(this.dingTalkService),
+    );
   }
   async addAttendCollection(ctx, next) {
     /*  */
@@ -72,9 +77,13 @@ export class PluginEnterpriseIntegrationServer extends Plugin {
               name: field.name,
               type: field.type,
               interface: field.interface,
-              uiSchema: field.uiSchema,
+              uiSchema: {
+                ...field.uiSchema,
+                title: column.name,
+              },
               dingColumn: column,
               dingColumnId: column.id,
+              unit: field.unit,
             };
           });
           /* 其它列 用户 统计日期 */
@@ -141,6 +150,34 @@ export class PluginEnterpriseIntegrationServer extends Plugin {
                 'x-component': 'DatePicker',
                 title: '统计日期',
               },
+            },
+            {
+              uiSchema: {
+                'x-component-props': {
+                  step: '0.1',
+                  stringMode: true,
+                },
+                type: 'number',
+                'x-component': 'InputNumber',
+                title: '周报工作时长',
+              },
+              name: 'reportDetails_time',
+              type: 'double',
+              interface: 'number',
+            },
+            {
+              uiSchema: {
+                'x-component-props': {
+                  step: '1',
+                  stringMode: true,
+                },
+                type: 'number',
+                'x-component': 'InputNumber',
+                title: '周报出差时长',
+              },
+              name: 'reportDetails_bussiness_time',
+              type: 'double',
+              interface: 'number',
             },
           ].concat(columns as any);
           const attendance = this.app.db.collection({

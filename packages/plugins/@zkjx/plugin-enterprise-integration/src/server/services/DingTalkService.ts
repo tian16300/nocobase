@@ -1,4 +1,5 @@
 import Application from '@nocobase/server';
+import { dayjs } from '@nocobase/utils';
 const axios = require('axios');
 
 export class DingTalkService {
@@ -10,7 +11,7 @@ export class DingTalkService {
     agentId: string;
     robotCode: string;
   };
-  isInited: boolean = false;
+  isInited = false;
   constructor(app, cache) {
     this.app = app;
     this.cache = cache;
@@ -164,23 +165,120 @@ export class DingTalkService {
     await next();
   }
   /* 获取考勤列 */
-  async getAttenceColumnFromDing(){
+  async getAttenceColumnFromDing() {
     const access_token = await this.getAccessToken();
     /* 获取考勤列 */
-   const res = await  axios.post(`https://oapi.dingtalk.com/topapi/attendance/getattcolumns?access_token=${access_token}`); 
+    const res = await axios.post(
+      `https://oapi.dingtalk.com/topapi/attendance/getattcolumns?access_token=${access_token}`,
+    );
     return res;
   }
   /* 获取考勤统计数据 */
-  async syncAttendceFromDing(ctx, next){
-    const params = ctx.action.params;
-    const { from_date } = params;
-    if(params && from_date){
-      /**
-       * 
-       */
+  async syncAttendData(ctx, next) {
+    const { start } = ctx.action.params;
+    const from_date = dayjs(start).startOf('month').format('YYYY-MM-DD HH:mm:ss');
+    const to_date = dayjs(start).endOf('month').format('YYYY-MM-DD 23:59:59');
+    const access_token = await this.getAccessToken();
+    const messages = [];
 
-    }else{
-      /* */
-    }
+    const app = ctx.app;
+    const userRep = app.db.getRepository('users');
+    const users = await userRep.find({
+      filter: {
+        dingUserId: {
+          $notEmpty: true,
+        },
+      },
+    });
+    const [details, detailsCount] = await app.db.getRepository('reportDetail').findAndCount({
+      filter: {
+        report: {
+          userId: {
+            $in: users.map((user) => user.id),
+          },
+          start: {
+            $between: [from_date, to_date],
+          },
+        },
+      },
+      appends: ['report'],
+    });
+    const fields = await app.db.getRepository('fields').find({
+      filter: {
+        collectionName: 'attendance',
+      },
+    });
+    const fieldsMap = new Map();
+    const dingColumns = fields
+      .filter((field) => {
+        return field.options?.dingColumnId;
+      })
+      .map((field) => {
+        const dingColumnId = field.options.dingColumnId;
+        fieldsMap.set(dingColumnId, field);
+        return dingColumnId;
+      });
+    const url = `https://oapi.dingtalk.com/topapi/attendance/getcolumnval?access_token=${access_token}`;
+    const dingRes = new Map();
+    const rows = [];
+    await Promise.all(
+      users.map(async (user) => {
+        return axios
+          .post(url, {
+            userid: user.dingUserId,
+            column_id_list: dingColumns.join(','),
+            from_date,
+            to_date,
+          })
+          .then((res) => {
+            const { column_vals } = res.data.result;
+            const reportTime = details
+              .filter(({ report, isBusinessTrip }) => {
+                return report.userId == user.id && !isBusinessTrip;
+              })
+              .reduce((prev, { hours }) => prev + hours, 0);
+            const reportBussinessTrip = details
+              .filter(({ report, isBusinessTrip }) => {
+                return report.userId == user.id && isBusinessTrip;
+              })
+              .reduce((prev, { hours }) => prev + hours, 0);
+            const row = {
+              dingUser_id: user.dingUserId,
+              static_month: from_date,
+              reportDetails_time: reportTime,
+              reportDetails_bussiness_time: reportBussinessTrip,
+            };
+
+            column_vals.forEach(({ column_vo, column_vals }) => {
+              const field = fieldsMap.get(column_vo.id);
+              let value = column_vals.reduce((prev, { value }) => prev + Number(value).valueOf(), 0);
+              if (field.options?.unit) {
+                value = value / field.options.unit;
+              }
+              row[field.name] = value;
+            });
+            rows.push(row);
+          });
+      }),
+    );
+    /**
+     * 数据组装
+     */
+    await app.db.getRepository('attendance').destroy({
+      filter: {
+        static_month: from_date,
+        dingUser_id: {
+          $in: users.map(({ dingUserId }) => {
+            return dingUserId;
+          }),
+        },
+      },
+    });
+    const res = await app.db.getRepository('attendance').createMany({
+      records: rows,
+    });
+
+    ctx.body = res;
+    await next();
   }
 }

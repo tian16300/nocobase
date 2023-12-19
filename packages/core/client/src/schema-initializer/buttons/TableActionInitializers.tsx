@@ -112,7 +112,7 @@ export const tableActionInitializers = new SchemaInitializer({
         {
           type: 'item',
           title: '{{t("按钮操作")}}',
-          component: 'CustomizeActionInitializer',
+          Component: 'CustomizeActionInitializer',
           schema: {
             title: '{{ t("按钮操作") }}',
             'x-component': 'Action',
@@ -121,7 +121,7 @@ export const tableActionInitializers = new SchemaInitializer({
               useProps: '{{ useCreateActionProps }}',
             },
           },
-        }
+        },
       ],
       useVisible() {
         const collection = useCollection();

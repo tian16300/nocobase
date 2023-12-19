@@ -3,7 +3,7 @@ export default [
     name: 'should_attendance_days',
     alias: 'should_attendance_days',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '应出勤天数',
@@ -38,7 +38,7 @@ export default [
     name: 'attendance_days',
     alias: 'attendance_days',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '出勤天数',
@@ -54,7 +54,7 @@ export default [
     name: 'attendance_rest_days',
     alias: 'attendance_rest_days',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '休息天数',
@@ -70,7 +70,7 @@ export default [
     name: 'attendance_work_time',
     alias: 'attendance_work_time',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '工作时长',
@@ -81,6 +81,7 @@ export default [
       type: 'number',
       'x-component': 'InputNumber',
     },
+    unit: 60,
   },
   {
     extension: 'null',
@@ -176,7 +177,7 @@ export default [
     name: 'absenteeism_days',
     alias: 'absenteeism_days',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '旷工天数',
@@ -192,7 +193,7 @@ export default [
     name: 'business_trip_time',
     alias: 'business_trip_time',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '出差时长',
@@ -208,7 +209,7 @@ export default [
     name: 'out_time',
     alias: 'out_time',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
       title: '外出时长',
@@ -217,7 +218,7 @@ export default [
         stringMode: true,
       },
       type: 'number',
-      'x-component': 'InputNumber'
+      'x-component': 'InputNumber',
     },
   },
   {
@@ -304,26 +305,26 @@ export default [
     name: 'overtime_workday',
     alias: 'overtime_工作日加班',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
-      title:'工作日加班',
+      title: '工作日加班',
       'x-component-props': {
         step: '1',
         stringMode: true,
       },
       type: 'number',
       'x-component': 'InputNumber',
-    }
+    },
   },
   {
     name: 'overtime_weekend',
     alias: 'overtime_休息日加班',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
-      title:'休息日加班',
+      title: '休息日加班',
       'x-component-props': {
         step: '1',
         stringMode: true,
@@ -336,10 +337,10 @@ export default [
     name: 'overtime_holiday',
     alias: 'overtime_节假日加班',
     type: 'double',
-    interface:'number',
+    interface: 'number',
     visible: true,
     uiSchema: {
-      title:'节假日加班',
+      title: '节假日加班',
       'x-component-props': {
         step: '1',
         stringMode: true,
