@@ -196,7 +196,7 @@ export default [
     interface: 'number',
     visible: true,
     uiSchema: {
-      title: '出差时长',
+      title: '出差天数',
       'x-component-props': {
         step: '1',
         stringMode: true,
@@ -308,7 +308,7 @@ export default [
     interface: 'number',
     visible: true,
     uiSchema: {
-      title: '工作日加班',
+      title: '工作日加班时长',
       'x-component-props': {
         step: '1',
         stringMode: true,
@@ -324,7 +324,7 @@ export default [
     interface: 'number',
     visible: true,
     uiSchema: {
-      title: '休息日加班',
+      title: '休息日加班时长',
       'x-component-props': {
         step: '1',
         stringMode: true,
@@ -340,7 +340,7 @@ export default [
     interface: 'number',
     visible: true,
     uiSchema: {
-      title: '节假日加班',
+      title: '节假日加班时长',
       'x-component-props': {
         step: '1',
         stringMode: true,

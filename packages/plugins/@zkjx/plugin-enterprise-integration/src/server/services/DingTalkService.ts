@@ -199,9 +199,10 @@ export class DingTalkService {
           start: {
             $between: [from_date, to_date],
           },
+
         },
       },
-      appends: ['report'],
+      appends: ['report', 'report.status'],
     });
     const fields = await app.db.getRepository('fields').find({
       filter: {
@@ -219,7 +220,6 @@ export class DingTalkService {
         return dingColumnId;
       });
     const url = `https://oapi.dingtalk.com/topapi/attendance/getcolumnval?access_token=${access_token}`;
-    const dingRes = new Map();
     const rows = [];
     await Promise.all(
       users.map(async (user) => {
@@ -233,20 +233,20 @@ export class DingTalkService {
           .then((res) => {
             const { column_vals } = res.data.result;
             const reportTime = details
-              .filter(({ report, isBusinessTrip }) => {
-                return report.userId == user.id && !isBusinessTrip;
+              .filter(({ report }) => {
+                return report.userId == user.id;
               })
               .reduce((prev, { hours }) => prev + hours, 0);
             const reportBussinessTrip = details
               .filter(({ report, isBusinessTrip }) => {
-                return report.userId == user.id && isBusinessTrip;
+                return report.userId == user.id   && isBusinessTrip;
               })
               .reduce((prev, { hours }) => prev + hours, 0);
             const row = {
               dingUser_id: user.dingUserId,
               static_month: from_date,
               reportDetails_time: reportTime,
-              reportDetails_bussiness_time: reportBussinessTrip,
+              reportDetails_bussiness_time: reportBussinessTrip/8
             };
 
             column_vals.forEach(({ column_vo, column_vals }) => {
