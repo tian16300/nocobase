@@ -7,7 +7,7 @@ import { DetailsBlockProvider, useDetailsBlockProps } from './DetailsBlockProvid
 import { FilterFormBlockProvider } from './FilterFormBlockProvider';
 import { FormBlockProvider, useFormBlockProps } from './FormBlockProvider';
 import { FormFieldProvider, useFormFieldProps } from './FormFieldProvider';
-import { GanttBlockProvider, useGanttBlockProps, useGanttFormGroupFieldProps, useGanttFormRangeFieldProps, useGanttFormSortFieldProps } from './GanttBlockProvider';
+// import { GanttBlockProvider, useGanttBlockProps, useGanttFormGroupFieldProps, useGanttFormRangeFieldProps, useGanttFormSortFieldProps } from './GanttBlockProvider';
 import * as bp from './hooks';
 // import { KanbanBlockProvider, useKanbanBlockProps } from './KanbanBlockProvider';
 import { TableBlockProvider, useTableBlockProps } from './TableBlockProvider';
