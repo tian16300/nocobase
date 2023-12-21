@@ -29,6 +29,7 @@ export class BasicAuth extends BaseAuth {
         };
     const user = await this.userRepository.findOne({
       filter,
+      appends:['dept']
     });
 
     if (!user) {

@@ -355,52 +355,26 @@ export default class Processor {
       $scopes,
     };
   }
-  public async getUserIdsByRule(rule, nodeId: number) {
-    const { ruleType } = rule;
-    const isAll = ruleType === 'all';
-    const isDept = ruleType === 'depts';
-    const isRole = ruleType === 'roles';
-    const isUser = ruleType === 'users';
+  public async getUserIdsByRule({rule, assignees, assigneeRoles}, nodeId: number) {
     const transaction = this.transaction;
     const repository = this.options.plugin.db.getRepository('users');
-    if (isAll) {
-      const [users] = await repository.findAndCount({ transaction });
-      return users.map((user) => user.id);
-    } else if (isDept) {
-      const depts = rule.depts || [];
+    if (rule == '1') {
+      return assignees;
+    } else if (rule == '3') {
       const [users]  = await repository.findAndCount({ 
         filter:{
           dept:{
             id:{
-              $in:depts
+              $in:assigneeRoles
             }
           }
         },
         transaction });
 
         return users.map((user) => user.id);
-    } else if (isRole) {
-      const roles = rule.roles || [];
-      const [users]  = await repository.findAndCount({ 
-        filter:{
-          roles:{
-            name:{
-              $in:roles
-            }
-          }
-        },
-        transaction });
-        return users.map((user) => user.id);
-    } else if (isUser) {
-      const users = rule.users || [];
-      return users;
-    } else if(/\{\{[\$|\w|.]+}\}/g.test(ruleType)){
-      const value = this.getParsedValue(ruleType, nodeId);
-      if(Array.isArray(value)){
-        return value;
-      }else{
-        return [value];
-      }
+    } else if (rule == '2') {
+      const userId = this.getParsedValue('{{$user.directUserId}}', nodeId)
+      return [userId];
     }
   }
 

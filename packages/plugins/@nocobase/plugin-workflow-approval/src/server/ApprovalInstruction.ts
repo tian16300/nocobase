@@ -106,24 +106,28 @@ export default class extends Instruction {
 
     initFormTypes(this);
   }
+  
 
   async run(node, prevJob, processor: Processor) {
-    const { mode, ...config } = node.config as ManualConfig;
     /**
-     * 查找
+     * 查找人
      */
     const transaction = processor.transaction;
     const workflowModel = await processor.execution.getWorkflow();
+    const  userIds = await processor.getUserIdsByRule(node.config, node.id)
+
     // const isApproval = workflowModel.get('isApproval');
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
-      result: mode ? [] : null,
+      result: userIds,
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
     /* 申请人 提交审批申请 字段 workflowId relatedCollection relatedId */
     /* 标题 《申请人》提交的《工作流名称》申请 */
-    /* 创建申请 */
+    /* 查找审批人 */
+
+  
 
 
     /*  */
@@ -196,7 +200,8 @@ export default class extends Instruction {
 
 
     // }
-    return job;
+    // return job;
+    return  job
   }
 
   async resume(node, job, processor: Processor) {

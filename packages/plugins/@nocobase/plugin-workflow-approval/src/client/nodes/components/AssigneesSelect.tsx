@@ -20,9 +20,8 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
         onChange([next]);
       }}
     >
-      <RemoteSelect
-        
-        multiple={true}
+      <RemoteSelect       
+        mode="multiple"
         fieldNames={{
           label: 'nickname',
           value: 'id',
@@ -30,8 +29,6 @@ export function AssigneesSelect({ multiple = false, value = [], onChange }) {
         service={{
           resource: 'users',
         }}
-        manual={true}
-       
         value={value}
         onChange={(v) => {
           onChange(v != null ? v : []);

@@ -3,9 +3,9 @@ import actions from '@nocobase/actions';
 import { HandlerType } from '@nocobase/resourcer';
 import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
 
-import jobsCollection from './collections/jobs';
-import usersCollection from './collections/users';
-import usersJobsCollection from './collections/users_jobs';
+// import jobsCollection from './collections/jobs';
+// import usersCollection from './collections/users';
+// import usersJobsCollection from './collections/users_jobs';
 import { submit } from './actions';
 
 import ApprovalInstruction from './ApprovalInstruction';
@@ -25,6 +25,18 @@ export default class extends Plugin {
     /* 添加事件同步 */
     /* 审批申请  申请人 = 创建人 */
     /* 审批结果  审批人 = 创建人  */
+    this.db.on('approval_apply.afterCreate', async (model, {transaction}) => {
+      const relatedCollection = model.get('relatedCollection');
+      const related_data_id = model.get('related_data_id');
+      const repo = this.app.db.getRepository(relatedCollection) 
+      await repo.update({
+        filterByTk: related_data_id,
+        values:{
+          currentApproval_id: model.get('id')
+        },
+        transaction
+      });
+    })
   }
   async load() {
     /* 导入审批相关的表 */

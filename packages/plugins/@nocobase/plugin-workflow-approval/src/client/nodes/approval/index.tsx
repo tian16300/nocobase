@@ -24,7 +24,7 @@ export class Approval extends Instruction {
   description = `{{t("Could be used for manually submitting data, and determine whether to continue or exit. Workflow will generate a todo item for assigned user when it reaches a manual node, and continue processing after user submits the form.", { ns: "${NAMESPACE}" })}}`;
   fieldset = {
     rule: {
-      title: '设置审批人',
+      title: '设置审批人类型',
       type: 'string',
       'x-decorator': 'FormItem',
       'x-component': 'Select',
@@ -64,7 +64,7 @@ export class Approval extends Instruction {
         },
       ],
     },
-    AssigneeRoles: {
+    assigneeRoles: {
       type: 'array',
       title: `{{t("角色", { ns: "${NAMESPACE}" })}}`,
       'x-decorator': 'FormItem',

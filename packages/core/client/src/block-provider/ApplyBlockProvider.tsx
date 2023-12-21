@@ -7,7 +7,7 @@ export const ApplyBlockProvider = (props) => {
   const collection = useCollection();
   const record = useRecord();
   const { currentApproval_id } = record;
-  const workflows = useRequest({
+  const workflows: any = useRequest({
     action: 'list',
     resource: 'workflows',
     params: {
@@ -20,6 +20,7 @@ export const ApplyBlockProvider = (props) => {
       pagination: false,
     },
   });
+  debugger;
   let apply = null;
   if (currentApproval_id) {
     const { data } = useRequest({
@@ -32,7 +33,7 @@ export const ApplyBlockProvider = (props) => {
     apply = data;
   }
 
-  return <InnerApplyBlockProvider {...props} workflow={workflows.data?.[0]} apply={apply}></InnerApplyBlockProvider>;
+  return <InnerApplyBlockProvider {...props}  workflow={workflows.data?.data?.[0]} apply={apply}></InnerApplyBlockProvider>;
 };
 
 const InnerApplyBlockProvider = (props) => {
@@ -44,13 +45,13 @@ const InnerApplyBlockProvider = (props) => {
   /* 用户 操作  提交申请  撤销  再次提交申请 */
   if (!currentApproval_id) {
     /* 用户可操作提交申请  */
-    formActionType = '1';
+    formActionType = 1;
   } else if (apply && apply.jobIsEnd) {
     /* 审批结束 */
-    formActionType = '3';
+    formActionType = 3;
   } else if (apply && !apply.jobIsEnd) {
     /* 审批结束 */
-    formActionType = '2';
+    formActionType = 2;
   }
   return (
     <ApplyBlockContext.Provider value={{ collection, apply, workflow, formActionType }}>

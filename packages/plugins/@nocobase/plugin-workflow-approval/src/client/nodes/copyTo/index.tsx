@@ -24,7 +24,7 @@ export default class CopyTo extends Instruction {
   description = `{{t("Could be used for manually submitting data, and determine whether to continue or exit. Workflow will generate a todo item for assigned user when it reaches a manual node, and continue processing after user submits the form.", { ns: "${NAMESPACE}" })}}`;
   fieldset = {
     rule: {
-      title: '选择抄送人',
+      title: '选择抄送人类型',
       type: 'string',
       'x-decorator': 'FormItem',
       'x-component': 'Select',
