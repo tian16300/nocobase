@@ -14,7 +14,6 @@ import { BlockItem } from '../block-item';
 import { HTMLEncode } from '../input/shared';
 import { FilterFormDesigner } from './FormItem.FilterFormDesigner';
 import { EditDataBlockSelectorAction, useEnsureOperatorsValid } from './SchemaSettingOptions';
-import useLazyLoadAssociationFieldOfForm from './hooks/useLazyLoadAssociationFieldOfForm';
 import useLazyLoadDisplayAssociationFieldsOfForm from './hooks/useLazyLoadDisplayAssociationFieldsOfForm';
 import useParseDefaultValue from './hooks/useParseDefaultValue';
 
@@ -33,7 +32,6 @@ export const FormItem: any = observer(
     // 需要放在注冊完变量之后
     useParseDefaultValue();
     useLazyLoadDisplayAssociationFieldsOfForm();
-    useLazyLoadAssociationFieldOfForm();
 
     useEffect(() => {
       addActiveFieldName?.(schema.name as string);
