@@ -392,7 +392,8 @@ export const approvalWorkflows: ISchema = {
                       'x-component': 'Action.Link',
                       'x-component-props': {
                         type: 'primary',
-                        useProps: '{{ useApprovalWorkflowFormActionProps }}'
+                        useProps: '{{ useApprovalWorkflowFormActionProps }}',
+                        current: 0
 
                       },
                     },
