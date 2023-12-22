@@ -98,8 +98,6 @@ function getMode(mode) {
  * 功能逻辑  查找 抄送人, 发送消息 对方 JOB 标记完成  下一步
  */
 export default class extends Instruction {
-  formTypes = new Registry<FormHandler>();
-
   constructor(public plugin: WorkflowPlugin) {
     super(plugin);
   }

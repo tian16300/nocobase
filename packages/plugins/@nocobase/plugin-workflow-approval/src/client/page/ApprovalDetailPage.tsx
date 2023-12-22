@@ -46,14 +46,13 @@ export const ApprovalDetailPage = () => {
     action: 'get',
     params: {
       filterByTk: searchParams.get('id'),
-      appends: ['applyUser', 'currentApprovalUsers'],
+      appends: ['applyUser', 'currentApprovalUsers', 'applyResults'],
     },
   });
   const apply = data?.data;
 
   useEffect(() => {
     if (apply?.workflowId && apply?.relatedCollection && apply?.related_data_id) {
-      debugger;
       Promise.all([
         api
           .resource('workflows')

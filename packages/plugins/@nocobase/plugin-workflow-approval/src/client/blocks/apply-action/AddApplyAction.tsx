@@ -51,6 +51,7 @@ const schema = {
 export const AddApplyAction = (props) => {
   const { workflow, collection, apply } = useApplyBlockContext();
   const { components, scope } = useSchemaComponentContext();
+  debugger;
   // const ctx = useTableBlockContext();
   const data = useCurrentUserContext();
   const currentUser = data?.data?.data;
@@ -112,7 +113,8 @@ export const AddApplyAction = (props) => {
                     applyUser_id:currentUser.id,
                     applyUser_deptId:currentUser.userId,
                     applyTime:dayjs().toISOString(),
-                    status: '1'
+                    status: '0',
+                    workflowId: workflow.id
                   },
                 });
               }, 300);

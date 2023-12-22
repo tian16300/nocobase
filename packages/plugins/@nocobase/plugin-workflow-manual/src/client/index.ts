@@ -1,5 +1,5 @@
 import { Plugin } from '@nocobase/client';
-import WorkflowPlugin from '@nocobase/plugin-workflow/client';
+import WorkflowPlugin,{JOB_STATUS} from '@nocobase/plugin-workflow/client';
 
 import Manual from './instruction';
 
@@ -8,9 +8,7 @@ import { WorkflowTodoBlockInitializer } from './WorkflowTodoBlockInitializer';
 import { NAMESPACE } from '../locale';
 import { addActionButton, addBlockButton } from './instruction/SchemaConfig';
 import { addCustomFormField } from './instruction/forms/custom';
-import { Approval } from './approval';
-import CopyTo from './copyTo';
-
+export {JOB_STATUS} 
 export default class extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()

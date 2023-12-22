@@ -60,11 +60,16 @@ export default class extends Plugin {
       await repo.db2cm('approval_apply');
       await repo.db2cm('approval_results');
     }
+
   
     const workflowPlugin = this.app.getPlugin('workflow') as WorkflowPlugin;
     this.workflow = workflowPlugin;
     workflowPlugin.instructions.register('approval', new ApprovalInstruction(workflowPlugin));
     workflowPlugin.instructions.register('copyTo', new CopyToInstruction(workflowPlugin));
+    this.app.resourcer.registerActionHandler(
+      'approval_apply:submit',
+      submit
+    );
   }
   async install(options?: InstallOptions): Promise<void> {
       

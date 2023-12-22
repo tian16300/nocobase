@@ -12,6 +12,7 @@ import { getValuesByPath } from '@nocobase/utils/client';
 import { FormActiveFieldsProvider } from './hooks';
 import { TemplateBlockProvider } from './TemplateBlockProvider';
 import { ApplyBlockProvider } from './ApplyBlockProvider';
+import { WorkflowBlockProvider } from './WorkflowBlockProvider';
 
 export const FormBlockContext = createContext<any>({});
 
@@ -112,11 +113,13 @@ export const FormBlockProvider = (props) => {
     (detailFlag || createFlag || isCusomeizeCreate) && (
       <TemplateBlockProvider>
         <BlockProvider name={props.name || 'form'} {...props} block={'form'}>
+          <WorkflowBlockProvider>
           <ApplyBlockProvider>
             <FormActiveFieldsProvider name="form">
               <InternalFormBlockProvider {...props} />
             </FormActiveFieldsProvider>
           </ApplyBlockProvider>
+          </WorkflowBlockProvider>
         </BlockProvider>
       </TemplateBlockProvider>
     )

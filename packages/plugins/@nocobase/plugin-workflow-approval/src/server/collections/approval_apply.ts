@@ -293,32 +293,81 @@ export default {
       defaultValue: '1',
     },
     {
-      name: 'workflowId',
-      type: 'bigInt',
-      interface: 'integer',      
-
+      name: 'workflow',
+      type: 'belongsTo',
+      interface: 'obo',
+      foreignKey: 'workflowId',
       uiSchema: {
-        type: 'number',
-        'x-component': 'InputNumber',
+        'x-component': 'AssociationField',
         'x-component-props': {
-          stringMode: true,
-          step: '1',
+          multiple: false,
+          fieldNames: {
+            label: 'title',
+            value: 'id',
+          }
         },
-        'x-validator': 'integer',
         title: '关联流程',
       },
+      target: 'workflows',
+      targetKey: 'id',
     },
     {
-     
-      "name": "jobId",
-      "type": "bigInt",
-      "interface": "integer",
-      "uiSchema": {
-          "type": "number",
-          "x-component": "InputNumber",
-          "title": "任务ID"
-      }
-  },
+      name: 'job',
+      type: 'belongsTo',
+      interface: 'obo',
+      foreignKey: 'jobId',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          }
+        },
+        title: '任务',
+      },
+      target: 'jobs',
+      targetKey: 'id',
+    },   
+    {
+      name: 'node',
+      type: 'belongsTo',
+      interface: 'obo',
+      foreignKey: 'nodeId',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'title',
+            value: 'id',
+          }
+        },
+        title: '节点',
+      },
+      target: 'flow_nodes',
+      targetKey: 'id',
+    },
+    {
+      type: 'belongsTo',
+      name: 'execution',
+      interface: 'obo',
+      foreignKey: 'executionId',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          }
+        },
+        title: '日志',
+      },
+      target: 'executions',
+      targetKey: 'id',
+    },
     {
       name: 'applyResults',
       type: 'hasMany',
@@ -341,36 +390,37 @@ export default {
       sourceKey: 'id',
     },
     {
-      "uiSchema": {
-          "x-component-props": {
-              "accept": "image/*",
-              "multiple": true
-          },
-          "type": "array",
-          "x-component": "Upload.Attachment",
-          "title": "图片"
-      },
-      "name": "images",
-      "type": "belongsToMany",
-      "target": "attachments",
-      "interface": "attachment",
-      "storage": "approval"
-  },{
-    "uiSchema": {
-        "x-component-props": {
-            "accept": "*",
-            "multiple": true
+      uiSchema: {
+        'x-component-props': {
+          accept: 'image/*',
+          multiple: true,
         },
-        "type": "array",
-        "x-component": "Upload.Attachment",
-        "title": "附件"
+        type: 'array',
+        'x-component': 'Upload.Attachment',
+        title: '图片',
+      },
+      name: 'images',
+      type: 'belongsToMany',
+      target: 'attachments',
+      interface: 'attachment',
+      storage: 'approval',
     },
-    "name": "files",
-    "type": "belongsToMany",
-    "target": "attachments",
-    "interface": "attachment",
-    "storage": "approval"
-},
+    {
+      uiSchema: {
+        'x-component-props': {
+          accept: '*',
+          multiple: true,
+        },
+        type: 'array',
+        'x-component': 'Upload.Attachment',
+        title: '附件',
+      },
+      name: 'files',
+      type: 'belongsToMany',
+      target: 'attachments',
+      interface: 'attachment',
+      storage: 'approval',
+    },
     {
       name: 'jobIsEnd',
       type: 'boolean',

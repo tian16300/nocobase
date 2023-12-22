@@ -1,7 +1,7 @@
 import { Context, utils } from '@nocobase/actions';
 import WorkflowPlugin, { EXECUTION_STATUS, JOB_STATUS } from '@nocobase/plugin-workflow';
 
-import ManualInstruction from './ManualInstruction';
+import ApprovalInstruction from './ApprovalInstruction';
 
 export async function submit(context: Context, next) {
   const repository = utils.getRepositoryFromParams(context);
@@ -13,14 +13,14 @@ export async function submit(context: Context, next) {
   }
 
   const plugin: WorkflowPlugin = context.app.pm.get('workflow') as WorkflowPlugin;
-  const instruction = plugin.instructions.get('manual') as ManualInstruction;
+  const instruction = plugin.instructions.get('approval') as ApprovalInstruction;
 
   const userJob = await repository.findOne({
     filterByTk,
     // filter: {
     //   userId: currentUser?.id
     // },
-    appends: ['job', 'node', 'execution', 'workflow'],
+    appends: ['job', 'node', 'execution', 'workflow', 'currentApprovalUsers'],
     context,
   });
 
@@ -28,19 +28,17 @@ export async function submit(context: Context, next) {
     return context.throw(404);
   }
 
-  const { forms = {} } = userJob.node.config;
-  const [formKey] = Object.keys(values.result ?? {}).filter((key) => key !== '_');
-  const actionKey = values.result?._;
+  // const { forms = {} } = userJob.node.config;
+  // const [formKey] = Object.keys(values.result ?? {}).filter((key) => key !== '_');
+  const actionStatus = values.result?.status;
 
-  const actionItem = forms[formKey]?.actions?.find((item) => item.key === actionKey);
+  // const actionItem = forms[formKey]?.actions?.find((item) => item.key === actionKey);
   // NOTE: validate status
   if (
-    userJob.status !== JOB_STATUS.PENDING ||
     userJob.job.status !== JOB_STATUS.PENDING ||
     userJob.execution.status !== EXECUTION_STATUS.STARTED ||
     !userJob.workflow.enabled ||
-    !actionKey ||
-    actionItem?.status == null
+    !actionStatus 
   ) {
     return context.throw(400);
   }
@@ -50,36 +48,37 @@ export async function submit(context: Context, next) {
   await processor.prepare();
 
   // NOTE: validate assignee
-  const assignees = processor.getParsedValue(userJob.node.config.assignees ?? [], userJob.nodeId);
-  if (!assignees.includes(currentUser.id) || userJob.userId !== currentUser.id) {
+  /* 是否有审批权限 */
+  const assignees = userJob.currentApprovalUsers.map((item) => item.id);
+  if (!assignees.includes(currentUser.id)) {
     return context.throw(403);
   }
-  const presetValues = processor.getParsedValue(actionItem.values ?? {}, userJob.nodeId, {
-    // @deprecated
-    currentUser: currentUser,
-    // @deprecated
-    currentRecord: values.result[formKey],
-    // @deprecated
-    currentTime: new Date(),
-    $user: currentUser,
-    $nForm: values.result[formKey],
-    $nDate: {
-      now: new Date(),
-    },
-  });
+  // const presetValues = processor.getParsedValue(actionItem.values ?? {}, userJob.nodeId, {
+  //   // @deprecated
+  //   currentUser: currentUser,
+  //   // @deprecated
+  //   currentRecord: {},
+  //   // @deprecated
+  //   currentTime: new Date(),
+  //   $user: currentUser,
+  //   $nForm: {},
+  //   $nDate: {
+  //     now: new Date(),
+  //   },
+  // });
 
   userJob.set({
-    status: actionItem.status,
+    status: actionStatus,
     result:
-      actionItem.status > JOB_STATUS.PENDING
-        ? { [formKey]: Object.assign(values.result[formKey], presetValues), _: actionKey }
+    actionStatus > JOB_STATUS.PENDING
+        ? {}
         : Object.assign(userJob.result ?? {}, values.result),
   });
 
-  const handler = instruction.formTypes.get(forms[formKey].type);
-  if (handler && userJob.status) {
-    await handler.call(instruction, userJob, forms[formKey], processor);
-  }
+  // const handler = instruction.formTypes.get(forms[formKey].type);
+  // if (handler && userJob.status) {
+  //   await handler.call(instruction, userJob, forms[formKey], processor);
+  // }
 
   await userJob.save({ transaction: processor.transaction });
 
@@ -94,7 +93,7 @@ export async function submit(context: Context, next) {
   userJob.job.latestUserJob = userJob;
 
   // NOTE: resume the process and no `await` for quick returning
-  processor.logger.info(`manual node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`);
+  processor.logger.info(`approval node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`);
 
   plugin.resume(userJob.job);
 }

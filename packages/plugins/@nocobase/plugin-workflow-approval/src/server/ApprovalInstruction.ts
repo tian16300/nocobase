@@ -125,8 +125,6 @@ function getMode(mode) {
  * 功能逻辑  查找 审批人, 新增或保存审批表单 审批记录
  */
 export default class extends Instruction {
-  formTypes = new Registry<FormHandler>();
-
   constructor(public plugin: WorkflowPlugin) {
     super(plugin);
   }
@@ -160,6 +158,7 @@ export default class extends Instruction {
         },
       },
     };
+ 
 
     const dingTalkService = (processor.options.plugin.app.getPlugin('@zkjx/plugin-enterprise-integration') as any)
       .dingTalkService;
@@ -180,8 +179,11 @@ export default class extends Instruction {
     const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
       filterByTk: approvalModel.id,
       values:{
-        workflowId: workflowModel.id,
         jobId: job.id,
+        nodeId: node.id,
+        executionId: job.executionId,
+        workflowId: node.workflowId,
+        currentApprovalUsers: users
       },
       transaction
     });
