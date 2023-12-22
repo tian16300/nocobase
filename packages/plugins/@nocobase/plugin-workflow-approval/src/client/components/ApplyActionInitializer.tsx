@@ -4,6 +4,8 @@ import React from 'react';
 export const ApplyActionInitializer = (props) => {
   const schema = {
     title:'提交申请',
+    name:'approvalApply',
+    'x-action': 'approval_apply:create',
     'x-designer': 'Apply.Action.Design',
     'x-component': 'Action',
     'x-acl-action-props': {

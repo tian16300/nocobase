@@ -27,7 +27,7 @@ import { ComposedAction } from './types';
 import { linkageAction } from './utils';
 import { RecordLink } from '@nocobase/client';
 
-export const Action: ComposedAction = observer(
+export const Action: any = observer(
   (props: any) => {
     const {
       popover,

@@ -5,34 +5,97 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import useStyles from './style';
 import { DingdingOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProForm, FooterToolbar } from '@ant-design/pro-components';
-import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col } from 'antd';
-import { useAPIClient } from '@nocobase/client';
+import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin } from 'antd';
+import {
+  CollectionProvider,
+  DefaultValueProvider,
+  FormActiveFieldsProvider,
+  FormProvider,
+  RecordProvider,
+  RemoteSchemaComponent,
+  SchemaComponent,
+  VariableScopeProvider,
+  createDetailsBlockSchema,
+  useAPIClient,
+  useRequest,
+  useSchemaComponentContext,
+} from '@nocobase/client';
+import { dayjs } from '@nocobase/utils';
+import { createDetailSchema } from './schema/detailSchema';
+import { createApproveSchema } from './schema/approveSchema';
+
+import { createForm } from '@formily/core';
 const ApprovalContext = createContext<any>({});
 
 export const useApprovalContext = () => {
   return useContext(ApprovalContext);
 };
 export const ApprovalDetailPage = () => {
-  const [workflow, setWorkflow] = useState<any>({ id: 108 });
-  const [approval, setApproval] = useState<any>({
-    id:1,
-    status: '待审批',
-    currentIndex: 1,
+  const [searchParams] = useSearchParams();
+  const [workflow, setWorkflow] = useState<any>(null);
+  // const [approval, setApproval] = useState<any>({
+  //   id:1,
+  //   status: '待审批',
+  //   currentIndex: 1,
+  // });
+  const api = useAPIClient();
+  const [loading, setLoading] = useState(true);
+  const [applyRelationData, setApplyRelationData] = useState<any>(null);
+  const { data } = useRequest<any>({
+    resource: 'approval_apply',
+    action: 'get',
+    params: {
+      filterByTk: searchParams.get('id'),
+      appends: ['applyUser', 'currentApprovalUsers'],
+    },
   });
+  const apply = data?.data;
+
+  useEffect(() => {
+    if (apply?.workflowId && apply?.relatedCollection && apply?.related_data_id) {
+      debugger;
+      Promise.all([
+        api
+          .resource('workflows')
+          .get({
+            filterByTk: apply?.workflowId,
+          })
+          .then((res) => {
+            apply.workflow = res.data?.data;
+            setWorkflow(res.data?.data);
+          }),
+        api
+          .resource(apply.relatedCollection)
+          .get({
+            filterByTk: apply?.related_data_id,
+          })
+          .then((res) => {
+            setApplyRelationData(res.data?.data);
+          }),
+      ]).then(() => {
+        setLoading(false);
+      });
+    }
+  }, [apply?.workflowId, apply?.relatedCollection, apply?.related_data_id]);
 
   return (
     <ApprovalContext.Provider
       value={{
         workflow,
-        approval,
+        apply,
+        applyRelationData,
+        loading,
       }}
     >
-      <View />
+      <View data={apply} />
     </ApprovalContext.Provider>
   );
 };
-const View = () => {
+const View = (props: any) => {
+  const data: any = props?.data;
   const [tab, setTab] = useState('tab2');
+  const { components, scope } = useSchemaComponentContext();
+  const { loading, apply, workflow } = useApprovalContext();
 
   const contentList = {
     tab1: <p>content1</p>,
@@ -47,7 +110,7 @@ const View = () => {
       <PageContainer
         fixedHeader
         header={{
-          title: '审批编号: APP-201908020001',
+          title: '审批编号: ' + data?.code,
           breadcrumb: {
             items: [
               {
@@ -61,86 +124,90 @@ const View = () => {
             ],
           },
         }}
-        content={
-          <Descriptions column={3} style={{ marginBlockEnd: -16 }}>
-            <Descriptions.Item label="申请人">曲丽丽</Descriptions.Item>
-            <Descriptions.Item label="关联表单">
-              <a>421421</a>
-            </Descriptions.Item>
-            <Descriptions.Item label="申请时间">2017-01-10</Descriptions.Item>
-            <Descriptions.Item label="单据备注">备注信息</Descriptions.Item>
-            <Descriptions.Item label="状态">
-              <a>待审批</a>
-            </Descriptions.Item>
-          </Descriptions>
-        }
       >
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Card title="流程进度" bordered={false} size="small">
-              <ApprovalFlowSteps />
-            </Card>
-          </Col>
-          <Col span={16}>
-            <ApprovalFlowNodeDetail ></ApprovalFlowNodeDetail>
-          </Col>
-          <Col span={8}>
-            <Card
-              size="small"
-              bordered={false}
-              activeTabKey={tab}
-              onTabChange={setTab}
-              tabList={[
-                {
-                  tab: '审批记录',
-                  key: 'tab1',
-                },
-                {
-                  tab: '操作日志',
-                  key: 'tab2',
-                },
-              ]}
-            >
-              {contentList[tab]}
-            </Card>
-          </Col>
-          <Col span={24}>
-            <Card title="审批意见" bordered={false} size="small"></Card>
-          </Col>
-        </Row>
+        {loading ? (
+          <Spin></Spin>
+        ) : (
+          <>
+            <SchemaComponent
+              schema={createDetailSchema({
+                id: apply?.id,
+              })}
+              components={components}
+              scope={scope}
+            />
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Card title="流程进度" bordered={false} size="small">
+                  <ApprovalFlowSteps />
+                </Card>
+              </Col>
+              <Col span={16}>
+                <ApprovalFlowNodeDetail></ApprovalFlowNodeDetail>
+              </Col>
+              <Col span={8}>
+                <Card
+                  size="small"
+                  bordered={false}
+                  activeTabKey={tab}
+                  onTabChange={setTab}
+                  tabList={[
+                    {
+                      tab: '审批记录',
+                      key: 'tab1',
+                    },
+                    {
+                      tab: '操作日志',
+                      key: 'tab2',
+                    },
+                  ]}
+                >
+                  {contentList[tab]}
+                </Card>
+              </Col>
+              <Col span={24}>
+              <SchemaComponent
+              schema={createApproveSchema()}
+              components={components}
+              scope={scope}
+            />
+              </Col>
+            </Row>
+          </>
+        )}
       </PageContainer>
     </div>
   );
 };
 
 const ApprovalFlowSteps = () => {
-  const { workflow, approval } = useApprovalContext();
+  const { apply } = useApprovalContext();
   const [nodes, setNodes] = useState<any[]>([]);
   const currentIndex = useMemo(() => {
-    return approval?.currentIndex || 0;
-  }, [approval]);
+    return apply?.currentIndex || 0;
+  }, [apply]);
   const api = useAPIClient();
   useEffect(() => {
-    if (workflow?.id)
+    if (apply?.workflowId)
       api
         .resource('flow_nodes')
         .list({
           filter: {
-            workflowId: workflow.id,
+            workflowId: apply?.workflowId,
             type: 'approval',
           },
         })
         .then((res) => {
           setNodes(res.data?.data);
         });
-  }, [workflow?.id]);
+  }, [apply?.workflowId]);
   const stepItems = useMemo(() => {
     const applyUser = {
       title: '提交申请',
       description: (
         <>
-          <div>曲丽丽</div>
-          <div>2017-01-10 12:00</div>
+          <div>{apply?.applyUser?.nickname}</div>
+          <div>{dayjs(apply.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
         </>
       ),
     };
@@ -170,25 +237,41 @@ const ApprovalFlowSteps = () => {
 };
 
 const ApprovalFlowNodeDetail = () => {
-  const { workflow, approval } = useApprovalContext();
+  const { workflow, apply, applyRelationData } = useApprovalContext();
+  const [uiSchemaRecordUid, setUiSchemaRecordUid] = useState(null);
   const api = useAPIClient();
   useEffect(() => {
-    if (workflow?.id)
+    if (workflow && workflow?.uiTemplateKey)
       api
-        .resource('users_jobs')
-        .list({
-          filter: {
-            workflowId: workflow.id,
-            type: 'approval',
-          },
+        .resource('uiSchemaTemplates')
+        .get({
+          filterByTk: workflow.uiTemplateKey,
         })
         .then((res) => {
-          // setNodes(res.data?.data);
+          setUiSchemaRecordUid(res.data.data.uid);
         });
-  }, [approval?.id]);
+  }, [workflow?.uiTemplateKey]);
+  const scope = [
+    {
+      $context: {
+        data: applyRelationData,
+      },
+    },
+  ];
+  const form = useMemo(() => {
+    return createForm({
+      initialValues: applyRelationData,
+      values: applyRelationData,
+    });
+  }, []);
+
   return (
     <Card title="详情" bordered={false} size="small">
-      Card content
+      <RecordProvider record={applyRelationData}>
+        <FormProvider form={form}>
+          <RemoteSchemaComponent uid={uiSchemaRecordUid} />
+        </FormProvider>
+      </RecordProvider>
     </Card>
   );
 };

@@ -1,8 +1,7 @@
-import { Plugin, SchemaInitializer, useSchemaInitializer } from '@nocobase/client';
+import { Plugin, SchemaInitializer, useCollection, useSchemaInitializer } from '@nocobase/client';
 import { getApprovalDetailPath,  getApprovalSettingListPath, getApprovalSettingPath } from './hooks';
 import { AddProvalSetting, ApprovalDetailPage, ApprovalSettingListPage } from './page';
 import React from 'react';
-import { useApprovalFormBlockProps } from './page/components';
 import WorkflowPlugin from '@nocobase/plugin-workflow';
 import { Approval } from './nodes';
 import CopyTo from './nodes/copyTo';
@@ -10,7 +9,9 @@ import { SettingOutlined } from '@ant-design/icons';
 // import { ApplyAction, useApplyFormActionProps, useApprovalApplyFormBlockProps } from './blocks/ApplyAction';
 import { createActionForm } from './blocks/schema/createActionForm';
 import { Apply } from './blocks/apply-action';
-import { ApplyActionInitializer } from './blocks/ApplyActionInitializer';
+
+import * as scopes from './scopes';
+import * as components from './components';
 // export * from './providers';
 export class PluginWorkflowApprovalClient extends Plugin {
   async afterAdd() {
@@ -37,12 +38,7 @@ export class PluginWorkflowApprovalClient extends Plugin {
     
   }
   addScopes() {
-    this.app.addScopes({
-      useApprovalFormBlockProps,
-      // useApprovalApplyFormBlockProps,
-      // useApplyFormActionProps,
-
-    })
+    this.app.addScopes(scopes)
   }
   addComponents() {
     // this.app.addComponents({
@@ -52,7 +48,7 @@ export class PluginWorkflowApprovalClient extends Plugin {
       AddProvalSetting,
       ApprovalDetailPage,
       Apply,
-      ApplyActionInitializer
+      ...components
     });
     /* 增加提交申请操作 */
     this.schemaInitializerManager.addItem(
@@ -63,6 +59,51 @@ export class PluginWorkflowApprovalClient extends Plugin {
         type: 'item',
         title:'提交申请',
         Component:'ApplyActionInitializer',
+      },
+    );
+    /* 增加 我的审批 查看详情操作 */
+    this.schemaInitializerManager.addItem(
+      'TableActionColumnInitializers', // 示例，已存在的 schema initializer
+      'actions.approvalView', // 向 otherBlocks 分组内添加 custom
+      {
+        type: 'item',
+        title: '{{t("审批详情")}}',
+        name:'approvalView',
+        useVisible() {
+          const collection = useCollection();
+          return collection?.name === 'approval_apply';
+        },
+        Component: 'ApprovalViewActionInitializer',
+      },
+    );
+
+     /* 增加 同意 拒绝 查看详情操作 */
+     this.schemaInitializerManager.addItem(
+      'FormActionInitializers', // 示例，已存在的 schema initializer
+      'enableActions.agree', // 向 otherBlocks 分组内添加 custom
+      {
+        type: 'item',
+        title: '{{t("同意")}}',
+        name:'agree',
+        useVisible() {
+          const collection = useCollection();
+          return collection?.name === 'approval_results';
+        },
+        Component: 'AgreeActionInitializer',
+      },
+    );
+    this.schemaInitializerManager.addItem(
+      'FormActionInitializers', // 示例，已存在的 schema initializer
+      'enableActions.reject', // 向 otherBlocks 分组内添加 custom
+      {
+        type: 'item',
+        title: '{{t("拒绝")}}',
+        name:'reject',
+        useVisible() {
+          const collection = useCollection();
+          return collection?.name === 'approval_results';
+        },
+        Component: 'RejectActionInitializer',
       },
     );
  
@@ -81,7 +122,7 @@ export class PluginWorkflowApprovalClient extends Plugin {
      aclSnippet: 'pm.workflow.workflows',
     });
     this.app.router.add('admin.workflow.approval.id', {
-      path: getApprovalDetailPath(':id'),
+      path: getApprovalDetailPath(),
       element: <ApprovalDetailPage />,
     });
     this.app.router.add('admin.workflow.approvalSetting.form', {

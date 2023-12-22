@@ -295,7 +295,8 @@ export default {
     {
       name: 'workflowId',
       type: 'bigInt',
-      interface: 'integer',
+      interface: 'integer',      
+
       uiSchema: {
         type: 'number',
         'x-component': 'InputNumber',
@@ -307,6 +308,17 @@ export default {
         title: '关联流程',
       },
     },
+    {
+     
+      "name": "jobId",
+      "type": "bigInt",
+      "interface": "integer",
+      "uiSchema": {
+          "type": "number",
+          "x-component": "InputNumber",
+          "title": "任务ID"
+      }
+  },
     {
       name: 'applyResults',
       type: 'hasMany',

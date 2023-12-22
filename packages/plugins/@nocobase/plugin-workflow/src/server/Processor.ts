@@ -355,11 +355,17 @@ export default class Processor {
       $scopes,
     };
   }
-  public async getUserIdsByRule({rule, assignees, assigneeRoles}, nodeId: number) {
+  public async getUsersByRule({rule, assignees, assigneeRoles}, nodeId: number) {
     const transaction = this.transaction;
     const repository = this.options.plugin.db.getRepository('users');
     if (rule == '1') {
-      return assignees;
+      return await repository.find({ 
+        filter:{
+            id:{
+              $in:assignees
+            }
+        },
+        transaction });;
     } else if (rule == '3') {
       const [users]  = await repository.findAndCount({ 
         filter:{
@@ -371,10 +377,13 @@ export default class Processor {
         },
         transaction });
 
-        return users.map((user) => user.id);
+        return users;
     } else if (rule == '2') {
-      const userId = this.getParsedValue('{{$user.directUserId}}', nodeId)
-      return [userId];
+      const userId = this.getParsedValue('{{$user.directUserId}}', nodeId);
+      const user = await repository.findOne({
+        filterByTk: userId
+      });
+      return user?[user]:[];
     }
   }
 

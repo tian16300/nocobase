@@ -151,7 +151,13 @@ export class DingTalkService {
   }
   /* 发送消息通知 */
   async sendMsgToUserByDing(ctx, next) {
-    const { userIds, msg } = ctx.action.params;
+    /* 增加消息日志 */
+    ctx.body =  await this.sendMsgToUserByDingAction(ctx.action.params?.values);
+    await next();
+  }
+   /* 发送消息通知 */
+   async sendMsgToUserByDingAction(data) {
+    const { userIds, msg } = data;
     const accessToken = await this.getAccessToken();
     const url = `https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2?access_token=${accessToken}`;
     const response = await axios.post(url, {
@@ -161,8 +167,7 @@ export class DingTalkService {
     });
     /* 增加消息日志 */
 
-    ctx.body = response.data;
-    await next();
+    return response.data
   }
   /* 获取考勤列 */
   async getAttenceColumnFromDing() {

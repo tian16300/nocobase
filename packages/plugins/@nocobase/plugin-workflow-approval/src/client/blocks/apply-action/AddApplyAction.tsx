@@ -10,9 +10,11 @@ import {
   SchemaComponentProvider,
   useAPIClient,
   useApplyBlockContext,
+  useBlockRequestContext,
   useCurrentUserContext,
   useRecord,
   useSchemaComponentContext,
+  useTableBlockContext,
 } from '@nocobase/client';
 import {  message } from 'antd';
 
@@ -47,8 +49,9 @@ const schema = {
   },
 };
 export const AddApplyAction = (props) => {
-  const { workflow, collection } = useApplyBlockContext();
+  const { workflow, collection, apply } = useApplyBlockContext();
   const { components, scope } = useSchemaComponentContext();
+  // const ctx = useTableBlockContext();
   const data = useCurrentUserContext();
   const currentUser = data?.data?.data;
   const record = useRecord();
@@ -58,11 +61,15 @@ export const AddApplyAction = (props) => {
       .request({
         url: 'approval_apply:create',
         method: 'POST',
-        data: form.values,
+        data: {
+          ...apply,
+          ...form.values
+        },
       })
       .then((res) => {
         if (res.status == 200) {
           message.success('申请成功');
+          // ctx?.service?.refresh();
           next(form);
         }
       });
@@ -105,14 +112,13 @@ export const AddApplyAction = (props) => {
                     applyUser_id:currentUser.id,
                     applyUser_deptId:currentUser.userId,
                     applyTime:dayjs().toISOString(),
-                    workflowId: workflow?.id
+                    status: '1'
                   },
                 });
               }, 300);
             })
             .forConfirm((form, next) => {
               /*提交表单 */
-              debugger;
               handleSubmit(form, next);
             })
             .forCancel((payload, next) => {

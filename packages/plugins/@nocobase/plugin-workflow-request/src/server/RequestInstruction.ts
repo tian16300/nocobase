@@ -12,7 +12,7 @@ export type RequestConfig = Pick<AxiosRequestConfig, 'url' | 'method' | 'params'
   ignoreFail: boolean;
 };
 
-async function request(config) {
+export async function request(config) {
   // default headers
   const { url, method = 'POST', data, timeout = 5000 } = config;
   const headers = (config.headers ?? []).reduce((result, header) => {

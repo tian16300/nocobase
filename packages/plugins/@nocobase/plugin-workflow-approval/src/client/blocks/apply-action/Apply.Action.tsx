@@ -1,13 +1,15 @@
 import { css } from '@emotion/css';
 import { useFieldSchema } from '@formily/react';
 import {
+  Action,
   Icon,
+  useAPIClient,
   useApplyBlockContext,
   useCompile,
   useTableBlockContext,
   useTableSelectorContext,
 } from '@nocobase/client';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { AddApplyAction } from './AddApplyAction';
 const actionDesignerCss = css`
@@ -52,12 +54,31 @@ const actionDesignerCss = css`
 
 /**
  * 未提交申请 撤销  隐藏
- * @param props
+ * @param props 将 status 修改 5
  * @returns
  */
-
+/**
+ * 修改申请 撤销  再次申请
+ * @param props 
+ * @returns 
+ */
 const CancelApplyAction = (props) => {
-  return <Button>撤销</Button>;
+  const { apply } = useApplyBlockContext();
+  const api = useAPIClient();
+  const handleCancleApply = async () => {
+    const res =  await api.resource('approval_apply').update({
+      filterByTk: apply.id,
+      values:{ status: '5' }
+    });
+    if(res.status == 200){
+      message.success('撤销成功');
+    }
+  };
+  const  confirm: any = {
+    title: '撤销审批',
+    content: '确认撤销该申请？'
+};
+  return <Action title='撤销' confirm={confirm} onClick={handleCancleApply}></Action>
 };
 const ReAddApplyAction = (props) => {
   return <Button>再次申请</Button>;

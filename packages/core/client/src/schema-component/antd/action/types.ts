@@ -10,6 +10,7 @@ export type ActionProps = ButtonProps & {
 export type ComposedAction = React.FC<ActionProps> & {
   Drawer?: ComposedActionDrawer;
   openMode?: string;
+  confirm?: any;
   [key: string]: any;
 };
 

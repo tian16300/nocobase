@@ -46,6 +46,7 @@ import {
   IField,
   useApp,
   useAppPluginLoad,
+  useCollectionManager,
 } from '@nocobase/client';
 import { createForm, onFieldChange } from '@formily/core';
 import { FormStep, FormButtonGroup } from '@formily/antd-v5';
@@ -137,6 +138,7 @@ export const AddProvalSetting = (props) => {
   const form = createForm({});
   const navigate = useNavigate();
   const nodes = [];
+  const { getCollectionFields, refreshCM } = useCollectionManager();
   const _params = useMemo(() => {
     /* 提交申请 */
     return {
@@ -150,7 +152,7 @@ export const AddProvalSetting = (props) => {
       config: {
         appends: ['applyUserDept', 'applyUser', 'currentApprovalUsers', 'applyResults', 'images', 'files'],
         collection: 'approval_apply',
-        changed: [],
+        changed: ['status'],
         condition: {
           $and: [
             {
@@ -158,9 +160,14 @@ export const AddProvalSetting = (props) => {
                 $eq: collection,
               },
             },
+            {
+              status: {
+                $eq: '1',
+              },
+            },
           ],
         },
-        mode: 1,
+        mode: 3,
       },
     };
   }, [workflow, flowName, collection]);
@@ -190,6 +197,37 @@ export const AddProvalSetting = (props) => {
         });
     }
   }, [searchParams.get('id')]);
+
+  const addApprovalStatusField = async () => {
+    const field = {
+      foreignKey: 'currentApproval_id',
+      onDelete: 'SET NULL',
+      name: 'approvalStatus',
+      type: 'belongsTo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '审批状态',
+      },
+      interface: 'obo',
+      target: 'approval_apply',
+    };
+    const existField = getCollectionFields(collection).find(({ name }) => {
+      return name == field.name;
+    });
+    if (!existField) {
+      const url = `/collections/${collection}/fields:create`;
+      const res = await api.axios.post(url, field);
+      refreshCM?.();
+      console.log(res);
+    }
+  };
   const handleSave = async () => {
     setLoading(true);
     if (!_params.id) {
@@ -198,17 +236,20 @@ export const AddProvalSetting = (props) => {
           ..._params,
         },
       });
+      addApprovalStatusField();
       setLoading(false);
       navigate(app.router.get('admin.workflow.approvalSetting.form').path + '?id=' + res.data?.data?.id);
       return res.data?.data;
-    } else {
+    } else if (!_params.executed) {
       const res = await api.resource('workflows').update({
         filterByTk: _params.id,
         values: _params,
       });
-
       setLoading(false);
       return res.data?.data?.[0];
+    } else {
+      setLoading(false);
+      return _params;
     }
   };
 
@@ -232,7 +273,9 @@ export const AddProvalSetting = (props) => {
   const handleNext = async () => {
     if (current == 0) {
       const res = await handleSave();
-      setWorkFlow(res);
+      if (res) {
+        setWorkFlow(res);
+      }
       if (!uiTemplateKey) {
         setInitialSchema(createSchema(res.bussinessCollectionName));
       }

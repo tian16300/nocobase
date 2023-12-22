@@ -37,6 +37,18 @@ export default class extends Plugin {
         transaction
       });
     })
+    /**
+     * 审批状态 = 已撤销 终止流程
+     */
+    this.db.on('approval_apply.afterUpdate', async (model, {transaction}) => {
+      const changed = Array.from(model._changed);
+      const status = model.get('status');
+      if(changed.includes('status') && status == '5'){
+        /* 终止job 流程 */
+
+
+      }
+    })
   }
   async load() {
     /* 导入审批相关的表 */

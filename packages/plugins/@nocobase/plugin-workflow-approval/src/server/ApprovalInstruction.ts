@@ -2,7 +2,34 @@ import { Registry } from '@nocobase/utils';
 import WorkflowPlugin, { Processor, JOB_STATUS, Instruction } from '@nocobase/plugin-workflow';
 
 import initFormTypes, { FormHandler } from './forms';
+import axios from 'axios';
+import statusTexts from './statusTexts';
+export async function request(config) {
+  // default headers
+  const { url, method = 'POST', data, timeout = 5000 } = config;
+  const headers = (config.headers ?? []).reduce((result, header) => {
+    if (header.name.toLowerCase() === 'content-type') {
+      return result;
+    }
+    return Object.assign(result, { [header.name]: header.value });
+  }, {});
+  const params = (config.params ?? []).reduce(
+    (result, param) => Object.assign(result, { [param.name]: param.value }),
+    {},
+  );
 
+  // TODO(feat): only support JSON type for now, should support others in future
+  headers['Content-Type'] = 'application/json';
+
+  return axios.request({
+    url,
+    method,
+    headers,
+    params,
+    data,
+    timeout,
+  });
+}
 type FormType = {
   type: 'custom' | 'create' | 'update';
   actions: number[];
@@ -16,13 +43,13 @@ export interface ManualConfig {
   forms: { [key: string]: FormType };
   assignees?: (number | string)[];
   assigneesRule?: {
-    ruleType: 'depts'|'roles'|'users'| string;
+    ruleType: 'depts' | 'roles' | 'users' | string;
     depts?: number[];
     roles?: number[];
     users?: number[];
   };
   copyToRule?: {
-    ruleType: 'depts'|'roles'|'users'| string;
+    ruleType: 'depts' | 'roles' | 'users' | string;
     depts?: number[];
     roles?: number[];
     users?: number[];
@@ -94,7 +121,6 @@ function getMode(mode) {
   }
 }
 
-
 /**
  * 功能逻辑  查找 审批人, 新增或保存审批表单 审批记录
  */
@@ -103,10 +129,7 @@ export default class extends Instruction {
 
   constructor(public plugin: WorkflowPlugin) {
     super(plugin);
-
-    initFormTypes(this);
   }
-  
 
   async run(node, prevJob, processor: Processor) {
     /**
@@ -114,94 +137,57 @@ export default class extends Instruction {
      */
     const transaction = processor.transaction;
     const workflowModel = await processor.execution.getWorkflow();
-    const  userIds = await processor.getUserIdsByRule(node.config, node.id)
+    const users = await processor.getUsersByRule(node.config, node.id);
+    const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
+    const { relatedCollection, related_data_id } = approvalModel;
+    // 获取关联数据
+    const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
+    const relatedData = await relatedModel.findOne({
+      filterByTk: related_data_id,
+      transaction,
+    });
+    const statusText = statusTexts.find(({value})=>{return value == approvalModel.status}).label;
+    const data = {
+      userIds: users
+        .map(({ dingUserId }) => {
+          return dingUserId;
+        })
+        .join(','),
+      msg: {
+        msgtype: 'text',
+        text: {
+          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请 ${!approvalModel.isNewRecord?statusText:''},请到我的审批查看。`,
+        },
+      },
+    };
 
-    // const isApproval = workflowModel.get('isApproval');
+    const dingTalkService = (processor.options.plugin.app.getPlugin('@zkjx/plugin-enterprise-integration') as any)
+      .dingTalkService;
+    const message = await dingTalkService.sendMsgToUserByDingAction(data);
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
-      result: userIds,
+      result: {
+        users,
+        relatedData,
+        message,
+      },
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
-    /* 申请人 提交审批申请 字段 workflowId relatedCollection relatedId */
-    /* 标题 《申请人》提交的《工作流名称》申请 */
-    /* 查找审批人 */
+    /**
+     * 存储workflowId jobId
+     */
+    const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
+      filterByTk: approvalModel.id,
+      values:{
+        workflowId: workflowModel.id,
+        jobId: job.id,
+      },
+      transaction
+    });
+    processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`);
 
-  
-
-
-    /*  */
-    // if (!isApproval) {
-      // const assignees = [...new Set(processor.getParsedValue(config.assignees, node.id) || [])];
-      // // NOTE: batch create users jobs
-      // const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-      // await UserJobModel.bulkCreate(
-      //   assignees.map((userId) => ({
-      //     userId,
-      //     jobId: job.id,
-      //     nodeId: node.id,
-      //     executionId: job.executionId,
-      //     workflowId: node.workflowId,
-      //     status: JOB_STATUS.PENDING,
-      //   })),
-      //   {
-      //     transaction: processor.transaction,
-      //   },
-      // );
-
-     
-    // }else{
-      /**
-       *  查找审批人，抄送人
-       */
-      // const collectionName = workflowModel.get('bussinessCollectionName');
-      // const bussinessCode = processor.getParsedValue(`{{$context.data.${collectionName}_code}}`,node.id)
-      // const assignees = await processor.getUserIdsByRule(config.assigneesRule, node.id)||[];
-      // const copyto = await processor.getUserIdsByRule(config.copyToRule, node.id)||[];
-      //创建审批记录
-      /**
-       * 查询审批汇总表有无记录 有则更新 无则创建
-       * 添加审批记录
-       */
-      // const ApprovalModel = processor.options.plugin.db.getRepository('approval');
-      // const ApprovalRecord = await ApprovalModel.findOne({
-      //   filter:{
-      //     bussinessCollectionName:workflowModel.get('bussinessCollectionName'),
-      //     bussinessCode: bussinessCode
-      //     /**
-      //      * 业务编号
-      //      */
-      //     // bussinessCode:
-
-      //   },
-      //   transaction: processor.transaction,
-      // });
-      // const submitterId = processor.getScope(node.id).$context.data.updatedById || processor.getScope(node.id).$context.data.createdById;
-      // const submitDate = processor.getScope(node.id).$context.data.updatedAt || processor.getScope(node.id).$context.data.createdAt;
-      // if(!ApprovalRecord){
-      //   ApprovalModel.create({
-      //     values:{
-      //       bussinessCollectionName: collectionName,
-      //       type: collectionName,
-      //       bussinessCode: bussinessCode,
-      //       submitterId: submitterId,
-      //       submitDate: submitDate,
-      //       submit_status:'1',
-      //       current_approval_users_id: assignees,
-      //       approval_record:[{
-      //         approval_users_id:assignees,
-      //         approval_status:'1',
-      //         current: true
-      //       }]
-      //     },
-      //     transaction: processor.transaction
-      //   });
-      // }
-
-
-    // }
-    // return job;
-    return  job
+    return job;
   }
 
   async resume(node, job, processor: Processor) {

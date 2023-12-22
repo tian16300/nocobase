@@ -234,7 +234,7 @@ export const approvalWorkflows: ISchema = {
               isApproval: true,
             },
             sort: ['-createdAt'],
-            except: ['config'],
+            // except: ['config'],
             appends: ['uiTemplate'],
           },
         },

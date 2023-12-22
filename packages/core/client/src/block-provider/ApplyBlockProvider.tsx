@@ -20,19 +20,21 @@ export const ApplyBlockProvider = (props) => {
       pagination: false,
     },
   });
-  debugger;
   let apply = null;
   if (currentApproval_id) {
-    const { data } = useRequest({
+    const { data } = useRequest<{data:any}>({
       action: 'get',
       resource: 'approval_apply',
       params: {
         filterByTk: currentApproval_id,
       },
     });
-    apply = data;
+    apply = data?.data;
+    if(apply){
+      apply.workflowId = workflows.data?.data?.[0]?.id;
+    }
   }
-
+  
   return <InnerApplyBlockProvider {...props}  workflow={workflows.data?.data?.[0]} apply={apply}></InnerApplyBlockProvider>;
 };
 
