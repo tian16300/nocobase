@@ -26,10 +26,5 @@
   "Update record form": "更新数据表单",
   "Filter settings": "筛选设置",
   "Workflow todos": "工作流待办",
-  "Task": "任务",
-  "Approval":"审批人",
-  "Approval status": "审批状态",
-  "Approval time": "审批时间",
-  "Approval comments": "审批意见",
-  "Copy To":"抄送人"
+  "Task": "任务"
 }

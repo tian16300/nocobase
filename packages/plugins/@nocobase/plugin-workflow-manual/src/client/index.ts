@@ -21,15 +21,8 @@ export default class extends Plugin {
     // this.app.addProvider(Provider);
     const workflow = this.app.pm.get('workflow') as WorkflowPlugin;
     const manualInstruction = new Manual();
-    /* 人工处理 */
     workflow.instructions.register(manualInstruction.type, manualInstruction);
-    /* 审批处理 */
-    // const approvalInstruction = new Approval();
-    // workflow.instructions.register(approvalInstruction.type, approvalInstruction);
-    /* 抄送处理 */
-    // const copyTo = new CopyTo();
-    // workflow.instructions.register(copyTo.type, copyTo);
-    
+
     this.app.schemaInitializerManager.add(addBlockButton);
     this.app.schemaInitializerManager.add(addActionButton);
     this.app.schemaInitializerManager.add(addCustomFormField);

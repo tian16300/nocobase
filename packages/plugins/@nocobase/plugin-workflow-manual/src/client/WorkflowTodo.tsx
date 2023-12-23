@@ -612,7 +612,6 @@ function Decorator({ params = {}, children }) {
       </TableBlockProvider>
     </CollectionManagerProvider>
   );
-  
 }
 
 WorkflowTodo.Drawer = Drawer;
