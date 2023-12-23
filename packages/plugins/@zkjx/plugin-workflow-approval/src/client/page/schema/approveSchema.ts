@@ -55,7 +55,6 @@ export const createApproveSchema = (options: any = {}) => {
                                 properties: {
                                   approvalComments: {
                                     'x-uid': uid(),
-
                                     type: 'string',
                                     'x-designer': 'FormItem.Designer',
                                     'x-component': 'CollectionField',
@@ -75,13 +74,9 @@ export const createApproveSchema = (options: any = {}) => {
                               },
                             },
                             'x-uid': uid(),
-                            
-                            
                           },
                         },
                         'x-uid': uid(),
-                        
-                        
                       },
                       actions: {
                         type: 'void',
@@ -96,7 +91,6 @@ export const createApproveSchema = (options: any = {}) => {
                         properties: {
                           agree: {
                             'x-uid': uid(),
-
                             title: '同意',
                             'x-action': 'approval_apply:agree',
                             'x-designer': 'Action.Designer',
@@ -110,8 +104,6 @@ export const createApproveSchema = (options: any = {}) => {
                               size: 'default',
                             },
                             type: 'void',
-                            
-                            
                           },
                           reject: {
                             title: '拒绝',

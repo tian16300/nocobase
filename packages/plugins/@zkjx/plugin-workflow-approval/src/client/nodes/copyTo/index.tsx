@@ -18,7 +18,7 @@ const MULTIPLE_ASSIGNED_MODE = {
 };
 
 export default class CopyTo extends Instruction {
-  title = `{{t("Copy To", { ns: "${NAMESPACE}" })}}`;
+  title = `抄送人`;
   type = 'copyTo';
   group = 'manual';
   description = `{{t("Could be used for manually submitting data, and determine whether to continue or exit. Workflow will generate a todo item for assigned user when it reaches a manual node, and continue processing after user submits the form.", { ns: "${NAMESPACE}" })}}`;

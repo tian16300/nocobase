@@ -142,7 +142,7 @@ export const AddProvalSetting = (props) => {
   const _params = useMemo(() => {
     /* 提交申请 */
     return {
-      enabled: false,
+      // enabled: false,
       ...workflow,
       title: flowName,
       bussinessCollectionName: collection,
@@ -162,7 +162,7 @@ export const AddProvalSetting = (props) => {
             },
             {
               status: {
-                $eq: '1',
+                $eq: '0',
               },
             },
           ],
