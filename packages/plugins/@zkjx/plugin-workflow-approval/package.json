@@ -1,8 +1,8 @@
 {
   "name": "@zkjx/plugin-workflow-approval",
-  "version": "0.17.0-alpha.7",
+  "version": "0.18.0-alpha.1",
   "main": "dist/server/index.js",
-  "dependencies": {},
+  "private": true,
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",
