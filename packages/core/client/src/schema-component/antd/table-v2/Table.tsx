@@ -862,6 +862,7 @@ export const Table: any = observer(
             ref={tableSizeRefCallback}
             rowKey={rowKey ?? defaultRowKey}
             dataSource={dataSource}
+            tableLayout="auto"
             {...others}
             {...restProps}
             pagination={paginationProps}

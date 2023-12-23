@@ -1,6 +1,6 @@
-import { expect, test } from '@nocobase/test/client';
-import { oneEmptyGantt } from './utils';
+import { expect, test } from '@nocobase/test/e2e';
 import { getYmd } from '../helpers/other-helper';
+import { oneEmptyGantt } from './utils';
 const mockData = {
   singleLineText: 'within apropos leaker whoever how',
   singleLineText2: 'the inasmuch unwelcome gah hm cleverly muscle worriedly lazily',
