@@ -16,49 +16,16 @@ import { LeftOutlined, EditOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Input as AntdInput, Space, Divider, Steps, message, Card } from 'antd';
 import { Schema } from '@formily/json-schema';
 import {
-  FormV2,
-  SchemaComponent,
-  FormItem,
-  Input,
-  CollectionSelect,
-  AppendsTreeSelect,
-  CollectionProvider,
-  SchemaComponentOptions,
-  FormBlockProvider,
-  CardItem,
-  formItemInitializers,
-  useSourceIdFromParentRecord,
-  useParamsFromRecord,
-  useFormBlockProps,
-  Grid,
-  useDesignable,
-  SchemaComponentProvider,
-  useSchemaInitializerRender,
-  useSchemaOptionsContext,
-  createDesignable,
-  SchemaComponentContext,
-  useToken,
   css,
-  FormBlockContext,
-  RecordProvider,
-  useSchemaComponentContext,
   useAPIClient,
-  IField,
-  useApp,
-  useAppPluginLoad,
   useCollectionManager,
 } from '@nocobase/client';
-import { createForm, onFieldChange } from '@formily/core';
-import { FormStep, FormButtonGroup } from '@formily/antd-v5';
-import { FormProvider, FormConsumer, useForm } from '@formily/react';
-import { uid } from '@nocobase/utils';
-import { observer, useField, useFieldSchema } from '@formily/react';
-import { DesignSchemaView, SelectDataModel } from './components';
-import { config, createSchema } from './schema/config';
+import { createForm } from '@formily/core';
+import { useForm } from '@formily/react';
+import { SelectDataModel } from './components';
 import { FlowCanvas } from './components/FlowCanvas';
-import { set } from 'packages/core/actions/src/actions';
 import { FlowContext } from '@nocobase/plugin-workflow/client';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SettingOutlined } from '@ant-design/icons';
 import { SelectTemplateKey } from './components/SelectTemplateKey';
 const ApprovalSettingContext = createContext<any>({});
@@ -82,23 +49,8 @@ const formValue: FormValue = {
     title: 'example table title',
   },
 };
-const waitTime = (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(formValue);
-    }, time);
-  });
-};
-const jobType = [
-  {
-    value: 1,
-    label: '国企',
-  },
-  {
-    value: 2,
-    label: '私企',
-  },
-];
+
+
 
 export const useSchemaConfigSettingProps = () => {
   const { values } = useForm();

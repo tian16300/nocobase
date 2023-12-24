@@ -1,22 +1,17 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
-import actions from '@nocobase/actions';
-import { HandlerType } from '@nocobase/resourcer';
-import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
+import WorkflowPlugin from '@nocobase/plugin-workflow';
 
-// import jobsCollection from './collections/jobs';
-// import usersCollection from './collections/users';
-// import usersJobsCollection from './collections/users_jobs';
 import { getNodeUsers, submit } from './actions';
 
 import ApprovalInstruction from './ApprovalInstruction';
 import CopyToInstruction from './CopyToInstruction';
 import path from 'path';
-import { namespace } from '../preset';
+// import { namespace } from '../preset';
 export default class extends Plugin {
   workflow: WorkflowPlugin;
   beforeLoad() {
     this.db.addMigrations({
-      namespace: namespace,
+      // namespace: namespace,
       directory: path.resolve(__dirname, 'migrations'),
       context: {
         plugin: this,
