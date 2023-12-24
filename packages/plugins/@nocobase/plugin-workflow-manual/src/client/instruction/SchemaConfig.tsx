@@ -415,7 +415,7 @@ export function SchemaConfig({ value, onChange }) {
   const nodeInitializers = {};
   const nodeComponents = {};
   nodes.forEach((item) => {
-    const instruction = workflowPlugin.instructions.get(item.type);
+    const instruction = workflowPlugin.instructions.get(item.type) as any;
     Object.assign(nodeInitializers, instruction.initializers);
     Object.assign(nodeComponents, instruction.components);
   });
