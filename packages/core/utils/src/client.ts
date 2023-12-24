@@ -17,4 +17,5 @@ export * from './registry';
 export * from './isPortalInBody';
 export * from './uid';
 export * from './url';
+export * from './flattenTree';
 export { dayjs, lodash };

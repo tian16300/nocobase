@@ -12,10 +12,9 @@ import {
   IField,
   useCollectionManager,
 } from '@nocobase/client';
-import { dayjs, getValuesByPath } from '@nocobase/utils/client';
+import { dayjs, getValuesByPath, flattenTree as flattenTree2 } from '@nocobase/utils/client';
 import { pick } from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { flattenTree as flattenTree2 } from '@nocobase/utils';
 
 export const GanttBlockContext = createContext<any>({});
 const getItemColor = (item, token, holidays) => {
