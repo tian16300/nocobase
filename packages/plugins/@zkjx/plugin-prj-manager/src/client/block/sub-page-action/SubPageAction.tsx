@@ -28,54 +28,54 @@ export const SubPageAction = () => {
   );
 };
 
-SubPageAction.initializer = (props) => {
-  const { insert } = props;
-  return (
-    <SchemaInitializer.Item
-      {...props}
-      icon={<FormOutlined />}
-      onClick={() => {
-        const schema = {
-          type: 'object',
-          properties: {
-            action1: {
-              'x-component': 'SubPageAction',
-              'x-component-props': {
-                type: 'primary',
-              },
-              type: 'void',
-              title: 'Open',
-              properties: {
-                drawer1: {
-                  'x-component': 'Action.Drawer',
-                  type: 'void',
-                  title: 'Drawer Title',
-                  properties: {
-                    hello1: {
-                      'x-content': 'Hello',
-                      title: 'T1',
-                    },
-                    footer1: {
-                      'x-component': 'Action.Drawer.Footer',
-                      type: 'void',
-                      properties: {
-                        close1: {
-                          title: 'Close',
-                          'x-component': 'Action',
-                          'x-component-props': {
-                            useAction: '{{ useCloseAction }}',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        };
-        insert(schema);
-      }}
-    />
-  );
-};
+// SubPageAction.initializer = (props) => {
+//   const { insert } = props;
+//   return (
+//     <SchemaInitializer.Item
+//       {...props}
+//       icon={<FormOutlined />}
+//       onClick={() => {
+//         const schema = {
+//           type: 'object',
+//           properties: {
+//             action1: {
+//               'x-component': 'SubPageAction',
+//               'x-component-props': {
+//                 type: 'primary',
+//               },
+//               type: 'void',
+//               title: 'Open',
+//               properties: {
+//                 drawer1: {
+//                   'x-component': 'Action.Drawer',
+//                   type: 'void',
+//                   title: 'Drawer Title',
+//                   properties: {
+//                     hello1: {
+//                       'x-content': 'Hello',
+//                       title: 'T1',
+//                     },
+//                     footer1: {
+//                       'x-component': 'Action.Drawer.Footer',
+//                       type: 'void',
+//                       properties: {
+//                         close1: {
+//                           title: 'Close',
+//                           'x-component': 'Action',
+//                           'x-component-props': {
+//                             useAction: '{{ useCloseAction }}',
+//                           },
+//                         },
+//                       },
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         };
+//         insert(schema);
+//       }}
+//     />
+//   );
+// };

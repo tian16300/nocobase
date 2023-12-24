@@ -21,7 +21,7 @@ export default class extends Migration {
         '@nocobase/plugin-workflow-request',
         '@nocobase/plugin-workflow-sql',
         '@nocobase/plugin-workflow-form-trigger',
-        '@nocobase/plugin-workflow-approval',
+        '@zkjx/plugin-workflow-approval',
       ].reduce(
         (promise, packageName) =>
           promise.then(async () => {
