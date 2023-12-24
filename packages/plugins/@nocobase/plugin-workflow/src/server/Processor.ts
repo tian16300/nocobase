@@ -355,7 +355,7 @@ export default class Processor {
       $scopes,
     };
   }
-  public async getUsersByRule({rule, assignees, assigneeRoles}, nodeId: number) {
+  public async getUsersByRule({rule, assignees, assigneeRoles}, nodeId: number, currentUser?) {
     const transaction = this.transaction;
     const repository = this.options.plugin.db.getRepository('users');
     if (rule == '1') {
@@ -379,7 +379,10 @@ export default class Processor {
 
         return users;
     } else if (rule == '2') {
-      const userId = this.getParsedValue('{{$user.directUserId}}', nodeId);
+      const userId = currentUser.directUserId;
+      if (!userId) {
+        return [];
+      }
       const user = await repository.findOne({
         filterByTk: userId
       });

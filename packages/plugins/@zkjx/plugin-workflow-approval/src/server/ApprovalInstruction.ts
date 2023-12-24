@@ -135,8 +135,9 @@ export default class extends Instruction {
      */
     const transaction = processor.transaction;
     const workflowModel = await processor.execution.getWorkflow();
-    const users = await processor.getUsersByRule(node.config, node.id);
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
+    const currentUser = prevJob.result.data.user || prevJob.result.data.applyUser;
+    const users = await processor.getUsersByRule(node.config, node.id, currentUser);
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
     const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
@@ -200,6 +201,7 @@ export default class extends Instruction {
         executionId: job.executionId,
         workflowKey: workflowModel.key,
         currentApprovalUsers: users,
+        result: relatedData
       },
       transaction,
     });

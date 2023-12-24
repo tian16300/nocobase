@@ -9,6 +9,7 @@ import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin, T
 import {
   APIClientProvider,
   Action,
+  BlockProvider,
   CollectionProvider,
   DefaultValueProvider,
   FormActiveFieldsProvider,
@@ -17,15 +18,21 @@ import {
   RemoteSchemaComponent,
   RemoteSelect,
   SchemaComponent,
+  SchemaComponentContext,
   VariableScopeProvider,
   actionDesignerCss,
   createDetailsBlockSchema,
   css,
   useAPIClient,
+  useAssociation,
+  useAssociationNames,
   useCollection,
   useCollectionManager,
+  useDesignable,
+  useFormBlockContext,
   useRequest,
   useSchemaComponentContext,
+  useSchemaTemplateManager,
   useToken,
 } from '@nocobase/client';
 
@@ -43,11 +50,6 @@ export const useApprovalContext = () => {
 export const ApprovalDetailPage = () => {
   const [searchParams] = useSearchParams();
   const [workflow, setWorkflow] = useState<any>(null);
-  // const [approval, setApproval] = useState<any>({
-  //   id:1,
-  //   status: '待审批',
-  //   currentIndex: 1,
-  // });
   const api = useAPIClient();
   const [loading, setLoading] = useState(true);
   const [applyRelationData, setApplyRelationData] = useState<any>(null);
@@ -63,16 +65,21 @@ export const ApprovalDetailPage = () => {
   const apply = data?.data;
 
   useEffect(() => {
-    if (apply?.workflowId && apply?.relatedCollection && apply?.related_data_id) {
+    if (apply?.workflowKey && apply?.relatedCollection && apply?.related_data_id) {
       Promise.all([
         api
           .resource('workflows')
-          .get({
-            filterByTk: apply?.workflowId,
+          .list({
+            filter: {
+              key: apply?.workflowKey,
+              enabled: true,
+              current: true,
+            },
+            appends: ['uiTemplate'],
           })
           .then((res) => {
-            apply.workflow = res.data?.data;
-            setWorkflow(res.data?.data);
+            apply.workflow = res.data?.data?.[0];
+            setWorkflow(res.data?.data?.[0]);
           }),
         api
           .resource(apply.relatedCollection)
@@ -86,7 +93,7 @@ export const ApprovalDetailPage = () => {
         setLoading(false);
       });
     }
-  }, [apply?.workflowId, apply?.relatedCollection, apply?.related_data_id]);
+  }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
   useEffect(() => {
     if (apply?.execution?.status) {
@@ -248,12 +255,12 @@ const ApprovalFlowSteps = () => {
 
   const api = useAPIClient();
   useEffect(() => {
-    if (apply?.workflowId)
+    if (workflow?.id)
       api
         .resource('flow_nodes')
         .list({
           filter: {
-            workflowId: apply?.workflowId,
+            workflowId: workflow.id,
           },
           sort: ['id'],
         })
@@ -268,7 +275,7 @@ const ApprovalFlowSteps = () => {
             setCurrentIndex(_currentIndex + 1);
           }
         });
-  }, [apply?.workflowId]);
+  }, [workflow?.id]);
   const stepItems = useMemo(() => {
     const applyUser = {
       title: '提交申请',
@@ -404,41 +411,79 @@ const DingAction = (props) => {
   );
 };
 const ApprovalFlowNodeDetail = () => {
-  const { workflow, apply, applyRelationData } = useApprovalContext();
-  const [uiSchemaRecordUid, setUiSchemaRecordUid] = useState(null);
-  const api = useAPIClient();
-  useEffect(() => {
-    if (workflow && workflow?.uiTemplateKey)
-      api
-        .resource('uiSchemaTemplates')
-        .get({
-          filterByTk: workflow.uiTemplateKey,
-        })
-        .then((res) => {
-          setUiSchemaRecordUid(res.data.data.uid);
-        });
-  }, [workflow?.uiTemplateKey]);
-  const scope = [
-    {
-      $context: {
-        data: applyRelationData,
+  const { apply, workflow } = useApprovalContext();
+  const { designable } = useDesignable();
+  const value = useContext(SchemaComponentContext);
+
+  const { data, loading } = useRequest<{
+    data: any;
+  }>({
+    method: 'GET',
+    url: `uiSchemas:getJsonSchema/${workflow?.uiTemplate?.uid}`,
+  });
+  // const { getTemplateSchemaByMode } = useSchemaTemplateManager();
+  // const s = getTemplateSchemaByMode({mode:'reference',template:workflow?.uiTemplateKey})
+  if (loading) {
+    return <Spin />;
+  }
+  // const schema = createDetailsBlockSchema({
+  //   collection: data.data.collectionName,
+  //   template: workflow?.uiTemplate,
+  // });
+  const schema: any = {
+    type: 'object',
+    properties: {
+      block: {
+        type: 'void',
+        'x-decorator': 'FormBlockProvider',
+        'x-decorator-props': {
+          collection: apply?.relatedCollection,
+          resource: apply?.relatedCollection,
+          resourceOf: apply?.related_data_id,
+          action: 'get',
+          useParams: '{{ useParamsFromRecord }}',
+          // 'useProps': '{{ useApprovalFormBlockProps }}',
+        },
+        properties: {
+          form: {
+            type: 'void',
+            'x-component': 'FormV2',
+            'x-component-props': {
+              useProps: '{{ useApprovalFormBlockProps }}',
+            },
+            properties: {
+              grid: data.data,
+            },
+          },
+        },
       },
     },
-  ];
-  const form = useMemo(() => {
-    return createForm({
-      initialValues: applyRelationData,
-      values: applyRelationData,
-    });
-  }, []);
+  };
 
   return (
-    <Card title="详情" bordered={false} size="small">
-      <RecordProvider record={applyRelationData}>
-        <FormProvider form={form}>
-          <RemoteSchemaComponent uid={uiSchemaRecordUid} />
-        </FormProvider>
-      </RecordProvider>
+    <Card title="详情">
+      <CollectionProvider name={apply?.relatedCollection}>
+        <RecordProvider record={{ ...apply.result, __collectionName: apply?.relatedCollection }}>
+          <SchemaComponentContext.Provider value={{ ...value, designable: designable }}>
+            <SchemaComponent schema={schema} scope={{ useApprovalFormBlockProps }} />
+          </SchemaComponentContext.Provider>
+        </RecordProvider>
+      </CollectionProvider>
     </Card>
   );
+};
+const useApprovalFormBlockProps = () => {
+  const ctx = useFormBlockContext();
+  useEffect(() => {
+    ctx.form.readPretty = true;
+  }, []);
+
+  useEffect(() => {
+    if (!ctx?.service?.loading) {
+      ctx.form?.setInitialValues(ctx.service?.data?.data);
+    }
+  }, [ctx?.service?.loading]);
+  return {
+    form: ctx.form,
+  };
 };

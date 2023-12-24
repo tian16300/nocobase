@@ -20,7 +20,7 @@ export async function submit(context: Context, next) {
     // filter: {
     //   userId: currentUser?.id
     // },
-    appends: ['job', 'node', 'execution','execution.workflow', 'currentApprovalUsers'],
+    appends: ['job', 'node', 'execution','execution.workflow','applyUser','applyUser.directUser','currentApprovalUsers'],
     context,
   });
 
@@ -54,23 +54,29 @@ export async function submit(context: Context, next) {
   if (!assignees.includes(currentUser.id)) {
     return context.throw(403);
   }
-  // const presetValues = processor.getParsedValue(values ?? {}, userJob.nodeId, {
-  //   // @deprecated
-  //   currentUser: currentUser,
-  //   // @deprecated
-  //   currentRecord: values.result.form,
-  //   // @deprecated
-  //   currentTime: new Date(),
-  //   $user: currentUser,
-  //   $nForm: values.result.form,
-  //   $nDate: {
-  //     now: new Date(),
-  //   },
-  // });
+  const presetValues = processor.getParsedValue(values ?? {}, userJob.nodeId, {
+    // @deprecated
+    currentUser: currentUser,
+    // @deprecated
+    currentRecord: values.result.form,
+    // @deprecated
+    currentTime: new Date(),
+    $user: currentUser,
+    $nForm: values.result.form,
+    $nDate: {
+      now: new Date(),
+    },
+  });
   userJob.set({
     status: actionStatus,
     executionId: processor.execution.id
   });
+  userJob.job.set({
+    result:{
+      ...userJob.job.result,
+      user: currentUser
+    }
+  })
   // userJob.job.set({
   //   status: jobStatus,
   //   result: jobStatus > JOB_STATUS.PENDING ? {} : Object.assign(userJob.result ?? {}, values.result),
