@@ -6,7 +6,7 @@ export const ApplyActionInitializer = (props) => {
     title:'提交申请',
     name:'approvalApply',
     'x-action': 'approval_apply:create',
-    'x-designer': 'Apply.Action.Design',
+    'x-designer': 'Action.Designer',
     'x-component': 'Action',
     'x-acl-action-props': {
         skipScopeCheck: true,

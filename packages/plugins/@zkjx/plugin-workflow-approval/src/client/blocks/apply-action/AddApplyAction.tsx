@@ -51,7 +51,6 @@ const schema = {
 export const AddApplyAction = (props) => {
   const { workflow, collection, apply } = useApplyBlockContext();
   const { components, scope } = useSchemaComponentContext();
-  debugger;
   // const ctx = useTableBlockContext();
   const data = useCurrentUserContext();
   const currentUser = data?.data?.data;

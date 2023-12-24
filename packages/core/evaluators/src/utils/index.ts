@@ -40,6 +40,7 @@ function replaceNumberIndex(path: string, scope: Scope): string {
 
 export function evaluate(this: Evaluator, expression: string, scope: Scope = {}) {
   const context = cloneDeep(scope);
+  let hasNull = false;
   const exp = expression.trim().replace(/{{\s*([^{}]+)\s*}}/g, (_, v) => {
     appendArrayColumn(context, v);
 
@@ -62,6 +63,6 @@ export function evaluate(this: Evaluator, expression: string, scope: Scope = {})
 
     return ` ${result} `;
   });
-  return this(exp, context);
+  return  exp.indexOf('null')> -1? null: this(exp, context);
 }
 export { functions };

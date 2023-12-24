@@ -90,6 +90,7 @@ export const ApplyAction = (props) => {
       {formActionType == 1 && <AddApplyAction />}
       {formActionType == 2 && <CancelApplyAction />}
       {formActionType == 3 && <ReAddApplyAction />}
+      {props.children?.[1]}
     </div>
   );
 };
