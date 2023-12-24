@@ -877,7 +877,6 @@ export const Table: any = observer(
               record?.dataFlag !== 'removed'?record?.dataFlag:''
             ].join('');
             }}
-            tableLayout={'auto'}
             scroll={scroll}
             columns={resizableColumns}
             expandable={{
