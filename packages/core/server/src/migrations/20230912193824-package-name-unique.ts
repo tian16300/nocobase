@@ -29,7 +29,7 @@ export default class extends Migration {
         if (['dic-manager', 'company-info', 'prj-manager'].includes(name)) {
           packageName = ['@zkjx/plugin-', name].join('');
         } else {
-          packageName = PluginManager.getPackageName(name);
+          packageName = await PluginManager.getPackageName(name);
         }
         await repository.update({
           filter: {

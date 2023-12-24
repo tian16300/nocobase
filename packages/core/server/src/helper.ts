@@ -1,7 +1,7 @@
 import cors from '@koa/cors';
 import Database from '@nocobase/database';
 import { Resourcer } from '@nocobase/resourcer';
-import { postPerfHooksWrap, prePerfHooksWrap, uid } from '@nocobase/utils';
+import { uid } from '@nocobase/utils';
 import { Command } from 'commander';
 import fs from 'fs';
 import i18next from 'i18next';
