@@ -87,7 +87,7 @@ const bulkEditactionSettings = new SchemaSettings({
       children: [
         {
           name: 'editButton',
-          Component: ActionDesigner,
+          Component: ActionDesigner.ButtonEditor,
           useComponentProps() {
             const { buttonEditorProps } = useSchemaToolbar();
             return buttonEditorProps;

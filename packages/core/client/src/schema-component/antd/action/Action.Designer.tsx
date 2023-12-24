@@ -1,15 +1,15 @@
 import { ArrayTable } from '@formily/antd-v5';
-import { onFieldInputValueChange, onFieldValueChange } from '@formily/core';
+import { Field, onFieldValueChange } from '@formily/core';
 import { ISchema, connect, mapProps, useField, useFieldSchema, useForm, useFormEffects } from '@formily/react';
 import { isValid, uid } from '@formily/shared';
 import { Alert, Tree as AntdTree, ModalProps } from 'antd';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RemoteSelect, treeFormBlockActionOptions, useCompile, useDesignable } from '../..';
+import { RemoteSelect, useCompile, useDesignable } from '../..';
 import { useApp } from '../../../application';
 import { usePlugin } from '../../../application/hooks';
-import { useSchemaToolbar } from '../../../application/schema-toolbar';
 import { SchemaSettingOptions, SchemaSettings } from '../../../application/schema-settings';
+import { useSchemaToolbar } from '../../../application/schema-toolbar';
 import { CollectionOptions, useCollection, useCollectionManager } from '../../../collection-manager';
 import { FlagProvider } from '../../../flag-provider';
 import { SchemaSettingOpenModeSchemaItems } from '../../../schema-items';
@@ -17,21 +17,16 @@ import { useCollectionState } from '../../../schema-settings/DataTemplates/hooks
 import { GeneralSchemaDesigner } from '../../../schema-settings/GeneralSchemaDesigner';
 import {
   SchemaSettingsActionModalItem,
-  SchemaSettingsButtonEditor,
   SchemaSettingsDivider,
   SchemaSettingsItemGroup,
   SchemaSettingsLinkageRules,
   SchemaSettingsModalItem,
   SchemaSettingsRemove,
-  SchemaSettingsSelectItem,
   SchemaSettingsSwitchItem,
 } from '../../../schema-settings/SchemaSettings';
 import { DefaultValueProvider } from '../../../schema-settings/hooks/useIsAllowToSetDefaultValue';
 import { useLinkageAction } from './hooks';
 import { requestSettingsSchema } from './utils';
-import { cloneDeep } from 'lodash';
-import { useRecord } from '../../../record-provider';
-import { useSyncFromForm } from '../../../schema-settings';
 
 const Tree = connect(
   AntdTree,
@@ -65,6 +60,82 @@ const MenuGroup = (props) => {
     <SchemaSettingsItemGroup title={`${t('Customize')} > ${actionTitle}`}>{props.children}</SchemaSettingsItemGroup>
   );
 };
+
+function ButtonEditor(props) {
+  const field = useField();
+  const fieldSchema = useFieldSchema();
+  const { dn } = useDesignable();
+  const { t } = useTranslation();
+  const isLink = props?.isLink || fieldSchema['x-component'] === 'Action.Link';
+
+  return (
+    <SchemaSettingsModalItem
+      title={t('Edit button')}
+      schema={
+        {
+          type: 'object',
+          title: t('Edit button'),
+          properties: {
+            title: {
+              'x-decorator': 'FormItem',
+              'x-component': 'Input',
+              title: t('Button title'),
+              default: fieldSchema.title,
+              'x-component-props': {},
+              // description: `原字段标题：${collectionField?.uiSchema?.title}`,
+            },
+            icon: {
+              'x-decorator': 'FormItem',
+              'x-component': 'IconPicker',
+              title: t('Button icon'),
+              default: fieldSchema?.['x-component-props']?.icon,
+              'x-component-props': {},
+              'x-visible': !isLink,
+              // description: `原字段标题：${collectionField?.uiSchema?.title}`,
+            },
+            type: {
+              'x-decorator': 'FormItem',
+              'x-component': 'Radio.Group',
+              title: t('Button background color'),
+              default: fieldSchema?.['x-component-props']?.danger
+                ? 'danger'
+                : fieldSchema?.['x-component-props']?.type === 'primary'
+                ? 'primary'
+                : 'default',
+              enum: [
+                { value: 'default', label: '{{t("Default")}}' },
+                { value: 'primary', label: '{{t("Highlight")}}' },
+                { value: 'danger', label: '{{t("Danger red")}}' },
+              ],
+              'x-visible': !isLink,
+            },
+          },
+        } as ISchema
+      }
+      onSubmit={({ title, icon, type }) => {
+        fieldSchema.title = title;
+        field.title = title;
+        field.componentProps.icon = icon;
+        field.componentProps.danger = type === 'danger';
+        field.componentProps.type = type;
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props'].icon = icon;
+        fieldSchema['x-component-props'].danger = type === 'danger';
+        fieldSchema['x-component-props'].type = type;
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            title,
+            'x-component-props': {
+              ...fieldSchema['x-component-props'],
+            },
+          },
+        });
+        dn.refresh();
+      }}
+    />
+  );
+}
 
 function SaveMode() {
   const { dn } = useDesignable();
@@ -176,9 +247,6 @@ const getAllkeys = (data, result) => {
   }
   return result;
 };
-
-
-
 
 function AssignedFieldValues() {
   const { dn } = useDesignable();
@@ -564,8 +632,6 @@ function WorkflowConfig() {
   );
 }
 
-
-
 export const actionSettingsItems: SchemaSettingOptions['items'] = [
   {
     name: 'Customize',
@@ -573,7 +639,7 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
     children: [
       {
         name: 'editButton',
-        Component: SchemaSettingsButtonEditor,
+        Component: ButtonEditor,
         useComponentProps() {
           const { buttonEditorProps } = useSchemaToolbar();
           return buttonEditorProps;
@@ -626,6 +692,22 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
             openMode: isPopupAction,
             openSize: isPopupAction,
           };
+        },
+      },
+      {
+        name: 'secondConFirm',
+        Component: SecondConFirm,
+        useVisible() {
+          const fieldSchema = useFieldSchema();
+          const isPopupAction = [
+            'create',
+            'update',
+            'view',
+            'customize:popup',
+            'duplicate',
+            'customize:create',
+          ].includes(fieldSchema['x-action'] || '');
+          return !isPopupAction;
         },
       },
       {
@@ -702,7 +784,42 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
     ],
   },
 ];
+function SecondConFirm() {
+  const { dn } = useDesignable();
+  const fieldSchema = useFieldSchema();
+  const { t } = useTranslation();
+  const field = useField<Field>();
 
+  return (
+    <SchemaSettingsSwitchItem
+      title={t('Second confirmation')}
+      checked={!!fieldSchema?.['x-component-props']?.confirm?.content}
+      onChange={(value) => {
+        if (!fieldSchema['x-component-props']) {
+          fieldSchema['x-component-props'] = {};
+        }
+        if (value) {
+          fieldSchema['x-component-props'].confirm = value
+            ? {
+                title: 'Perform the {{title}}',
+                content: 'Are you sure you want to perform the {{title}} action?',
+              }
+            : {};
+        } else {
+          fieldSchema['x-component-props'].confirm = {};
+        }
+        field.componentProps.confirm = { ...fieldSchema['x-component-props']?.confirm };
+
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            'x-component-props': { ...fieldSchema['x-component-props'] },
+          },
+        });
+      }}
+    />
+  );
+}
 export const actionSettings = new SchemaSettings({
   name: 'ActionSettings',
   items: actionSettingsItems,
@@ -724,7 +841,7 @@ export const ActionDesigner = (props) => {
   const settingsName = `ActionSettings:${fieldSchema['x-action']}`;
   const defaultActionSettings = schemaSettings || 'ActionSettings';
   const hasAction = app.schemaSettingsManager.has(settingsName);
-  const isAddChildAction = fieldSchema['x-component-props']?.addChild;
+
   return (
     <GeneralSchemaDesigner
       schemaSettings={hasAction ? settingsName : defaultActionSettings}
@@ -736,4 +853,5 @@ export const ActionDesigner = (props) => {
   );
 };
 
+ActionDesigner.ButtonEditor = ButtonEditor;
 ActionDesigner.RemoveButton = RemoveButton;
