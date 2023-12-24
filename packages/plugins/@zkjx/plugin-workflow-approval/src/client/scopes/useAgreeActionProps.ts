@@ -1,25 +1,31 @@
 import { JOB_STATUS } from '@nocobase/plugin-workflow/client';
 import { useApprovalContext } from '../page';
-import { useAPIClient } from '@nocobase/client';
+import { useAPIClient, useFormBlockContext } from '@nocobase/client';
 export const useAgreeActionProps = () => {
   const { apply } = useApprovalContext();
-  const value = JOB_STATUS.RESOLVED;
-  const jobId = apply.jobId;
+  const {form} =  useFormBlockContext();
   const api = useAPIClient();
+  const status = '1';
   return {
     async onClick() {
+      const formValues = form.values;
+      formValues.approvalStatus = status;
       api
         .resource('approval_apply')
         .submit({
             filterByTk: apply.id,
             values: {
+              status: status,
               result: {
-                status: '3',
-              },
+                _: apply,
+                form: formValues
+              }
             },
         })
         .then((res) => {
-          console.log(res);
+           /* 刷新界面 */
+           if(res)
+           window.location.reload();
         });
     },
   };

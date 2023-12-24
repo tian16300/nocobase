@@ -381,7 +381,7 @@ export const SchemaSettingsFormItemTemplate = function FormItemTemplate(props) {
       onClick={async () => {
         setVisible(false);
         const { title } = getCollection(collectionName);
-        const gridSchema = findGridSchema(fieldSchema);
+        const gridSchema = findGridSchema(fieldSchema) ;
         const values = await FormDialog(
           t('Save as template'),
           () => {
@@ -415,7 +415,7 @@ export const SchemaSettingsFormItemTemplate = function FormItemTemplate(props) {
           t,
           api,
           refresh: dn.refresh.bind(dn),
-          current: gridSchema.parent,
+          current: gridSchema?.parent || fieldSchema,
         });
         sdn.loadAPIClientEvents();
         const { key } = await saveAsTemplate({
@@ -425,7 +425,10 @@ export const SchemaSettingsFormItemTemplate = function FormItemTemplate(props) {
           name: values.name,
           uid: gridSchema['x-uid'],
         });
-        sdn.removeWithoutEmit(gridSchema);
+        if (gridSchema) {
+          sdn.removeWithoutEmit(gridSchema);
+        }
+      
         sdn.insertAdjacent(insertAdjacentPosition, {
           type: 'void',
           'x-component': 'BlockTemplate',

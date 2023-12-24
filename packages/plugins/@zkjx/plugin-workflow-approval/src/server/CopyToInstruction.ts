@@ -98,6 +98,11 @@ export default class extends Instruction {
   }
 
   async run(node, prevJob, processor: Processor) {
+    // const job = await processor.saveJob({
+    //   status: JOB_STATUS.PENDING,
+    //   nodeId: node.id,
+    //   upstreamId: prevJob?.id ?? null,
+    // });
     /**
      * 查找人
      */
@@ -115,8 +120,11 @@ export default class extends Instruction {
     });
     const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
     const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
+    const dingUsers = users.filter(({ dingUserId }) => {
+      return dingUserId && dingUserId !== '';
+    });
     const data = {
-      userIds: users
+      userIds: dingUsers
         .map(({ dingUserId }) => {
           return dingUserId;
         })
@@ -130,45 +138,20 @@ export default class extends Instruction {
     };
     const dingTalkService = (processor.options.plugin.app.getPlugin('@zkjx/plugin-enterprise-integration') as any)
       .dingTalkService;
-    const message = await dingTalkService.sendMsgToUserByDingAction(data);
-    const job = await processor.saveJob({
-      status: JOB_STATUS.RESOLVED,
+    const message = await dingTalkService.sendMsgToUserByDingAction(data);    
+    return {
+      status: message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED, 
       result: {
-        users,
+        type: 'copyTo',
         relatedData,
-        message,
-      },
-      nodeId: node.id,
-      upstreamId: prevJob?.id ?? null,
-    });
-    return job;
+        users,
+        dingUsers,
+        message
+      }
+    };
   }
 
   async resume(node, job, processor: Processor) {
-    // NOTE: check all users jobs related if all done then continue as parallel
-    // const { assignees = [], mode } = node.config as ManualConfig;
-
-    // const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
-    // const distribution = await UserJobModel.count({
-    //   where: {
-    //     jobId: job.id,
-    //   },
-    //   group: ['status'],
-    //   transaction: processor.transaction,
-    // });
-
-    // const submitted = distribution.reduce(
-    //   (count, item) => (item.status !== JOB_STATUS.PENDING ? count + item.count : count),
-    //   0,
-    // );
-    // const status = job.status || (getMode(mode).getStatus(distribution, assignees) ?? JOB_STATUS.PENDING);
-    // const result = mode ? (submitted || 0) / assignees.length : job.latestUserJob?.result ?? job.result;
-    // processor.logger.debug(`manual resume job and next status: ${status}`);
-    // job.set({
-    //   status,
-    //   result,
-    // });
-
     return job;
   }
 }

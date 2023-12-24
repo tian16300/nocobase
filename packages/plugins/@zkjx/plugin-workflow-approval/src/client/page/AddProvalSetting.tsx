@@ -60,6 +60,7 @@ import { set } from 'packages/core/actions/src/actions';
 import { FlowContext } from '@nocobase/plugin-workflow/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { SettingOutlined } from '@ant-design/icons';
+import { SelectTemplateKey } from './components/SelectTemplateKey';
 const ApprovalSettingContext = createContext<any>({});
 type FormValue = {
   jobInfo: {
@@ -192,8 +193,8 @@ export const AddProvalSetting = (props) => {
           const data = res.data?.data;
           setWorkFlow(data);
           setFlowName(data.title);
-          setCollection(data.bussinessCollectionName);
-          setUiTemplateKey(data?.uiTemplateKey);
+          // setCollection(data.bussinessCollectionName);
+          // setUiTemplateKey(data?.uiTemplateKey);
         });
     }
   }, [searchParams.get('id')]);
@@ -275,69 +276,62 @@ export const AddProvalSetting = (props) => {
       const res = await handleSave();
       if (res) {
         setWorkFlow(res);
-      }
-      if (!uiTemplateKey) {
-        setInitialSchema(createSchema(res.bussinessCollectionName));
-      }
-      setTimeout(() => {
         next();
-      }, 1000);
+      }
+      // if (!uiTemplateKey) {
+      //   setInitialSchema(createSchema(res.bussinessCollectionName));
+      // }
     } else if (current == 1) {
       if (workflow?.id) {
         /* 保存区块模板 */
 
-        if (!uiTemplateKey) {
-          const uiSchemaJson = initialSchema;
-          api
-            .resource('uiSchemas')
-            .create({
-              values: uiSchemaJson,
-            })
-            .then((res) => {
-              /* 保存 uitemplateKey */
-              // api.resource('uiSchemas')
-              api
-                .resource('uiSchemaTemplates')
-                .create({
-                  values: {
-                    name: flowName + '_' + '显示设置',
-                    uid: res.data.data['x-uid'],
-                    resourceName: collection,
-                    collectionName: collection,
-                    componentName: 'ReadPrettyFormItem',
-                  },
-                })
-                .then((res) => {
-                  const uiTemplate = res.data.data;
-                  setUiTemplateKey(uiTemplate.key);
-                  api
-                    .resource('workflows')
-                    .update({
-                      filterByTk: workflow.id,
-                      updateAssociationValues: ['uiTemplate'],
-                      values: {
-                        uiTemplateKey: uiTemplate.key,
-                        uiTemplate: uiTemplate,
-                      },
-                    })
-                    .then((res) => {
-                      // setWorkFlow({
-                      //   ...workflow,
-                      //   uiTemplateKey: uiTemplate.key
-                      // });
-                    });
-                });
-            });
-        }
+        // if (!uiTemplateKey) {
+        //   const uiSchemaJson = initialSchema;
+        //   api
+        //     .resource('uiSchemas')
+        //     .create({
+        //       values: uiSchemaJson,
+        //     })
+        //     .then((res) => {
+        //       /* 保存 uitemplateKey */
+        //       // api.resource('uiSchemas')
+        //       api
+        //         .resource('uiSchemaTemplates')
+        //         .create({
+        //           values: {
+        //             name: flowName + '_' + '显示设置',
+        //             uid: res.data.data['x-uid'],
+        //             resourceName: collection,
+        //             collectionName: collection,
+        //             componentName: 'ReadPrettyFormItem',
+        //           },
+        //         })
+        //         .then((res) => {
+        //           const uiTemplate = res.data.data;
+        //           setUiTemplateKey(uiTemplate.key);
+        //           api
+        //             .resource('workflows')
+        //             .update({
+        //               filterByTk: workflow.id,
+        //               updateAssociationValues: ['uiTemplate'],
+        //               values: {
+        //                 uiTemplateKey: uiTemplate.key,
+        //                 uiTemplate: uiTemplate,
+        //               },
+        //             })
+        //             .then((res) => {
+        //               // setWorkFlow({
+        //               //   ...workflow,
+        //               //   uiTemplateKey: uiTemplate.key
+        //               // });
+        //             });
+        //         });
+        //     });
+        // }
         next();
       }
     }
   };
-  // useEffect(() => {
-  //   if (collection) {
-  //     setInitialSchema(createSchema(collection));
-  //   }
-  // }, [collection]);
   return (
     <div
       style={{
@@ -454,7 +448,7 @@ export const AddProvalSetting = (props) => {
               <Divider></Divider>
               <div className={css``}>
                 {current == 0 && <SelectDataModel />}
-                {current == 1 && workflow?.id && <DesignSchemaView />}
+                {current == 1 && workflow?.id && <SelectTemplateKey collection={collection || workflow.bussinessCollectionName} />}
                 {current == 2 && workflow?.id && <FlowCanvas />}
               </div>
             </Card>

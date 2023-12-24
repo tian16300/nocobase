@@ -2,7 +2,7 @@ import { useAPIClient, useBlockRequestContext, useRecord } from '@nocobase/clien
 import { message } from 'antd';
 export const sendMsgToUserByDing = () => {
   const api = useAPIClient();
-  const { service } = useBlockRequestContext();
+  // const { service } = useBlockRequestContext();
   const { dingUserId } = useRecord();
   return {
     confirm: {

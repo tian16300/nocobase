@@ -20,7 +20,7 @@ export async function submit(context: Context, next) {
     // filter: {
     //   userId: currentUser?.id
     // },
-    appends: ['job', 'node', 'execution', 'workflow', 'currentApprovalUsers'],
+    appends: ['job', 'node', 'execution','execution.workflow', 'currentApprovalUsers'],
     context,
   });
 
@@ -30,14 +30,15 @@ export async function submit(context: Context, next) {
 
   // const { forms = {} } = userJob.node.config;
   // const [formKey] = Object.keys(values.result ?? {}).filter((key) => key !== '_');
-  const actionStatus = values.result?.status;
-
+  const actionStatus = values.status;
+  const [formKey] = Object.keys(values.result ?? {}).filter((key) => key !== '_');
+  const actionKey = values.result?._;
   // const actionItem = forms[formKey]?.actions?.find((item) => item.key === actionKey);
   // NOTE: validate status
   if (
     userJob.job.status !== JOB_STATUS.PENDING ||
     userJob.execution.status !== EXECUTION_STATUS.STARTED ||
-    !userJob.workflow.enabled ||
+    !userJob.execution.workflow.enabled ||
     !actionStatus
   ) {
     return context.throw(400);
@@ -53,47 +54,73 @@ export async function submit(context: Context, next) {
   if (!assignees.includes(currentUser.id)) {
     return context.throw(403);
   }
-  // const presetValues = processor.getParsedValue(actionItem.values ?? {}, userJob.nodeId, {
+  // const presetValues = processor.getParsedValue(values ?? {}, userJob.nodeId, {
   //   // @deprecated
   //   currentUser: currentUser,
   //   // @deprecated
-  //   currentRecord: {},
+  //   currentRecord: values.result.form,
   //   // @deprecated
   //   currentTime: new Date(),
   //   $user: currentUser,
-  //   $nForm: {},
+  //   $nForm: values.result.form,
   //   $nDate: {
   //     now: new Date(),
   //   },
   // });
-
   userJob.set({
     status: actionStatus,
-    result: actionStatus > JOB_STATUS.PENDING ? {} : Object.assign(userJob.result ?? {}, values.result),
+    executionId: processor.execution.id
   });
+  // userJob.job.set({
+  //   status: jobStatus,
+  //   result: jobStatus > JOB_STATUS.PENDING ? {} : Object.assign(userJob.result ?? {}, values.result),
+  // });
+  // const { forms = {} } = userJob.node.config;
+  /**
+   * {
+   *   type:'create',
+   *   collection:'approve_results',
+   * }
+   */
+  const form = {
+     type:'create',
+     collection:'approval_results',
 
-  // const handler = instruction.formTypes.get(forms[formKey].type);
-  // if (handler && userJob.status) {
-  //   await handler.call(instruction, userJob, forms[formKey], processor);
+  };
+  const handler = instruction.formTypes.get(form.type);
+  let result = null;
+  if (handler && userJob.status) {
+    result = await handler.call(instruction, {
+      ...values,
+      currentUser
+    }, form, processor);
+  }
+  // const nodes = await context.app.db.getRepository('flow_nodes').find({
+  //   filter: {
+  //     workflowId: userJob?.workflowId,
+  //     type: 'approval',
+  //   }
+  // });
+  // const isLastApprovalNode = nodes[nodes.length - 1].id === userJob.nodeId;
+  // /* 审批完成 */
+  // if(result && isLastApprovalNode){
+  //   userJob.set('jobIsEnd', true);
   // }
 
-  // await userJob.save({ transaction: processor.transaction });
+  // await userJob.job.save({ transaction: processor.transaction });
+  await userJob.save({ transaction: processor.transaction });
 
-  // await processor.exit();
+  await processor.exit();
 
   context.body = userJob;
-  context.status = 200;
+  context.status = 202;
 
   await next();
+  // userJob.job.status = jobStatus;
+  userJob.job.execution = userJob.execution;
+  userJob.job.latestUserJobResult = result;
 
-  // userJob.job.execution = userJob.execution;
-  // userJob.job.latestUserJob = userJob;
-
-  // NOTE: resume the process and no `await` for quick returning
-  // processor.logger.info(
-  //   `approval node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`,
-  // );
-
+  processor.logger.info(`manual node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`);
   plugin.resume(userJob.job);
 }
 

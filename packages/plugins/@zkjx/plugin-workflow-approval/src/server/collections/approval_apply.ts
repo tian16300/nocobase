@@ -293,23 +293,29 @@ export default {
       defaultValue: '0',
     },
     {
+      name: 'workflowKey',
+      type: 'string',
+      isForeignKey: true,
+      interface: 'input'
+    },
+    {
       name: 'workflow',
       type: 'belongsTo',
       interface: 'obo',
-      foreignKey: 'workflowId',
+      foreignKey: 'workflowKey',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
           multiple: false,
           fieldNames: {
             label: 'title',
-            value: 'id',
+            value: 'key',
           }
         },
         title: '关联流程',
       },
       target: 'workflows',
-      targetKey: 'id',
+      targetKey: 'key',
     },
     {
       name: 'job',
@@ -323,13 +329,13 @@ export default {
           fieldNames: {
             label: 'id',
             value: 'id',
-          }
+          },
         },
         title: '任务',
       },
       target: 'jobs',
       targetKey: 'id',
-    },   
+    },
     {
       name: 'node',
       type: 'belongsTo',
@@ -342,7 +348,7 @@ export default {
           fieldNames: {
             label: 'title',
             value: 'id',
-          }
+          },
         },
         title: '节点',
       },
@@ -361,7 +367,7 @@ export default {
           fieldNames: {
             label: 'id',
             value: 'id',
-          }
+          },
         },
         title: '日志',
       },
@@ -431,6 +437,22 @@ export default {
         type: 'boolean',
         title: '审批完成',
       },
+    },
+    {
+      uiSchema: {
+        'x-component': 'Input.JSON',
+        type: 'object',
+        'x-component-props': {
+          autoSize: {
+            minRows: 5,
+          },
+        },
+        default: null,
+        title: '实例结果',
+      },
+      name: 'result',
+      type: 'json',
+      interface: 'json',
     },
   ],
   logging: true,

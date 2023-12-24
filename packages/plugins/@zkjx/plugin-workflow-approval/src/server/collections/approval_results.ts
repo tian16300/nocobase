@@ -178,6 +178,41 @@ export default {
         title: '审批备注',
       },
     },
+    {
+      type: 'belongsTo',
+      name: 'execution',
+      interface: 'obo',
+      foreignKey: 'executionId',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '日志',
+      },
+      target: 'executions',
+      targetKey: 'id',
+    },
+    {
+      uiSchema: {
+        'x-component': 'Input.JSON',
+        type: 'object',
+        'x-component-props': {
+          autoSize: {
+            minRows: 5,
+          },
+        },
+        default: null,
+        title: '实例结果',
+      },
+      name: 'result',
+      type: 'json',
+      interface: 'json',
+    }
   ],
   logging: true,
   autoGenId: true,

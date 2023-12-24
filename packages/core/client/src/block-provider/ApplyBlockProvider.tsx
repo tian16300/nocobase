@@ -14,7 +14,8 @@ export const ApplyBlockProvider = (props) => {
       action: 'get',
       resource: 'approval_apply',
       params: {
-        filterByTk: currentApproval_id,
+        filterByTk: currentApproval_id,        
+        appends: ['execution']
       },
     });
     apply = data?.data;

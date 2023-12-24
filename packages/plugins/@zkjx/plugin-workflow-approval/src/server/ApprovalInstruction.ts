@@ -1,5 +1,7 @@
 import WorkflowPlugin, { Processor, JOB_STATUS, Instruction } from '@nocobase/plugin-workflow';
 import axios from 'axios';
+import initFormTypes, { FormHandler } from './forms';
+import { Registry } from '@nocobase/utils';
 export async function request(config) {
   // default headers
   const { url, method = 'POST', data, timeout = 5000 } = config;
@@ -121,8 +123,10 @@ function getMode(mode) {
  * 功能逻辑  查找 审批人, 新增或保存审批表单 审批记录
  */
 export default class extends Instruction {
+  formTypes = new Registry<FormHandler>();
   constructor(public plugin: WorkflowPlugin) {
     super(plugin);
+    initFormTypes(this);
   }
 
   async run(node, prevJob, processor: Processor) {
@@ -140,31 +144,46 @@ export default class extends Instruction {
       filterByTk: related_data_id,
       transaction,
     });
-    const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
-    const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
-    const data = {
-      userIds: users
-        .map(({ dingUserId }) => {
-          return dingUserId;
-        })
-        .join(','),
-      msg: {
-        msgtype: 'text',
-        text: {
-          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${!approvalModel.isNewRecord?statusText:''},请到我的审批查看。`,
+    const statusField = processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
+    const statusText = statusField.options.uiSchema.enum.find(({ value }) => {
+      return value == approvalModel.status;
+    }).label;
+    const dingUsers = users.filter(({ dingUserId }) => {
+      return dingUserId && dingUserId !== '';
+    });
+    let message = null;
+    /* 发送消息 */
+    if (dingUsers.length) {
+      const data = {
+        userIds: dingUsers
+          .map(({ dingUserId }) => {
+            return dingUserId;
+          })
+          .join(','),
+        msg: {
+          msgtype: 'text',
+          text: {
+            content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${
+              !approvalModel.isNewRecord ? statusText : ''
+            },请到我的审批查看。`,
+          },
         },
-      },
-    };
- 
+      };
 
-    const dingTalkService = (processor.options.plugin.app.getPlugin('@zkjx/plugin-enterprise-integration') as any)
-      .dingTalkService;
-    const message = await dingTalkService.sendMsgToUserByDingAction(data);
+      const dingTalkService = (processor.options.plugin.app.getPlugin('@zkjx/plugin-enterprise-integration') as any)
+        .dingTalkService;
+      message = await dingTalkService.sendMsgToUserByDingAction(data);
+    }
+
+    /**
+     * 创建审批记录 approve_results
+     */
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
       result: {
-        users,
         relatedData,
+        users,
+        dingUsers,
         message,
       },
       nodeId: node.id,
@@ -175,14 +194,14 @@ export default class extends Instruction {
      */
     const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
       filterByTk: approvalModel.id,
-      values:{
+      values: {
         jobId: job.id,
         nodeId: node.id,
         executionId: job.executionId,
-        workflowId: node.workflowId,
-        currentApprovalUsers: users
+        workflowKey: workflowModel.key,
+        currentApprovalUsers: users,
       },
-      transaction
+      transaction,
     });
     processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`, upRes);
 
@@ -191,37 +210,22 @@ export default class extends Instruction {
 
   /**
    * TODO 设置当前审批状态
-   * @param node 
-   * @param job 
-   * @param processor 
-   * @returns 
+   * @param node
+   * @param job
+   * @param processor
+   * @returns
    */
   async resume(node, job, processor: Processor) {
-    // NOTE: check all users jobs related if all done then continue as parallel
-    const { assignees = [], mode } = node.config as ManualConfig;
-
-    const UserJobModel = processor.options.plugin.db.getModel('apply_results');
-    const distribution = await UserJobModel.count({
-      where: {
-        jobId: job.id,
-      },
-      group: ['status'],
-      transaction: processor.transaction,
-    });
-    const users = await processor.getUsersByRule(node.config, node.id);
-
-    const submitted = distribution.reduce(
-      (count, item) => (item.status !== JOB_STATUS.PENDING ? count + item.count : count),
-      0,
-    );
-    const status = job.status || (getMode(mode).getStatus(distribution, assignees) ?? JOB_STATUS.PENDING);
-    const result = mode ? (submitted || 0) / assignees.length : job.latestUserJob?.result ?? job.result;
-    processor.logger.debug(`manual resume job and next status: ${status}`);
-    job.set({
-      status,
-      result,
-    });
-
+    /**
+     * 当前节点是否通过
+     */
+    const isResolved = job.latestUserJobResult?.approvalStatus == '1';
+    job.set('result',{      
+      type:'approval',
+      ...job.result,
+      approvalResult: job.latestUserJobResult
+    })
+    job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
     return job;
   }
 }

@@ -14,6 +14,7 @@ export const WorkflowBlockProvider = (props) => {
         type: 'collection',
         isApproval: true,
         current: true,
+        enabled: true
       },
       pagination: false,
     },

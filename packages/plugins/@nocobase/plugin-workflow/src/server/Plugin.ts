@@ -432,15 +432,15 @@ export default class WorkflowPlugin extends Plugin {
     const processor = this.createProcessor(execution);
 
     this.getLogger(execution.workflowId).info(`execution (${execution.id}) ${job ? 'resuming' : 'starting'}...`);
-
+    await (job ? processor.resume(job) : processor.start());
+    this.getLogger(execution.workflowId).info(
+      `execution (${execution.id}) finished with status: ${execution.status}`,
+    );
+    if (execution.status && execution.workflow.options?.deleteExecutionOnStatus?.includes(execution.status)) {
+      await execution.destroy();
+    }
     try {
-      await (job ? processor.resume(job) : processor.start());
-      this.getLogger(execution.workflowId).info(
-        `execution (${execution.id}) finished with status: ${execution.status}`,
-      );
-      if (execution.status && execution.workflow.options?.deleteExecutionOnStatus?.includes(execution.status)) {
-        await execution.destroy();
-      }
+    
     } catch (err) {
       this.getLogger(execution.workflowId).error(`execution (${execution.id}) error: ${err.message}`, err);
     }

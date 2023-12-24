@@ -12,7 +12,7 @@ import {
 import { Button, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { AddApplyAction } from './AddApplyAction';
-const actionDesignerCss = css`
+export const actionDesignerCss = css`
   position: relative;
   &:hover {
     .general-schema-designer {

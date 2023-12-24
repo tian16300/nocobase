@@ -108,12 +108,12 @@ export const AddApplyAction = (props) => {
                   initialValues: {
                     relatedCollection: collection.name,
                     related_data_id: record.id,
-                    applyTitle:currentUser.nickname+'发起的'+workflow.title+'申请',
+                    applyTitle:currentUser.nickname+'发起的'+workflow?.title+'申请',
                     applyUser_id:currentUser.id,
                     applyUser_deptId:currentUser.userId,
                     applyTime:dayjs().toISOString(),
                     status: '0',
-                    workflowId: workflow.id
+                    workflowKey: workflow?.key
                   },
                 });
               }, 300);
