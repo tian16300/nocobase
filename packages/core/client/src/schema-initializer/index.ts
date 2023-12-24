@@ -54,6 +54,7 @@ import {
   readPrettyFormItemInitializers,
   detailsActionInitializers,
   readPrettyFormActionInitializers,
+  GroupTableGroupRecordActionInitializers,
 } from './buttons';
 
 export class SchemaInitializerPlugin extends Plugin {
@@ -84,7 +85,6 @@ export class SchemaInitializerPlugin extends Plugin {
     this.app.schemaInitializerManager.add(filterFormItemInitializers);
     this.app.schemaInitializerManager.add(gridCardActionInitializers);
     this.app.schemaInitializerManager.add(gridCardItemActionInitializers);
-
     this.app.schemaInitializerManager.add(listActionInitializers);
     this.app.schemaInitializerManager.add(listItemActionInitializers);
     this.app.schemaInitializerManager.add(recordBlockInitializers);
@@ -94,6 +94,7 @@ export class SchemaInitializerPlugin extends Plugin {
     this.app.schemaInitializerManager.add(tabPaneInitializers);
     this.app.schemaInitializerManager.add(tabPaneInitializersForRecordBlock);
     this.app.schemaInitializerManager.add(tabPaneInitializersForBulkEditFormBlock);
+    this.app.schemaInitializerManager.add(GroupTableGroupRecordActionInitializers);
   }
 }
 

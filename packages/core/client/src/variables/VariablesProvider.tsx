@@ -89,7 +89,7 @@ const VariablesProvider = ({ children }) => {
                 const result = api
                   .request({
                     url,
-                    params,
+                    // params,
                   })
                   .then((data) => {
                     clearRequested(url);
@@ -111,7 +111,7 @@ const VariablesProvider = ({ children }) => {
           } else {
             const waitForData = api.request({
               url,
-              params,
+              // params,
             });
             stashRequested(url, waitForData);
             data = await waitForData;

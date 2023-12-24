@@ -63,11 +63,11 @@ export class PluginPrjManagerClient extends Plugin {
   }
   addSchemaInitializers(){
     const blockInitializers = this.app.schemaInitializerManager.get('BlockInitializers');    
-    blockInitializers?.add('dataBlocks.dataItemSelectBlock', {
-      icon: 'CheckSquareOutlined',
-      title: '下拉列表',
-      Component: 'DataItemSelect.initializer'
-    });
+    // blockInitializers?.add('dataBlocks.dataItemSelectBlock', {
+    //   icon: 'CheckSquareOutlined',
+    //   title: '下拉列表',
+    //   Component: 'DataItemSelect.initializer'
+    // });
     blockInitializers?.add('otherBlocks.dataSelectBlock', {
       icon: 'CheckSquareOutlined',
       title: '项目详情',

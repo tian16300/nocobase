@@ -128,5 +128,5 @@ export const tableActionInitializers = new SchemaInitializer({
         return !['view', 'sql'].includes(collection.template) || collection?.writableView;
       },
     },
-  ],
+  ] as any
 });

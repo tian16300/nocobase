@@ -17,21 +17,21 @@ export const blockInitializers = new SchemaInitializer({
           title: '{{t("Table")}}',
           Component: 'TableBlockInitializer',
         },
-        {
-          name: 'groupTable',
-          title: '{{t("Group Table")}}',
-          Component: 'GroupTable.Initializer'
-        },
+        // {
+        //   name: 'groupTable',
+        //   title: '分组表格',
+        //   Component: 'GroupTable.Initializer'
+        // },
         {
           name: 'form',
           title: '{{t("Form")}}',
           Component: 'FormBlockInitializer',
         },
-        {
-          name: 'treeForm',
-          title: '{{t("Tree Form")}}',
-          Component: 'TreeForm.Initializer',
-        },
+        // {
+        //   name: 'treeForm',
+        //   title: '树表格',
+        //   Component: 'TreeForm.Initializer',
+        // },
         {
           name: 'details',
           title: '{{t("Details")}}',
