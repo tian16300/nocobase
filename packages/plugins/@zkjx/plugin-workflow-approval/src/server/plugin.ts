@@ -6,7 +6,7 @@ import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
 // import jobsCollection from './collections/jobs';
 // import usersCollection from './collections/users';
 // import usersJobsCollection from './collections/users_jobs';
-import { submit } from './actions';
+import { getNodeUsers, submit } from './actions';
 
 import ApprovalInstruction from './ApprovalInstruction';
 import CopyToInstruction from './CopyToInstruction';
@@ -61,7 +61,6 @@ export default class extends Plugin {
       await repo.db2cm('approval_results');
     }
 
-  
     const workflowPlugin = this.app.getPlugin('workflow') as WorkflowPlugin;
     this.workflow = workflowPlugin;
     workflowPlugin.instructions.register('approval', new ApprovalInstruction(workflowPlugin));
@@ -69,6 +68,10 @@ export default class extends Plugin {
     this.app.resourcer.registerActionHandler(
       'approval_apply:submit',
       submit
+    );
+    this.app.resourcer.registerActionHandler(
+      'approval_apply:getNodeUsers',
+      getNodeUsers
     );
   }
   async install(options?: InstallOptions): Promise<void> {

@@ -1,9 +1,5 @@
-import { Registry } from '@nocobase/utils';
 import WorkflowPlugin, { Processor, JOB_STATUS, Instruction } from '@nocobase/plugin-workflow';
-
-import initFormTypes, { FormHandler } from './forms';
 import axios from 'axios';
-import statusTexts from './statusTexts';
 export async function request(config) {
   // default headers
   const { url, method = 'POST', data, timeout = 5000 } = config;
@@ -144,7 +140,8 @@ export default class extends Instruction {
       filterByTk: related_data_id,
       transaction,
     });
-    const statusText = statusTexts.find(({value})=>{return value == approvalModel.status}).label;
+    const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
+    const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
     const data = {
       userIds: users
         .map(({ dingUserId }) => {
@@ -154,7 +151,7 @@ export default class extends Instruction {
       msg: {
         msgtype: 'text',
         text: {
-          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请 ${!approvalModel.isNewRecord?statusText:''},请到我的审批查看。`,
+          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${!approvalModel.isNewRecord?statusText:''},请到我的审批查看。`,
         },
       },
     };
@@ -187,16 +184,23 @@ export default class extends Instruction {
       },
       transaction
     });
-    processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`);
+    processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`, upRes);
 
     return job;
   }
 
+  /**
+   * TODO 设置当前审批状态
+   * @param node 
+   * @param job 
+   * @param processor 
+   * @returns 
+   */
   async resume(node, job, processor: Processor) {
     // NOTE: check all users jobs related if all done then continue as parallel
     const { assignees = [], mode } = node.config as ManualConfig;
 
-    const UserJobModel = processor.options.plugin.db.getModel('users_jobs');
+    const UserJobModel = processor.options.plugin.db.getModel('apply_results');
     const distribution = await UserJobModel.count({
       where: {
         jobId: job.id,
@@ -204,6 +208,7 @@ export default class extends Instruction {
       group: ['status'],
       transaction: processor.transaction,
     });
+    const users = await processor.getUsersByRule(node.config, node.id);
 
     const submitted = distribution.reduce(
       (count, item) => (item.status !== JOB_STATUS.PENDING ? count + item.count : count),

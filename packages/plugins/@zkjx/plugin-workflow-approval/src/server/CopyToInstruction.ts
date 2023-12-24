@@ -1,9 +1,4 @@
-import { Registry } from '@nocobase/utils';
 import WorkflowPlugin, { Processor, JOB_STATUS, Instruction } from '@nocobase/plugin-workflow';
-
-import initFormTypes, { FormHandler } from './forms';
-import statusTexts from './statusTexts';
-
 type FormType = {
   type: 'custom' | 'create' | 'update';
   actions: number[];
@@ -118,8 +113,8 @@ export default class extends Instruction {
       filterByTk: related_data_id,
       transaction,
     });
-  
-  const statusText = statusTexts.find(({value})=>{return value == approvalModel.status}).label;
+    const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
+    const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
     const data = {
       userIds: users
         .map(({ dingUserId }) => {
@@ -129,7 +124,7 @@ export default class extends Instruction {
       msg:{
         msgtype: 'text',
         text: {
-          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请 ${statusText},请知悉!`,
+          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${statusText},请知悉!`,
         },
       }
     };

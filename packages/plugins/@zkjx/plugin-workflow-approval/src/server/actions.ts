@@ -38,7 +38,7 @@ export async function submit(context: Context, next) {
     userJob.job.status !== JOB_STATUS.PENDING ||
     userJob.execution.status !== EXECUTION_STATUS.STARTED ||
     !userJob.workflow.enabled ||
-    !actionStatus 
+    !actionStatus
   ) {
     return context.throw(400);
   }
@@ -69,10 +69,7 @@ export async function submit(context: Context, next) {
 
   userJob.set({
     status: actionStatus,
-    result:
-    actionStatus > JOB_STATUS.PENDING
-        ? {}
-        : Object.assign(userJob.result ?? {}, values.result),
+    result: actionStatus > JOB_STATUS.PENDING ? {} : Object.assign(userJob.result ?? {}, values.result),
   });
 
   // const handler = instruction.formTypes.get(forms[formKey].type);
@@ -80,20 +77,64 @@ export async function submit(context: Context, next) {
   //   await handler.call(instruction, userJob, forms[formKey], processor);
   // }
 
-  await userJob.save({ transaction: processor.transaction });
+  // await userJob.save({ transaction: processor.transaction });
 
-  await processor.exit();
+  // await processor.exit();
 
   context.body = userJob;
-  context.status = 202;
+  context.status = 200;
 
   await next();
 
-  userJob.job.execution = userJob.execution;
-  userJob.job.latestUserJob = userJob;
+  // userJob.job.execution = userJob.execution;
+  // userJob.job.latestUserJob = userJob;
 
   // NOTE: resume the process and no `await` for quick returning
-  processor.logger.info(`approval node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`);
+  // processor.logger.info(
+  //   `approval node (${userJob.nodeId}) action trigger execution (${userJob.execution.id}) to resume`,
+  // );
 
   plugin.resume(userJob.job);
+}
+
+/**
+ *
+ * @param context applyUser 申请人 nodeId 节点id
+ * @param next
+ */
+export async function getNodeUsers(context: Context, next) {
+  const { filterByTk, values } = context.action.params;
+  const {  nodeId } = values;
+  const apply = await context.app.db.getRepository('approval_apply').findOne({
+    filterByTk: filterByTk,
+    appends:['applyUser', 'applyUser.directUser']
+  });
+  const node = await context.app.db.getRepository('flow_nodes').findOne({
+    filterByTk: nodeId,
+  });
+  const {rule,assignees,assigneeRoles} = node.config;
+  const repository = context.app.db.getRepository('users');
+  if (rule == '1') {
+    context.body =  await repository.find({ 
+      filter:{
+          id:{
+            $in:assignees
+          }
+      } });
+  } else if (rule == '3') {
+    const [users]  = await repository.findAndCount({ 
+      filter:{
+        dept:{
+          id:{
+            $in:assigneeRoles
+          }
+        }
+      } });
+
+      context.body = users;
+  } else if (rule == '2') {
+    context.body = [apply.applyUser.directUser];
+  }
+  context.status = 200;
+  await next();
 }

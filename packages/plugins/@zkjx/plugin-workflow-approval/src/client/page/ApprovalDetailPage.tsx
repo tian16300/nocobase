@@ -5,22 +5,25 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import useStyles from './style';
 import { DingdingOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProForm, FooterToolbar } from '@ant-design/pro-components';
-import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin } from 'antd';
+import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin, Tag, Space } from 'antd';
 import {
+  APIClientProvider,
   CollectionProvider,
   DefaultValueProvider,
   FormActiveFieldsProvider,
   FormProvider,
   RecordProvider,
   RemoteSchemaComponent,
+  RemoteSelect,
   SchemaComponent,
   VariableScopeProvider,
   createDetailsBlockSchema,
+  css,
   useAPIClient,
   useRequest,
   useSchemaComponentContext,
 } from '@nocobase/client';
-import { dayjs } from '@nocobase/utils';
+import { dayjs, uid } from '@nocobase/utils';
 import { createDetailSchema } from './schema/detailSchema';
 import { createApproveSchema } from './schema/approveSchema';
 
@@ -165,11 +168,7 @@ const View = (props: any) => {
                 </Card>
               </Col>
               <Col span={24}>
-              <SchemaComponent
-              schema={createApproveSchema()}
-              components={components}
-              scope={scope}
-            />
+                <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
               </Col>
             </Row>
           </>
@@ -182,9 +181,8 @@ const View = (props: any) => {
 const ApprovalFlowSteps = () => {
   const { apply } = useApprovalContext();
   const [nodes, setNodes] = useState<any[]>([]);
-  const currentIndex = useMemo(() => {
-    return apply?.currentIndex || 0;
-  }, [apply]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const api = useAPIClient();
   useEffect(() => {
     if (apply?.workflowId)
@@ -197,34 +195,40 @@ const ApprovalFlowSteps = () => {
           },
         })
         .then((res) => {
-          setNodes(res.data?.data);
+          const nodes = res.data?.data;
+          const _currentIndex = nodes.findIndex((node) => node.id === apply.nodeId);
+          setCurrentIndex(_currentIndex + 1);
+          setNodes(nodes);
         });
   }, [apply?.workflowId]);
   const stepItems = useMemo(() => {
     const applyUser = {
       title: '提交申请',
       description: (
-        <>
-          <div>{apply?.applyUser?.nickname}</div>
-          <div>{dayjs(apply.createdAt).format('YYYY-MM-DD HH:mm:ss')}</div>
-        </>
+        <div
+          className={css`
+            margin-top: 6px;
+          `}
+        >
+          <Space direction="vertical" size={'small'}>
+            <div>
+              <Tag color="default">{apply?.applyUser?.nickname}</Tag>
+            </div>
+            <div>
+              <small>{dayjs(apply.createdAt).format('YYYY-MM-DD HH:mm:ss')}</small>
+            </div>
+          </Space>
+        </div>
       ),
     };
     return [
       applyUser,
       ...nodes.map((node) => {
-       
-
         return {
           title: node.title,
           description: (
             <>
-              <div>
-                周毛毛 <DingdingOutlined style={{ color: '#007fff' }} />
-              </div>
-              <div>
-                <a>催一下</a>
-              </div>
+              <ApprovalNodeUsers apply={apply}></ApprovalNodeUsers>
             </>
           ),
         };
@@ -234,7 +238,71 @@ const ApprovalFlowSteps = () => {
       },
     ];
   }, [nodes]);
-  return <Steps size="small" progressDot current={currentIndex} items={stepItems} />;
+  return <Steps size="small" current={currentIndex} progressDot labelPlacement="vertical" items={stepItems} />;
+};
+
+const ApprovalNodeUsers = ({ apply }) => {
+  const { data } = useRequest<any>({
+    resource: 'approval_apply',
+    action: 'getNodeUsers',
+    params: {
+      filterByTk: apply?.id,
+      values: {
+        nodeId: apply?.nodeId,
+        executionId: apply?.executionId,
+      },
+    },
+  });
+
+  const schema = {
+    type: 'object',
+    properties: {
+      users: {
+        type: 'array',
+        'x-component': 'RemoteSelect',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'nickname',
+            value: 'id',
+          },
+          service: {
+            resource: 'users',
+            action: 'list',
+          },
+          style: {
+            width: '100%',
+          },
+        },
+        'x-read-pretty': true,
+      },
+    },
+  };
+  const form = useMemo(() => {
+    return createForm({
+      // initialValues: value,
+      // values: value,
+    });
+  }, []);
+  return (
+    <div
+          className={css`
+            margin-top: 6px;
+          `}
+        >
+    <Space direction="vertical" size={'small'}>
+      <div>
+        {data?.data.map(({ nickname }) => {
+          return <Tag color="default">{nickname}</Tag>;
+        })}
+      </div>
+      <div>
+        <DingdingOutlined style={{ color: '#007fff' }} />
+        <a>催一下</a>
+      </div>
+      </Space>
+      </div>
+  );
 };
 
 const ApprovalFlowNodeDetail = () => {
