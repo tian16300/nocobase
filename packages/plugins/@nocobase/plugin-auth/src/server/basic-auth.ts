@@ -35,11 +35,13 @@ export class BasicAuth extends BaseAuth {
     if (!user) {
       ctx.throw(401, ctx.t('The username or email is incorrect, please re-enter', { ns: namespace }));
     }
-
     const field = this.userCollection.getField<PasswordField>('password');
     const valid = await field.verify(password, user.password);
     if (!valid) {
       ctx.throw(401, ctx.t('The password is incorrect, please re-enter', { ns: namespace }));
+    }
+    if (!user.enabled) {
+      ctx.throw(403, ctx.t('账号已禁用', { ns: namespace }));
     }
     return user;
   }
