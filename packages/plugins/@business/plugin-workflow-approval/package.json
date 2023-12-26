@@ -1,0 +1,15 @@
+{
+  "name": "@business/plugin-workflow-approval",
+  "version": "0.18.0-alpha.1",
+  "main": "dist/server/index.js",
+  "private": true,  
+  "displayName": "Approval",
+  "displayName.zh-CN": "审批流",
+  "description": "Provide plugin workflow approval",
+  "description.zh-CN": "提供工作流扩展审批流",
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}

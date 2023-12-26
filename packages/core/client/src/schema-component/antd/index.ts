@@ -5,7 +5,6 @@ export * from './association-field';
 export * from './association-select';
 export * from './auto-complete';
 export * from './block-item';
-export * from './calendar';
 export * from './card-item';
 export * from './cascader';
 export * from './checkbox';
@@ -60,4 +59,6 @@ export * from './approval-timeline';
 export * from './tree-form';
 export * from './data-block-selector';
 import 'react-reflex/styles.css';
+export { genStyleHook } from './__builtins__';
+
 import './index.less';

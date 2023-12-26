@@ -20,8 +20,7 @@ export default class extends Migration {
         '@nocobase/plugin-workflow-parallel',
         '@nocobase/plugin-workflow-request',
         '@nocobase/plugin-workflow-sql',
-        '@nocobase/plugin-workflow-form-trigger',
-        '@zkjx/plugin-workflow-approval',
+        '@nocobase/plugin-workflow-form-trigger'
       ].reduce(
         (promise, packageName) =>
           promise.then(async () => {

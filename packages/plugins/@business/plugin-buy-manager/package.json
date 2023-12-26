@@ -1,0 +1,11 @@
+{
+  "name": "@business/plugin-buy-manager",
+  "version": "0.18.0-alpha.1",
+  "main": "dist/server/index.js",
+  "private": true,
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@domain/plugin-dic-manager",
+  "version": "0.18.0-alpha.1",
+  "main": "dist/server/index.js",
+  "private": true,
+  "displayName": "domain dic manager",
+  "displayName.zh-CN": "字典管理",
+  "description": "Provide dic manager",
+  "description.zh-CN": "提供字典管理模板及区块",
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}

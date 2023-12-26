@@ -1,0 +1,16 @@
+{
+  "name": "@domain/plugin-common",
+  "version": "0.18.0-alpha.2",
+  "main": "dist/server/index.js",
+  "private": true,
+  "displayName": "domain common",
+  "displayName.zh-CN": "通用功能",
+  "description": "Provide domain common",
+  "description.zh-CN": "提供通用功能模板及区块",
+  "dependencies": {},
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}

@@ -35,20 +35,14 @@ export class PresetNocoBase extends Plugin {
     'data-visualization',
     'auth',
     'sms-auth',
-    'theme-editor',
-    'graph-collection-manager',
-    'mobile-client',
-    'audit-logs',    
     'custom-request',
+    'calendar',
     'action-bulk-update',
     'action-bulk-edit',
     'gantt',
     'kanban',
     'action-duplicate',
     'action-print',
-    'company-info',
-    'dic-manager',
-    'prj-manager'
   ];
 
   localPlugins = [
@@ -66,7 +60,7 @@ export class PresetNocoBase extends Plugin {
     'api-keys@0.10.1-alpha.1',
     'localization-management@0.11.1-alpha.1',
     'theme-editor@0.11.1-alpha.1',
-    'api-doc@0.13.0-alpha.1'
+    'api-doc@0.13.0-alpha.1',
   ];
 
   splitNames(name: string) {

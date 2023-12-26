@@ -24,28 +24,19 @@ export default class extends Migration {
     const plugins = await repository.find();
     for (const plugin of plugins) {
       const { name } = plugin;
-      if (!['report-manager'].includes(name)) {
-        let packageName = '';
-        if (['dic-manager', 'company-info', 'prj-manager'].includes(name)) {
-          packageName = ['@zkjx/plugin-', name].join('');
-        } else {
-          packageName = await PluginManager.getPackageName(name);
-        }
-        await repository.update({
-          filter: {
-            name,
-          },
-          values: {
-            packageName,
-          },
-        });
-      } else {
-        await repository.destroy({
-          filter: {
-            'name.$in': ['report-manager'],
-          },
-        });
+      if (plugin.packageName) {
+        continue;
       }
+      const packageName = await PluginManager.getPackageName(name);
+      await repository.update({
+        filter: {
+          name,
+        },
+        values: {
+          packageName,
+        },
+      });
+      console.log(name, packageName);
     }
   }
 }

@@ -1,0 +1,15 @@
+{
+  "name": "@business/plugin-company-info",
+  "version": "0.18.0-alpha.1",
+  "main": "dist/server/index.js",
+  "private": true,
+  "displayName": "Bussiness company info",
+  "displayName.zh-CN": "企业信息",
+  "description": "Provide Bussiness company info",
+  "description.zh-CN": "提供企业信息模板及区块",
+  "peerDependencies": {
+    "@nocobase/client": "0.x",
+    "@nocobase/server": "0.x",
+    "@nocobase/test": "0.x"
+  }
+}
