@@ -83,6 +83,18 @@ export default {
         'x-component': 'Password',
       },
     },
+
+    {
+      uiSchema: {
+        'x-component': 'Switch',
+        type: 'boolean',
+        title: '启用',
+      },
+      name: 'enabled',
+      type: 'boolean',
+      interface: 'checkbox',
+      defaultValue: true,
+    },
     {
       foreignKey: 'userId',
       onDelete: 'SET NULL',
@@ -102,6 +114,76 @@ export default {
       },
       interface: 'm2o',
       target: 'dept',
+    },
+    {
+      name: 'directUser',
+      type: 'belongsTo',
+      interface: 'obo',
+      foreignKey: 'directUserId',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '直接主管',
+      },
+      target: 'users',
+      targetKey: 'id',
+    },
+    {
+      name: 'onjob',
+      type: 'boolean',
+      interface: 'checkbox',
+      description: '在职-勾选；离职-不勾选',
+      uiSchema: {
+        type: 'boolean',
+        'x-component': 'Checkbox',
+        title: '在职',
+      },
+      defaultValue: true,
+    },
+    {
+      name: 'job_number',
+      type: 'sequence',
+      interface: 'sequence',
+      unique: true,
+      patterns: [
+        {
+          type: 'string',
+          options: {
+            value: 'TX',
+          },
+        },
+        {
+          type: 'integer',
+          options: {
+            digits: 5,
+            start: 1,
+            key: 3717,
+          },
+        },
+      ],
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        'x-component-props': {},
+        title: '工号',
+      },
+    },
+    {
+      name: 'dingUserId',
+      type: 'string',
+      interface: 'input',
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        title: '钉钉用户ID',
+      },
     },
 
     {
