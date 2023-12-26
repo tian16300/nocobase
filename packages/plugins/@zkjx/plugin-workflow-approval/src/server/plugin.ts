@@ -20,30 +20,28 @@ export default class extends Plugin {
     /* 添加事件同步 */
     /* 审批申请  申请人 = 创建人 */
     /* 审批结果  审批人 = 创建人  */
-    this.db.on('approval_apply.afterCreate', async (model, {transaction}) => {
+    this.db.on('approval_apply.afterCreate', async (model, { transaction }) => {
       const relatedCollection = model.get('relatedCollection');
       const related_data_id = model.get('related_data_id');
-      const repo = this.app.db.getRepository(relatedCollection) 
+      const repo = this.app.db.getRepository(relatedCollection);
       await repo.update({
         filterByTk: related_data_id,
-        values:{
-          currentApproval_id: model.get('id')
+        values: {
+          currentApproval_id: model.get('id'),
         },
-        transaction
+        transaction,
       });
-    })
+    });
     /**
      * 审批状态 = 已撤销 终止流程
      */
-    this.db.on('approval_apply.afterUpdate', async (model, {transaction}) => {
+    this.db.on('approval_apply.afterUpdate', async (model, { transaction }) => {
       const changed = Array.from(model._changed);
       const status = model.get('status');
-      if(changed.includes('status') && status == '5'){
+      if (changed.includes('status') && status == '5') {
         /* 终止job 流程 */
-
-
       }
-    })
+    });
   }
   async load() {
     /* 导入审批相关的表 */
@@ -51,7 +49,7 @@ export default class extends Plugin {
       directory: path.resolve(__dirname, './collections'),
     });
     const repo = this.db.getRepository<any>('collections');
-    if(repo){
+    if (repo) {
       await repo.db2cm('approval_apply');
       await repo.db2cm('approval_results');
     }
@@ -60,16 +58,32 @@ export default class extends Plugin {
     this.workflow = workflowPlugin;
     workflowPlugin.instructions.register('approval', new ApprovalInstruction(workflowPlugin));
     workflowPlugin.instructions.register('copyTo', new CopyToInstruction(workflowPlugin));
-    this.app.resourcer.registerActionHandler(
-      'approval_apply:submit',
-      submit
-    );
-    this.app.resourcer.registerActionHandler(
-      'approval_apply:getNodeUsers',
-      getNodeUsers
-    );
+    this.app.resourcer.registerActionHandler('approval_apply:submit', submit);
+    this.app.resourcer.registerActionHandler('approval_apply:getNodeUsers', getNodeUsers);
   }
   async install(options?: InstallOptions): Promise<void> {
-      
+    const Storage = this.db.getCollection('storages');
+
+    const exist = await Storage.repository.findOne({
+      filter: {
+        name: 'approval',
+      },
+    });
+    if (!exist) {
+      await Storage.repository.create({
+        values: {
+          title: '审批材料',
+          name: 'approval',
+          type: 'local',
+          options: {
+            documentRoot: 'storage/uploads',
+          },
+          path: 'approval',
+          baseUrl: '/storage/uploads',
+          default: false,
+          paranoid: true,
+        },
+      });
+    }
   }
 }
