@@ -1,6 +1,6 @@
 import { Migration } from '@nocobase/server';
 
-export default class AddUserNameMigration extends Migration {
+export default class AddEnabledFieldMigration extends Migration {
   async up() {
     const match = await this.app.version.satisfies('<=0.12.0-alpha.4');
     if (!match) {
