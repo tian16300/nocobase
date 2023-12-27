@@ -6,7 +6,6 @@ import {
   CardItem,
   IField,
   RecordProvider,
-  TreeView,
   css,
   findFilterTargets,
   mergeFilter,
@@ -17,9 +16,8 @@ import {
   useDesignable,
   useFilterBlock,
 } from '@nocobase/client';
-import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
-import { forEach } from 'lodash';
+import { TreeView } from '../..';
 function buildTree(
   arr,
   parentKey?: React.Key,

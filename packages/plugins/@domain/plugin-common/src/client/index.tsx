@@ -28,13 +28,24 @@ export class PluginCommonClient extends Plugin {
   }
   async addSchemaInitials(){
     this.schemaInitializerManager.addItem(
-      'BlockInitializers', // 示例，已存在的 schema initializer
-      'dataBlocks.groupTable', // 向 otherBlocks 分组内添加 custom
+      'BlockInitializers', 
+      'dataBlocks.groupTable', 
       {
         type: 'item',
         name:'groupTable',
         title:'分组表格',
         Component:'GroupTable.Initializer'
+      },
+    );
+    /* 树表单 */
+    this.schemaInitializerManager.addItem(
+      'BlockInitializers', 
+      'dataBlocks.treeForm', 
+      {
+        type: 'item',
+        name:'treeForm',
+        title:'树表单',
+        Component:'TreeForm.Initializer'
       },
     );
   }

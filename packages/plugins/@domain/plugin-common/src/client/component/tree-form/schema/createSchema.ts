@@ -1,4 +1,3 @@
-import { uid } from '@nocobase/utils';
 import formSchema from './formSchema';
 
 export const createSchema = (props) => {

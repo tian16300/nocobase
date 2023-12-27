@@ -1,12 +1,10 @@
 import { css } from "@emotion/css";
-import { TableBlockProvider } from "../../../block-provider";
-import { CardItem } from "../card-item";
 import React from "react";
-import { Designer } from "./Designer";
 import { TreeFormMain } from "./TreeFormMain";
 import { LeftTree } from "./LeftTree";
 import { Initializer } from "./Initializer";
 import { TreeFormBlockDesigner } from "./TreeFormBlockDesigner";
+import { CardItem, TableBlockProvider } from "@nocobase/client";
 
 export const TreeForm = ()=>{};
 TreeForm.Initializer = Initializer;

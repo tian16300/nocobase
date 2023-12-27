@@ -54,7 +54,7 @@ import {
   SchemaComponentOptions,
   createDesignable,
   findFormBlock,
-  treeFormBlockActionOptions,
+  // treeFormBlockActionOptions,
   useAPIClient,
   useActionContext,
   useBlockRequestContext,
@@ -2063,7 +2063,7 @@ export const SchemaSettingsActionScopeBind= (props) =>{
     initialValues['usePropsOption'] = defValue.trim();
     initialValues['useProps'] = defValue.trim();
   }
-  const enumOptions = [...treeFormBlockActionOptions]
+  // const enumOptions = [...treeFormBlockActionOptions]
   return (
     <SchemaSettingsModalItem
       title={t('功能绑定')}
@@ -2077,7 +2077,8 @@ export const SchemaSettingsActionScopeBind= (props) =>{
               'x-decorator': 'FormItem',
               'x-component': 'Select',
               title: t('功能选择'),
-              enum: enumOptions
+              // enum: enumOptions
+              enum: []
             }, 
             useProps: {
               type:'string',

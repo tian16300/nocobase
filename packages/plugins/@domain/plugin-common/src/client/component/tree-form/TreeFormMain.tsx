@@ -1,20 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-import { CardItem, FixedBlockWrapper, removeNullCondition, useFixedBlock, useToken } from '..';
 import { FormProvider, RecursionField, useField, useFieldSchema } from '@formily/react';
 import { css } from '@emotion/css';
-import { uid } from '@nocobase/utils';
-import { LeftTree } from './LeftTree';
-import { RecordProvider, useRecord } from '../../../record-provider';
 import { Divider, Space, Spin } from 'antd';
 import { useSize } from 'ahooks';
-import { useDesignable } from '../../hooks';
-import { CollectionProvider, IField, useCollectionManager } from '../../../collection-manager';
-import { mergeFilter, useBlockRequestContext } from '../../../block-provider';
 import { createForm } from '@formily/core';
 import { default as cls } from 'classnames';
 import { set } from 'lodash';
-import { transformToFilter, useFilterBlock } from '@nocobase/client';
+import { CardItem, CollectionProvider, IField, RecordProvider, mergeFilter, removeNullCondition, transformToFilter, useBlockRequestContext, useCollectionManager, useDesignable, useFilterBlock, useFixedBlock, useRecord, useToken } from '@nocobase/client';
 interface TreeNode {
   id: number;
   name: string;

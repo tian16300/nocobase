@@ -5,7 +5,9 @@ import _, { isEmpty, pick } from 'lodash';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useCollection } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
-import { useActionContext, useDesignable, useTreeFormBlockContext } from '../schema-component';
+import { useActionContext, useDesignable,
+  //  useTreeFormBlockContext
+   } from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
 import { BlockProvider, useBlockRequestContext, useFilterByTk, useParamsFromRecord } from './BlockProvider';
 import { getValuesByPath } from '@nocobase/utils/client';

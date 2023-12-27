@@ -1,11 +1,9 @@
-import { Divider, useDesignable, useToken } from '../..';
-import { Button, Dropdown, Input, Popconfirm, Space, Spin, Tag, Tooltip, Tree } from 'antd';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DashOutlined, DownOutlined, MoreOutlined } from '@ant-design/icons';
-import { IField, RecordProvider, css } from '@nocobase/client';
+import { Input, Spin, Tag, Tooltip, Tree } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { IField, RecordProvider, css, useToken } from '@nocobase/client';
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField, connect, mapProps, mapReadPretty } from '@formily/react';
-import { debounce, forEach } from 'lodash';
+import { debounce } from 'lodash';
 
 const { Search } = Input;
 const MemoTooltip = Tooltip || React.memo(Tooltip);
@@ -79,12 +77,14 @@ export const TreeView = connect(
         `}
       >
         <div ref={searchBoxRef}>
-          <Search  style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
+          <Search style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
         </div>
         {loading && (
-          <div className={css`
-            text-align: center;
-          `}>
+          <div
+            className={css`
+              text-align: center;
+            `}
+          >
             <Spin />
           </div>
         )}
@@ -113,7 +113,7 @@ export const TreeView = connect(
                       color: ${token.colorWarning};
                       font-weight: bold;
                     }
-                    .ant-tag{
+                    .ant-tag {
                       font-size: ${token.fontSize}px;
                     }
                   `}

@@ -18,7 +18,6 @@ import {
   useFormBlockType,
   useTableBlockContext,
 } from '../../../block-provider';
-import { useTreeFormBlockContext } from '..';
 import { SchemaInitializer, useSchemaInitializerItem } from '../../../application';
 import { ActionInitializer, BlockInitializer } from '../../../schema-initializer';
 

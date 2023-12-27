@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plugin } from '../application/Plugin';
-import { SchemaComponentOptions, useDataBlockSelectorProps, useSubmitApprovalActionProps, useTreeFormAddChildActionProps, useTreeFormBlockProps, useTreeFormBlockTreeItemProps, useTreeFormCreateActionProps, useTreeFormCreateProps, useTreeFormExpandActionProps, useTreeFormFilterProps, useTreeFormRefreshActionProps, useTreeFormSaveAsNewVersionProps, useTreeFormShowForm } from '../schema-component';
+import { SchemaComponentOptions, useDataBlockSelectorProps } from '../schema-component';
 import { RecordLink, useParamsFromRecord, useSourceIdFromParentRecord, useSourceIdFromRecord } from './BlockProvider';
 import { DetailsBlockProvider, useDetailsBlockProps } from './DetailsBlockProvider';
 import { FilterFormBlockProvider } from './FilterFormBlockProvider';
@@ -23,7 +23,6 @@ export const BlockSchemaComponentProvider: React.FC = (props) => {
         FilterFormBlockProvider,
         FormFieldProvider,
         DetailsBlockProvider,
-        // KanbanBlockProvider,
         RecordLink,
       }}
       scope={{
@@ -36,9 +35,7 @@ export const BlockSchemaComponentProvider: React.FC = (props) => {
         useDetailsBlockProps,
         useTableFieldProps,
         useTableBlockProps,
-        useTableSelectorProps,
-        // useKanbanBlockProps,
-        // useGanttBlockProps
+        useTableSelectorProps
       }}
     >
       {props.children}
@@ -51,7 +48,6 @@ export class BlockSchemaComponentPlugin extends Plugin {
     this.addComponents();
     this.addScopes();
   }
-
   addComponents() {
     this.app.addComponents({
       TableFieldProvider,
@@ -61,7 +57,6 @@ export class BlockSchemaComponentPlugin extends Plugin {
       FilterFormBlockProvider,
       FormFieldProvider,
       DetailsBlockProvider,
-      // KanbanBlockProvider,
       RecordLink,
     });
   }
@@ -78,23 +73,7 @@ export class BlockSchemaComponentPlugin extends Plugin {
       useTableFieldProps,
       useTableBlockProps,
       useTableSelectorProps,
-      // useKanbanBlockProps,
-      // useGanttBlockProps, 
-      // useGanttFormGroupFieldProps,     
-      // useGanttFormSortFieldProps,
-      // useGanttFormRangeFieldProps,
-      useTreeFormBlockProps,
-      useTreeFormAddChildActionProps,
-      useTreeFormCreateActionProps,
-      useTreeFormShowForm,
       useDataBlockSelectorProps,
-      useTreeFormBlockTreeItemProps,
-      useTreeFormExpandActionProps,
-      useTreeFormCreateProps,
-      useTreeFormRefreshActionProps,
-      useTreeFormFilterProps,
-      useTreeFormSaveAsNewVersionProps,
-      useSubmitApprovalActionProps
     });
   }
 }

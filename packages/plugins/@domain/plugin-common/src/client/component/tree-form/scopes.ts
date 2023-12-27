@@ -1,22 +1,15 @@
 import { useField, useFieldSchema, useForm } from '@formily/react';
-import { useRecord, useRecordIndex } from '../../../record-provider';
 import {
-  IField,
-  mergeFilter,
-  removeNullCondition,
-  transformToFilter,
   useAPIClient,
   useActionContext,
   useBlockRequestContext,
   useCollection,
-  useCollectionManager,
-  useFilterBlock,
   useFilterByTk,
   useFormBlockContext,
   useFormBlockType,
-  useRequest,
+  useRecord
 } from '@nocobase/client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTreeFormBlockContext } from './TreeFormMain';
 import { uid } from '@formily/shared';
 import { onFormValuesChange } from '@formily/core';

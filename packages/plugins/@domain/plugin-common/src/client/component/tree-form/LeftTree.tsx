@@ -1,36 +1,15 @@
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CardItem,
-  Divider,
-  TreeView,
-  removeNullCondition,
-  useDesignable,
-  useToken,
-  useTreeFormBlockContext,
-} from '../..';
-import { Button, Input, Space, Tag, Tooltip, Tree } from 'antd';
-import React, { useEffect, useRef, useState } from 'react';
-import { DownOutlined, MoreOutlined } from '@ant-design/icons';
-import {
-  BlockProvider,
   IField,
-  RecordProvider,
-  css,
-  findFilterTargets,
-  mergeFilter,
   useBlockRequestContext,
-  useCollectionManager,
-  useCompile,
-  useFilterBlock,
+  useCollectionManager
 } from '@nocobase/client';
-import { useSize } from 'ahooks';
-import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
-import { forEach } from 'lodash';
+import { useFieldSchema, useField } from '@formily/react';
 import { flattenTree } from '@nocobase/utils';
-interface TreeNode {
-  id: number;
-  name: string;
-  children?: TreeNode[];
-}
+import { TreeView } from '..';
+import { useTreeFormBlockContext } from './TreeFormMain';
+
 function buildTree(
   arr,
   parentKey?: React.Key,
