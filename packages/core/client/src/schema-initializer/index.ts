@@ -50,7 +50,7 @@ export {
   useInheritsTableColumnInitializerFields,
   useRecordCollectionDataSourceItems,
   useRemoveGridFormItem,
-  useTableColumnInitializerFields
+  useTableColumnInitializerFields,
 } from './utils';
 export * from './components';
 // import { Plugin } from '../application/Plugin';
