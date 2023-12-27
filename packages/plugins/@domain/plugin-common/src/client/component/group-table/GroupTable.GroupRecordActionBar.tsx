@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { observer } from '@formily/react';
+import { SortableItem, useDesigner } from '@nocobase/client';
 import React from 'react';
-import { SortableItem, useDesigner } from '../..';
 const designerCss = css`
   position: relative;
   &:hover {

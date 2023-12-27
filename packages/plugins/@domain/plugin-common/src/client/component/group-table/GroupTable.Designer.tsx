@@ -1,7 +1,5 @@
+import { GeneralSchemaDesigner, SchemaSettingsRemove, useCollection } from "@nocobase/client";
 import React from "react";
-import { useCollection } from "../../../collection-manager";
-import { GeneralSchemaDesigner, SchemaSettingsRemove } from "../../../schema-settings";
-
 export const Designer =  ()=>{
     const { name, title } = useCollection();
     return (

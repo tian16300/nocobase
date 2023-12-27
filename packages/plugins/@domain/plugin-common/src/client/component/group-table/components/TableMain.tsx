@@ -7,16 +7,7 @@ import { SheetComponent, SheetComponentsProps } from '@antv/s2-react';
 import '@antv/s2-react/dist/style.min.css';
 import { FormContext, RecursionField, useFieldSchema } from '@formily/react';
 import { createForm } from '@formily/core';
-import { SchemaComponentOptions } from '../../../core';
-import {
-  BlockProvider,
-  useBlockRequestContext,
-  useCollectionManager,
-  useCompile,
-  useParsedFilter,
-  useRecord,
-  useToken,
-} from '../../../..';
+import { BlockProvider, SchemaComponentOptions, useBlockRequestContext, useCollectionManager, useCompile, useParsedFilter, useRecord, useToken } from '@nocobase/client';
 export const TableMain = (props) => {
   return (
     <GroupTableMainProvider {...props}>

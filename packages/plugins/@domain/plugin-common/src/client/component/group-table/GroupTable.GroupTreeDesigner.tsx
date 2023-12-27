@@ -1,17 +1,8 @@
 import { ArrayItems } from '@formily/antd-v5';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
+import { FilterBlockType, GeneralSchemaDesigner, RecordProvider, SchemaSettingsBlockTitleItem, SchemaSettingsConnectDataBlocks, SchemaSettingsDataScope, SchemaSettingsDivider, SchemaSettingsModalItem, SchemaSettingsRemove, SchemaSettingsSelectItem, SchemaSettingsSwitchItem, SchemaSettingsTemplate, mergeFilter, removeNullCondition, useCollection, useCollectionManager, useDesignable, useFormBlockContext, useRecord, useSchemaTemplate, useSortFields, useTableBlockContext } from '@nocobase/client';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useFormBlockContext, useTableBlockContext } from '../../../block-provider';
-import { mergeFilter } from '../../../block-provider/SharedFilterProvider';
-import { useCollection, useCollectionManager } from '../../../collection-manager';
-import { useSortFields } from '../../../collection-manager/action-hooks';
-import { FilterBlockType } from '../../../filter-provider/utils';
-import { RecordProvider, useRecord } from '../../../record-provider';
-import { GeneralSchemaDesigner, SchemaSettingsBlockTitleItem, SchemaSettingsConnectDataBlocks, SchemaSettingsDataScope, SchemaSettingsDivider, SchemaSettingsModalItem, SchemaSettingsRemove, SchemaSettingsSelectItem, SchemaSettingsSwitchItem, SchemaSettingsTemplate } from '../../../schema-settings';
-import { useSchemaTemplate } from '../../../schema-templates';
-import { useDesignable } from '../../hooks';
-import { removeNullCondition } from '../filter';
 // import { FixedBlockDesignerItem } from '../page';
 
 export const GroupTreeDesigner = () => {

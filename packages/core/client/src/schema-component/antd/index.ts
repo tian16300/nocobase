@@ -51,7 +51,6 @@ export * from './time-picker';
 export * from './tree-select';
 export * from './upload';
 export * from './variable';
-export * from './group-table';
 export * from './tree-view';
 export * from './approval-timeline';
 export * from './tree-form';

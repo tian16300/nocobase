@@ -1,10 +1,8 @@
 import { DragOutlined } from '@ant-design/icons';
 import { useFieldSchema } from '@formily/react';
+import { DragHandler, useGetAriaLabelOfDesigner, useSchemaInitializerRender } from '@nocobase/client';
 import { Space } from 'antd';
 import React from 'react';
-import { DragHandler } from '../..';
-import { useGetAriaLabelOfDesigner } from '../../../schema-settings/hooks/useGetAriaLabelOfDesigner';
-import {  useSchemaInitializerRender } from '../../../application';
 
 export const GroupTableGroupRecordActionDesigner = (props: any) => {
   const fieldSchema = useFieldSchema();

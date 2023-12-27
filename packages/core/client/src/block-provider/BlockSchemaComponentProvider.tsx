@@ -9,7 +9,6 @@ import { FormFieldProvider, useFormFieldProps } from './FormFieldProvider';
 import { TableBlockProvider, useTableBlockProps } from './TableBlockProvider';
 import { TableFieldProvider, useTableFieldProps } from './TableFieldProvider';
 import { TableSelectorProvider, useTableSelectorProps } from './TableSelectorProvider';
-import { useGroupTableBlockProps, useGroupTableProps } from '../schema-component/antd/group-table/GroupTable.Decorator';
 import * as bp from './hooks';
 
 // TODO: delete this, replaced by `BlockSchemaComponentPlugin`
@@ -84,8 +83,6 @@ export class BlockSchemaComponentPlugin extends Plugin {
       // useGanttFormGroupFieldProps,     
       // useGanttFormSortFieldProps,
       // useGanttFormRangeFieldProps,
-      useGroupTableProps,
-      useGroupTableBlockProps,
       useTreeFormBlockProps,
       useTreeFormAddChildActionProps,
       useTreeFormCreateActionProps,

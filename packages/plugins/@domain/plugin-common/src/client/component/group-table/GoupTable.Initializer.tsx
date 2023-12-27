@@ -1,16 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { useCollectionManager } from '../../../collection-manager';
 import { useContext } from 'react';
 import { SchemaOptionsContext } from '@formily/react';
-import { useGlobalTheme } from '../../../global-theme';
-import { DataBlockInitializer } from '../../../schema-initializer';
 import React from 'react';
 import { TableOutlined } from '@ant-design/icons';
-import { SchemaComponent, SchemaComponentOptions } from '../../core';
 import { ArrayItems, FormLayout } from '@formily/antd-v5';
-import { FormDialog } from '..';
 import { uid } from '@formily/shared';
 import { css } from '@emotion/css';
+import { DataBlockInitializer, FormDialog, SchemaComponent, SchemaComponentOptions, useCollectionManager, useGlobalTheme, useSchemaInitializer, useSchemaInitializerItem } from '@nocobase/client';
 
 export const createGroupTableSchema = (decoratorProps) => {
   const { collection, group,
@@ -180,15 +176,16 @@ export const createGroupTableSchema = (decoratorProps) => {
   };
 };
 
-export const Initializer = (props) => {
-  const { insert } = props;
+export const Initializer = () => {
+  const { insert } = useSchemaInitializer();
   const { t } = useTranslation();
   const { getCollectionFields, getCollectionField } = useCollectionManager();
   const options = useContext(SchemaOptionsContext);
   const { theme } = useGlobalTheme();
+  const itemConfig = useSchemaInitializerItem();
   return (
     <DataBlockInitializer
-      {...props}
+      {...itemConfig}
       componentType={'GroupTable'}
       icon={<TableOutlined />}
       onCreateBlockSchema={async ({ item }) => {

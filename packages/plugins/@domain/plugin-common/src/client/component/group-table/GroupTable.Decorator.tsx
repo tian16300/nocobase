@@ -1,7 +1,5 @@
+import { FixedBlockWrapper, useCollectionManager, useTableBlockProps } from '@nocobase/client';
 import React, { createContext, useContext, useState } from 'react';
-import { BlockProvider, TableBlockProvider, useTableBlockProps } from '../../../block-provider';
-import { useCollectionManager } from '../../../collection-manager';
-import { FixedBlockWrapper } from '..';
 interface GroupTableBlockResourceContextProps {
   groupSelectedKeys?: string[];
   setGroupSelectedKeys?: (arg: string[]) => void;

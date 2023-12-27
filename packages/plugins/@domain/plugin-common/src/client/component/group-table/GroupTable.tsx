@@ -1,20 +1,15 @@
 import React, { useRef } from 'react';
 import { Initializer } from './GoupTable.Initializer';
 import { Provider } from './GroupTable.Decorator';
-import { Designer } from './GroupTable.Designer';
-import { CardItem } from '../card-item';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { css } from '@emotion/css';
-import { TableBlockDesigner, useFixedBlock, useToken } from '..';
-import { GroupTree, TableMain } from './components';
 import { GroupTableGroupRecordActionBar } from './GroupTable.GroupRecordActionBar';
 import { GroupTableGroupRecordActionDesigner } from './GroupTable.GroupRecordActionDesigner';
 import { RecursionField, useFieldSchema } from '@formily/react';
 import { GroupTreeDesigner } from './GroupTable.GroupTreeDesigner';
-import { FilterBlockProvider } from '../../../filter-provider';
-import { uid } from '@nocobase/utils';
-import { useSize } from 'ahooks';
+import { CardItem, TableBlockDesigner, useFixedBlock, useToken } from '@nocobase/client';
+import { GroupTree } from './components';
 export const GroupTable: any = (props) => {
   const { token } = useToken();
   const { useProps } = props;
