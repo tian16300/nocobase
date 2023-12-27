@@ -127,7 +127,7 @@ export const TreeFormMain = (props) => {
 
   const [record, setRecord] = useState<any>({});
   useEffect(() => {
-    setLoadingFormBlock(false);  
+    setLoadingFormBlock(false);
     setTimeout(() => {
       setLoadingFormBlock(true);
     }, 1000);
@@ -136,7 +136,6 @@ export const TreeFormMain = (props) => {
     } else {
       setUserAction('create');
     }
-  
   }, [record?.id]);
   const refeshForm = () => {
     // setLoadingFormBlock(false);
@@ -330,13 +329,11 @@ export const TreeFormMain = (props) => {
                   {loadingFormBlock ? (
                     <>
                       <RecordProvider record={record} isMemo={true}>
-                       
                         {['create', 'createAndAddChild'].includes(userAction) && (
                           <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
                         )}
                         {userAction == 'update' && <RecursionField name={'update-form'} schema={updateFormSchema} />}
-                       
-</RecordProvider>
+                      </RecordProvider>
                     </>
                   ) : (
                     <Spin />
@@ -345,8 +342,9 @@ export const TreeFormMain = (props) => {
               </div>
             </ReflexElement>
             {/* 有审批流程则显示 */}
-            {hasApproval && <ReflexSplitter />}
-            {hasApproval && (
+
+            {/* {hasApproval && <ReflexSplitter />} */}
+            {/* {hasApproval && (
               <ReflexElement
                 className="middle"
                 flex={rightFlex}
@@ -355,7 +353,7 @@ export const TreeFormMain = (props) => {
                 }}
               >
                 <div className={'pane-container'}>
-                  {/* <RecursionField
+                  {<RecursionField
               name={'approveRecords'}
               schema={{
                 // type: 'void',
@@ -461,10 +459,10 @@ export const TreeFormMain = (props) => {
                 },
                 'x-uid': 'wl_info-approval-records',
               }}
-            /> */}
+            /> }
                 </div>
               </ReflexElement>
-            )}
+            )} */}
           </ReflexContainer>
         </TreeFormBlockContext.Provider>
       </CollectionProvider>

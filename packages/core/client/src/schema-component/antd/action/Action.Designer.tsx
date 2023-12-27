@@ -99,13 +99,13 @@ function ButtonEditor(props) {
               title: t('Button background color'),
               default: fieldSchema?.['x-component-props']?.danger
                 ? 'danger'
-                : fieldSchema?.['x-component-props']?.type === 'primary'
-                ? 'primary'
-                : 'default',
+                : fieldSchema?.['x-component-props']?.type,
               enum: [
                 { value: 'default', label: '{{t("Default")}}' },
                 { value: 'primary', label: '{{t("Highlight")}}' },
                 { value: 'danger', label: '{{t("Danger red")}}' },
+                { value: 'text', label: '{{t("文本")}}' },
+                { value: 'link', label: '{{t("链接")}}' },
               ],
               'x-visible': !isLink,
             },
