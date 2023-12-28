@@ -159,17 +159,8 @@ export const createGroupTableSchema = (decoratorProps) => {
               },
 
 
-            },
-            'x-reactions': [{
-              dependencies: ['.group'],
-              fulfill: {
-                schema: {
-                  [`x-decorator-props.params.filter.${group}.id`]: '{{ $deps[0] }}'
-                }
-              },
-            }]
-          },
-         
+            }
+          }
         },
       },
     },

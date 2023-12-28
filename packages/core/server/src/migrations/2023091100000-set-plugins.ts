@@ -34,6 +34,7 @@ export default class extends Migration {
         '@business/plugin-company-info',      
         '@business/plugin-prj-manager',
         '@business/plugin-workflow-approval',
+        '@business/plugin-produce-manager'
       ].reduce(
         (promise, packageName) =>
           promise.then(async () => {
