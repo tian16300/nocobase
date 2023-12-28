@@ -156,9 +156,7 @@ export const createGroupTableSchema = (decoratorProps) => {
                   },
                 },
     
-              },
-
-
+              }
             }
           }
         },

@@ -4,7 +4,7 @@ import { IField, RecordProvider, css, useToken } from '@nocobase/client';
 import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField, connect, mapProps, mapReadPretty } from '@formily/react';
 import { debounce } from 'lodash';
-
+import { DownOutlined } from '@ant-design/icons';
 const { Search } = Input;
 const MemoTooltip = Tooltip || React.memo(Tooltip);
 const { CheckableTag } = Tag;
@@ -167,7 +167,7 @@ export const TreeView = connect(
               );
             }}
             treeData={treeData}
-            draggable
+            switcherIcon={<DownOutlined />}
             // onDragEnter={onDragEnter}
             // onDrop={onDrop}
             {...others}

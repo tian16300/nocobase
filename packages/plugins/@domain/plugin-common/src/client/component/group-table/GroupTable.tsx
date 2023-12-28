@@ -71,121 +71,6 @@ export const GroupTable: any = (props) => {
           <RecursionField name={'table'} schema={fieldSchema.properties.table} />
         </div>
       </ReflexElement>
-      {/* 有审批流程则显示 */}
-      {/* {hasApproval && <ReflexSplitter />}
-      {hasApproval && (
-        <ReflexElement className="middle" flex={0.15}>
-          <div className={'pane-container'}>
-            <RecursionField
-              name={'approveRecords'}
-              schema={{
-                // type: 'void',
-                // "x-acl-action": "wl_info:view",
-                // 'x-decorator': 'ApprovalTimeline.Provider',
-                // 'x-component': 'CardItem',
-                // 'x-component-props': {
-                //   title: '审批记录',
-                //   className: 'pane-container-card',
-                // },
-                // 'x-designer': 'ApprovalTimeline.Designer',
-                // properties: {
-                //   [uid()]: {
-                //     type: 'array',
-                //     title: '审批记录',
-                //     'x-component': 'ApprovalTimeline',
-
-                //   },
-                // },
-                type: 'void',
-                'x-component': 'CardItem',
-                'x-component-props': {
-                  title: '审批记录',
-                  className: 'pane-container-card',
-                },
-                'x-acl-action': 'wl_info:view',
-                'x-decorator': 'GridCard.Decorator',
-                'x-decorator-props': {
-                  resource: 'wl_info',
-                  collection: 'wl_info',
-                  readPretty: true,
-                  action: 'list',
-                  params: {
-                    pageSize: 12,
-                  },
-                  runWhenParamsChanged: true,
-                  rowKey: 'id',
-                },
-
-                'x-designer': 'GridCard.Designer',
-                properties: {
-                  [uid()]: {
-                    type: 'void',
-                    'x-component': 'BlockItem',
-                    'x-component-props': {
-                      useProps: '{{ useGridCardBlockItemProps }}',
-                    },
-                    properties: {
-                      actionBar: {
-                        version: '2.0',
-                        type: 'void',
-                        'x-initializer': 'GridCardActionInitializers',
-                        'x-component': 'ActionBar',
-                        'x-component-props': {
-                          style: {
-                            marginBottom: 'var(--nb-spacing)',
-                          },
-                        },
-                      },
-                      list: {
-                        version: '2.0',
-                        type: 'array',
-                        'x-component': 'ApprovalTimeline',
-                        'x-component-props': {
-                          useProps: '{{ useGridCardBlockProps }}',
-                        },
-                        properties: {
-                          item: {
-                            version: '2.0',
-                            type: 'object',
-                            'x-component': 'GridCard.Item',
-                            'x-read-pretty': true,
-                            'x-component-props': {
-                              useProps: '{{ useGridCardItemProps }}',
-                            },
-                            properties: {
-                              grid: {
-                                version: '2.0',
-                                type: 'void',
-                                'x-component': 'Grid',
-                                'x-initializer': 'ReadPrettyFormItemInitializers',
-                                'x-initializer-props': {
-                                  useProps: '{{ useGridCardItemInitializerProps }}',
-                                },
-                              },
-                              actionBar: {
-                                version: '2.0',
-                                type: 'void',
-                                'x-align': 'left',
-                                'x-initializer': 'GridCardItemActionInitializers',
-                                'x-component': 'ActionBar',
-                                'x-component-props': {
-                                  useProps: '{{ useGridCardActionBarProps }}',
-                                  layout: 'one-column',
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                'x-uid': 'wl_info-approval-records'
-              }}
-            />
-          </div>
-        </ReflexElement>
-      )} */}
     </ReflexContainer>
     </div>
   );
@@ -197,7 +82,7 @@ GroupTable.Wrap = (props) => {
       {...props}
       className={css`
         .ant-card-body {
-          padding: ${token.padding}px;
+          padding: 0px;
         }
       `}
     >

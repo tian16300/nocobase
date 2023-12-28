@@ -10,6 +10,18 @@ export class PluginProduceManagerServer extends Plugin {
         plugin: this,
       },
     });
+    /* BOM物料明细 继承 BOM单  */
+    this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
+      await this.db.getRepository('bom_wl').update({
+        filter: {
+          bom_id: model.get('id'),
+        },
+        values: {
+          prj_code: model.get('prj_code')
+        },
+        transaction
+      });
+    });
   }
   async load() {
     await this.db.import({
@@ -18,6 +30,7 @@ export class PluginProduceManagerServer extends Plugin {
     const repo = this.db.getRepository<any>('collections');
     if (repo) {
       await repo.db2cm('wl_category');
+      await repo.db2cm('wl_info');
     }
   }
 

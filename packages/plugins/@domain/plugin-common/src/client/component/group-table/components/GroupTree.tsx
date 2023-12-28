@@ -170,49 +170,49 @@ export const GroupTree = (props: any) => {
   return (
     <CardItem
       {...props}
-      extra={
-        <>
-          {designable && (
-            <div>
-              <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
-            </div>
-          )}
-          <div
-            className={css`
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-            `}
-          >
-            {!designable && (
-              <MemoTooltip
-                placement="bottomRight"
-                color={'#fff'}
-                title={
-                  <>
-                    <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
-                  </>
-                }
-                trigger={['click']}
-                overlayClassName={css`
-                  .ant-space {
-                    flex-direction: column !important;
-                    align-items: flex-start !important;
-                    .ant-btn {
-                      border-color: 0 !important;
-                    }
-                  }
-                `}
-              >
-                <Button icon={<MoreOutlined />} type="text"></Button>
-              </MemoTooltip>
-            )}
-          </div>
-        </>
-      }
-      headStyle = {{
-        padding:'0 12px'
-      }}
+      // extra={
+      //   <>
+      //     {/* {designable && (
+      //       <div>
+      //         <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
+      //       </div>
+      //     )} */}
+      //     <div
+      //       className={css`
+      //         display: flex;
+      //         justify-content: space-between;
+      //         align-items: flex-start;
+      //       `}
+      //     >
+      //       {!designable && (
+      //         <MemoTooltip
+      //           placement="bottomRight"
+      //           color={'#fff'}
+      //           title={
+      //             <>
+      //               <RecursionField name={'actionBar'} schema={fieldSchema.properties.actions} />
+      //             </>
+      //           }
+      //           trigger={['click']}
+      //           overlayClassName={css`
+      //             .ant-space {
+      //               flex-direction: column !important;
+      //               align-items: flex-start !important;
+      //               .ant-btn {
+      //                 border-color: 0 !important;
+      //               }
+      //             }
+      //           `}
+      //         >
+      //           <Button icon={<MoreOutlined />} type="text"></Button>
+      //         </MemoTooltip>
+      //       )}
+      //     </div>
+      //   </>
+      // }
+      // headStyle = {{
+      //   padding:'0 12px'
+      // }}
     >
       <TreeView
         {...props}

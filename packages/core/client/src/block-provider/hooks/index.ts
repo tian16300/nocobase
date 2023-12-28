@@ -907,7 +907,7 @@ export const useUpdateActionProps = () => {
   const localVariables = useLocalVariables({ currentForm: form });
   const { getActiveFieldsName } = useFormActiveFields() || {};
   
-  const { field: treeFormField } = useTreeFormBlockContext(); 
+  // const { field: treeFormField } = useTreeFormBlockContext(); 
 
   return {
     async onClick() {
@@ -983,12 +983,12 @@ export const useUpdateActionProps = () => {
         actionField.data.loading = false;
         const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource);
         service?.refresh?.();
-        treeFormField?.data?.blockCtx?.service?.refresh?.();
-        treeFormField?.data?.updateSucessCallback?.({
-          ...values,
-          ...overwriteValues,
-          ...assignedValues,
-        });
+        // treeFormField?.data?.blockCtx?.service?.refresh?.();
+        // treeFormField?.data?.updateSucessCallback?.({
+        //   ...values,
+        //   ...overwriteValues,
+        //   ...assignedValues,
+        // });
 
         // __parent?.service?.refresh?.();
         setVisible?.(false);

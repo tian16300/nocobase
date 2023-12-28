@@ -14,11 +14,9 @@ export const Provider = (props) => {
   const [groupSelectedKeys, setGroupSelectedKeys] = useState(['root']);
 
   return (
-    <FixedBlockWrapper>
-      <GroupTableBlockResourceContext.Provider value={{ ...others, groupSelectedKeys, setGroupSelectedKeys }}>
-        {children}
-      </GroupTableBlockResourceContext.Provider>
-    </FixedBlockWrapper>
+    <GroupTableBlockResourceContext.Provider value={{ ...others, groupSelectedKeys, setGroupSelectedKeys }}>
+    {children}
+  </GroupTableBlockResourceContext.Provider>
   );
 };
 

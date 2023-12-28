@@ -19,33 +19,36 @@ export const Percent = connect(
     const { value, onChange } = props;
     const v = useMemo(() => toValue(value, (v) => v * 100), [value]);
     return (
-      <Row>
-      <Col flex="auto">
-        <Slider
-          {...props}
-          onChange={(v: any) => {
-            if (onChange) {
-              onChange(toValue(v, (v) => v / 100));
-            }
-          }}
-          value={v}
-        />
-      </Col>
-      <Col flex="100px">
-        <InputNumber
-          {...props}
-          addonAfter="%"
-          // size="small" 
-          style={{marginLeft: 18, marginRight:-12}}
-          value={v}
-          onChange={(v: any) => {
-            if (onChange) {
-              onChange(toValue(v, (v) => v / 100));
-            }
-          }}
-        />
-      </Col>
-    </Row>
+    <><InputNumber
+    {...props}
+    addonAfter="%"
+    // size="small" 
+    value={v}
+    onChange={(v: any) => {
+      if (onChange) {
+        onChange(toValue(v, (v) => v / 100));
+      }
+    }}
+  />
+    </>
+    
+    //   <Row>
+    //   <Col flex="auto">
+    //     <Slider
+    //       {...props}
+    //       onChange={(v: any) => {
+    //         if (onChange) {
+    //           onChange(toValue(v, (v) => v / 100));
+    //         }
+    //       }}
+    //       value={v}
+    //     />
+    //   </Col>
+    //   <Col flex="100px">
+       
+    //   </Col>
+    // </Row>
+    
     );
   },
   mapReadPretty((props) => {
