@@ -52,6 +52,21 @@ export const ExpandActionDesign = (props) => {
                 title: `${t('Button icon')} - ${t('Collapse all')}`,
                 default: iconCollapse,
               },
+              type: {
+                'x-decorator': 'FormItem',
+                'x-component': 'Radio.Group',
+                title: t('Button background color'),
+                default: fieldSchema?.['x-component-props']?.danger
+                  ? 'danger'
+                  : fieldSchema?.['x-component-props']?.type === 'primary'
+                    ? 'primary'
+                    : 'default',
+                enum: [
+                  { value: 'default', label: '{{t("Default")}}' },
+                  { value: 'primary', label: '{{t("Highlight")}}' },
+                  { value: 'danger', label: '{{t("Danger red")}}' },
+                ],
+              },
             },
           } as ISchema
         }
