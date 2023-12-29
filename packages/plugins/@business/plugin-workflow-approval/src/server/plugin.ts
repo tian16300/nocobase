@@ -1,5 +1,5 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
-import WorkflowPlugin from '@nocobase/plugin-workflow';
+import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
 
 import { getNodeUsers, submit } from './actions';
 
@@ -39,7 +39,7 @@ export default class extends Plugin {
       const changed = Array.from(model._changed);
       const status = model.get('status');
       if (changed.includes('status') && status == '5') {
-        /* 终止job 流程 */
+        /* 终止job 流程  */
       }
     });
   }

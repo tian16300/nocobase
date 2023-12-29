@@ -145,8 +145,8 @@ export const AddProvalSetting = (props) => {
           const data = res.data?.data;
           setWorkFlow(data);
           setFlowName(data.title);
-          // setCollection(data.bussinessCollectionName);
-          // setUiTemplateKey(data?.uiTemplateKey);
+          setCollection(data.bussinessCollectionName);
+          setUiTemplateKey(data?.uiTemplateKey);
         });
     }
   }, [searchParams.get('id')]);
@@ -236,50 +236,6 @@ export const AddProvalSetting = (props) => {
     } else if (current == 1) {
       if (workflow?.id) {
         /* 保存区块模板 */
-
-        // if (!uiTemplateKey) {
-        //   const uiSchemaJson = initialSchema;
-        //   api
-        //     .resource('uiSchemas')
-        //     .create({
-        //       values: uiSchemaJson,
-        //     })
-        //     .then((res) => {
-        //       /* 保存 uitemplateKey */
-        //       // api.resource('uiSchemas')
-        //       api
-        //         .resource('uiSchemaTemplates')
-        //         .create({
-        //           values: {
-        //             name: flowName + '_' + '显示设置',
-        //             uid: res.data.data['x-uid'],
-        //             resourceName: collection,
-        //             collectionName: collection,
-        //             componentName: 'ReadPrettyFormItem',
-        //           },
-        //         })
-        //         .then((res) => {
-        //           const uiTemplate = res.data.data;
-        //           setUiTemplateKey(uiTemplate.key);
-        //           api
-        //             .resource('workflows')
-        //             .update({
-        //               filterByTk: workflow.id,
-        //               updateAssociationValues: ['uiTemplate'],
-        //               values: {
-        //                 uiTemplateKey: uiTemplate.key,
-        //                 uiTemplate: uiTemplate,
-        //               },
-        //             })
-        //             .then((res) => {
-        //               // setWorkFlow({
-        //               //   ...workflow,
-        //               //   uiTemplateKey: uiTemplate.key
-        //               // });
-        //             });
-        //         });
-        //     });
-        // }
         next();
       }
     }

@@ -133,7 +133,7 @@ export default class extends Instruction {
     /**
      * 查找人
      */
-    const transaction = processor.transaction;
+    const transaction = (processor as any).transaction;
     const workflowModel = await processor.execution.getWorkflow();
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
     const currentUser = prevJob.result.data.user || prevJob.result.data.applyUser;
@@ -182,6 +182,7 @@ export default class extends Instruction {
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
       result: {
+        type: 'approval',
         relatedData,
         users,
         dingUsers,
@@ -201,7 +202,7 @@ export default class extends Instruction {
         executionId: job.executionId,
         workflowKey: workflowModel.key,
         currentApprovalUsers: users,
-        result: relatedData
+        result: relatedData,
       },
       transaction,
     });
@@ -221,13 +222,48 @@ export default class extends Instruction {
     /**
      * 当前节点是否通过
      */
+    const nextNode = node.downstream;
     const isResolved = job.latestUserJobResult?.approvalStatus == '1';
-    job.set('result',{      
-      type:'approval',
+    const isRejected = job.latestUserJobResult?.approvalStatus == '2';
+
+    job.set('result', {
+      type: 'approval',
       ...job.result,
-      approvalResult: job.latestUserJobResult
-    })
-    job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
-    return job;
+      approvalResult: job.latestUserJobResult,
+    });
+    /* 如果拒绝则 审批完成 */
+    if (job.latestUserJobResult && isRejected) {
+      await processor.options.plugin.app.db.getRepository('approval_apply').update({
+        filterByTk: processor.execution.context.data.id,
+        values: {
+          jobIsEnd: true,
+        },
+      });
+    }else if(isResolved && !nextNode){
+      /* 如果是最后一个节点 则审批完成 */
+      await processor.options.plugin.app.db.getRepository('approval_apply').update({
+        filterByTk: processor.execution.context.data.id,
+        values: {
+          jobIsEnd: true
+        }
+      });
+    }else{
+      await processor.options.plugin.app.db.getRepository('approval_apply').update({
+        filterByTk: processor.execution.context.data.id,
+        values: {
+          jobIsEnd: false
+        }
+      });
+    }
+    if (nextNode.type == 'copyTo') {
+      job.set('status', JOB_STATUS.RESOLVED);
+      return job;
+    } else {
+      job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
+      /* 更新审批流 审批完成状态 */
+      return job;
+    }
+    // job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
+    // return job;
   }
 }

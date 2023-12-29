@@ -114,7 +114,7 @@ export async function submit(context: Context, next) {
   // }
 
   // await userJob.job.save({ transaction: processor.transaction });
-  await userJob.save({ transaction: processor.transaction });
+  await userJob.save({ transaction: (processor as any).transaction });
 
   await processor.exit();
 

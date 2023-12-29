@@ -5,9 +5,6 @@ import React from 'react';
 import WorkflowPlugin from '@nocobase/plugin-workflow';
 import { Approval } from './nodes';
 import CopyTo from './nodes/copyTo';
-import { SettingOutlined } from '@ant-design/icons';
-// import { ApplyAction, useApplyFormActionProps, useApprovalApplyFormBlockProps } from './blocks/ApplyAction';
-import { createActionForm } from './blocks/schema/createActionForm';
 import { Apply } from './blocks/apply-action';
 
 import * as scopes from './scopes';

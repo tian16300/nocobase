@@ -98,15 +98,12 @@ export default class extends Instruction {
   }
 
   async run(node, prevJob, processor: Processor) {
-    // const job = await processor.saveJob({
-    //   status: JOB_STATUS.PENDING,
-    //   nodeId: node.id,
-    //   upstreamId: prevJob?.id ?? null,
-    // });
+   
     /**
      * 查找人
      */
-    const transaction = processor.transaction;
+    const nextNode = node.downstream;
+    const transaction = (processor as any).transaction;
     const workflowModel = await processor.execution.getWorkflow();
     const users = await processor.getUsersByRule(node.config, node.id);
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
@@ -139,19 +136,68 @@ export default class extends Instruction {
     const dingTalkService = (processor.options.plugin.app.getPlugin('@domain/plugin-enterprise-integration') as any)
       .dingTalkService;
     const message = await dingTalkService.sendMsgToUserByDingAction(data);    
-    return {
-      status: message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED, 
-      result: {
-        type: 'copyTo',
-        relatedData,
-        users,
-        dingUsers,
-        message
+    const status = message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.ERROR;
+    /* 更新审批流完成状态 */
+    let jobModel;
+    let jobIsEnd = false;
+     /**
+     * 如果是抄送节点 是最后一个节点 并且上个节点是通过状态 则更新 jobIsEnd
+     */
+    // if(prevJob && !nextNode){
+    //   jobIsEnd = true;
+    // }
+    /* 拒绝 或者取消 */
+    if(prevJob && prevJob.latestUserJobResult && ['2'].includes(prevJob.latestUserJobResult.approvalStatus)){
+      jobModel = {
+        status: status == JOB_STATUS.RESOLVED?JOB_STATUS.REJECTED: status,
+        result: {
+          type: 'copyTo',
+          relatedData,
+          users,
+          dingUsers,
+          message
+        }
       }
-    };
+      jobIsEnd = true;
+    }else {
+      jobModel = {
+        status: status, 
+        result: {
+          type: 'copyTo',
+          relatedData,
+          users,
+          dingUsers,
+          message
+        }
+      };
+    }
+    if(prevJob && prevJob.latestUserJobResult && ['1'].includes(prevJob.latestUserJobResult.approvalStatus) && !nextNode){
+      jobIsEnd = true;
+    }
+     const job = await processor.saveJob({
+      ...jobModel,
+      nodeId: node.id,
+      upstreamId: prevJob?.id ?? null,
+    });
+   
+    const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
+      filterByTk: approvalModel.id,
+      values: {
+        jobId: job.id,
+        nodeId: node.id,
+        executionId: job.executionId,
+        workflowKey: workflowModel.key,
+        result: relatedData,
+        jobIsEnd
+      },
+      transaction,
+    });
+    processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`, upRes);
+    return job;
+
   }
 
-  async resume(node, job, processor: Processor) {
-    return job;
-  }
+  // async resume(node, job, processor: Processor) {
+  //   return job;
+  // }
 }

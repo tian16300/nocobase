@@ -1,38 +1,21 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-const { Title } = Typography;
 
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import useStyles from './style';
+import { useSearchParams, useNavigate  } from 'react-router-dom';
 import { DingdingOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProForm, FooterToolbar } from '@ant-design/pro-components';
 import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin, Tag, Space, Timeline } from 'antd';
 import {
-  APIClientProvider,
-  Action,
-  BlockProvider,
   CollectionProvider,
-  DefaultValueProvider,
-  FormActiveFieldsProvider,
-  FormProvider,
   RecordProvider,
-  RemoteSchemaComponent,
-  RemoteSelect,
   SchemaComponent,
   SchemaComponentContext,
-  VariableScopeProvider,
-  actionDesignerCss,
-  createDetailsBlockSchema,
   css,
   useAPIClient,
-  useAssociation,
-  useAssociationNames,
-  useCollection,
   useCollectionManager,
   useDesignable,
   useFormBlockContext,
   useRequest,
   useSchemaComponentContext,
-  useSchemaTemplateManager,
   useToken,
 } from '@nocobase/client';
 
@@ -41,7 +24,6 @@ import { dayjs, uid } from '@nocobase/utils';
 import { createDetailSchema } from './schema/detailSchema';
 import { createApproveSchema } from './schema/approveSchema';
 import { UserOutlined } from '@ant-design/icons';
-import { createForm } from '@formily/core';
 const ApprovalContext = createContext<any>({});
 
 export const useApprovalContext = () => {
@@ -59,7 +41,7 @@ export const ApprovalDetailPage = () => {
     action: 'get',
     params: {
       filterByTk: searchParams.get('id'),
-      appends: ['applyUser', 'currentApprovalUsers', 'applyResults', 'applyResults.approvalUser', 'execution'],
+      appends: ['applyUser', 'currentApprovalUsers', 'applyResults', 'applyResults.approvalUser', 'execution', 'job'],
     },
   });
   const apply = data?.data;
@@ -96,10 +78,8 @@ export const ApprovalDetailPage = () => {
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
   useEffect(() => {
-    if (apply?.execution?.status) {
-      setIsComplete(true);
-    }
-  }, [apply?.execution?.status]);
+    setIsComplete(apply?.jobIsEnd);
+  }, [apply?.jobIsEnd]);
 
   return (
     <ApprovalContext.Provider
@@ -121,7 +101,11 @@ const View = (props: any) => {
   const { components, scope } = useSchemaComponentContext();
   const { loading, apply, workflow, isComplete } = useApprovalContext();
   const token = useToken();
-
+  /**
+   *
+   * @param props TODO 调整成表格
+   * @returns
+   */
   const ApprovalLogs = (props) => {
     const items =
       apply.applyResults?.map((applyResult) => {
@@ -161,90 +145,108 @@ const View = (props: any) => {
         <p>审批中...</p>
       </>
     );
-    return <Timeline pending={pending} reverse={true} items={items} />;
+    // return <Timeline pending={pending} reverse={true} items={items} />;
+    return <>审批记录</>;
   };
 
   const contentList = {
     tab1: <ApprovalLogs />,
     tab2: <p>content2</p>,
   };
+  const navigate = useNavigate();
 
   return (
-    <div
-      style={{
-        background: '#F5F7FA',
-      }}
-    >
-      <PageContainer
-        fixedHeader
-        header={{
-          title: '审批编号: ' + data?.code,
-          breadcrumb: {
-            items: [
-              {
-                path: '',
-                title: '我的审批',
-              },
-              {
-                path: '',
-                title: '审批详情',
-              },
-            ],
+    <PageContainer
+    fixedHeader
+    header={{
+      // title: '审批编号: ' + data?.code,
+      breadcrumb: {
+        items: [
+          {
+            path: '',
+            title: '返回',
+            onClick(){
+              navigate(-1);
+            }
           },
-        }}
-      >
-        {loading ? (
-          <Spin></Spin>
-        ) : (
-          <>
-            <SchemaComponent
-              schema={createDetailSchema({
-                id: apply?.id,
-              })}
-              components={components}
-              scope={scope}
-            />
-            <Row gutter={[16, 16]}>
-              <Col span={24}>
-                <Card title="流程进度" bordered={false} size="small">
-                  <ApprovalFlowSteps />
-                </Card>
-              </Col>
-              <Col span={16}>
-                <ApprovalFlowNodeDetail></ApprovalFlowNodeDetail>
-              </Col>
-              <Col span={8}>
-                <Card
-                  size="small"
-                  bordered={false}
-                  activeTabKey={tab}
-                  onTabChange={setTab}
-                  tabList={[
-                    {
-                      tab: '审批记录',
-                      key: 'tab1',
-                    },
-                    {
-                      tab: '操作日志',
-                      key: 'tab2',
-                    },
-                  ]}
-                >
-                  <div className={css``}>{contentList[tab]}</div>
-                </Card>
-              </Col>
-              {isComplete ? (
-                <></>
-              ) : (
-                <Col span={24}>
-                  <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
-                </Col>
-              )}
-            </Row>
-          </>
-        )}
-      </PageContainer>
-    </div>
+          {
+            path: '',
+            title: '审批详情',
+          },
+        ],
+      },
+    }}
+    className={css`
+      height: 100%;
+      .ant-pro-page-container-children-container,
+      .ant-page-header-heading {
+        padding-inline-start: 20px;
+        padding-inline-end: 20px;
+      }
+      .ant-pro-page-container-warp-page-header {
+        padding-inline-start: 0;
+        padding-inline-end: 0;
+        padding-block-start: 0;
+        .ant-breadcrumb {
+          padding: 0.5rem 20px;
+          background: #ffffff;
+          border-bottom: 1px solid #e0e0e0;
+        }
+      }
+      .ant-pro-grid-content{
+        height: calc(100% - 55px);
+        overflow: auto;
+      }
+    `}
+  >
+    {loading ? (
+      <Spin></Spin>
+    ) : (
+      <>
+        <SchemaComponent
+          schema={createDetailSchema({
+            id: apply?.id,
+          })}
+          components={components}
+          scope={scope}
+        />
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            {apply.id?<RecordProvider record={apply}>
+              <ApprovalFlowNodeDetail></ApprovalFlowNodeDetail>
+            </RecordProvider>:<></>}
+          </Col>
+          <Col span={24}>
+            <Card
+              size="small"
+              bordered={false}
+              activeTabKey={tab}
+              onTabChange={setTab}
+              tabList={[
+                {
+                  tab: '审批记录',
+                  key: 'tab1',
+                },
+                {
+                  tab: '操作日志',
+                  key: 'tab2',
+                },
+              ]}
+            >
+              <div className={css``}>{contentList[tab]}</div>
+            </Card>
+          </Col>
+          {isComplete ? (
+            <></>
+          ) : (
+            <Col span={24}>
+              <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
+            </Col>
+          )}
+        </Row>
+      </>
+    )}
+  </PageContainer>
   );
 };
 
@@ -266,14 +268,15 @@ const ApprovalFlowSteps = () => {
         })
         .then((res) => {
           const nodes = res.data?.data;
-          const _currentIndex = nodes.findIndex((node) => node.id === apply.nodeId);
+          const _currentIndex = nodes.findIndex((node) => node.id === apply.job?.nodeId);
           setNodes(nodes);
-          if (isComplete) {
-            //审批完成
-            setCurrentIndex(nodes.length + 1);
-          } else {
-            setCurrentIndex(_currentIndex + 1);
-          }
+          setCurrentIndex(_currentIndex + 1);
+          // if (isComplete) {
+          //   //审批完成
+          //   setCurrentIndex(nodes.length + 1);
+          // } else {
+
+          // }
         });
   }, [workflow?.id]);
   const stepItems = useMemo(() => {
@@ -421,15 +424,9 @@ const ApprovalFlowNodeDetail = () => {
     method: 'GET',
     url: `uiSchemas:getJsonSchema/${workflow?.uiTemplate?.uid}`,
   });
-  // const { getTemplateSchemaByMode } = useSchemaTemplateManager();
-  // const s = getTemplateSchemaByMode({mode:'reference',template:workflow?.uiTemplateKey})
   if (loading) {
     return <Spin />;
   }
-  // const schema = createDetailsBlockSchema({
-  //   collection: data.data.collectionName,
-  //   template: workflow?.uiTemplate,
-  // });
   const schema: any = {
     type: 'object',
     properties: {
@@ -442,7 +439,6 @@ const ApprovalFlowNodeDetail = () => {
           resourceOf: apply?.related_data_id,
           action: 'get',
           useParams: '{{ useParamsFromRecord }}',
-          // 'useProps': '{{ useApprovalFormBlockProps }}',
         },
         properties: {
           form: {

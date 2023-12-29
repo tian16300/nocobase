@@ -35,6 +35,6 @@ export const useApprovalFormBlockProps = () => {
       };
     }, []);
     return {
-      form: ctx.form,
+      form: ctx.form
     };
   };
