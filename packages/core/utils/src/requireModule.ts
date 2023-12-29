@@ -1,6 +1,6 @@
 import path from 'path';
-// import { pathToFileURL } from 'url';
-var url = require('url'); 
+import { pathToFileURL } from 'url';
+
 export function requireModule(m: any) {
   if (typeof m === 'string') {
     m = require(m);
@@ -21,7 +21,7 @@ export async function importModule(m: string) {
   }
 
   if (path.isAbsolute(m)) {
-    m = url.pathToFileURL(m).href;
+    m = pathToFileURL(m).href;
   }
 
   const r = (await import(m)).default;
