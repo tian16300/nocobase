@@ -120,6 +120,7 @@ export default class extends Instruction {
     const dingUsers = users.filter(({ dingUserId }) => {
       return dingUserId && dingUserId !== '';
     });
+    const text =  `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${statusText},请知悉!`;
     const data = {
       userIds: dingUsers
         .map(({ dingUserId }) => {
@@ -129,7 +130,7 @@ export default class extends Instruction {
       msg:{
         msgtype: 'text',
         text: {
-          content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${statusText},请知悉!`,
+          content: text,
         },
       }
     };
@@ -138,8 +139,29 @@ export default class extends Instruction {
     const message = await dingTalkService.sendMsgToUserByDingAction(data);    
     const status = message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.ERROR;
     /* 更新审批流完成状态 */
-    let jobModel;
+   
     let jobIsEnd = false;
+    let jobModel = null;
+    let jobModelResult ={
+      type: 'copyTo',
+      relatedData:{
+        relatedCollection,
+        related_data_id
+      },
+      users: users.map(({id, nickname, dingUserId})=>{
+        return {
+          id,
+          nickname,
+          dingUserId
+        }
+      }),
+      // dingUsers,
+      message:{
+        text,
+        result: message
+      },
+      currentUser: prevJob.result?.currentUser,
+    };
      /**
      * 如果是抄送节点 是最后一个节点 并且上个节点是通过状态 则更新 jobIsEnd
      */
@@ -147,31 +169,19 @@ export default class extends Instruction {
     //   jobIsEnd = true;
     // }
     /* 拒绝 或者取消 */
-    if(prevJob && prevJob.latestUserJobResult && ['2'].includes(prevJob.latestUserJobResult.approvalStatus)){
+    if(prevJob && prevJob.latestUserJobResult && ['-4','-5'].includes(prevJob.latestUserJobResult.useAction)){
       jobModel = {
         status: status == JOB_STATUS.RESOLVED?JOB_STATUS.REJECTED: status,
-        result: {
-          type: 'copyTo',
-          relatedData,
-          users,
-          dingUsers,
-          message
-        }
+        result: jobModelResult
       }
       jobIsEnd = true;
     }else {
       jobModel = {
         status: status, 
-        result: {
-          type: 'copyTo',
-          relatedData,
-          users,
-          dingUsers,
-          message
-        }
+        result: jobModelResult
       };
     }
-    if(prevJob && prevJob.latestUserJobResult && ['1'].includes(prevJob.latestUserJobResult.approvalStatus) && !nextNode){
+    if(prevJob && prevJob.latestUserJobResult && ['0','1'].includes(prevJob.latestUserJobResult.useAction) && !nextNode){
       jobIsEnd = true;
     }
      const job = await processor.saveJob({
@@ -187,7 +197,7 @@ export default class extends Instruction {
         nodeId: node.id,
         executionId: job.executionId,
         workflowKey: workflowModel.key,
-        result: relatedData,
+        // result: relatedData,
         jobIsEnd
       },
       transaction,

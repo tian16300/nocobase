@@ -4,10 +4,10 @@ import React from 'react';
 import { useWorkflowContext } from './WorkflowBlockProvider';
 const ApplyBlockContext = createContext<any>({ collection: null });
 export const ApplyBlockProvider = (props) => {
+  const collection = useCollection();
   const { workflow } = useWorkflowContext();
   const record = useRecord();
   const { currentApproval_id } = record;
- 
   let apply = null;
   if (currentApproval_id) {
     const { data } = useRequest<{data:any}>({
@@ -17,17 +17,19 @@ export const ApplyBlockProvider = (props) => {
         filterByTk: currentApproval_id,        
         appends: ['execution']
       },
+    },{
+      uid:`${collection.name}_apply`
     });
     apply = data?.data;
   }
   
-  return  <InnerApplyBlockProvider {...props}  apply={apply} workflow={workflow}></InnerApplyBlockProvider>
+  return  <InnerApplyBlockProvider {...props}  apply={apply} workflow={workflow} record={record}></InnerApplyBlockProvider>
 };
 
 const InnerApplyBlockProvider = (props) => {
-  const { children, workflow, apply } = props;
+  const { children, workflow, apply, record,  } = props;
   const collection = useCollection();
-  const record = useRecord();
+  // const record = useRecord();
   const { currentApproval_id } = record;
   let formActionType = null;
   /* 用户 操作  提交申请  撤销  再次提交申请 */
@@ -43,7 +45,7 @@ const InnerApplyBlockProvider = (props) => {
   }
   return (
    
-    <ApplyBlockContext.Provider value={{ collection, apply, workflow, formActionType }}>
+    <ApplyBlockContext.Provider value={{ collection, apply, workflow,  formActionType }}>
       {children}
     </ApplyBlockContext.Provider>
   );

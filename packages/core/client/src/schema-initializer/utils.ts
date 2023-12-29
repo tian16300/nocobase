@@ -1155,6 +1155,7 @@ export const createFormBlockSchema = (options) => {
     'x-designer': designer = 'FormV2.Designer',
     template,
     title,
+    cardStyle,
     ...others
   } = options;
   const resourceName = resource || association || collection;
@@ -1178,6 +1179,7 @@ export const createFormBlockSchema = (options) => {
     'x-component': 'CardItem',
     'x-component-props': {
       title,
+      ...cardStyle
     },
     properties: {
       [uid()]: {

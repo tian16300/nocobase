@@ -35,13 +35,13 @@ export const ApprovalDetailPage = () => {
   const api = useAPIClient();
   const [loading, setLoading] = useState(true);
   const [applyRelationData, setApplyRelationData] = useState<any>(null);
-  const [isComplete, setIsComplete] = useState<any>(false);
+  const [formIsVisible, setFormIsVisible] = useState<any>(false);
   const { data } = useRequest<any>({
     resource: 'approval_apply',
     action: 'get',
     params: {
       filterByTk: searchParams.get('id'),
-      appends: ['applyUser', 'currentApprovalUsers', 'applyResults', 'applyResults.approvalUser', 'execution', 'job'],
+      appends: ['applyUser', 'currentApprovalUsers', 'applyResults', 'applyResults.user', 'execution', 'job'],
     },
   });
   const apply = data?.data;
@@ -78,7 +78,7 @@ export const ApprovalDetailPage = () => {
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
   useEffect(() => {
-    setIsComplete(apply?.jobIsEnd);
+    setFormIsVisible(!apply?.jobIsEnd || apply.status == '0' );
   }, [apply?.jobIsEnd]);
 
   return (
@@ -88,7 +88,7 @@ export const ApprovalDetailPage = () => {
         apply,
         applyRelationData,
         loading,
-        isComplete,
+        formIsVisible,
       }}
     >
       <View data={apply} />
@@ -99,7 +99,7 @@ const View = (props: any) => {
   const data: any = props?.data;
   const [tab, setTab] = useState('tab1');
   const { components, scope } = useSchemaComponentContext();
-  const { loading, apply, workflow, isComplete } = useApprovalContext();
+  const { loading, apply, workflow, formIsVisible } = useApprovalContext();
   const token = useToken();
   /**
    *
@@ -236,7 +236,7 @@ const View = (props: any) => {
               <div className={css``}>{contentList[tab]}</div>
             </Card>
           </Col>
-          {isComplete ? (
+          {formIsVisible ? (
             <></>
           ) : (
             <Col span={24}>
@@ -436,9 +436,12 @@ const ApprovalFlowNodeDetail = () => {
         'x-decorator-props': {
           collection: apply?.relatedCollection,
           resource: apply?.relatedCollection,
-          resourceOf: apply?.related_data_id,
+          // resourceOf: apply?.related_data_id,
           action: 'get',
-          useParams: '{{ useParamsFromRecord }}',
+          // useParams: '{{ useParamsFromRecord }}',
+          params:{
+            filterByTk: apply?.related_data_id,
+          }
         },
         properties: {
           form: {

@@ -35,6 +35,7 @@ export async function submit(context: Context, next) {
   const actionKey = values.result?._;
   // const actionItem = forms[formKey]?.actions?.find((item) => item.key === actionKey);
   // NOTE: validate status
+  
   if (
     userJob.job.status !== JOB_STATUS.PENDING ||
     userJob.execution.status !== EXECUTION_STATUS.STARTED ||
@@ -54,19 +55,19 @@ export async function submit(context: Context, next) {
   if (!assignees.includes(currentUser.id)) {
     return context.throw(403);
   }
-  const presetValues = processor.getParsedValue(values ?? {}, userJob.nodeId, {
-    // @deprecated
-    currentUser: currentUser,
-    // @deprecated
-    currentRecord: values.result.form,
-    // @deprecated
-    currentTime: new Date(),
-    $user: currentUser,
-    $nForm: values.result.form,
-    $nDate: {
-      now: new Date(),
-    },
-  });
+  // const presetValues = processor.getParsedValue(values ?? {}, userJob.nodeId, {
+  //   // @deprecated
+  //   currentUser: currentUser,
+  //   // @deprecated
+  //   currentRecord: values.result.form,
+  //   // @deprecated
+  //   currentTime: new Date(),
+  //   $user: currentUser,
+  //   $nForm: values.result.form,
+  //   $nDate: {
+  //     now: new Date(),
+  //   },
+  // });
   userJob.set({
     status: actionStatus,
     executionId: processor.execution.id
@@ -74,7 +75,7 @@ export async function submit(context: Context, next) {
   userJob.job.set({
     result:{
       ...userJob.job.result,
-      user: currentUser
+      currentUser: currentUser
     }
   })
   // userJob.job.set({
@@ -95,7 +96,7 @@ export async function submit(context: Context, next) {
   };
   const handler = instruction.formTypes.get(form.type);
   let result = null;
-  if (handler && userJob.status) {
+  if (handler && userJob.status ) {
     result = await handler.call(instruction, {
       ...values,
       currentUser

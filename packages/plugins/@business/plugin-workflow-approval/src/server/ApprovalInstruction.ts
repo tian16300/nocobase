@@ -136,15 +136,15 @@ export default class extends Instruction {
     const transaction = (processor as any).transaction;
     const workflowModel = await processor.execution.getWorkflow();
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
-    const currentUser = prevJob.result.data.user || prevJob.result.data.applyUser;
+    const currentUser = prevJob.result?.currentUser || prevJob.result?.data?.applyUser;
     const users = await processor.getUsersByRule(node.config, node.id, currentUser);
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
-    const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
-    const relatedData = await relatedModel.findOne({
-      filterByTk: related_data_id,
-      transaction,
-    });
+    // const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
+    // const relatedData = await relatedModel.findOne({
+    //   filterByTk: related_data_id,
+    //   transaction,
+    // });
     const statusField = processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
     const statusText = statusField.options.uiSchema.enum.find(({ value }) => {
       return value == approvalModel.status;
@@ -153,6 +153,9 @@ export default class extends Instruction {
       return dingUserId && dingUserId !== '';
     });
     let message = null;
+    const text = `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${
+      !approvalModel.isNewRecord ? statusText : ''
+    },请到我的审批查看。`;
     /* 发送消息 */
     if (dingUsers.length) {
       const data = {
@@ -163,11 +166,7 @@ export default class extends Instruction {
           .join(','),
         msg: {
           msgtype: 'text',
-          text: {
-            content: `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${
-              !approvalModel.isNewRecord ? statusText : ''
-            },请到我的审批查看。`,
-          },
+          text: text,
         },
       };
 
@@ -183,10 +182,23 @@ export default class extends Instruction {
       status: JOB_STATUS.PENDING,
       result: {
         type: 'approval',
-        relatedData,
-        users,
-        dingUsers,
-        message,
+        relatedData:{
+          relatedCollection,
+          related_data_id
+        },
+        users: users.map(({id, nickname, dingUserId})=>{
+          return {
+            id,
+            nickname,
+            dingUserId
+          }
+        }),
+        // dingUsers,
+        message:{
+          text,
+          result: message
+        },
+        currentUser
       },
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
@@ -202,7 +214,7 @@ export default class extends Instruction {
         executionId: job.executionId,
         workflowKey: workflowModel.key,
         currentApprovalUsers: users,
-        result: relatedData,
+        // result: relatedData,
       },
       transaction,
     });
@@ -223,8 +235,8 @@ export default class extends Instruction {
      * 当前节点是否通过
      */
     const nextNode = node.downstream;
-    const isResolved = job.latestUserJobResult?.approvalStatus == '1';
-    const isRejected = job.latestUserJobResult?.approvalStatus == '2';
+    const isResolved = job.latestUserJobResult?.userAction == '1';
+    const isRejected = job.latestUserJobResult?.userAction == '-5';
 
     job.set('result', {
       type: 'approval',
@@ -255,15 +267,11 @@ export default class extends Instruction {
         }
       });
     }
-    if (nextNode.type == 'copyTo') {
+    if (nextNode?.type == 'copyTo') {
       job.set('status', JOB_STATUS.RESOLVED);
-      return job;
-    } else {
-      job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
-      /* 更新审批流 审批完成状态 */
-      return job;
+    }else{
+      job.set('status', Number(job.latestUserJobResult?.userAction).valueOf());
     }
-    // job.set('status', isResolved ? JOB_STATUS.RESOLVED : JOB_STATUS.REJECTED);
-    // return job;
+    return job;
   }
 }

@@ -73,6 +73,21 @@ export class PluginWorkflowApprovalClient extends Plugin {
         Component: 'ApprovalViewActionInitializer',
       },
     );
+    /* 增加 我的审批 查看详情操作 */
+    // this.schemaInitializerManager.addItem(
+    //   'TableActionColumnInitializers', // 示例，已存在的 schema initializer
+    //   'actions.approvalView', // 向 otherBlocks 分组内添加 custom
+    //   {
+    //     type: 'item',
+    //     title: '{{t("审批详情")}}',
+    //     name:'approvalView',
+    //     useVisible() {
+    //       const collection = useCollection();
+    //       return collection?.name === 'approval_apply';
+    //     },
+    //     Component: 'ApprovalViewActionInitializer',
+    //   },
+    // );
 
      /* 增加 同意 拒绝 查看详情操作 */
      this.schemaInitializerManager.addItem(

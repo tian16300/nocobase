@@ -18,6 +18,8 @@ export const WorkflowBlockProvider = (props) => {
       },
       pagination: false,
     },
+  },{
+    uid:`${collection.name}_workflow`
   });
   return (
     <WorkflowContext.Provider value={{ workflow: data?.data?.[0] }}>{props.children}</WorkflowContext.Provider>

@@ -53,13 +53,13 @@ export const createApproveSchema = (options: any = {}) => {
                                 type: 'void',
                                 'x-component': 'Grid.Col',
                                 properties: {
-                                  approvalComments: {
+                                  remark: {
                                     'x-uid': uid(),
                                     type: 'string',
                                     'x-designer': 'FormItem.Designer',
                                     'x-component': 'CollectionField',
                                     'x-decorator': 'FormItem',
-                                    'x-collection-field': 'approval_results.approvalComments',
+                                    'x-collection-field': 'approval_results.remark',
                                     'x-component-props': {},
                                     'x-decorator-props': {
                                       showTitle: false,
@@ -122,32 +122,20 @@ export const createApproveSchema = (options: any = {}) => {
                           },
                         },
                         'x-uid': uid(),
-                        
-                        
                       },
                     },
                     'x-uid': uid(),
-                    
-                    
                   },
                 },
-                
-                
               },
             },
             'x-uid': uid(),
-            
-            
           },
         },
         'x-uid': uid(),
-        
-        
       },
     },
     'x-uid': uid(),
-    
-    
   };
   return schema;
 };

@@ -19,14 +19,14 @@ export default {
       },
     },
     {
-      name: 'approvalUser_id',
+      name: 'userId',
       type: 'bigInt',
       interface: 'integer',
-
+      
       isForeignKey: true,
       uiSchema: {
         type: 'number',
-        title: 'approvalUser_id',
+        title: 'userId',
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
@@ -35,7 +35,6 @@ export default {
       name: 'apply_id',
       type: 'bigInt',
       interface: 'integer',
-
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -58,29 +57,12 @@ export default {
       },
     },
     {
-      name: 'createdBy',
-      type: 'belongsTo',
-      interface: 'createdBy',
-      target: 'users',
-      foreignKey: 'createdById',
-      uiSchema: {
-        type: 'object',
-        title: '{{t("Created by")}}',
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          fieldNames: {
-            value: 'id',
-            label: 'nickname',
-          },
-        },
-        'x-read-pretty': true,
-      },
-      targetKey: 'id',
-    },
-    {
       name: 'updatedAt',
       type: 'date',
       interface: 'updatedAt',
+
+      
+      
       field: 'updatedAt',
       uiSchema: {
         type: 'string',
@@ -91,30 +73,106 @@ export default {
       },
     },
     {
-      name: 'updatedBy',
+      name: 'sort',
+      type: 'sort',
+      hidden: true,
+    },
+    {
+      name: 'createdById',
+      type: 'context',
+      
+      dataType: 'bigInt',
+      dataIndex: 'state.currentUser.id',
+      createOnly: true,
+      visible: true,
+      index: true,
+    },
+    {
+      name: 'createdBy',
       type: 'belongsTo',
-      interface: 'updatedBy',
       target: 'users',
-      foreignKey: 'updatedById',
-      uiSchema: {
-        type: 'object',
-        title: '{{t("Last updated by")}}',
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          fieldNames: {
-            value: 'id',
-            label: 'nickname',
-          },
-        },
-        'x-read-pretty': true,
-      },
+      foreignKey: 'createdById',
       targetKey: 'id',
     },
     {
-      name: 'approvalUser',
+      name: 'updatedById',
+      type: 'context',
+      dataType: 'bigInt',
+      dataIndex: 'state.currentUser.id',
+      visible: true,
+      index: true,
+    },
+    {
+      name: 'updatedBy',
+      type: 'belongsTo',
+      target: 'users',
+      foreignKey: 'updatedById',
+      targetKey: 'id',
+    },
+    {
+      name: 'files',
+      type: 'belongsToMany',
+      interface: 'attachment',
+      uiSchema: {
+        'x-component-props': {
+          accept: 'image/*',
+          multiple: true,
+        },
+        type: 'array',
+        'x-component': 'Upload.Attachment',
+        title: '附件',
+      },
+      target: 'attachments',
+      storage: 'approval',
+      through: 't_9fandryor96',
+      foreignKey: 'f_uvberahle61',
+      otherKey: 'f_kd082hiiydc',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
+    {
+      name: 'userAction',
+      type: 'string',
+      interface: 'select',      
+      uiSchema: {
+        enum: [
+          {
+            value: '0',
+            label: '申请',
+          },
+          {
+            value: '-4',
+            label: '撤销',
+          },
+          {
+            value: '1',
+            label: '同意',
+          },
+          {
+            value: '-5',
+            label: '拒绝',
+          },
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '操作类型',
+      },
+    },
+    {
+      name: 'remark',
+      type: 'text',
+      interface: 'textarea',
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input.TextArea',
+        title: '备注',
+      },
+    },
+    {
+      name: 'user',
       type: 'belongsTo',
       interface: 'obo',
-      foreignKey: 'approvalUser_id',
+      foreignKey: 'userId',
       onDelete: 'SET NULL',
       uiSchema: {
         'x-component': 'AssociationField',
@@ -125,95 +183,29 @@ export default {
             value: 'id',
           },
         },
-        title: '审批人',
+        title: '用户',
       },
       target: 'users',
       targetKey: 'id',
     },
     {
-      name: 'approvalDate',
+      name: 'actionTime',
       type: 'date',
       interface: 'datetime',
-
       uiSchema: {
         'x-component-props': {
           dateFormat: 'YYYY-MM-DD',
           gmt: false,
-          showTime: false,
+          showTime: true,
+          timeFormat: 'HH:mm:ss',
         },
         type: 'string',
         'x-component': 'DatePicker',
-        title: '审批日期',
+        title: '操作时间',
       },
     },
-    {
-      name: 'approvalStatus',
-      type: 'string',
-      interface: 'select',
-      uiSchema: {
-        enum: [
-          {
-            value: '1',
-            label: '已同意',
-            color: 'success',
-          },
-          {
-            value: '2',
-            label: '已拒绝',
-            color: 'error',
-          },
-        ],
-        type: 'string',
-        'x-component': 'Select',
-        title: '审批状态',
-      },
-    },
-    {
-      name: 'approvalComments',
-      type: 'text',
-      interface: 'textarea',
-      uiSchema: {
-        type: 'string',
-        'x-component': 'Input.TextArea',
-        title: '审批备注',
-      },
-    },
-    {
-      type: 'belongsTo',
-      name: 'execution',
-      interface: 'obo',
-      foreignKey: 'executionId',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: '日志',
-      },
-      target: 'executions',
-      targetKey: 'id',
-    },
-    {
-      uiSchema: {
-        'x-component': 'Input.JSON',
-        type: 'object',
-        'x-component-props': {
-          autoSize: {
-            minRows: 5,
-          },
-        },
-        default: null,
-        title: '实例结果',
-      },
-      name: 'result',
-      type: 'json',
-      interface: 'json',
-    }
   ],
+  category: [],
   logging: true,
   autoGenId: true,
   createdBy: true,

@@ -1,3 +1,4 @@
+import { JOB_STATUS } from '@nocobase/plugin-workflow/client';
 import { useApprovalContext } from '../page';
 import { useAPIClient, useFormBlockContext } from '@nocobase/client';
 
@@ -8,8 +9,10 @@ export const useRejectActionProps = () => {
   const status = '2';
   return {
     async onClick() {
-      const formValues = form.values;
-      formValues.approvalStatus = status;
+      const values = {
+        ...form.values,
+        userAction: JOB_STATUS.REJECTED
+      }
       api
         .resource('approval_apply')
         .submit({
@@ -18,7 +21,7 @@ export const useRejectActionProps = () => {
             status: status,
             result: {
               _: apply,
-              form: formValues,
+              form: values,
             },
           },
         })

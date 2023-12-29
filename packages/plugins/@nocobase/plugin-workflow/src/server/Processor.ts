@@ -322,7 +322,7 @@ export default class Processor {
     };
   }
   public async getUsersByRule({rule, assignees, assigneeRoles}, nodeId: number, currentUser?) {
-    const transaction = this.transaction;
+    // const transaction = this.transaction;
     const repository = this.options.plugin.db.getRepository('users');
     if (rule == '1') {
       return await repository.find({ 
@@ -330,8 +330,7 @@ export default class Processor {
             id:{
               $in:assignees
             }
-        },
-        transaction });;
+        }});;
     } else if (rule == '3') {
       const [users]  = await repository.findAndCount({ 
         filter:{
@@ -340,8 +339,7 @@ export default class Processor {
               $in:assigneeRoles
             }
           }
-        },
-        transaction });
+        } });
 
         return users;
     } else if (rule == '2') {

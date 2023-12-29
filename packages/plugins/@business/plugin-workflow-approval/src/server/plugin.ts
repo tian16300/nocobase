@@ -20,10 +20,13 @@ export default class extends Plugin {
     /* 添加事件同步 */
     /* 审批申请  申请人 = 创建人 */
     /* 审批结果  审批人 = 创建人  */
-    this.db.on('approval_apply.afterCreate', async (model, { transaction }) => {
+    this.db.on('approval_apply.afterSaveWithAssociations', async (model, { transaction }) => {
       const relatedCollection = model.get('relatedCollection');
       const related_data_id = model.get('related_data_id');
       const repo = this.app.db.getRepository(relatedCollection);
+      /**
+       * 将申请人记录 添加到申请记录
+       */
       await repo.update({
         filterByTk: related_data_id,
         values: {
@@ -31,17 +34,35 @@ export default class extends Plugin {
         },
         transaction,
       });
+      // const {id, ...others} = model.dataValues;
+      /**
+       * 添加申请记录
+       */
+      if( ['0'].includes(model.get('status'))){
+      await this.app.db.getRepository('approval_results').create({
+        values:{
+          userId: model.get('updatedBy') || model.get('createdBy'),
+          userAction:'0',
+          remark: model.get('remark'),
+          files: model.dataValues?.files,
+          actionTime: new Date().toISOString(),
+          apply_id: model.get('id'),
+          
+        },
+        transaction
+      })
+    }
     });
     /**
      * 审批状态 = 已撤销 终止流程
      */
-    this.db.on('approval_apply.afterUpdate', async (model, { transaction }) => {
-      const changed = Array.from(model._changed);
-      const status = model.get('status');
-      if (changed.includes('status') && status == '5') {
-        /* 终止job 流程  */
-      }
-    });
+    // this.db.on('approval_apply.afterUpdate', async (model, { transaction }) => {
+    //   const changed = Array.from(model._changed);
+    //   const status = model.get('status');
+    //   if (changed.includes('status') && status == '5') {
+    //     /* 终止job 流程  */
+    //   }
+    // });
   }
   async load() {
     /* 导入审批相关的表 */

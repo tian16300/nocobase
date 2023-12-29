@@ -12,15 +12,17 @@ export default async function (this: ApprovalInstruction, instance, { collection
   const model = await repo.create({
     values: {
       ...((values as { [key: string]: any }) ?? {}),
-      approvalUser_id:instance.currentUser.id,
-      approvalDate: new Date(),
+      // approvalUser_id:instance.currentUser.id,
+      // approvalDate: new Date(),
+      actionTime: new Date().toISOString(),
+      user:instance.currentUser,
       apply_id:_.id,
-      executionId: processor.execution.id
+      // executionId: processor.execution.id
     },
     context: {
       executionId: processor.execution.id,
     },
-    transaction: processor.transaction,
+    // transaction: processor.transaction,
   });
   return model;
 }
