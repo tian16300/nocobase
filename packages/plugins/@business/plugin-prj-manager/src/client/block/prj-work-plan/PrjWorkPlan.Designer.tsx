@@ -274,7 +274,7 @@ export const PrjWorkPlanDesigner = () => {
         }}
       />
       <SchemaSettingsDivider />
-      <SchemaSettingsTemplate componentName={'Gantt'} collectionName={name} resourceName={defaultResource} />
+      <SchemaSettingsTemplate componentName={'PrjWorkPlan'} collectionName={name} resourceName={defaultResource} />
       <SchemaSettingsDivider />
       <SchemaSettingsRemove
         removeParentsIfNoChildren

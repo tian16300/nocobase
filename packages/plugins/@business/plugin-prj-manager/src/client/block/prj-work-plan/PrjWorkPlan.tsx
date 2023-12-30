@@ -17,4 +17,4 @@ PrjWorkPlan.Wrap = ({ children }) => {
 PrjWorkPlan.Table = PrjWorkPlanTable
 PrjWorkPlan.Decorator = PrjWorkPlanProvider;
 PrjWorkPlan.Designer = PrjWorkPlanDesigner;
-PrjWorkPlan.Initial = PrjWorkPlanInitializer
+PrjWorkPlan.Initializer = PrjWorkPlanInitializer

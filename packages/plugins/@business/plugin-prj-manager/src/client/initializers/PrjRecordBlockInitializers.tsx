@@ -1,5 +1,12 @@
 import { Schema, useFieldSchema } from '@formily/react';
-import { SchemaInitializer, SchemaInitializerItemType, gridRowColWrap, useCollection, useCollectionManager, useSchemaInitializer } from '@nocobase/client';
+import {
+  SchemaInitializer,
+  SchemaInitializerItemType,
+  gridRowColWrap,
+  useCollection,
+  useCollectionManager,
+  useSchemaInitializer,
+} from '@nocobase/client';
 
 const recursiveParent = (schema: Schema) => {
   if (!schema) return null;
@@ -55,62 +62,74 @@ const useRelationFields = () => {
       }
 
       if (['hasMany', 'belongsToMany'].includes(field.type)) {
+        const children = [
+          {
+            name: `${field.name}_table`,
+            type: 'item',
+            title: '{{t("Table")}}',
+            field,
+            Component: 'RecordAssociationBlockInitializer',
+          },
+          {
+            name: `${field.name}_details`,
+            type: 'item',
+            title: '{{t("Details")}}',
+            field,
+            Component: 'RecordAssociationDetailsBlockInitializer',
+          },
+          {
+            name: `${field.name}_list`,
+            type: 'item',
+            title: '{{t("List")}}',
+            field,
+            Component: 'RecordAssociationListBlockInitializer',
+          },
+          {
+            name: `${field.name}_grid_card`,
+            type: 'item',
+            title: '{{t("Grid Card")}}',
+            field,
+            Component: 'RecordAssociationGridCardBlockInitializer',
+          },
+          {
+            name: `${field.name}_form`,
+            type: 'item',
+            title: '{{t("Form")}}',
+            field,
+            Component: 'RecordAssociationFormBlockInitializer',
+          },
+          // TODO: This one should be append in the calendar plugin
+          {
+            name: `${field.name}_calendar`,
+            type: 'item',
+            title: '{{t("Calendar")}}',
+            field,
+            Component: 'RecordAssociationCalendarBlockInitializer',
+          },
+        ];
+        if (field.target == 'task') {
+          children.push({
+            name: `${field.name}_prjWorkPlan`,
+            type: 'item',
+            title: '任务管理',
+            field,
+            Component: 'PrjWorkPlan.Initializer',
+          });
+        }
+        if (field.target == 'bom') {
+          children.push({
+            name: `${field.name}_treeForm`,
+            type: 'item',
+            title: '树表单',
+            field,
+            Component: 'RecordAssociationTreeFormBlockInitializer',
+          });
+        }
         return {
           name: field.name,
           type: 'subMenu',
           title: field?.uiSchema?.title || field.name,
-          children: [
-            {
-              name: `${field.name}_table`,
-              type: 'item',
-              title: '{{t("Table")}}',
-              field,
-              Component: 'RecordAssociationBlockInitializer',
-            },
-            {
-              name: `${field.name}_details`,
-              type: 'item',
-              title: '{{t("Details")}}',
-              field,
-              Component: 'RecordAssociationDetailsBlockInitializer',
-            },
-            {
-              name: `${field.name}_list`,
-              type: 'item',
-              title: '{{t("List")}}',
-              field,
-              Component: 'RecordAssociationListBlockInitializer',
-            },
-            {
-              name: `${field.name}_grid_card`,
-              type: 'item',
-              title: '{{t("Grid Card")}}',
-              field,
-              Component: 'RecordAssociationGridCardBlockInitializer',
-            },
-            {
-              name: `${field.name}_form`,
-              type: 'item',
-              title: '{{t("Form")}}',
-              field,
-              Component: 'RecordAssociationFormBlockInitializer',
-            },
-            // TODO: This one should be append in the calendar plugin
-            {
-              name: `${field.name}_calendar`,
-              type: 'item',
-              title: '{{t("Calendar")}}',
-              field,
-              Component: 'RecordAssociationCalendarBlockInitializer',
-            },
-            {
-                name: `${field.name}_prjWorkPlan`,
-                type: 'item',
-                title: '甘特图',
-                field,
-                Component: 'RecordAssociationGanttBlockInitializer'
-              },
-          ],
+          children: children,
         };
       }
 
@@ -271,6 +290,11 @@ export const prjRecordBlockInitializers = new SchemaInitializer({
           name: 'markdown',
           title: '{{t("Markdown")}}',
           Component: 'MarkdownBlockInitializer',
+        },
+        {
+          name: 'hours',
+          title: '工时统计',
+          Component: 'PrjWorkStatic.Initializer'
         },
       ],
     },

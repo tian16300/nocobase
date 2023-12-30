@@ -17,4 +17,4 @@ PrjWorkStatic.View = PrjWorkStaticView;
 PrjWorkStatic.Event = Event;
 PrjWorkStatic.Decorator = PrjWorkProvider;
 PrjWorkStatic.Designer = PrjWorkStaticDesigner;
-PrjWorkStatic.Initial = PrjWorkStaticInitializer
+PrjWorkStatic.Initializer = PrjWorkStaticInitializer
