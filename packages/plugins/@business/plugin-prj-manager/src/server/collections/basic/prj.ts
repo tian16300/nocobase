@@ -250,12 +250,12 @@ export default {
         },
         'x-component': 'AssociationField',
         'x-read-pretty': true,
-        title: '项目类型'
+        title: '项目类型',
       },
       foreignKey: 'type_dicId',
       target: 'dicItem',
       dicCode: 'prj_type',
-      targetKey: 'id'
+      targetKey: 'id',
     },
     //项目状态
     {
@@ -268,7 +268,7 @@ export default {
         title: 'status_dicId',
         'x-component': 'InputNumber',
         'x-read-pretty': true,
-      }
+      },
     },
     {
       name: 'status',
@@ -301,12 +301,12 @@ export default {
         },
         'x-component': 'AssociationField',
         'x-read-pretty': true,
-        title: '项目状态'
+        title: '项目状态',
       },
       foreignKey: 'status_dicId',
       target: 'dicItem',
       dicCode: 'prj_status',
-      targetKey: 'id'
+      targetKey: 'id',
     },
     {
       name: 'title',
@@ -316,7 +316,7 @@ export default {
         type: 'string',
         'x-component': 'Input',
         title: '项目名称',
-      }
+      },
     },
     {
       name: 'code',
@@ -326,7 +326,7 @@ export default {
         type: 'string',
         'x-component': 'Input',
         title: '项目编号',
-      }
+      },
     },
     {
       name: 'description',
@@ -336,7 +336,7 @@ export default {
         type: 'string',
         'x-component': 'Input.TextArea',
         title: '项目描述',
-      }
+      },
     },
     {
       name: 'files',
@@ -357,7 +357,7 @@ export default {
       foreignKey: 'prj_id',
       otherKey: 'file_id',
       targetKey: 'id',
-      sourceKey: 'id'
+      sourceKey: 'id',
     },
     {
       name: 'remark',
@@ -367,7 +367,7 @@ export default {
         type: 'string',
         'x-component': 'Input.TextArea',
         title: '备注说明',
-      }
+      },
     },
     {
       foreignKey: 'belongsPrjKey',
@@ -386,7 +386,7 @@ export default {
         title: '本周进展',
       },
       interface: 'o2m',
-      target: 'reportDetail'
+      target: 'reportDetail',
     },
     {
       foreignKey: 'prjId',
@@ -415,7 +415,7 @@ export default {
         type: 'string',
         'x-component': 'Input.TextArea',
         title: '客户单位',
-      }
+      },
     },
     {
       name: 'customer',
@@ -425,7 +425,7 @@ export default {
         type: 'string',
         'x-component': 'Input',
         title: '客户代表',
-      }
+      },
     },
     {
       foreignKey: 'prjId',
@@ -444,8 +444,27 @@ export default {
         title: '项目任务',
       },
       interface: 'o2m',
-      target: 'task'
-    }
+      target: 'task',
+    },
+    {
+      foreignKey: 'prjId',
+      onDelete: 'SET NULL',
+      name: 'boms',
+      type: 'hasMany',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: 'BOM',
+      },
+      interface: 'o2m',
+      target: 'bom',
+    },
   ],
-  title: '项目'
+  title: '项目',
 };
