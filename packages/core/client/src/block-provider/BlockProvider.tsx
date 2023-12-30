@@ -329,7 +329,8 @@ export interface BlockProviderProps {
 export const BlockProvider = (props: BlockProviderProps) => {
   const {params:_params, collection, association, name } = props;
   const resource = useResource(props);
-  const { appends, updateAssociationValues } = useAssociationNames();
+  const { getAssociationAppends } = useAssociationNames();
+  const { appends, updateAssociationValues } = getAssociationAppends();
   const params = useMemo(() => {
     if (!props.params?.['appends']) {
       return { ...props.params, appends };

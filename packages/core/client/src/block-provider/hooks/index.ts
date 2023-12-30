@@ -1347,30 +1347,13 @@ export function getAssociationPath(str) {
 }
 
 export const useAssociationNames = () => {
+  let updateAssociationValues = new Set([]);
+  let appends = new Set([]);
   const { getCollectionJoinField, getCollection } = useCollectionManager();
   const fieldSchema = useFieldSchema();
-  const updateAssociationValues = new Set([]);
-  const appends = new Set([]);
-  const getAssociationAppends = (schema, str) => {
-    /**
-     * 解决 decorator上的 appends
-     */
-    if (schema['x-decorator-props']?.fieldNames) {
-      Object.values(schema['x-decorator-props']?.fieldNames).forEach((valKeys: string) => {
-        if (typeof valKeys == 'string') {
-          const keys = valKeys.split('.');
-          if (keys.length > 1) {
-            const prefix = schema['x-decorator-props'].resource || schema['x-decorator-props'].collection;
-            const collectionfield = getCollectionJoinField(prefix + '.' + valKeys);
-            if (collectionfield) {
-              const newPath = [...keys.slice(0, keys.length - 1)].join('.');
-              appends.add(newPath);
-            }
-          }
-        }
-      });
-    }
-    schema?.reduceProperties((pre, s) => {
+  const _getAssociationAppends = (schema, str) => {
+    debugger;
+    schema.reduceProperties((pre, s) => {
       const prefix = pre || str;
       const collectionField = s['x-collection-field'] && getCollectionJoinField(s['x-collection-field']);
       const isAssociationSubfield = s.name.includes('.');
@@ -1411,26 +1394,6 @@ export const useAssociationNames = () => {
           const bufPrefix = prefix && prefix !== '' ? prefix + '.' + s.name : s.name;
           getAssociationAppends(s, bufPrefix);
         }
-        /**
-         * 兼容字典字段使用
-         */
-        if (s['x-component-props']?.fieldNames) {
-          Object.values(s['x-component-props']?.fieldNames).forEach((valKeys: string) => {
-            const keys = valKeys.split('.');
-            if (keys.length > 1) {
-              const newPath = [path, ...keys.slice(0, keys.length - 1)].join('.');
-              appends.add(newPath);
-            }
-          });
-        }
-        /**
-         * 设置默认值字段
-         */
-        if (s['x-component-props']?.inheritsKeys) {
-          Object.values(s['x-component-props']?.inheritsKeys).forEach((name: string) => {
-            appends.add(name);
-          });
-        }
       } else if (
         ![
           'ActionBar',
@@ -1446,12 +1409,18 @@ export const useAssociationNames = () => {
           'DataBlockSelectorAction'
         ].includes(s['x-component'])
       ) {
-        getAssociationAppends(s, str);
+        _getAssociationAppends(s, str);
       }
     }, str);
   };
-  getAssociationAppends(fieldSchema, '');
-  return { appends: [...appends], updateAssociationValues: [...updateAssociationValues] };
+  const getAssociationAppends = () => {
+    updateAssociationValues = new Set([]);
+    appends = new Set([]);
+    _getAssociationAppends(fieldSchema, '');
+    return { appends: [...appends], updateAssociationValues: [...updateAssociationValues] };
+  };
+
+  return { getAssociationAppends };
 };
 
 function getTargetField(obj) {
