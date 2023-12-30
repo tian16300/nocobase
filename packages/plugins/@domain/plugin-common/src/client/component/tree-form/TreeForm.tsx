@@ -6,7 +6,22 @@ import { Initializer } from "./Initializer";
 import { TreeFormBlockDesigner } from "./TreeFormBlockDesigner";
 import { CardItem, TableBlockProvider } from "@nocobase/client";
 
-export const TreeForm = ()=>{};
+export const TreeForm = (props)=>{
+
+  return <>
+   {/* <div></div>
+   <div>
+    <div></div>
+    <div>
+       <div></div>
+       <div></div>
+    </div>
+   </div> */}
+   <CardItem {...props}>
+    {props.children}
+    </CardItem>
+  </>
+};
 TreeForm.Initializer = Initializer;
 TreeForm.Main = TreeFormMain;
 TreeForm.Tree = LeftTree;
@@ -25,4 +40,16 @@ TreeForm.Wrap = (props) => {
       </CardItem>
     );
   };
-TreeForm.Designer = TreeFormBlockDesigner;
+TreeForm.Designer = ()=>{
+  return <></>
+};
+
+TreeForm.Content = ()=>{
+
+}
+
+TreeForm.Filter = (props)=>{
+  return <>
+    {props.children}
+  </>
+}

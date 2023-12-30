@@ -463,7 +463,7 @@ export const PrjWorkPlanTable: React.FC<any> = observer(
         key: 'title',
         render: (v, record, index) => {
           const { fieldCtx } = record;
-          const value = fieldCtx ? getValuesByPath(record, fieldCtx.title, '') : record.title;
+          const value = fieldCtx ? getValuesByPath(record, fieldCtx?.title, '') : record.title;
           const menus = renderItems(record);
           return (
             <div className="ant-description-input">

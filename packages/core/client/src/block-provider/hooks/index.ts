@@ -1352,7 +1352,6 @@ export const useAssociationNames = () => {
   const { getCollectionJoinField, getCollection } = useCollectionManager();
   const fieldSchema = useFieldSchema();
   const _getAssociationAppends = (schema, str) => {
-    debugger;
     schema.reduceProperties((pre, s) => {
       const prefix = pre || str;
       const collectionField = s['x-collection-field'] && getCollectionJoinField(s['x-collection-field']);
@@ -1392,7 +1391,7 @@ export const useAssociationNames = () => {
         if (['Nester', 'SubTable', 'PopoverNester'].includes(s['x-component-props']?.mode)) {
           updateAssociationValues.add(path);
           const bufPrefix = prefix && prefix !== '' ? prefix + '.' + s.name : s.name;
-          getAssociationAppends(s, bufPrefix);
+          _getAssociationAppends(s, bufPrefix);
         }
       } else if (
         ![

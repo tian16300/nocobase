@@ -1,5 +1,10 @@
 import { createFilterFormBlockSchema, createFormBlockSchema, createTableBlockSchema } from '@nocobase/client';
 import formSchema from './formSchema';
+import { uid } from '@nocobase/utils';
+import { ISchema, Schema, useFieldSchema, useForm } from '@formily/react';
+
+
+
 
 export const createSchema = (props) => {
   const {
@@ -15,30 +20,33 @@ export const createSchema = (props) => {
     blockType,
     ...others
   } = props;
+  return createTreeFormFilterFormBlockSchema({
+    collection,
+    resource,
+  })
   return {
     type: 'void',
-    'x-designer': 'TreeForm.Designer',
-    'x-decorator':'CardItem',
-    'x-component': 'TreeForm.Main',
+    // 'x-designer': 'TreeForm.Designer',
+    'x-decorator': 'CardItem',
+    'x-component': 'TreeForm',
     'x-component-props': {
       // useProps: '{{ useTreeFormBlockProps }}',
       collection: collection,
     },
+    'x-settings': 'TreeFormSettings',
     properties: {
-      filter: createFilterFormBlockSchema({collection}),
-      tree:{
+      filter: createFilterFormBlockSchema({ collection, className: 'filter-form' }),
+      // tree:{
 
-
-
-      },
-      block:{
-        type:'void',
-        'x-component':'Block',
-        properties:{
-           table:createTableBlockSchema({collection}),
-           form: createFormBlockSchema({collection})
-        }
-      }
+      // },
+      // block:{
+      //   type:'void',
+      //   'x-component':'Block',
+      //   properties:{
+      //      table:createTableBlockSchema({collection}),
+      //      form: createFormBlockSchema({collection})
+      //   }
+      // }
       // filterForm: formSchema(collection),
       // tree: {
       //   type: 'string',
@@ -225,3 +233,85 @@ export const createSchema = (props) => {
     },
   };
 };
+
+
+
+const createTreeFormFilterFormBlockSchema = (options)=>{
+  const {
+    formItemInitializers = 'FilterFormItemInitializers',
+    actionInitializers = 'FilterFormActionInitializers',
+    collection,
+    resource,
+    association,
+    action,
+    template,
+    ...others
+  } = options;
+  const resourceName = resource || association || collection;
+  const schema: ISchema = {
+    type: 'void',
+    'x-decorator': 'FilterFormBlockProvider',
+    'x-decorator-props': {
+      ...others,
+      action,
+      resource: resourceName,
+      collection,
+      association,
+    },
+    'x-settings': 'TreeFormSettings',
+    'x-component': 'TreeForm',
+    properties: {
+      [uid()]: {
+        type: 'void',
+        'x-component': 'FormV2',
+        'x-component-props': {
+          useProps: '{{ useFormBlockProps }}',
+        },
+        properties: {
+          grid1: template || {
+            type: 'void',
+            'x-component': 'Grid',
+            'x-initializer': formItemInitializers,
+            properties: {},
+          },
+          // [uid()]:{
+          //   type: 'void',
+          //   'x-component': 'TreeForm.Main',
+          //   properties:{
+          //      tree:{
+          //       type: 'void',
+          //       'x-component': 'TreeForm.Tree',
+          //      },
+          //      [uid()]:{
+          //       type: 'void',
+          //       'x-component': 'TreeForm.Content',
+          //       properties:{
+          //          actions:{
+          //             type:'void',
+          //             'x-component':'ActionBar',
+          //          },
+          //           block:{
+          //             type: 'void',
+          //             'x-component': 'TreeForm.Block',
+          //             properties:{
+          //               table:{
+          //                 type: 'void',
+          //                 'x-component': 'Table',
+          //               },
+          //               form:{
+          //                 type: 'void',
+          //                 'x-component': 'Form',
+          //               }
+          //             }
+          //           }
+          //       }
+
+          //      }
+          //   }
+          // }
+        },
+      },
+    },
+  };
+  return schema;
+}

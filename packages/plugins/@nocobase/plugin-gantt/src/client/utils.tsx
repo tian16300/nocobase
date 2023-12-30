@@ -46,7 +46,7 @@ export const useGroupFields=()=>{
   return options;
 }
 export const createGanttBlockSchema = (options) => {
-  const { collection, resource, fieldNames, ...others } = options;
+  const { collection,rowKey = 'id', association,  resource, fieldNames, ...others } = options;
   const schema: ISchema = {
     type: 'void',
     'x-acl-action': `${resource || collection}:list`,
@@ -56,12 +56,14 @@ export const createGanttBlockSchema = (options) => {
       resource: resource || collection,
       action: 'list',
       fieldNames: {
-        id: 'id',
+        id: rowKey,
         ...fieldNames,
       },
       params: {
         paginate: false,
       },
+      association,
+      rowKey,
       ...others,
     },
     'x-designer': 'Gantt.Designer',

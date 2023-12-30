@@ -23,6 +23,7 @@ import { ganttSettings } from './Gantt.Settings';
 import { FormLayout } from '@formily/antd-v5';
 export * from './types/public-types';
 export * from './GanttBlockProvider';
+export * from './utils';
 Gantt.ActionBar = ActionBar;
 Gantt.ViewMode = ViewMode;
 Gantt.Designer = GanttDesigner;

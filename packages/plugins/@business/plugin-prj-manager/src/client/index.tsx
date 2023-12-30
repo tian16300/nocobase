@@ -1,4 +1,4 @@
-import { Plugin } from '@nocobase/client';
+import { Plugin, SchemaInitializer } from '@nocobase/client';
 import { FormLayout } from '@formily/antd-v5';
 import {
   BomPrjCost,
@@ -22,7 +22,8 @@ import {
   useSaveOtherPrjPlanActionProps,
   useSavePrjPlanActionProps,
 } from './block';
-
+import { prjRecordBlockInitializers } from './initializers';
+import * as items from './initializers/items';
 export class PluginPrjManagerClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -56,7 +57,8 @@ export class PluginPrjManagerClient extends Plugin {
       PrjWorkStatic,
       PrjPlanCompare,
       BomPrjCost,
-      PrjBomTree
+      PrjBomTree,
+      ...items
 
     });
     this.addSchemaInitializers();
@@ -78,6 +80,9 @@ export class PluginPrjManagerClient extends Plugin {
       title: '计划对比',
       Component: 'PrjPlanCompare.initializer'
     });
+   this.app.schemaInitializerManager.add(prjRecordBlockInitializers);
+
+
   }
 }
 

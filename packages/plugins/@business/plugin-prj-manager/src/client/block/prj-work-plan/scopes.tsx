@@ -50,10 +50,12 @@ const toTreeData = (children, parentIndex) => {
 
 const preProcessData = (data, ctx) => {
   const group = ctx.group;
-  const _groups = ctx.groupData;
+  const _groups = ctx.groupData||[];
+
   const groupField = ctx.groupField;
   const groups = _groups.map((record, index) => {
     const { id, start, end, ...others } = record;
+    debugger;
     const title = getValuesByPath(record, groupField.title);
     const groupItem = {
       id,

@@ -133,7 +133,6 @@ const InternalRemoteSelect = connect(
             })
             .filter(Boolean);
         } catch (err) {
-          console.error(err);
           return options;
         }
       },
@@ -217,7 +216,6 @@ const InternalRemoteSelect = connect(
       }
       firstRun.current = true;
     };
-    console.log('remote select',value);
    
 
     return (

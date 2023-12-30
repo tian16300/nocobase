@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plugin, useSchemaInitializer } from '@nocobase/client';
+import { Plugin, SchemaSettings, SchemaSettingsBlockTitleItem, SchemaSettingsDataTemplates, useCollection, useFormBlockContext, useSchemaInitializer } from '@nocobase/client';
 import { TableOutlined } from '@ant-design/icons';
 import * as comps from './component';
 import * as scopes from './scopes';
@@ -48,6 +48,35 @@ export class PluginCommonClient extends Plugin {
         Component:'TreeForm.Initializer'
       },
     );
+    this.schemaSettingsManager.add(new SchemaSettings({
+      name:'TreeFormSettings',
+      items:[{
+        name: 'title',
+        Component: SchemaSettingsBlockTitleItem,
+      },{
+        name: 'dataTemplates',
+        Component: SchemaSettingsDataTemplates,
+        useVisible() {
+          const { action } = useFormBlockContext();
+          return !action;
+        },
+        useComponentProps() {
+          const { name } = useCollection();
+          return {
+            collectionName: name,
+          };
+        },
+      },{
+        name: 'remove',
+        type: 'remove',
+        componentProps: {
+          removeParentsIfNoChildren: true,
+          breakRemoveOn: {
+            'x-component': 'Grid',
+          },
+        },
+      }]
+    }));
   }
 }
 
