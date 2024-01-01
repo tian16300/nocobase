@@ -465,6 +465,25 @@ export default {
       interface: 'o2m',
       target: 'bom',
     },
+    {
+      foreignKey: 'prjId',
+      onDelete: 'SET NULL',
+      name: 'bomMaterials',
+      type: 'hasMany',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: 'BOM物料',
+      },
+      interface: 'o2m',
+      target: 'bom_wl',
+    },
   ],
   title: '项目',
 };

@@ -3,11 +3,13 @@ import { RecursionField, Schema, useField, useFieldSchema } from '@formily/react
 import { Spin } from 'antd';
 import _, { isEmpty, pick } from 'lodash';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
-import { useCollection } from '../collection-manager';
+import { useCollection, useCollectionManager } from '../collection-manager';
 import { RecordProvider, useRecord } from '../record-provider';
-import { useActionContext, useDesignable,
+import {
+  useActionContext,
+  useDesignable,
   //  useTreeFormBlockContext
-   } from '../schema-component';
+} from '../schema-component';
 import { Templates as DataTemplateSelect } from '../schema-component/antd/form-v2/Templates';
 import { BlockProvider, useBlockRequestContext, useFilterByTk, useParamsFromRecord } from './BlockProvider';
 import { getValuesByPath } from '@nocobase/utils/client';
@@ -116,11 +118,11 @@ export const FormBlockProvider = (props) => {
       <TemplateBlockProvider>
         <BlockProvider name={props.name || 'form'} {...props} block={'form'}>
           <WorkflowBlockProvider>
-          <ApplyBlockProvider>
-            <FormActiveFieldsProvider name="form">
-              <InternalFormBlockProvider {...props} />
-            </FormActiveFieldsProvider>
-          </ApplyBlockProvider>
+            <ApplyBlockProvider>
+              <FormActiveFieldsProvider name="form">
+                <InternalFormBlockProvider {...props} />
+              </FormActiveFieldsProvider>
+            </ApplyBlockProvider>
           </WorkflowBlockProvider>
         </BlockProvider>
       </TemplateBlockProvider>
@@ -138,8 +140,12 @@ export const useFormBlockProps = () => {
   const { fieldSchema: actionFieldSchema } = useActionContext();
   const fieldSchema = actionFieldSchema ? actionFieldSchema : useFieldSchema();
   const addChild = fieldSchema?.['x-component-props']?.addChild;
+  const parentFieldMap = fieldSchema?.['x-component-props']?.parentFieldMap;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
+  console.log('useFormBlockProps record', record);
+  const { getCollectionField } = useCollectionManager();
+  const { name } = useCollection();
 
   useEffect(() => {
     if (addChild) {
@@ -147,17 +153,29 @@ export const useFormBlockProps = () => {
         field.disabled = true;
         field.value = new Proxy({ ...record?.__parent }, {});
       });
-      if (inheritsKeys) {
-        inheritsKeys.forEach((key) => {
-          ctx.form?.query(key).take((field) => {
-            const value = record[key];
-            if (value && typeof value == 'object') {
-              // field.readPretty = true;
-              field.value = new Proxy({ ...value }, {});
-            }
-          });
+    }
+  });
+
+  useEffect(() => {
+    if (parentFieldMap) {
+      const isMapField = record?.__parent?.__collectionName == getCollectionField(`${name}.${parentFieldMap}`).target;
+      if (isMapField) {
+        ctx.form?.query(parentFieldMap).take((field) => {
+          field.value = new Proxy({ ...record?.__parent }, {});
         });
       }
+    }
+  });
+  useEffect(() => {
+    if (inheritsKeys) {
+      (inheritsKeys || []).forEach((key) => {
+        ctx.form?.query(key).take((field) => {
+          const value = record?.__parent?.[key];
+          if (value && typeof value == 'object') {
+            field.value = new Proxy({ ...value }, {});
+          }
+        });
+      });
     }
   });
 

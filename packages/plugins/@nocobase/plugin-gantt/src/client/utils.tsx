@@ -81,7 +81,7 @@ export const createGanttBlockSchema = (options) => {
             'x-component': 'ActionBar',
             'x-component-props': {
               style: {
-                marginBottom: 24,
+                marginBottom: 'var(--nb-spacing)',
               },
             },
             'x-initializer': 'GanttActionInitializers',

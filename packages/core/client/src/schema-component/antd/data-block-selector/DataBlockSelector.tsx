@@ -184,7 +184,7 @@ DataBlockSelectorAction.Designer = (props) => {
                   'x-decorator': 'FormItem',
                   'x-component': 'Select',
                   enum: addToFields,
-                },
+                }
               },
             }}
             initialValues={initialValues}

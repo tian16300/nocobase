@@ -55,7 +55,6 @@ const preProcessData = (data, ctx) => {
   const groupField = ctx.groupField;
   const groups = _groups.map((record, index) => {
     const { id, start, end, ...others } = record;
-    debugger;
     const title = getValuesByPath(record, groupField.title);
     const groupItem = {
       id,

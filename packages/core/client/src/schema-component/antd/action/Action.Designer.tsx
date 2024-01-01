@@ -27,6 +27,7 @@ import {
 import { DefaultValueProvider } from '../../../schema-settings/hooks/useIsAllowToSetDefaultValue';
 import { useLinkageAction } from './hooks';
 import { requestSettingsSchema } from './utils';
+import { cloneDeep } from 'lodash';
 
 const Tree = connect(
   AntdTree,
@@ -97,9 +98,7 @@ function ButtonEditor(props) {
               'x-decorator': 'FormItem',
               'x-component': 'Radio.Group',
               title: t('Button background color'),
-              default: fieldSchema?.['x-component-props']?.danger
-                ? 'danger'
-                : fieldSchema?.['x-component-props']?.type,
+              default: fieldSchema?.['x-component-props']?.danger ? 'danger' : fieldSchema?.['x-component-props']?.type,
               enum: [
                 { value: 'default', label: '{{t("Default")}}' },
                 { value: 'primary', label: '{{t("Highlight")}}' },
@@ -645,6 +644,31 @@ export const actionSettingsItems: SchemaSettingOptions['items'] = [
           return buttonEditorProps;
         },
       },
+
+      {
+        name: 'initialValues',
+        Component: InitialValues,
+        useComponentProps() {
+          const { initialValuesProps } = useSchemaToolbar();
+          return initialValuesProps;
+        },
+        useVisible() {
+          const fieldSchema = useFieldSchema();
+          return 'CreateRecordAction' == fieldSchema['x-component-props']?.['component'];
+        },
+      },
+      {
+        name: 'parentInherit',
+        Component: ParentInherit,
+        useComponentProps() {
+          const { parentInheritProps } = useSchemaToolbar();
+          return parentInheritProps;
+        },
+        useVisible() {
+          const fieldSchema = useFieldSchema();
+          return fieldSchema['x-component-props']?.addChild;
+        },
+      },
       {
         name: 'saveMode',
         Component: SaveMode,
@@ -825,6 +849,125 @@ export const actionSettings = new SchemaSettings({
   items: actionSettingsItems,
 });
 
+function InitialValues(props) {
+  const field = useField();
+  const fieldSchema = useFieldSchema();
+  const { dn } = useDesignable();
+  const { t } = useTranslation();
+  const { getCollectionFields } = useCollectionManager();
+  const {name} = useCollection();
+  const fields = getCollectionFields(name).filter(()=>{
+    return true;
+  }).map((field)=>{
+    return {
+      label:t(field.uiSchema?.title),
+      value: field.name
+    }
+  });
+  return (
+    <SchemaSettingsModalItem
+      title={t('初始数据设置')}
+      schema={
+        {
+          type: 'object',
+          title: t('Edit button'),
+          properties: {
+            parentFieldMap: {
+              type: ' string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              enum:fields,
+              default:  fieldSchema['x-component-props']?.parentFieldMap
+            }
+          },
+        } as ISchema
+      }
+      onSubmit={({parentFieldMap }) => {   
+        field.componentProps.parentFieldMap = parentFieldMap;     
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props'].parentFieldMap = parentFieldMap;
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            'x-component-props': {
+              ...fieldSchema['x-component-props'],
+            },
+          },
+        });
+        dn.refresh();
+      }}
+    />
+  );
+}
+function ParentInherit(props) {
+  const field = useField();
+  const fieldSchema = useFieldSchema();
+  const { dn } = useDesignable();
+  const { t } = useTranslation();
+  const { getCollectionFields } = useCollectionManager();
+  const {name} = useCollection();
+  const inheritsKeys = cloneDeep(fieldSchema['x-component-props'].inheritsKeys || []);
+  const fields = getCollectionFields(name).filter(()=>{
+    return true;
+  }).map((field)=>{
+    return {
+      title:t(field.uiSchema?.title),
+      value: field.name,
+      key: field.name
+    }
+  });
+  return (
+    <SchemaSettingsModalItem
+      title={t('字段继承')}
+      schema={
+        {
+          type: 'object',
+          title: t('设置'),
+          properties: {
+            value: {
+              type: 'array',
+              title: '{{ t("Data fields") }}',
+              required: true,
+              description: t('Only the selected fields will be used as the initialization data for the form'),
+              'x-decorator': 'FormItem',
+              'x-component': Tree,
+              'x-component-props': {
+                defaultCheckedKeys: inheritsKeys,
+                treeData: fields,
+                checkable: true,
+                checkStrictly: true,
+                selectable: false,
+                // onCheck: '{{ getOnCheck($self) }}',
+                rootStyle: {
+                  padding: '8px 0',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '2px',
+                  maxHeight: '30vh',
+                  overflow: 'auto',
+                  margin: '2px 0',
+                },
+              }
+            },
+          },
+        } as ISchema
+      }
+      onSubmit={({ value}) => {
+        field.componentProps.inheritsKeys = value?.checked;     
+        fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
+        fieldSchema['x-component-props'].inheritsKeys = value?.checked;
+        dn.emit('patch', {
+          schema: {
+            ['x-uid']: fieldSchema['x-uid'],
+            'x-component-props': {
+              ...fieldSchema['x-component-props'],
+            },
+          },
+        });
+        dn.refresh();
+      }}
+    />
+  );
+}
 export const ActionDesigner = (props) => {
   const {
     modalTip,
@@ -832,6 +975,8 @@ export const ActionDesigner = (props) => {
     removeButtonProps,
     buttonEditorProps,
     linkageRulesProps,
+    parentInheritProps,
+    initialValuesProps,
     schemaSettings = 'ActionSettings',
     ...restProps
   } = props;
@@ -845,7 +990,15 @@ export const ActionDesigner = (props) => {
   return (
     <GeneralSchemaDesigner
       schemaSettings={hasAction ? settingsName : defaultActionSettings}
-      contextValue={{ modalTip, linkageAction, removeButtonProps, buttonEditorProps, linkageRulesProps }}
+      contextValue={{
+        modalTip,
+        linkageAction,
+        removeButtonProps,
+        buttonEditorProps,
+        linkageRulesProps,
+        initialValuesProps,
+        parentInheritProps,
+      }}
       {...restProps}
       disableInitializer
       draggable={isDraggable}

@@ -141,7 +141,7 @@ export const TreeView = connect(
                       )}
                     </CheckableTag>
                   </MemoTooltip>
-                  <span
+                  {/* <span
                     className={css`
                       position: absolute;
                       top: 0;
@@ -162,7 +162,7 @@ export const TreeView = connect(
                         <RecursionField name={'recordActionBar'} schema={fieldSchema.properties.recordActions} />
                       </RecordProvider>
                     )}
-                  </span>
+                  </span> */}
                 </div>
               );
             }}

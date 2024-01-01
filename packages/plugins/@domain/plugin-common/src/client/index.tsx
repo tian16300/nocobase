@@ -3,6 +3,7 @@ import { Plugin, SchemaSettings, SchemaSettingsBlockTitleItem, SchemaSettingsDat
 import { TableOutlined } from '@ant-design/icons';
 import * as comps from './component';
 import * as scopes from './scopes';
+// import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -48,36 +49,17 @@ export class PluginCommonClient extends Plugin {
         Component:'TreeForm.Initializer'
       },
     );
+   
     this.schemaSettingsManager.add(new SchemaSettings({
-      name:'TreeFormSettings',
-      items:[{
-        name: 'title',
-        Component: SchemaSettingsBlockTitleItem,
-      },{
-        name: 'dataTemplates',
-        Component: SchemaSettingsDataTemplates,
-        useVisible() {
-          const { action } = useFormBlockContext();
-          return !action;
-        },
-        useComponentProps() {
-          const { name } = useCollection();
-          return {
-            collectionName: name,
-          };
-        },
-      },{
-        name: 'remove',
-        type: 'remove',
-        componentProps: {
-          removeParentsIfNoChildren: true,
-          breakRemoveOn: {
-            'x-component': 'Grid',
-          },
-        },
-      }]
+      name:'TreeFormContentSettings',
+      items:[]
     }));
+    // const tableActionInitializers = this.app.schemaInitializerManager.get('TableActionInitializers');
+    // tableActionInitializers?.add('enableActions.addNew', initializerData);
+
+
   }
+  
 }
 
 export default PluginCommonClient;

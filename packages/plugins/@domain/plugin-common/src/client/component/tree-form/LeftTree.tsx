@@ -3,12 +3,14 @@ import {
   CardItem,
   IField,
   useBlockRequestContext,
+  useCollection,
   useCollectionManager
 } from '@nocobase/client';
 import { useFieldSchema, useField } from '@formily/react';
 import { flattenTree } from '@nocobase/utils';
 import { TreeView } from '..';
-import { useTreeFormBlockContext } from './TreeFormMain';
+import { useTreeFormBlockContext } from './TreeFormBlockProvider';
+// import { useTreeFormBlockContext } from './TreeFormMain';
 
 function buildTree(
   arr,
@@ -49,7 +51,7 @@ const treeEach = (tree, callback, { children }) => {
 
 export const LeftTree = (props: any) => {
   const { useProps } = props;
-  const {  onSelect } = useProps?.();
+  // const {  onSelect } = useProps?.();
   const field: IField = useField();
   const blockCtx = useBlockRequestContext();
   const { service } = blockCtx;
@@ -57,10 +59,10 @@ export const LeftTree = (props: any) => {
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const { expandedKeys, setExpandedKeys, setBlockCtx, expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
-  formField.data = formField.data || {};
-  formField.data.blockCtx = blockCtx;
-  const collection = getCollection(field.decoratorProps.collection);
+  const { expandedKeys, setExpandedKeys,  expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
+  // formField.data = formField.data || {};
+  // formField.data.blockCtx = blockCtx;
+  const collection: any = useCollection();
   const fieldNames = {
     key: 'id',
     title: collection?.titleField || 'title',
@@ -71,19 +73,23 @@ export const LeftTree = (props: any) => {
   useEffect(() => {
     if (!service.loading) {
       field.data = field.data || {};
-      field.dataSource =[{
-        [fieldNames.key]: 'root',
-        [fieldNames.title]: '全部',
-        [fieldNames.parentKey]: null,
-        [fieldNames.children]: service.data?.data,
-      }];
-      const data = flattenTree(service.data?.data, []);
-      field.data.list = data;
-      field.value = 'root';
+      // field.dataSource =[{
+      //   [fieldNames.key]: 'root',
+      //   [fieldNames.title]: '全部',
+      //   [fieldNames.parentKey]: null,
+      //   [fieldNames.children]: service.data?.data,
+      // }];
+      field.dataSource = service.data?.data;
+      field.value = null;
+
+      // const data = flattenTree(service.data?.data, []);
+      // field.data.list = data;
+      // field.value = 'root';
       
       
     }
   }, [service.loading, service.data?.data]);
+
   const setExpandSchema = (fieldSchema) => {
     fieldSchema.reduceProperties((buf, s) => {
       if (s['x-action'] === 'expandAll') {
@@ -96,43 +102,41 @@ export const LeftTree = (props: any) => {
       setExpandSchema(s);
     });
   };
-  setExpandSchema(fieldSchema);
-  const handleSelect = (selectedKeys) => {
-    field.data = field.data || {};
-    field.data.selectedRowKeys = selectedKeys;
-    const value = selectedKeys;
-    const row = field?.data?.list.find((item) => item[fieldNames.key] === selectedKeys?.[0]);
-    onSelect?.(value[0], row);
-  };
-  useEffect(() => {
-    const defaultKeys = ['root'];
-    const data = service.data?.data;
-    if (expandAll && data && data.length) {
-      treeEach(
-        data,
-        (item) => {
-          const children = item[fieldNames['children'] || 'children'];
-          if (children && children.length) {
-            defaultKeys.push(item[fieldNames['key'] || 'id']);
-          }
-        },
-        fieldNames,
-      );
-    }
-    setExpandedKeys(defaultKeys);
-  }, [expandAll, service.data?.data]);
+  // setExpandSchema(fieldSchema);
+  // const handleSelect = (selectedKeys) => {
+  //   field.data = field.data || {};
+  //   field.data.selectedRowKeys = selectedKeys;
+  //   const value = selectedKeys;
+  //   const row = field?.data?.list.find((item) => item[fieldNames.key] === selectedKeys?.[0]);
+  //   // onSelect?.(value[0], row);
+  // };
+  // useEffect(() => {
+  //   const defaultKeys = ['root'];
+  //   const data = service.data?.data;
+  //   if (expandAll && data && data.length) {
+  //     treeEach(
+  //       data,
+  //       (item) => {
+  //         const children = item[fieldNames['children'] || 'children'];
+  //         if (children && children.length) {
+  //           defaultKeys.push(item[fieldNames['key'] || 'id']);
+  //         }
+  //       },
+  //       fieldNames,
+  //     );
+  //   }
+  //   setExpandedKeys(defaultKeys);
+  // }, [expandAll, service.data?.data]);
 
 
   return (
-    <CardItem {...props} title={collection.title}>
-      <TreeView
-        {...props}
-        loading={service.loading}
-        fieldNames={fieldNames}
-        expandedKeys={expandedKeys}
-        onExpand={setExpandedKeys}
-        onSelect={handleSelect}
-      ></TreeView>
-    </CardItem>
+    <TreeView
+    {...props}
+    loading={service.loading}
+    fieldNames={fieldNames}
+    expandedKeys={expandedKeys}
+    onExpand={setExpandedKeys}
+    // onSelect={handleSelect}
+  ></TreeView>
   );
 };
