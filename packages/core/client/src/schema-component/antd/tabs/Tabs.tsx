@@ -18,6 +18,7 @@ export const Tabs: any = observer(
     const { render } = useSchemaInitializerRender(fieldSchema['x-initializer'], fieldSchema['x-initializer-props']);
     const contextProps = useTabsContext();
     const { PaneRoot = React.Fragment as React.FC<any> } = contextProps;
+
     
 
     const items = useMemo(() => {
