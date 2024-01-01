@@ -5,7 +5,8 @@ import { useSize } from 'ahooks';
 import { RecursionField, useFieldSchema, observer, useField, connect, mapProps, mapReadPretty } from '@formily/react';
 import { debounce } from 'lodash';
 import { DownOutlined } from '@ant-design/icons';
-const { Search } = Input;
+import { useTreeFormBlockContext } from '../tree-form/Provider';
+// const { Search } = Input;
 const MemoTooltip = Tooltip || React.memo(Tooltip);
 const { CheckableTag } = Tag;
 
@@ -25,7 +26,7 @@ export const TreeView = connect(
     const { key, title, parentKey } = fieldNames;
     const field: IField = useField();
     const fieldSchema = useFieldSchema();
-    const [selectedKeys, setSelectedKeys] = useState([field.value || 'root']);
+    const [selectedKeys, setSelectedKeys] = useState([field.value || [] ]);
     const [searchValue, setSearchValue] = useState('');
     const [autoExpandParent, setAutoExpandParent] = useState(true);
     const { token } = useToken();
@@ -35,6 +36,7 @@ export const TreeView = connect(
     const boxSize = useSize(boxRef);
     const searchBoxSize = useSize(searchBoxRef);
     const [treeBoxHeight, setTreeBoxHeight] = useState(500);
+    const treeCtx = useTreeFormBlockContext();
     useEffect(() => {
       if (boxSize?.height && searchBoxSize?.height) {
         setTreeBoxHeight(boxSize?.height - searchBoxSize?.height);
@@ -67,6 +69,8 @@ export const TreeView = connect(
       if (typeof onSelect === 'function') {
         onSelect(selectedKeys);
       }
+      field.value = selectedKeys;
+      treeCtx?.onSelect(selectedKeys);
     };
 
     return (
@@ -76,8 +80,15 @@ export const TreeView = connect(
           height: ${height};
         `}
       >
-        <div ref={searchBoxRef}>
-          <Search style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
+        <div ref={searchBoxRef} className={css`
+        padding:6px 8px;
+          .ant-input-affix-wrapper-borderless{
+            border-bottom: 1px solid ${token.colorBorder};
+            border-radius: 0;
+          }
+         
+        `}>
+          <Input bordered={false} style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
         </div>
         {loading && (
           <div
@@ -95,7 +106,8 @@ export const TreeView = connect(
             autoExpandParent={autoExpandParent}
             height={treeBoxHeight}
             fieldNames={fieldNames}
-            selectable={false}
+            selectable={true}
+            onSelect={handleSelect}
             className={css`
               .ant-tree-node-content-wrapper: hover {
                 background-color: transparent;
@@ -119,18 +131,17 @@ export const TreeView = connect(
                   `}
                 >
                   <MemoTooltip title={item[title] as any}>
-                    <CheckableTag
+                    {/* <CheckableTag
                       key={item[key]}
                       checked={selectedKeys.includes(item[key])}
-                      onChange={() => {
-                        handleSelect([item[key]]);
-                        if (item[key] !== selectedKeys[0]) {
-                          // onSelect?.(item[key]);
-                          field.value = item[key];
-                        }
-                      }}
+                      // onChange={() => {
+                      //   handleSelect([item[key]]);
+                      //   field.value = item[key];
+                      // }}
                     >
-                      {item[title]?.indexOf(searchValue) > -1 ? (
+                     
+                    </CheckableTag> */}
+                    {item[title]?.indexOf(searchValue) > -1 ? (
                         <>
                           {item[title].substring(0, item[title].indexOf(searchValue))}
                           <span className="site-tree-search-value">{searchValue}</span>
@@ -139,13 +150,12 @@ export const TreeView = connect(
                       ) : (
                         <>{item[title] || '--'}</>
                       )}
-                    </CheckableTag>
                   </MemoTooltip>
-                  {/* <span
+                  <span
                     className={css`
                       position: absolute;
                       top: 0;
-                      margin-left: 10px;
+                      margin-left: 30px;
                       text-wrap: nowrap;
                       .ant-space-horizontal {
                         gap: 0px !important;
@@ -157,16 +167,15 @@ export const TreeView = connect(
                     `}
                     hidden={!selectedKeys.includes(item[key])}
                   >
-                    {item[key] !== 'root' && (
-                      <RecordProvider record={item}>
-                        <RecursionField name={'recordActionBar'} schema={fieldSchema.properties.recordActions} />
+                       <RecordProvider record={item}>
+                        <RecursionField name={'recordActionBar'} schema={fieldSchema.properties?.recordActions} />
                       </RecordProvider>
-                    )}
-                  </span> */}
+                  </span>
                 </div>
               );
             }}
             treeData={treeData}
+            showLine
             switcherIcon={<DownOutlined />}
             // onDragEnter={onDragEnter}
             // onDrop={onDrop}

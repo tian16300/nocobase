@@ -1,5 +1,6 @@
 import { useField, useFieldSchema, useForm } from '@formily/react';
 import {
+  IField,
   useAPIClient,
   useActionContext,
   useBlockRequestContext,
@@ -7,7 +8,7 @@ import {
   useFilterByTk,
   useFormBlockContext,
   useFormBlockType,
-  useRecord
+  useRecord,
 } from '@nocobase/client';
 import { useEffect, useState } from 'react';
 import { useTreeFormBlockContext } from './TreeFormMain';
@@ -59,7 +60,6 @@ export const useTreeFormCreateActionProps = () => {
     onClick: (value) => {
       setUserAction('create');
       refeshForm?.();
-
     },
   };
 };
@@ -96,19 +96,19 @@ export const useTreeFormCreateProps = () => {
   const { field, filterFormLoaded, userAction } = useTreeFormBlockContext();
   useEffect(() => {
     if (filterFormLoaded) {
-      if(userAction == 'createAndAddChild'){
+      if (userAction == 'createAndAddChild') {
         ctx?.form.reset();
         ctx?.form.setInitialValues({
           ...field.data?.filterFormValues,
           parent: record,
         });
-      }else if(userAction == 'create'){
+      } else if (userAction == 'create') {
         ctx?.form.reset();
         ctx?.form.setInitialValues({
           ...field.data?.filterFormValues,
         });
       }
-    }    
+    }
   }, [filterFormLoaded, userAction]);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export const useTreeFormCreateProps = () => {
       ctx?.form.reset();
       ctx?.form.setInitialValues({
         ...field.data?.filterFormValues,
-      });  
+      });
     }
   }, [ctx?.service?.loading]);
   useEffect(() => {
@@ -227,26 +227,43 @@ export const useTreeFormSaveAsNewVersionProps = () => {
 };
 export { useTreeFormBlockContext };
 
-
-export const  useSubmitApprovalActionProps = () => {
+export const useSubmitApprovalActionProps = () => {
   const form = useForm();
   const filterByTk = useFilterByTk();
   const { field, resource, __parent } = useBlockRequestContext();
 
   const ctx = useFormBlockContext();
-  const record =  useRecord();
+  const record = useRecord();
   const collection = useCollection();
   const api = useAPIClient();
- 
+
   return {
-     onClick: async () => {
+    onClick: async () => {
       /**
        * 先保存业务表的信息 再去触发审批流
        */
-      
-      api.resource(collection.name,record[collection.filterTargetKey|| 'id']).submitApproval(ctx?.form?.values).then((res)=>{ 
-        console.log(res);
-       } );
+
+      api
+        .resource(collection.name, record[collection.filterTargetKey || 'id'])
+        .submitApproval(ctx?.form?.values)
+        .then((res) => {
+          console.log(res);
+        });
     },
+  };
+};
+
+export const useTreeFormRightBlockProps = () => {
+  return {
+    view: 'table',
+  };
+};
+export const useTreeFormFormBlockProps = () => {
+  const {selectedKey} = useTreeFormBlockContext();
+  
+ 
+  
+  return {
+    selectedKey
   };
 };

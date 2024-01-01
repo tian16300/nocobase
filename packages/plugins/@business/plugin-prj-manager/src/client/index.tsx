@@ -17,6 +17,7 @@ import {
   useFormSelectOptionsProps,
   usePrjPlanCompareOptionsProps,
   usePrjPlanCompareTableBlockProps,
+  usePrjTabsProps,
   usePrjWorkPlanProcessData,
   usePrjWorkPlanTableBlockProps,
   useSaveOtherPrjPlanActionProps,
@@ -46,7 +47,8 @@ export class PluginPrjManagerClient extends Plugin {
       useSaveOtherPrjPlanActionProps,
       useSavePrjPlanActionProps,
       useDataItemSelectFormSelectBlockProps,
-      useDataItemSelectFormSelectOptionsProps
+      useDataItemSelectFormSelectOptionsProps,
+      usePrjTabsProps
 
     });
     this.app.addComponents({

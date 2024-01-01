@@ -71,7 +71,7 @@ const createShema = (options) => {
       action: 'list',
       params: {
         // pageSize,
-        pagination: false
+        pagination: false,
       },
       rowKey,
       showIndex: true,
@@ -94,19 +94,39 @@ const createShema = (options) => {
         },
         properties: {},
       },
-      content:{
+      content: {
         type: 'object',
         'x-decorator': 'TreeForm.Content',
-        'x-decorator-props':{ },
+        'x-decorator-props': {},
         'x-settings': 'TreeFormContentSettings',
         properties: {
-          tree:{
-             type:'string',
-             'x-decorator': 'CardItem',
-             'x-component':'TreeForm.Tree'
+          tree: {
+            type: 'array',
+            'x-decorator': 'CardItem',
+            'x-component': 'TreeForm.Tree',
+            properties: {
+              recordActions: {
+                type: 'void',
+                title: '{{ t("Actions") }}',
+                'x-component': 'ActionBar',
+                'x-designer': 'TableV2.ActionColumnDesigner',
+                'x-initializer': 'TableActionColumnInitializers',
+                properties: {
+                  actions: {
+                    type: 'void',
+                    'x-decorator': 'DndContext',
+                    'x-component': 'Space',
+                    'x-component-props': {
+                      split: '',
+                    },
+                    properties: {},
+                  },
+                },
+              },
+            },
           },
-          table:{
-            type:'array',
+          table: {
+            type: 'array',
             'x-initializer': 'TableColumnInitializers',
             'x-component': 'TableV2',
             'x-component-props': {
@@ -116,14 +136,16 @@ const createShema = (options) => {
               },
               useProps: '{{ useTableBlockProps }}',
             },
-            'reactions':[{
-              dependencies: ['.tree'],
-              fulfill: {
-                state: {
-                  visible: '{{ !$deps[0] || ($deps[0] == "") }}',
+            'x-reactions': [
+              {
+                dependencies: ['.tree'],
+                fulfill: {
+                  state: {
+                    visible: '{{ !$deps[0] || ($deps[0].length == 0) }}',
+                  },
                 },
               },
-            }],
+            ],
             properties: {
               actions: {
                 type: 'void',
@@ -147,18 +169,26 @@ const createShema = (options) => {
               },
             },
           },
-          form:{
+          form: {
+            type: 'number',
             'x-initializer': 'RecordBlockInitializers',
+            'x-decorator': 'TreeForm.Form',
+            'x-decorator-props': {
+              useProps: '{{ useTreeFormFormBlockProps }}',
+            },
             'x-component': 'Grid',
-            'reactions':[{
-              dependencies: ['.tree'],
-              fulfill: {
-                state: {
-                  visible: '{{ $deps[0] && ($deps[0] !== "") }}',
+            'x-reactions': [
+              {
+                dependencies: ['.tree'],
+                fulfill: {
+                  state: {
+                    visible: '{{ $deps[0] && ($deps[0].length !== 0) }}',
+                    value: '{{ $deps[0]?.[0] }}',
+                  },
                 },
               },
-            }]
-          }
+            ],
+          },
         },
       },
     },

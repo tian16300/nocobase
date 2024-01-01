@@ -107,14 +107,22 @@ export const SchemaSettingOpenModeSchemaItems: React.FC<Options> = (options) => 
           options={[
             { label: t('Drawer'), value: 'drawer' },
             { label: t('Dialog'), value: 'modal' },
+            { label: t('Link'), value: 'link' },
           ]}
           value={openModeValue}
           onChange={(value) => {
             field.componentProps.openMode = value;
+         
+
             const schema = {
               'x-uid': fieldSchema['x-uid'],
             };
             schema['x-component-props'] = fieldSchema['x-component-props'] || {};
+            if(value == 'link'){
+              schema['x-component-props'].component = 'RecordLink';
+            }else{
+              Reflect.deleteProperty(fieldSchema['x-component-props'], 'component');
+            }
             schema['x-component-props'].openMode = value;
             fieldSchema['x-component-props'].openMode = value;
             // when openMode change, set openSize value to default
@@ -152,35 +160,6 @@ export const SchemaSettingOpenModeSchemaItems: React.FC<Options> = (options) => 
             dn.refresh();
           }}
         />
-      ) : null}
-      {['link'].includes(openModeValue) ? (
-        <SchemaSettingsItem title='link'>
-          <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
-            {/* {t('链接地址')} */}
-            <Space.Compact size="middle" style={{ width: '400px' }}>
-              <Input ref={toRef} placeholder="链接地址..." defaultValue={fieldSchema?.['x-component-props']?.['to']} />
-              <Button
-                type="primary"
-                onClick={() => {
-                  const value = toRef.current.input.value;
-                  field.componentProps.to = value;
-                  const schema = {
-                    'x-uid': fieldSchema['x-uid'],
-                  };
-                  schema['x-component-props'] = fieldSchema['x-component-props'] || {};
-                  schema['x-component-props'].to = value;
-                  fieldSchema['x-component-props'].to = value;
-                  dn.emit('patch', {
-                    schema: schema,
-                  });
-                  dn.refresh();
-                }}
-              >
-                确定
-              </Button>
-            </Space.Compact>
-          </div>
-        </SchemaSettingsItem>
       ) : null}
       {['link'].includes(openModeValue) ? (
         <SchemaSettingsItem title='link'>

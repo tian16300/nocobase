@@ -126,6 +126,7 @@ export const createDataSelectBlockSchema = (options) => {
     'x-component-props': {
       //  'size':'large',
       //  'type':'card'
+      useProps: '{{ usePrjTabsProps }}'
     },
     'x-initializer': 'TabPaneInitializers',
     'x-initializer-props': {

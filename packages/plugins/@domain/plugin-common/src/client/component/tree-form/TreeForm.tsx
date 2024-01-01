@@ -1,20 +1,39 @@
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TreeFormMain } from './TreeFormMain';
 import { LeftTree } from './LeftTree';
 import { Initializer } from './Initializer';
 // import { TreeFormBlockDesigner } from "./TreeFormBlockDesigner";
 import {
   CardItem,
+  IField,
+  RecordProvider,
   TableBlockDesigner,
   TableBlockProvider,
   tableActionInitializers,
+  useCollection,
   useDesignable,
+  useProps,
+  useRecord,
+  useTableBlockContext,
   useToken,
 } from '@nocobase/client';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
-import { ISchema, RecursionField, Schema, connect, mapProps, useFieldSchema, useField } from '@formily/react';
+import {
+  ISchema,
+  RecursionField,
+  Schema,
+  connect,
+  mapProps,
+  useFieldSchema,
+  useField,
+  useForm,
+  observer,
+} from '@formily/react';
 import { set } from 'lodash';
+import { flattenTree } from '@nocobase/utils';
+import { useTreeFormBlockContext, TreeFormBlockProvider } from './Provider';
+import { Spin } from 'antd';
 export const TreeForm = (props) => {
   const { token } = useToken();
   const fieldSchema = useFieldSchema();
@@ -51,7 +70,7 @@ export const TreeForm = (props) => {
 TreeForm.Initializer = Initializer;
 TreeForm.Main = TreeFormMain;
 // TreeForm.Tree = LeftTree;
-TreeForm.Decorator = TableBlockProvider;
+TreeForm.Decorator = TreeFormBlockProvider;
 TreeForm.Wrap = (props) => {
   return (
     <CardItem
@@ -76,9 +95,9 @@ TreeForm.Content = (props) => {
   const { left = 0.25 } = props;
   const { token } = useToken();
   const fieldSchema = useFieldSchema();
-  const field = useField();
-
+  const field: IField = useField();
   const { designable, dn } = useDesignable();
+  const { view = 'table' } = useTreeFormBlockContext();
 
   const onStopResize = ({ component }, key) => {
     const flex = component.props.flex;
@@ -103,6 +122,9 @@ TreeForm.Content = (props) => {
         className={css`
           border: 1px solid ${token.colorBorder};
           height: 100%;
+          .ant-card {
+            box-shadow: none;
+          }
           .pane-container:not(.multi-rows) {
             height: 100%;
             & > div:not(.multi-rows) {
@@ -137,7 +159,17 @@ TreeForm.Content = (props) => {
         `}
       >
         <ReflexElement
-          className="left-tree"
+          className={css`
+            .ant-nb-card-item,.ant-card,.ant-card-body {
+              height: 100%;
+            }
+            .ant-card {
+              box-shadow: none;
+              .ant-card-body {
+                padding: 0;
+              }
+            }
+          `}
           flex={left}
           onStopResize={(arg) => {
             onStopResize(arg, 'left');
@@ -147,67 +179,51 @@ TreeForm.Content = (props) => {
         </ReflexElement>
         <ReflexSplitter />
         <ReflexElement className={'main'}>
-          {/* <div
-                ref={boxRef}
-                className={
-                  'pane-container multi-rows ' +
-                  css`
-                    padding: 10px;
-                    .form-container {
-                      // overflow-x: hidden;
-                      .ant-formily-layout {
-                        width: 100%;
-                        overflow-x: hidden;
-                      }
-                    }
-                    .ant-card {
-                      box-shadow: none;
-                      margin-bottom: 0;
-                    }
-                  `
-                }
-              >
-                <div
-                  className={css`
-                    margin-bottom: 8px;
-                  `}
-                >
-                  <RecursionField name={'actions'} schema={fieldSchema.properties.actions} />
-                </div>
-                <div className="form-container">
-                  {loadingFormBlock ? (
-                    <>
-                      <RecordProvider record={record} isMemo={true}>
-                        {['create', 'createAndAddChild'].includes(userAction) && (
-                          <RecursionField name={'create-form'} schema={fieldSchema.properties.form.properties.add} />
-                        )}
-                        {userAction == 'update' && <RecursionField name={'update-form'} schema={updateFormSchema} />}
-                      </RecordProvider>
-                    </>
-                  ) : (
-                    <Spin />
-                  )}
-                </div>
-              </div> */}
-               <RecursionField name={'table'} schema={fieldSchema.properties.table} />
-               <RecursionField name={'form'} schema={fieldSchema.properties.form} />
-              {/* <RecursionField name={'tree'} schema={fieldSchema.properties.tree} /> */}
-          {props.children[1]}
+          {view == 'table' ? (
+            <RecursionField name={'table'} schema={fieldSchema.properties.table} />
+          ) : view == 'form' ? (
+            <RecursionField name={'form'} schema={fieldSchema.properties.form} />
+          ) : (
+            <Spin></Spin>
+          )}
         </ReflexElement>
       </ReflexContainer>
     </>
   );
 };
-
-TreeForm.tbale = ({ children }) => {
-  return <>{children}</>;
-};
-TreeForm.Form = ({ children }) => {
-  return <>{children}</>;
-};
+TreeForm.Form = observer(
+  (_props) => {
+    const field: IField = useField();
+    console.log('TreeForm.Form',field?.value);
+    const {selectedKey} = useTreeFormBlockContext();
+    const props = useProps(_props);
+    const __parent = useRecord();
+    const { name } = useCollection();    
+    const record = new Proxy(
+      {
+        ['id']: selectedKey,
+        __collectionName: name,
+        __parent,
+      },
+      {},
+    );
+     return (
+      <div
+        className={css`
+          overflow-x: hidden;
+        `}
+      >
+        <RecordProvider record={record}> {props.children} </RecordProvider>
+      </div>
+    );
+  },
+  {
+    displayName: 'TreeForm.Form',
+  },
+);
 TreeForm.Filter = (props) => {
   return <>{props.children}</>;
 };
 
-export const TreeFormBlockProvider = TableBlockProvider;
+export {TreeFormBlockProvider};
 export const TreeFormBlockDesigner = TableBlockDesigner;

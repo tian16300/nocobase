@@ -9,7 +9,7 @@ import {
 import { useFieldSchema, useField } from '@formily/react';
 import { flattenTree } from '@nocobase/utils';
 import { TreeView } from '..';
-import { useTreeFormBlockContext } from './TreeFormBlockProvider';
+import { useTreeFormBlockContext } from './Provider';
 // import { useTreeFormBlockContext } from './TreeFormMain';
 
 function buildTree(

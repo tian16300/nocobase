@@ -146,6 +146,7 @@ export const useFormBlockProps = () => {
   console.log('useFormBlockProps record', record);
   const { getCollectionField } = useCollectionManager();
   const { name } = useCollection();
+  const filterByTk = useFilterByTk();
 
   useEffect(() => {
     if (addChild) {
@@ -184,6 +185,13 @@ export const useFormBlockProps = () => {
       ctx.form?.setInitialValues(ctx.service?.data?.data);
     }
   }, [ctx?.service?.loading]);
+
+  useEffect(() => {
+    if (filterByTk && type == 'update') {
+      // ctx.form?.setInitialValues(ctx.service?.data?.data);
+      ctx.service?.refresh();
+    }
+  }, [filterByTk, type]);
   return {
     form: ctx.form,
   };
