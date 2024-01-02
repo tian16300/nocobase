@@ -2,13 +2,13 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { TabsProps } from 'antd';
-import { useTabsContext } from '@nocobase/client';
+// import { useTabsContext } from '@nocobase/client';
 export const usePrjTabsProps = () => {
-    const contextProps = useTabsContext();
+    // const contextProps = useTabsContext();
     const [searchParams, setSearchParams] = useSearchParams();
-    console.log('contextProps', contextProps);
-    contextProps.activeKey =  searchParams.get('tab');
-    contextProps.onChange = useCallback<TabsProps['onChange']>(
+    // console.log('contextProps', contextProps);
+    // contextProps.activeKey =  searchParams.get('tab');
+    const onTabChange = useCallback<TabsProps['onChange']>(
         (key) => {
           setSearchParams([['tab', key]], {
             replace: true,
@@ -19,6 +19,7 @@ export const usePrjTabsProps = () => {
   
     //   contextProps.activeKey = searchParams.get('tab');
   return {
-  
+    activeKey : searchParams.get('tab'),
+    onChange: onTabChange
   };
 };

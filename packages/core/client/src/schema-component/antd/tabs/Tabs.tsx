@@ -16,11 +16,12 @@ export const Tabs: any = observer(
     const props = useProps(_props);
     const fieldSchema = useFieldSchema();
     const { render } = useSchemaInitializerRender(fieldSchema['x-initializer'], fieldSchema['x-initializer-props']);
-    const contextProps = useTabsContext();
+    const _contextProps = useTabsContext();
+    const contextProps = {
+      ...props,
+      ..._contextProps
+    }
     const { PaneRoot = React.Fragment as React.FC<any> } = contextProps;
-
-    
-
     const items = useMemo(() => {
       const result = fieldSchema.mapProperties((schema, key: string) => {
         return {
