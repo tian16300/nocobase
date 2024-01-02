@@ -9,12 +9,15 @@ import {
   useFormBlockContext,
   useFormBlockType,
   useRecord,
+  useTableBlockContext,
 } from '@nocobase/client';
 import { useEffect, useState } from 'react';
-import { useTreeFormBlockContext } from './TreeFormMain';
+// import { useTreeFormBlockContext } from './TreeFormMain';
 import { uid } from '@formily/shared';
 import { onFormValuesChange } from '@formily/core';
 import { isEmpty } from 'lodash';
+import { flatten, flattenTree } from '@nocobase/utils';
+import { useTreeFormBlockContext } from './Provider';
 export const useTreeFormBlockProps = () => {
   const schema: any = useFieldSchema();
   const collection = schema.properties?.tree?.['x-decorator-props']?.collection;
@@ -260,10 +263,20 @@ export const useTreeFormRightBlockProps = () => {
 };
 export const useTreeFormFormBlockProps = () => {
   const {selectedKey} = useTreeFormBlockContext();
-  
- 
-  
   return {
     selectedKey
   };
 };
+
+export const useTreeFormCreateInitialValues = ()=>{
+ const {service} = useTableBlockContext();
+  const {selectedKey} = useTreeFormBlockContext();
+  
+  const record  = flattenTree(service?.data?.data || [],[]).find(item=>item.id == selectedKey)?.[0];
+  if(record){
+    return {
+      parent: record
+    }
+  }
+  return {}
+}

@@ -72,7 +72,7 @@ const useSubmitAction = () => {
   const { setVisible } = useActionContext();
   const data = useCurrentUserContext();
   const currentUser = data?.data?.data;
-  const { form } = useFormBlockContext();
+  const { form, service } = useFormBlockContext();
   const api = useAPIClient();
   const serviceUid = [collection.name, 'apply'].join('_');
   return {
@@ -122,6 +122,7 @@ const useSubmitAction = () => {
             message.success('提交申请成功');
             setVisible(false);
             api.service(serviceUid)?.refresh();
+            service?.refresh();
           });
           // Promise.all([
           //   api.resource('approval_results').create({
@@ -181,6 +182,7 @@ import { JOB_STATUS } from '@nocobase/plugin-workflow/client';
 export const ApplyAction = observer((props) => {
   const { formActionType, ...others } = useApplyBlockContext();
   const record = useRecord();
+
   return (
     <ApplyActionContext.Provider value={{ formActionType, record, ...others }}>
       <CollectionProvider name="approval_apply">
@@ -188,7 +190,7 @@ export const ApplyAction = observer((props) => {
           {/* 创新新申请 */}
           {formActionType == 1 && <AddApplyAction title="提交申请" name="addApply" {...others} />}
           {/* 未审批完成 */}
-          {formActionType == 2 && <CancelApplyAction />}
+          {/* {formActionType == 2 && <CancelApplyAction />} */}
           {/* 审批完成  */}
           {formActionType == 3 && <AddApplyAction title="再次申请" name="reAddApply" {...others} />}
           {props.children?.[1]}

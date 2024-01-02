@@ -143,7 +143,6 @@ export const useFormBlockProps = () => {
   const parentFieldMap = fieldSchema?.['x-component-props']?.parentFieldMap;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
   const { type } = useFormBlockType();
-  console.log('useFormBlockProps record', record);
   const { getCollectionField } = useCollectionManager();
   const { name } = useCollection();
   const filterByTk = useFilterByTk();
@@ -159,7 +158,7 @@ export const useFormBlockProps = () => {
 
   useEffect(() => {
     if (parentFieldMap) {
-      const isMapField = record?.__parent?.__collectionName == getCollectionField(`${name}.${parentFieldMap}`).target;
+      const isMapField = record?.__parent?.__collectionName == getCollectionField(`${name}.${parentFieldMap}`)?.target;
       if (isMapField) {
         ctx.form?.query(parentFieldMap).take((field) => {
           field.value = new Proxy({ ...record?.__parent }, {});
@@ -186,12 +185,6 @@ export const useFormBlockProps = () => {
     }
   }, [ctx?.service?.loading]);
 
-  useEffect(() => {
-    if (filterByTk && type == 'update') {
-      // ctx.form?.setInitialValues(ctx.service?.data?.data);
-      ctx.service?.refresh();
-    }
-  }, [filterByTk, type]);
   return {
     form: ctx.form,
   };

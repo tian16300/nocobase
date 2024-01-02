@@ -28,4 +28,5 @@ export interface ActionContextProps {
   fieldSchema?: Schema;
   drawerProps?: DrawerProps;
   modalProps?: ModalProps;
+  initialValuesScopeBind?: () => any;
 }

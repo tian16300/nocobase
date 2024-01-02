@@ -195,13 +195,13 @@ TreeForm.Form = observer(
   (_props) => {
     const field: IField = useField();
     console.log('TreeForm.Form',field?.value);
-    const {selectedKey} = useTreeFormBlockContext();
+    const {currentRecord = {} } = useTreeFormBlockContext();
     const props = useProps(_props);
     const __parent = useRecord();
     const { name } = useCollection();    
     const record = new Proxy(
       {
-        ['id']: selectedKey,
+        ...(currentRecord||{}),
         __collectionName: name,
         __parent,
       },

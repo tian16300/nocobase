@@ -873,19 +873,39 @@ function InitialValues(props) {
           title: t('Edit button'),
           properties: {
             parentFieldMap: {
+              title:'字段映射',
               type: ' string',
               'x-decorator': 'FormItem',
               'x-component': 'Select',
               enum:fields,
               default:  fieldSchema['x-component-props']?.parentFieldMap
+            },
+            initialValuesScopeBind: {
+              title:'初始值绑定功能',
+              type: ' string',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              enum: [
+                {
+                  label:'关系字段添加初始值',
+                  value:'{{ useTreeFormCreateInitialValues }}'
+                }
+              ],
+              default:  fieldSchema['x-component-props']?.initialValuesScopeBind
             }
+            
           },
+          
         } as ISchema
       }
-      onSubmit={({parentFieldMap }) => {   
+      onSubmit={({parentFieldMap, initialValuesScopeBind }) => {   
         field.componentProps.parentFieldMap = parentFieldMap;     
         fieldSchema['x-component-props'] = fieldSchema['x-component-props'] || {};
         fieldSchema['x-component-props'].parentFieldMap = parentFieldMap;
+        if(initialValuesScopeBind?.name){
+          field.componentProps.initialValuesScopeBind = initialValuesScopeBind;  
+          fieldSchema['x-component-props'].initialValuesScopeBind = '{{' + initialValuesScopeBind?.name+'}}';
+        }      
         dn.emit('patch', {
           schema: {
             ['x-uid']: fieldSchema['x-uid'],

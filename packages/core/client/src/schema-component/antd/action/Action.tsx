@@ -45,6 +45,7 @@ export const Action: any = observer(
       size,
       type,
       disabled: propsDisabled,
+      initialValuesScopeBind,
       ...others
     } = useProps(props);
     const { wrapSSR, componentCls, hashId } = useStyles();
@@ -185,6 +186,7 @@ export const Action: any = observer(
         openSize={openSize}
         containerRefKey={containerRefKey}
         fieldSchema={fieldSchema}
+        initialValuesScopeBind={initialValuesScopeBind}
       >
         {popover}
         {popover && <RecursionField basePath={field.address} onlyRenderProperties schema={fieldSchema} />}

@@ -2,6 +2,8 @@
   "name": "@business/plugin-produce-manager",
   "version": "0.18.0-alpha.1",
   "main": "dist/server/index.js",
+  "displayName": "Bussiness produce manager",
+  "displayName.zh-CN": "生产管理",
   "private": true,
   "peerDependencies": {
     "@nocobase/client": "0.x",

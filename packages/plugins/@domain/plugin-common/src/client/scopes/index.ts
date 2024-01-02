@@ -4,6 +4,7 @@ import {
   useTreeFormBlockProps,
   useTreeFormBlockTreeItemProps,
   useTreeFormCreateActionProps,
+  useTreeFormCreateInitialValues,
   useTreeFormCreateProps,
   useTreeFormExpandActionProps,
   useTreeFormFilterProps,
@@ -26,5 +27,6 @@ export {
   useTreeFormRefreshActionProps,
   useTreeFormSaveAsNewVersionProps,
   useTreeFormShowForm,
-  useTreeFormFormBlockProps
+  useTreeFormFormBlockProps,
+  useTreeFormCreateInitialValues
 };

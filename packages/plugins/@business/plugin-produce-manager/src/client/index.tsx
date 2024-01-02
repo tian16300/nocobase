@@ -5,7 +5,10 @@ export class PluginProduceManagerClient extends Plugin {
     // await this.app.pm.add()
   }
 
-  async beforeLoad() {}
+  async beforeLoad() {
+    
+
+  }
 
   // You can get and modify the app instance here
   async load() {

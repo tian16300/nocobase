@@ -1,6 +1,6 @@
 import { ArrayCollapse, FormLayout } from '@formily/antd-v5';
 import { Field } from '@formily/core';
-import { ISchema, Schema, useField, useFieldSchema } from '@formily/react';
+import { ISchema, Schema, useField, useFieldSchema, useForm } from '@formily/react';
 import { uid } from '@formily/shared';
 import _ from 'lodash';
 import React from 'react';
@@ -652,6 +652,63 @@ export const EditDataBlockSelectorAction = () => {
                 'x-decorator': 'FormItem',
                 'x-component': 'Select',
                 enum: addToFields,
+              },
+              groupBy: {
+                type: 'string',
+                title: '分组字段',
+                'x-decorator': 'FormItem',
+                'x-component': 'AppendsTreeSelect',
+                'x-component-props': {
+                  multiple: false,
+                  useCollection() {
+                    const { values } = useForm();
+                    return values?.collection;
+                  },
+                },
+                'x-reactions': [
+                  {
+                    dependencies: ['.collection'],
+                    fulfill: {
+                      state: {
+                        visible: '{{ !!$deps[0] }}',
+                      },
+                    },
+                  },
+                ],
+              },
+              sumFields:{
+                type: 'array', 
+                title: '统计字段',
+                'x-decorator': 'FormItem',
+                'x-component': 'Select',
+                'x-component-props': {
+                  useProps: ()=>{
+                    const field = useField();
+                    const fields = getCollectionFields(field.data)||[];
+                    // const {t} = useTranslation();
+                    return {
+                      options: fields.filter((field)=>{
+                        return field.uiSchema?.type == 'number';
+                      }).map((field)=>{
+                        return {
+                          label: field.uiSchema?.title,
+                          value: field.name
+                        }
+                      }),
+                      mode:'multiple'
+
+                    }
+                  }
+                },
+                'x-reactions': [{
+                  dependencies:['.collection'],
+                  fulfill:{
+                    state:{
+                      visible: '{{ !!$deps[0] }}',
+                      data: '{{$deps[0]}}'
+                    }
+                  }
+                }],
               },
             },
           }}

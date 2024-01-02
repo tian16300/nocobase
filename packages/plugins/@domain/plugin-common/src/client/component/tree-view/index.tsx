@@ -26,7 +26,7 @@ export const TreeView = connect(
     const { key, title, parentKey } = fieldNames;
     const field: IField = useField();
     const fieldSchema = useFieldSchema();
-    const [selectedKeys, setSelectedKeys] = useState([field.value || [] ]);
+    const [selectedKeys, setSelectedKeys] = useState([field.value || []]);
     const [searchValue, setSearchValue] = useState('');
     const [autoExpandParent, setAutoExpandParent] = useState(true);
     const { token } = useToken();
@@ -65,12 +65,26 @@ export const TreeView = connect(
       setAutoExpandParent(autoExpandParent);
     };
     const handleSelect = (selectedKeys) => {
-      setSelectedKeys(selectedKeys as string[]);
       if (typeof onSelect === 'function') {
         onSelect(selectedKeys);
       }
+      
+      if (typeof  treeCtx?.onSelect === 'function') {
+        treeCtx?.onSelect(selectedKeys);
+      }
       field.value = selectedKeys;
-      treeCtx?.onSelect(selectedKeys);
+    
+    };
+    const toggelSelect = (key)=>{
+      let newValue;
+      if(selectedKeys.includes(key)){
+        newValue = [];
+      }else{
+        newValue = [key];
+      }
+      handleSelect(newValue);
+      setSelectedKeys(newValue);
+
     };
 
     return (
@@ -80,14 +94,16 @@ export const TreeView = connect(
           height: ${height};
         `}
       >
-        <div ref={searchBoxRef} className={css`
-        padding:6px 8px;
-          .ant-input-affix-wrapper-borderless{
-            border-bottom: 1px solid ${token.colorBorder};
-            border-radius: 0;
-          }
-         
-        `}>
+        <div
+          ref={searchBoxRef}
+          className={css`
+            padding: 6px 8px;
+            .ant-input-affix-wrapper-borderless {
+              border-bottom: 1px solid ${token.colorBorder};
+              border-radius: 0;
+            }
+          `}
+        >
           <Input bordered={false} style={{ marginBottom: 8 }} placeholder="搜索..." allowClear onChange={onSearch} />
         </div>
         {loading && (
@@ -106,7 +122,7 @@ export const TreeView = connect(
             autoExpandParent={autoExpandParent}
             height={treeBoxHeight}
             fieldNames={fieldNames}
-            selectable={true}
+            selectable={false}
             onSelect={handleSelect}
             className={css`
               .ant-tree-node-content-wrapper: hover {
@@ -131,17 +147,15 @@ export const TreeView = connect(
                   `}
                 >
                   <MemoTooltip title={item[title] as any}>
-                    {/* <CheckableTag
+                    <CheckableTag
                       key={item[key]}
                       checked={selectedKeys.includes(item[key])}
-                      // onChange={() => {
-                      //   handleSelect([item[key]]);
-                      //   field.value = item[key];
-                      // }}
+                      onChange={() => {
+                        toggelSelect(item[key])
+                      
+                      }}
                     >
-                     
-                    </CheckableTag> */}
-                    {item[title]?.indexOf(searchValue) > -1 ? (
+                      {item[title]?.indexOf(searchValue) > -1 ? (
                         <>
                           {item[title].substring(0, item[title].indexOf(searchValue))}
                           <span className="site-tree-search-value">{searchValue}</span>
@@ -150,6 +164,7 @@ export const TreeView = connect(
                       ) : (
                         <>{item[title] || '--'}</>
                       )}
+                    </CheckableTag>
                   </MemoTooltip>
                   <span
                     className={css`
@@ -167,9 +182,9 @@ export const TreeView = connect(
                     `}
                     hidden={!selectedKeys.includes(item[key])}
                   >
-                       <RecordProvider record={item}>
-                        <RecursionField name={'recordActionBar'} schema={fieldSchema.properties?.recordActions} />
-                      </RecordProvider>
+                    <RecordProvider record={item}>
+                      <RecursionField name={'recordActionBar'} schema={fieldSchema.properties?.recordActions} />
+                    </RecordProvider>
                   </span>
                 </div>
               );
