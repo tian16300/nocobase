@@ -71,7 +71,8 @@ const createShema = (options) => {
       action: 'list',
       params: {
         // pageSize,
-        pagination: false,
+        tree: true,
+        paginate: false,
       },
       rowKey,
       showIndex: true,
