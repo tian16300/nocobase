@@ -59,7 +59,7 @@ export const LeftTree = (props: any) => {
   // field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const { expandedKeys, setExpandedKeys,  expandAll, setExpandAll, field: formField } = useTreeFormBlockContext();
+  const {  expandAll, setExpandAll, expandFlag, allIncludesChildren } = useTreeFormBlockContext();
   // formField.data = formField.data || {};
   // formField.data.blockCtx = blockCtx;
   const collection: any = useCollection();
@@ -70,6 +70,7 @@ export const LeftTree = (props: any) => {
     parentKey: 'parentId',
   };
   // const [expandFlag, setExpandFlag] = useState(false);
+  const [expandedKeys, setExpandesKeys] = useState([]); 
   useEffect(() => {
     if (!service.loading) {
       field.data = field.data || {};
@@ -102,7 +103,8 @@ export const LeftTree = (props: any) => {
       setExpandSchema(s);
     });
   };
-  // setExpandSchema(fieldSchema);
+  
+  setExpandSchema(fieldSchema);
   // const handleSelect = (selectedKeys) => {
   //   field.data = field.data || {};
   //   field.data.selectedRowKeys = selectedKeys;
@@ -110,23 +112,30 @@ export const LeftTree = (props: any) => {
   //   const row = field?.data?.list.find((item) => item[fieldNames.key] === selectedKeys?.[0]);
   //   // onSelect?.(value[0], row);
   // };
-  // useEffect(() => {
-  //   const defaultKeys = ['root'];
-  //   const data = service.data?.data;
-  //   if (expandAll && data && data.length) {
-  //     treeEach(
-  //       data,
-  //       (item) => {
-  //         const children = item[fieldNames['children'] || 'children'];
-  //         if (children && children.length) {
-  //           defaultKeys.push(item[fieldNames['key'] || 'id']);
-  //         }
-  //       },
-  //       fieldNames,
-  //     );
-  //   }
-  //   setExpandedKeys(defaultKeys);
-  // }, [expandAll, service.data?.data]);
+  useEffect(() => {
+    const defaultKeys = [];
+    const data = service.data?.data;
+    if (expandAll && data && data.length) {
+      treeEach(
+        data,
+        (item) => {
+          const children = item[fieldNames['children'] || 'children'];
+          if (children && children.length) {
+            defaultKeys.push(item[fieldNames['key'] || 'id']);
+          }
+        },
+        fieldNames,
+      );
+    }
+    setExpandesKeys(defaultKeys);
+  }, [expandAll, service.data?.data]);
+  useEffect(() => {
+    if (expandFlag) {
+      setExpandesKeys(allIncludesChildren);
+    } else {
+      setExpandesKeys([]);
+    }
+  }, [expandFlag, allIncludesChildren]);
 
 
   return (
@@ -135,7 +144,7 @@ export const LeftTree = (props: any) => {
     loading={service.loading}
     fieldNames={fieldNames}
     expandedKeys={expandedKeys}
-    onExpand={setExpandedKeys}
+    onExpand={setExpandesKeys}
     // onSelect={handleSelect}
   ></TreeView>
   );

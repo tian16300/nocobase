@@ -78,7 +78,10 @@ export const ApprovalDetailPage = () => {
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
   useEffect(() => {
-    setFormIsVisible(!apply?.jobIsEnd || apply.status == '0' );
+  
+    const visible = !apply?.jobIsEnd || apply.status == '0';
+    console.log('detailPage', visible);
+    setFormIsVisible(visible );
   }, [apply?.jobIsEnd]);
 
   return (
@@ -237,11 +240,11 @@ const View = (props: any) => {
             </Card>
           </Col>
           {formIsVisible ? (
-            <></>
-          ) : (
             <Col span={24}>
-              <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
-            </Col>
+            <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
+          </Col>
+          ) : (
+           <></>
           )}
         </Row>
       </>
