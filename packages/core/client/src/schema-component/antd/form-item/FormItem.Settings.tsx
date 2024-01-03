@@ -11,7 +11,7 @@ import { Collection, useCollection, useCollectionManager } from '../../../collec
 import { useRecord } from '../../../record-provider';
 import { generalSettingsItems } from '../../../schema-items/GeneralSettings';
 import {
-  SchemaSettingsDataFormat,
+  SchemaSettingsDateFormat,
   SchemaSettingsDataScope,
   SchemaSettingsDefaultValue,
   SchemaSettingsModalItem,
@@ -463,8 +463,10 @@ export const formItemSettings = new SchemaSettings({
             { label: t('Middle'), value: 'middle' },
             { label: t('Large'), value: 'large' },
           ],
-          value: field?.componentProps?.openSize,
-          onChange(value) {
+          value:
+            fieldSchema?.['x-component-props']?.['openSize'] ??
+            (fieldSchema?.['x-component-props']?.['openMode'] == 'modal' ? 'large' : 'middle'),
+          onChange: (value) => {
             field.componentProps.openSize = value;
             fieldSchema['x-component-props'] = field.componentProps;
             dn.emit('patch', {
@@ -831,7 +833,7 @@ export const formItemSettings = new SchemaSettings({
     },
     {
       name: 'dateFormat',
-      Component: SchemaSettingsDataFormat,
+      Component: SchemaSettingsDateFormat,
       useVisible() {
         const collectionField = useCollectionField();
         const isDateField = ['datetime', 'createdAt', 'updatedAt'].includes(collectionField?.interface);
