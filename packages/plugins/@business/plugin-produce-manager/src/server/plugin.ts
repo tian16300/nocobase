@@ -12,20 +12,20 @@ export class PluginProduceManagerServer extends Plugin {
     });
     /* BOM物料明细 继承 BOM单  */
     this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
-      const prj = await  this.db.getRepository('prj').findOne({
-        filter:{
-          code: model.get('prj_code')   
+      const prj = await this.db.getRepository('prj').findOne({
+        filter: {
+          code: model.get('prj_code'),
         },
-        transaction
-      })
+        transaction,
+      });
       await this.db.getRepository('bom_wl').update({
         filter: {
           bom_id: model.get('id'),
         },
         values: {
-          prjId: prj.get('id')
+          prjId: prj.get('id'),
         },
-        transaction
+        transaction,
       });
       // await this.db.getRepository('bom').update({
       //   filterByTk: model.get('id'),
@@ -43,7 +43,31 @@ export class PluginProduceManagerServer extends Plugin {
     //   model.set('prj_code', prj.code);
 
     // })
-    
+    /* 存储库存 把项目也作更新 */
+    this.app.db.on('wl_stock.beforeSave', async (model, { transaction }) => {
+      if (model.get('stock_id') && !model.get('prjId')) {
+        const prjModel = await this.db.getRepository('prj').findOne({
+          filter: {
+            stock_id: model.get('stock_id'),
+          },
+          transaction,
+        });
+        if (prjModel) {
+          model.set('prjId', prjModel.get('id'));
+        }
+      }else if(model.get('prjId') && !model.get('stock_id')){
+        const prjModel = await this.db.getRepository('prj').findOne({
+          filter: {
+            id: model.get('prjId')
+          },
+          transaction,
+        });
+        if (prjModel) {
+          model.set('stock_id', prjModel.get('stock_id'));
+        }
+
+      }
+    });
   }
   async load() {
     await this.db.import({

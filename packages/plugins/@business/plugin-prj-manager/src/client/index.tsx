@@ -1,4 +1,4 @@
-import { Plugin, SchemaInitializer } from '@nocobase/client';
+import { Plugin, SchemaInitializer, useCollection } from '@nocobase/client';
 import { FormLayout } from '@formily/antd-v5';
 import {
   BomPrjCost,
@@ -86,6 +86,35 @@ export class PluginPrjManagerClient extends Plugin {
     });
    this.app.schemaInitializerManager.add(prjRecordBlockInitializers);
 
+  // this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.createExpectCgApply',{
+  //   title: '{{t("提交采购需求")}}',
+  //   name: 'createExpectCgApply',
+  //   type: 'item',
+  //   Component: 'CreateExpectCgApplyActionInitializer',
+  //   schema: {
+  //     'x-align': 'right',
+  //     'x-decorator': 'ACLActionProvider',
+  //     'x-designer': 'Action.Designer',
+  //     'x-action': 'customize:create',
+  //     'x-settings': 'ActionSettings:customize:bulkEdit',
+  //     'x-acl-action': 'create',
+  //     'x-acl-action-props': {
+  //       skipScopeCheck: true,
+  //     },
+  //   },
+  //   useVisible() {
+  //     const collection = useCollection();
+  //     return (
+  //       (collection.template !== 'view' || collection?.writableView) &&
+  //       collection.template !== 'file' &&
+  //       collection.template !== 'sql'
+  //     );
+  //   }
+
+
+
+  // })
+  
 
   }
 }

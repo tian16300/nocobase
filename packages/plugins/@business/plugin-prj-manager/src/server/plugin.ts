@@ -18,12 +18,12 @@ export class PluginPrjManagerServer extends Plugin {
   afterAdd() {}
   beforeLoad() {
     this.db.addMigrations({
-      namespace: namespace,
       directory: path.resolve(__dirname, 'migrations'),
       context: {
         plugin: this,
       },
     });
+    
     // this.app.db.registerModels({
     //   ReportModel,
     //   ReportDetailModel,
@@ -270,6 +270,8 @@ export class PluginPrjManagerServer extends Plugin {
     this.app.acl.allow('prj', 'hoursCount', 'loggedIn');
     this.app.acl.allow('prj', 'generatePlan', 'loggedIn');
     this.app.acl.allow('prj', 'savePlanLatest', 'loggedIn');
+
+
   }
   async addRecords() {
     dicRecords.forEach(async (record) => {

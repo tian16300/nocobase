@@ -484,6 +484,39 @@ export default {
       interface: 'o2m',
       target: 'bom_wl',
     },
+    {
+      name: 'stock_id',
+      type: 'bigInt',
+      interface: 'integer',
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'stock_id',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+    {
+      name: 'stock',
+      type: 'belongsTo',
+      interface: 'obo',
+      collectionName: 'prj',
+      foreignKey: 'stock_id',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '仓库',
+      },
+      target: 'ware_house',
+      targetKey: 'id',
+    },
   ],
   title: '项目',
 };

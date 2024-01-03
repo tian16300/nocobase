@@ -2,6 +2,7 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { TabsProps } from 'antd';
+import { css } from '@nocobase/client';
 // import { useTabsContext } from '@nocobase/client';
 export const usePrjTabsProps = () => {
     // const contextProps = useTabsContext();
@@ -20,6 +21,11 @@ export const usePrjTabsProps = () => {
     //   contextProps.activeKey = searchParams.get('tab');
   return {
     activeKey : searchParams.get('tab'),
-    onChange: onTabChange
+    onChange: onTabChange,
+    className: css`
+     .nb-block-item.ant-nb-card-item > .ant-card > .ant-card-body{
+       padding: 0
+     }
+    `
   };
 };

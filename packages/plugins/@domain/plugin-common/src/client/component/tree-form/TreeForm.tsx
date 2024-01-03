@@ -178,7 +178,9 @@ TreeForm.Content = (props) => {
           <RecursionField name={'tree'} schema={fieldSchema.properties.tree} />
         </ReflexElement>
         <ReflexSplitter />
-        <ReflexElement className={'main'}>
+        <ReflexElement className={css`.nb-block-item.ant-nb-card-item > .ant-card > .ant-card-body{
+       padding: ${token.padding}px;
+     }`}>
           {view == 'table' ? (
             <RecursionField name={'table'} schema={fieldSchema.properties.table} />
           ) : view == 'form' ? (
