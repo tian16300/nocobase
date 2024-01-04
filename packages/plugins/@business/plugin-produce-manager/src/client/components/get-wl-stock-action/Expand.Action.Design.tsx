@@ -14,8 +14,8 @@ export const GetWlStockActionDesign = (props) => {
   const { getCollectionFields } = useCollectionManager();
   const fields = getCollectionFields(name);
   const targetFields = fields
-    .filter(({ type }) => {
-      return type == 'hasMany';
+    .filter((field) => {
+      return ['o2m','m2m'].includes(field.interface);
     })
     .map((item) => {
       return { label: item?.uiSchema?.title, value: item.name };

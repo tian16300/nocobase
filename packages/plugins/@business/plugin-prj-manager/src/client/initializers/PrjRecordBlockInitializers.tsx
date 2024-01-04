@@ -120,9 +120,9 @@ const useRelationFields = () => {
           children.push({
             name: `${field.name}_treeForm`,
             type: 'item',
-            title: '树表单',
+            title: 'BOM结构树',
             field,
-            Component: 'RecordAssociationTreeFormBlockInitializer',
+            Component: 'RecordAssociationBomTreeFormBlockInitializer',
           });
         }
         return {

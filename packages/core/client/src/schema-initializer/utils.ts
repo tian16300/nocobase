@@ -1348,6 +1348,7 @@ export const createTableBlockSchema = (options) => {
     TableBlockDesigner,
     blockType,
     pageSize = 20,
+    actionVisible,
     ...others
   } = options;
   const schema: ISchema = {
@@ -1382,6 +1383,7 @@ export const createTableBlockSchema = (options) => {
           },
         },
         properties: {},
+        'x-visible': typeof  actionVisible == 'boolean'?actionVisible: true
       },
       [uid()]: {
         type: 'array',

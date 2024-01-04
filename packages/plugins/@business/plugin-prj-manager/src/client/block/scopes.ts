@@ -11,8 +11,9 @@ export const usePrjTabsProps = () => {
     // contextProps.activeKey =  searchParams.get('tab');
     const onTabChange = useCallback<TabsProps['onChange']>(
         (key) => {
-          setSearchParams([['tab', key]], {
-            replace: true,
+          setSearchParams({
+            tab: key,
+            id:searchParams.get('id')
           });
         },
         [setSearchParams],

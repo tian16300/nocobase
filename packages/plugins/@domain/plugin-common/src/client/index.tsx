@@ -3,6 +3,8 @@ import { Plugin, SchemaSettings, SchemaSettingsBlockTitleItem, SchemaSettingsDat
 import { TableOutlined } from '@ant-design/icons';
 import * as comps from './component';
 import * as scopes from './scopes';
+export * from './component';
+export * from './scopes';
 // import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
   async afterAdd() {

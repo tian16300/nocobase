@@ -142,15 +142,13 @@ export const useFormBlockProps = () => {
   const addChild = fieldSchema?.['x-component-props']?.addChild;
   const parentFieldMap = fieldSchema?.['x-component-props']?.parentFieldMap;
   const inheritsKeys = fieldSchema?.['x-component-props']?.inheritsKeys || [];
-  const { type } = useFormBlockType();
+  const isRecord = fieldSchema?.['x-component-props']?.isRecord;
   const { getCollectionField } = useCollectionManager();
   const { name } = useCollection();
-  const filterByTk = useFilterByTk();
-
   useEffect(() => {
     if (addChild) {
       ctx.form?.query('parent').take((field) => {
-        field.disabled = true;
+        // field.disabled = true;
         field.value = new Proxy({ ...record?.__parent }, {});
       });
     }
@@ -184,6 +182,12 @@ export const useFormBlockProps = () => {
       ctx.form?.setInitialValues(ctx.service?.data?.data);
     }
   }, [ctx?.service?.loading]);
+  /* 设置初始化数据 */
+  useEffect(() => {
+    if (isRecord) {
+      ctx.form?.setInitialValues(record.__parent);
+    }
+  }, []);
 
   return {
     form: ctx.form,

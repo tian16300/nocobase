@@ -625,8 +625,8 @@ export const EditDataBlockSelectorAction = () => {
   const { getCollectionFields } = useCollectionManager();
   const fields = getCollectionFields(name);
   const addToFields = fields
-    .filter(({ type }) => {
-      return type == 'hasMany';
+    .filter((field) => {
+      return ['o2m','m2m'].includes(field?.interface);
     })
     .map((item) => {
       return { label: item?.uiSchema?.title, value: item.name };

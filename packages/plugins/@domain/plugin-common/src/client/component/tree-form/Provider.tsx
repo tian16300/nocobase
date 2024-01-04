@@ -28,11 +28,13 @@ const InnerTreeFormBlockProvider = (props) => {
         });
         setSelectedKey(keys[0]);
         setCurrentRecord(record);
+
+        
         setView('form');
       } else {
-        setSelectedKey([]);
-        setCurrentRecord(null);
-        setView('table');
+        // setSelectedKey([]);
+        // setCurrentRecord(null);
+        // setView('table');
       }
     }, 500);
   };

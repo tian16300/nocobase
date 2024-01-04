@@ -1,9 +1,13 @@
 import { Action } from "@nocobase/client";
 import { ExpectCgApplyAction } from "./ExpectCgApply.Action";
+import { ExpectCgApplyActionInitializer } from "./ExpectCgApplyActionInitializer";
 // import { ApplyActionDesign } from "./Apply.Action.Design";
 
 
-export const Apply: any = ExpectCgApplyAction;
+export const ExpectCgApply: any = ExpectCgApplyAction;
 
-Apply.Action = ExpectCgApplyAction;
-Apply.Action.Designer = Action.Designer;
+ExpectCgApply.Action = ExpectCgApplyAction;
+ExpectCgApply.Action.Designer = Action.Designer;
+
+export {ExpectCgApplyActionInitializer}
+

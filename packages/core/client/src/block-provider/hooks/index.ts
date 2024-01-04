@@ -954,6 +954,7 @@ export const useUpdateActionProps = () => {
         resource,
         actionFields: getActiveFieldsName?.('form') || [],
       });
+      debugger;
       actionField.data = field.data || {};
       actionField.data.loading = true;
       const getFormBlockService = (__parent, collectionName) => {

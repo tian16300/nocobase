@@ -1,5 +1,6 @@
 import { Plugin, useSchemaInitializer } from '@nocobase/client';
 import * as comps from './components';
+import { ISchema, useField, useFieldSchema } from '@formily/react';
 export class PluginProduceManagerClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -50,6 +51,28 @@ export class PluginProduceManagerClient extends Plugin {
       },
 
 
+    })
+    this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.countTableChangeAction',{
+      name:'countTableChangeAction',
+      title:'明细/统计',
+      type:'item',
+      Component: 'CountTableChangeActionInitializer',
+      useVisible(){
+        const fieldSchema = useFieldSchema();
+        return true;
+      }
+    })
+    this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.bomTreeAddAction',{
+      name:'bomTreeAddAction',
+      title:'新增BOM',
+      type:'item',
+      Component: 'BomTreeAddActionInitializer',
+    })
+    this.app.schemaInitializerManager.addItem('RecordFormBlockInitializers','dataBlocks.formBlockInitializer2',{
+      name:'formBlockInitializer2',
+      title:'表单块2',
+      type:'item',
+      Component: 'FormBlockInitializer2',
     })
   }
 }
