@@ -983,6 +983,7 @@ export const useUpdateActionProps = () => {
         });
         actionField.data.loading = false;
         const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource);
+        actionField.data.pService = service;
         service?.refresh?.();
         // treeFormField?.data?.blockCtx?.service?.refresh?.();
         // treeFormField?.data?.updateSucessCallback?.({

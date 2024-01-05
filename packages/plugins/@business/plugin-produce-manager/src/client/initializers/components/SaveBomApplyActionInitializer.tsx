@@ -10,7 +10,7 @@ export const SaveBomApplyActionInitializer = (props) => {
     'x-component-props': {
       type: 'primary',
       htmlType: 'submit',
-      useProps: '{{ useCreateActionProps }}',
+      useProps: '{{ useSaveBomApplyActionProps }}'
     },
     'x-action-settings': {
       triggerWorkflows: [],

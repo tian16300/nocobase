@@ -90,7 +90,6 @@ export class PluginProduceManagerClient extends Plugin {
       useVisible(){
         const {name} = useCollection();
         return name === 'bom';
-
       }
     })
       /* 增加保存表单 及 提交申请 操作 */
