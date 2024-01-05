@@ -9,17 +9,25 @@ export const BomTreeAddAction = (props) => {
   const {size, type} = useProps(props)
   const {setViewType, loading, setLoading, currentRecord, setCurrentRecord, setFormRecord} = useBomTreeFormBlockContext();
   const record = useRecord();
+
   const _handleActionClick = () => {
-    if(currentRecord && !['GZ','DY'].includes(currentRecord.type)){
+    if(currentRecord?.id && !['GZ','DY'].includes(currentRecord.type)){
       message.warning('只能在工站或者单元下面增加BOM');
       return;
-
     }
     setLoading(true);
-    setFormRecord({
-      parent: currentRecord,
-      prj: currentRecord?.prj || record,
-    });
+    // const prj = currentRecord?.prj || record;
+    // const formRecord:any = {
+    //   prj: prj,
+    //   prjId: prj.id,
+    //   __collectionName: 'bom'
+    // }
+    // if(currentRecord?.id){
+    //   formRecord.parent = currentRecord;
+    //   formRecord.parentId = currentRecord.id;
+    // }
+
+    // setFormRecord(formRecord);
     setViewType({
       view:'form',
       action:'create'

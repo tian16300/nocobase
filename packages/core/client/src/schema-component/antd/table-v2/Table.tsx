@@ -790,9 +790,9 @@ export const Table: any = observer(
     );
     const fieldSchema = useFieldSchema();
     /* 兼容 如果是甘特图的情况 */
-    const fixedBlock =
-      fieldSchema?.parent?.parent?.['x-decorator-props']?.fixedBlock ||
-      fieldSchema?.parent?.['x-decorator-props']?.fixedBlock;
+    const fixedSize =
+      fieldSchema?.parent?.parent?.['x-decorator-props']?.fixedSize ||
+      fieldSchema?.parent?.['x-decorator-props']?.fixedSize;
 
     const { height: tableHeight, tableSizeRefCallback } = useTableSize();
     const scroll = useMemo(() => {
@@ -802,11 +802,11 @@ export const Table: any = observer(
       if (scrollY) {
         value.y = scrollY;
       }
-      if (fixedBlock) {
+      if (fixedSize) {
         value.y = tableHeight;
       }
       return value;
-    }, [fixedBlock, tableHeight, tableWidth, scrollY]);
+    }, [fixedSize, tableHeight, tableWidth, scrollY]);
     const setRowClassName = (record) => {
       const isRemoved = record?.meta_status === 'removed';
       const selectedClassName = selectedRow.includes(record[rowKey]) ? highlightRow : '';
@@ -817,7 +817,7 @@ export const Table: any = observer(
     };
     return (
       <div
-        className={css`
+        className={'table-inner-block-wrap '+css`
           height: 100%;
           overflow: hidden;
           .ant-table-wrapper {

@@ -21,7 +21,8 @@ export const CountTableChangeAction = (props) => {
   const { viewType, setViewType, loading, setLoading } = useBomTreeFormBlockContext();
   const [count, setIsCount] = useState(viewType.type === 'countTable');
   const { token } = useToken();
-  const handleChange = (value) => {
+  const handleChange = (e) => {
+    const value = e.target.value;
     setLoading(true);
     if(value == 'table'){
       setIsCount(false);

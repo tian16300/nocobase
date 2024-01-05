@@ -79,10 +79,10 @@ export const TableBlockDesigner = () => {
     },
     [dn, field.decoratorProps, fieldSchema, service],
   );
-  const onFixedBlockPropsSubmit = async ({otherHeight}) => {
+  const onFixedBlockPropsSubmit = async ({ otherHeight }) => {
     const decoratorProps = {
       ...fieldSchema['x-decorator-props'],
-      otherHeight
+      otherHeight,
     };
     await dn.emit('patch', {
       schema: {
@@ -101,7 +101,7 @@ export const TableBlockDesigner = () => {
         'x-decorator': 'FormItem',
         'x-component': 'Input',
         default: fieldSchema['x-decorator-props']?.otherHeight,
-        required: true
+        required: true,
       },
     },
   };
@@ -158,7 +158,24 @@ export const TableBlockDesigner = () => {
             }}
           />
         )}
-        <FixedBlockDesignerItem />
+        {/* <FixedBlockDesignerItem /> */}
+        <SchemaSettingsSwitchItem
+          title={t('固定尺寸')}
+          checked={fieldSchema['x-decorator-props']?.fixedSize}
+          onChange={async (fixedSize) => {
+            const decoratorProps = {
+              ...fieldSchema['x-decorator-props'],
+              fixedSize,
+            };
+            await dn.emit('patch', {
+              schema: {
+                ['x-uid']: fieldSchema['x-uid'],
+                'x-decorator-props': decoratorProps,
+              },
+            });
+            field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
+          }}
+        />
         <SchemaSettingsDataScope
           collectionName={name}
           defaultFilter={fieldSchema?.['x-decorator-props']?.params?.filter || {}}

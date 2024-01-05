@@ -185,7 +185,7 @@ export const useFormBlockProps = () => {
   /* 设置初始化数据 */
   useEffect(() => {
     if (isRecord) {
-      ctx.form?.setInitialValues(record.__parent);
+      ctx.form?.setInitialValues(record);
     }
   }, []);
 

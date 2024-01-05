@@ -14,23 +14,35 @@ export class PluginProduceManagerServer extends Plugin {
     /* BOM物料明细 继承 BOM单  */
     
     this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
-      
       const prj = await this.db.getRepository('prj').findOne({
         filter: {
           code: model.get('prj_code'),
         },
         transaction,
       });
-      const records = model.dataValues.bom_wls;
+      // const records = model.dataValues.bom_wl||[];
+      /**
+       * 获取bom_wl
+       */
+      const records = await this.db.getRepository('bom_wl').find({
+        filter: {
+          bom_id: model.get('id'),
+        },
+        transaction,
+      });
+      if(records.length){
       await Promise.all(
         records.map(async (record) => {
           return new Promise(async (resolve, reject) => {
-            // const bomIds = await this.getAllParentIds(model.get('id'), transaction);
+            const boms = await this.getAllParentIds(model.get('id'), transaction);
             const res = await this.db.getRepository('bom_wl').update({
-              filterByTk: record.id,
+              filterByTk: record.get('id'),
+              updateAssociationValues:['boms'],
+              // targetCollection: 'bom_wl',
               values: {
                 prjId: prj.get('id'),
                 // bom_id: bomIds,
+                boms: boms
               },
               transaction,
             });
@@ -38,6 +50,7 @@ export class PluginProduceManagerServer extends Plugin {
           });
         }),
       );
+    }
       // await this.db.getRepository('bom_wl').update({
       //   filter: {
       //     bom_id: model.get('id'),
@@ -109,8 +122,8 @@ export class PluginProduceManagerServer extends Plugin {
     });
 
     if (bom && bom.get('parentId')) {
-      const parentIds = await this.getAllParentIds(bom.get('parentId'), transaction);
-      return [bomId, ...parentIds];
+      const parents = await this.getAllParentIds(bom.get('parentId'), transaction);
+      return [bomId, ...parents];
     } else {
       return [bomId];
     }

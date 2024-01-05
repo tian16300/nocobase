@@ -1,5 +1,7 @@
-import { Plugin, useSchemaInitializer } from '@nocobase/client';
+import { Plugin, useCollection, useSchemaInitializer } from '@nocobase/client';
 import * as comps from './components';
+import * as items from './initializers/components';
+import * as scopes from './scopes';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
 export class PluginProduceManagerClient extends Plugin {
   async afterAdd() {
@@ -13,9 +15,11 @@ export class PluginProduceManagerClient extends Plugin {
 
   // You can get and modify the app instance here
   async load() {
-    console.log(this.app);
-    this.app.addComponents(comps);
-    // this.app.addScopes({})
+    this.app.addComponents({
+      ...comps,
+      ...items as any
+    });
+    this.app.addScopes(scopes)
     // this.app.addProvider()
     // this.app.addProviders()
     // this.app.router.add()
@@ -68,12 +72,38 @@ export class PluginProduceManagerClient extends Plugin {
       type:'item',
       Component: 'BomTreeAddActionInitializer',
     })
-    this.app.schemaInitializerManager.addItem('RecordFormBlockInitializers','dataBlocks.formBlockInitializer2',{
-      name:'formBlockInitializer2',
-      title:'表单块2',
+    this.app.schemaInitializerManager.addItem('RecordFormBlockInitializers','dataBlocks.recordBomFormBlockInitializer',{
+      name:'recordBomFormBlockInitializer',
+      title:'BOM表单',
       type:'item',
-      Component: 'FormBlockInitializer2',
+      Component: 'RecordBomFormBlockInitializer',
     })
+    // this.app.schemaInitializerManager.add('RecordFormBlockInitializers','dataBlocks.formBlockInitializer2',)
+
+    // this.app.schemaInitializerManager.add(new );
+    /* 增加保存表单 及 提交申请 操作 */
+    this.app.schemaInitializerManager.addItem('CreateFormActionInitializers','enableActions.saveBomActionInitializer',{
+      name:'saveBomActionInitializer',
+      title:'保存BOM',
+      type:'item',
+      Component: 'SaveBomActionInitializer',
+      useVisible(){
+        const {name} = useCollection();
+        return name === 'bom';
+
+      }
+    })
+      /* 增加保存表单 及 提交申请 操作 */
+      this.app.schemaInitializerManager.addItem('CreateFormActionInitializers','enableActions.saveBomApplyActionInitializer',{
+        name:'saveBomActionInitializer',
+        title:'提交申请',
+        type:'item',
+        Component: 'SaveBomApplyActionInitializer',
+        useVisible(){
+          const {name} = useCollection();
+          return name === 'bom';  
+        }
+      })
   }
 }
 

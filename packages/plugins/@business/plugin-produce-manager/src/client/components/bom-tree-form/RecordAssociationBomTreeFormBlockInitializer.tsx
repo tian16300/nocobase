@@ -126,46 +126,26 @@ const createShema = (options) => {
                 },
               },
             },
-          },
-          table: createTableBlockSchema({
-            collection:'bom_wl',
-            resource:'prj.bomMaterials',
-            association:'prj.bomMaterials',
-            action:'list',
-            className:'bom_wl_table',
-            actionVisible:false
-          }),
-          countTable: createTableBlockSchema({
-            collection:'bom_count_wl',
-            resource:'prj.bom_wl_count',
-            association:'prj.bom_wl_count',
-            action:'list',
-            className:'bom_count_wl_table',
-            actionVisible:false
-          }),
-          detail: {
+          },        
+          tableBlock:{
             type: 'void',
-            'x-initializer': 'RecordBlockInitializers',
-            'x-decorator': 'BomTreeForm.Form',
-            'x-decorator-props': {
-              useProps: '{{ useBomTreeFormFormBlockProps }}',
-            },
-            'x-component': 'Grid',
-            'x-reactions': [
-              {
-                dependencies: ['.tree'],
-                fulfill: {
-                  state: {
-                    visible: '{{ $deps[0] && ($deps[0].length !== 0) }}',
-                    value: '{{ $deps[0]?.[0] }}',
-                  },
-                },
+            'x-component': 'BomTreeFormTableBlockProvider',            
+            properties:{
+              table: {
+                type: 'void',
+                'x-component': 'Grid',
+                'x-initializer': 'RecordBlockInitializers',
               },
-            ],
+              countTable: {
+                type: 'void',
+                'x-component': 'Grid',
+                'x-initializer': 'RecordBlockInitializers',
+              }, 
+            }
           },
           form: {
             type: 'void',
-            'x-initializer': 'CreateFormBlockInitializers',
+            'x-initializer': 'RecordFormBlockInitializers',
             'x-decorator': 'BomTreeForm.Form',
             'x-decorator-props': {
               useProps: '{{ useBomTreeFormFormBlockProps }}',
