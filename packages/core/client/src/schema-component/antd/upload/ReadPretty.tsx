@@ -39,7 +39,6 @@ ReadPretty.File = function File(props: UploadProps) {
   function closeIFrameModal() {
     setVisible(false);
   }
-
   return wrapSSR(
     <div>
       <div
