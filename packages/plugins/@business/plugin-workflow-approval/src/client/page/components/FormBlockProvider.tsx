@@ -19,7 +19,7 @@ export function FormBlockProvider(props) {
   const fieldSchema = useFieldSchema();
   const field = useField();
   const formBlockRef = useRef(null);
-  const { appends, updateAssociationValues } = useAssociationNames();
+  const {  getAssociationAppends} = useAssociationNames();
   const [formKey] = Object.keys(fieldSchema.toJSON().properties ?? {});
   const values = userJob?.result?.[formKey];
 
@@ -36,10 +36,10 @@ export function FormBlockProvider(props) {
 
   const params = useMemo(() => {
     return {
-      appends,
+      appends: getAssociationAppends(),
       ...props.params,
     };
-  }, [appends, props.params]);
+  }, [props.params]);
   const service = useMemo(() => {
     return {
       loading: false,
@@ -58,10 +58,10 @@ export function FormBlockProvider(props) {
       form,
       field,
       service,
-      updateAssociationValues,
+      // updateAssociationValues,
       formBlockRef,
     };
-  }, [field, form, params, service, updateAssociationValues]);
+  }, [field, form, params, service]);
 
   return !userJob.status || values ? (
     <CollectionProvider collection={props.collection}>

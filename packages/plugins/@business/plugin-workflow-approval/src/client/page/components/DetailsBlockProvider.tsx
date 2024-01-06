@@ -37,7 +37,7 @@ function useFlowContextData(dataSource) {
 export function DetailsBlockProvider(props) {
   const field = useField();
   const formBlockRef = useRef(null);
-  const { appends, updateAssociationValues } = useAssociationNames();
+  const { getAssociationAppends } = useAssociationNames();
   const values = useFlowContextData(props.dataSource);
 
   const form = useMemo(
@@ -50,7 +50,7 @@ export function DetailsBlockProvider(props) {
   );
 
   const params = {
-    appends,
+    appends: getAssociationAppends(),
   };
   const service = {
     loading: false,
@@ -72,7 +72,7 @@ export function DetailsBlockProvider(props) {
               form,
               field,
               service,
-              updateAssociationValues,
+              // updateAssociationValues,
               formBlockRef,
             }}
           >

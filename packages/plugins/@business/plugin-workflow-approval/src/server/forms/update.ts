@@ -2,7 +2,7 @@ import { Processor } from '@nocobase/plugin-workflow';
 import ApprovalInstruction from '../ApprovalInstruction';
 
 export default async function (this: ApprovalInstruction, instance, { collection, filter = {} }, processor: Processor) {
-  const repo = this.plugin.db.getRepository(collection);
+  const repo = this.workflow.db.getRepository(collection);
   if (!repo) {
     throw new Error(`collection ${collection} for update data on manual node not found`);
   }
@@ -18,6 +18,6 @@ export default async function (this: ApprovalInstruction, instance, { collection
     context: {
       executionId: processor.execution.id,
     },
-    transaction: processor.transaction,
+    // transaction: processor.transaction,
   });
 }
