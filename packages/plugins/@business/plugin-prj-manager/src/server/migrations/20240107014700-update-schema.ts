@@ -10,7 +10,7 @@ export default class extends Migration {
       filter: {
         'schema.x-initializer-props.gridInitializer': 'PrjRecordBlockInitializers',
       },
-    });;
+    });
     await db.sequelize.transaction(async (transaction) => {
       for (const item of items) {
         const schema = item.schema;
