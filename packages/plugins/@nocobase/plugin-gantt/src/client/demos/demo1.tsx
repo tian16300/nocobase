@@ -1,5 +1,7 @@
-import { Gantt, SchemaComponent, SchemaComponentProvider, useGanttBlockProps } from '@nocobase/client';
+import { SchemaComponent, SchemaComponentProvider,  } from '@nocobase/client';
 import React from 'react';
+import { Gantt } from '..';
+import { useGanttBlockProps } from '../GanttBlockProvider';
 
 const schema = {
   type: 'object',

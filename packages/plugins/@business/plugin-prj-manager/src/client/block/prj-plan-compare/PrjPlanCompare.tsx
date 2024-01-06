@@ -22,7 +22,6 @@ import { Table, Spin, App, Tag, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { useAuthTranslation } from '../../locale';
 import { default as classNames } from 'classnames';
-import { dayjs } from '@nocobase/utils';
 import { ZoomInOutlined } from '@ant-design/icons';
 import { Gantt, useGanttBlockContext } from '@nocobase/plugin-gantt/client';
 export const PrjPlanCompare = () => {

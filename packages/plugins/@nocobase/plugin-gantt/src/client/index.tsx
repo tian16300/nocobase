@@ -1,3 +1,4 @@
+
 import React, { useContext } from 'react';
 import {
   Plugin,
@@ -14,21 +15,21 @@ import { GanttActionInitializers } from './GanttActionInitializers';
 import { GanttBlockInitializer } from './GanttBlockInitializer';
 import {
   GanttBlockProvider,
+  useGanttBlockContext,
   useGanttBlockProps,
   useGanttFormGroupFieldProps,
   useGanttFormRangeFieldProps,
   useGanttFormSortFieldProps,
+  groupData
 } from './GanttBlockProvider';
 import { ganttSettings } from './Gantt.Settings';
 import { FormLayout } from '@formily/antd-v5';
-export * from './types/public-types';
-export * from './GanttBlockProvider';
-export * from './utils';
+
 Gantt.ActionBar = ActionBar;
 Gantt.ViewMode = ViewMode;
 Gantt.Designer = GanttDesigner;
 Gantt.Event = Event;
-export { Gantt  };
+export { Gantt,GanttBlockProvider, useGanttBlockContext, groupData  };
 
 const GanttProvider = React.memo((props) => {
   const ctx = useContext(CollectionManagerContext);
