@@ -7,21 +7,7 @@ export default class extends Migration {
       return;
     }
     const { db } = this.context;
-    const repository = db.getRepository<any>('applicationPlugins');
-    const oldPluginNames = [
-      'company-info',
-      'dic-manager',
-      'prj-manager',
-      '@zkjx/plugin-workflow-approval',
-      '@zkjx/plugin-enterprise-integration',
-    ];
-    await repository.destroy({
-      filter: {
-        name: {
-          $in: oldPluginNames
-        },
-      },
-    });
+    
 
     const PluginModel = db.getModel('applicationPlugins');
     await db.sequelize.transaction(async (transaction) => {

@@ -1,3 +1,3 @@
-import { TreeForm } from "../../schema-component";
+// import { TreeForm } from "../../schema-component";
 
-export const TreeFormInitializer  = TreeForm.Initializer;
+// export const TreeFormInitializer  = TreeForm.Initializer;
