@@ -17,12 +17,7 @@ export class PluginPrjManagerServer extends Plugin {
   activeReceiveExpires = 86400 * 7;
   afterAdd() {}
   beforeLoad() {
-    this.db.addMigrations({
-      directory: path.resolve(__dirname, 'migrations'),
-      context: {
-        plugin: this,
-      },
-    });
+  
     
     // this.app.db.registerModels({
     //   ReportModel,
@@ -221,6 +216,12 @@ export class PluginPrjManagerServer extends Plugin {
     });
   }
   async load() {
+    this.db.addMigrations({
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
     //增加字典数据
     // await this.addRecords();
     await this.app.db.import({
