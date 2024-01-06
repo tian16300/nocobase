@@ -30,6 +30,7 @@ Gantt.ViewMode = ViewMode;
 Gantt.Designer = GanttDesigner;
 Gantt.Event = Event;
 export { Gantt,GanttBlockProvider, useGanttBlockContext, groupData  };
+export * from './types/public-types';
 
 const GanttProvider = React.memo((props) => {
   const ctx = useContext(CollectionManagerContext);
