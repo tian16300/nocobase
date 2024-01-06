@@ -41,7 +41,7 @@ export const ApprovalDetailPage = () => {
     action: 'get',
     params: {
       filterByTk: searchParams.get('id'),
-      appends: ['applyUser', 'currentApprovalUsers', 'applyResults', 'applyResults.user', 'execution', 'job'],
+      appends: ['applyUser', 'currentApprovalUsers', 'applyResults'],
     },
   });
   const apply = data?.data;
@@ -77,10 +77,8 @@ export const ApprovalDetailPage = () => {
     }
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
-  useEffect(() => {
-  
+  useEffect(() => {  
     const visible = !apply?.jobIsEnd || apply.status == '0';
-    console.log('detailPage', visible);
     setFormIsVisible(visible );
   }, [apply?.jobIsEnd]);
 

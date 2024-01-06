@@ -1,10 +1,11 @@
 import {
-    IField,
+  IField,
   useAPIClient,
   useApplyBlockContext,
   useBlockRequestContext,
   useCreateActionProps,
   useCurrentUserContext,
+  useFilterByTk,
   useFormBlockContext,
   useUpdateActionProps,
 } from '@nocobase/client';
@@ -31,10 +32,11 @@ export const useSaveBomApplyActionProps = (props: any) => {
   const fieldSchema = useFieldSchema();
   const { viewType, onSelect } = useBomTreeFormBlockContext();
   const { workflow, collection, apply } = useApplyBlockContext();
-  const {form, service} = useFormBlockContext();
+  const { form, service } = useFormBlockContext();
   const userService = useCurrentUserContext();
   const currentUser = userService?.data?.data;
   const api = useAPIClient();
+  const filterByTk = useFilterByTk();
   /**
    * 1. 如果是创建，先提交数据后 创建提交申请
    * 2· 如果是更新，查看是否有提交申请, 如果有提交申请 则隐藏提交申请按钮，如果没有提交申请，则显示提交申请按钮
@@ -43,39 +45,44 @@ export const useSaveBomApplyActionProps = (props: any) => {
 
   const addApply = async (record) => {
     if (record?.id) {
-        api
-          .request({
-            url: 'approval_apply:create',
-            method: 'POST',
-            data: {
-              relatedCollection: collection.name,
-              related_data_id: record.id,
-              applyTitle: currentUser.nickname + '发起的' + workflow?.title + '申请',
-              applyReason: record?.remark,
-              applyUser_id: currentUser.id,
-              applyUser_deptId: currentUser.userId,
-              applyTime: dayjs().toISOString(),
-              status: '0',
-              workflowKey: workflow?.key,
-            },
-          })
-          .then((res) => {
-            if (res.status == 200) {
-              //   message.success('申请成功');
-              // ctx?.service?.refresh();
-              //   next(form);
-              console.log('BOM 审核申请成功');
-            }
-          });
-      }
-
-};
+      api
+        .request({
+          url: 'approval_apply:create',
+          method: 'POST',
+          data: {
+            relatedCollection: collection.name,
+            related_data_id: record?.id || filterByTk,
+            applyTitle: currentUser.nickname + '发起的' + workflow?.title + '申请',
+            applyReason: record?.remark,
+            applyUser_id: currentUser.id,
+            applyUser_deptId: currentUser.userId,
+            applyTime: dayjs().toISOString(),
+            status: null,
+            workflowKey: workflow?.key,
+          },
+        })
+        .then((res) => {
+          if (res.status == 200) {
+            //   message.success('申请成功');
+            // ctx?.service?.refresh();
+            //   next(form);
+            // console.log('BOM 审核申请成功');
+            api.resource('approval_apply').update({
+              filterByTk: res.data.data.id,
+              values: {
+                status: '0',
+              },
+            });
+          }
+        });
+    }
+  };
 
   if (viewType.action == 'create') {
     const { onClick: onCreateClick, ...others } = useCreateActionProps();
-   
+
     return {
-        ...others,
+      ...others,
       async onClick() {
         await onCreateClick();
         // actionField.setValue('create');
@@ -87,7 +94,7 @@ export const useSaveBomApplyActionProps = (props: any) => {
   } else if (viewType.action == 'get') {
     const { onClick: onUpdateClick, ...others } = useUpdateActionProps();
     return {
-        ...others,
+      ...others,
       hidden: apply?.id && apply?.status != '0',
       async onClick() {
         await onUpdateClick();

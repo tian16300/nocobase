@@ -1,7 +1,7 @@
-import WorkflowPlugin, { Processor, JOB_STATUS, Instruction } from '@nocobase/plugin-workflow';
+import WorkflowPlugin, { Processor, JOB_STATUS, Instruction, ExecutionModel } from '@nocobase/plugin-workflow';
 import axios from 'axios';
 import initFormTypes, { FormHandler } from './forms';
-import { Registry } from '@nocobase/utils';
+import { Registry, dayjs } from '@nocobase/utils';
 export async function request(config) {
   // default headers
   const { url, method = 'POST', data, timeout = 5000 } = config;
@@ -124,8 +124,9 @@ function getMode(mode) {
  */
 export default class extends Instruction {
   formTypes = new Registry<FormHandler>();
-  constructor(public plugin: WorkflowPlugin) {
-    super(plugin);
+  updateJobValues = new Map();
+  constructor(public workflow: WorkflowPlugin) {
+    super(workflow);
     initFormTypes(this);
   }
 
@@ -133,7 +134,7 @@ export default class extends Instruction {
     /**
      * 查找人
      */
-    const transaction = (processor as any).transaction;
+    // const transaction = (processor as any).transaction;
     const workflowModel = await processor.execution.getWorkflow();
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
     const currentUser = prevJob.result?.currentUser || prevJob.result?.data?.applyUser;
@@ -145,7 +146,8 @@ export default class extends Instruction {
     //   filterByTk: related_data_id,
     //   transaction,
     // });
-    const statusField = processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
+
+    const statusField = this.workflow.app.db.getCollection('approval_apply').getField('status');
     const statusText = statusField.options.uiSchema.enum.find(({ value }) => {
       return value == approvalModel.status;
     }).label;
@@ -170,7 +172,7 @@ export default class extends Instruction {
         },
       };
 
-      const dingTalkService = (processor.options.plugin.app.getPlugin('@domain/plugin-enterprise-integration') as any)
+      const dingTalkService = (this.workflow.app.getPlugin('@domain/plugin-enterprise-integration') as any)
         .dingTalkService;
       message = await dingTalkService.sendMsgToUserByDingAction(data);
     }
@@ -181,6 +183,9 @@ export default class extends Instruction {
     const job = await processor.saveJob({
       status: JOB_STATUS.PENDING,
       result: {
+        data:{
+          ...approvalModel
+        },
         type: 'approval',
         relatedData:{
           relatedCollection,
@@ -203,11 +208,10 @@ export default class extends Instruction {
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
-    /**
-     * 存储workflowId jobId
-     */
-    const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
+    const registry = this.workflow.app.db.getRepository('approval_apply');
+    await registry.update({
       filterByTk: approvalModel.id,
+      updateAssociationValues:['currentApprovalUsers'],
       values: {
         jobId: job.id,
         nodeId: node.id,
@@ -216,10 +220,8 @@ export default class extends Instruction {
         currentApprovalUsers: users,
         // result: relatedData,
       },
-      transaction,
+      // transaction,
     });
-    processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`, upRes);
-
     return job;
   }
 

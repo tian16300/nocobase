@@ -271,7 +271,11 @@ export default class WorkflowPlugin extends Plugin {
     }
   }
 
-  public trigger(workflow: WorkflowModel, context: object, options: { context?: any } = {}): void {
+  public trigger(
+    workflow: WorkflowModel,
+    context: object,
+    options: { context?: any; model?: any; options?: any; collectionName?: any; repository?: any } = {},
+  ): void {
     const logger = this.getLogger(workflow.id);
     if (!this.ready) {
       logger.warn(`app is not ready, event of workflow ${workflow.id} will be ignored`);
@@ -316,8 +320,7 @@ export default class WorkflowPlugin extends Plugin {
   }
 
   private async createExecution(event: CachedEvent): Promise<ExecutionModel | null> {
-    const [workflow, context, options] = event;
-
+    const [workflow, context, options] = event as any;
     if (options.context?.executionId) {
       // NOTE: no transaction here for read-uncommitted execution
       const existed = await workflow.countExecutions({
@@ -344,7 +347,19 @@ export default class WorkflowPlugin extends Plugin {
         },
         { transaction },
       );
+      if (!options.model?.get('executionId')) 
+      options.model.set('executionId', execution.id);
 
+      // const { options: dbOptions, collectionName, repository, model } = options as any;
+      // if (collectionName == 'approval_apply') {
+      //   await repository.update({
+      //     filterByTk:model[model.get('id')],
+      //     values: {
+      //       executionId: execution.id,
+      //     },
+      //     transaction: dbOptions.transaction,
+      //   });
+      // }
       this.getLogger(workflow.id).info(`execution of workflow ${workflow.id} created as ${execution.id}`);
 
       await workflow.increment(['executed', 'allExecuted'], { transaction });
@@ -455,14 +470,11 @@ export default class WorkflowPlugin extends Plugin {
 
     this.getLogger(execution.workflowId).info(`execution (${execution.id}) ${job ? 'resuming' : 'starting'}...`);
     await (job ? processor.resume(job) : processor.start());
-    this.getLogger(execution.workflowId).info(
-      `execution (${execution.id}) finished with status: ${execution.status}`,
-    );
+    this.getLogger(execution.workflowId).info(`execution (${execution.id}) finished with status: ${execution.status}`);
     if (execution.status && execution.workflow.options?.deleteExecutionOnStatus?.includes(execution.status)) {
       await execution.destroy();
     }
     try {
-    
     } catch (err) {
       this.getLogger(execution.workflowId).error(`execution (${execution.id}) error: ${err.message}`, err);
     }

@@ -14,10 +14,24 @@ export default {
       name: 'key',
     },
     {
-      type: 'hasMany',
-      name: 'jobs',
-      onDelete: 'CASCADE',
-    },
+      "foreignKey": "executionId",
+      "onDelete": "CASCADE",
+      "name": "jobs",
+      "type": "hasMany",
+      "uiSchema": {
+          "x-component": "AssociationField",
+          "x-component-props": {
+              "multiple": true,
+              "fieldNames": {
+                  "label": "id",
+                  "value": "id"
+              }
+          },
+          "title": "任务"
+      },
+      "interface": "o2m",
+      "target": "jobs"
+  },
     {
       type: 'json',
       name: 'context',

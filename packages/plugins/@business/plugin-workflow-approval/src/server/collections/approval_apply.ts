@@ -318,10 +318,23 @@ export default {
       targetKey: 'key',
     },
     {
-      name: 'job',
+      name: 'jobId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'jobId',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+     {
       type: 'belongsTo',
-      interface: 'obo',
+      name: 'job',
+      target: 'jobs',
       foreignKey: 'jobId',
+      interface: 'obo',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
@@ -332,34 +345,26 @@ export default {
           },
         },
         title: '任务',
-      },
-      target: 'jobs',
-      targetKey: 'id',
+      }
     },
     {
-      name: 'node',
-      type: 'belongsTo',
-      interface: 'obo',
-      foreignKey: 'nodeId',
+      name: 'nodeId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
       uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'title',
-            value: 'id',
-          },
-        },
-        title: '节点',
+        type: 'number',
+        title: 'nodeId',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
       },
-      target: 'flow_nodes',
-      targetKey: 'id',
     },
     {
       type: 'belongsTo',
-      name: 'execution',
+      name: 'node',
+      target: 'flow_nodes',
+      foreignKey: 'nodeId',
       interface: 'obo',
-      foreignKey: 'executionId',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
@@ -369,11 +374,38 @@ export default {
             value: 'id',
           },
         },
-        title: '日志',
-      },
-      target: 'executions',
-      targetKey: 'id',
+        title: '节点',
+      }
     },
+    {
+      name: 'executionId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'executionId',
+        'x-component': 'InputNumber',
+      },
+    }, 
+    {
+      type: 'belongsTo',
+      name: 'execution',
+      target: 'executions',
+      foreignKey: 'executionId',
+      interface: 'obo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '执行记录',
+      }
+    },   
     {
       name: 'applyResults',
       type: 'hasMany',

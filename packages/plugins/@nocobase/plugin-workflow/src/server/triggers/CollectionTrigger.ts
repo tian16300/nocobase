@@ -87,9 +87,11 @@ async function handler(this: CollectionTrigger, workflow: WorkflowModel, data: M
 
   this.workflow.trigger(
     workflow,
-    { data: json },
+    { data: json   },
     {
       context,
+      repository,  
+      model: data
     },
   );
 }

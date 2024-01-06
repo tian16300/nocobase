@@ -12,7 +12,7 @@ export async function submit(context: Context, next) {
     return context.throw(401);
   }
 
-  const plugin: WorkflowPlugin = context.app.pm.get('workflow') as WorkflowPlugin;
+  const plugin: WorkflowPlugin = context.app.getPlugin(WorkflowPlugin);
   const instruction = plugin.instructions.get('approval') as ApprovalInstruction;
 
   const userJob = await repository.findOne({
@@ -20,13 +20,20 @@ export async function submit(context: Context, next) {
     // filter: {
     //   userId: currentUser?.id
     // },
-    appends: ['job', 'node', 'execution','execution.workflow','applyUser','applyUser.directUser','currentApprovalUsers'],
-    context,
+    // appends: ['applyUser','currentApprovalUsers','execution','job', 'node'],
+    appends:['applyUser','currentApprovalUsers','job', 'execution', 'execution.workflow'],
+    // context,
   });
 
   if (!userJob) {
     return context.throw(404);
   }
+  const workflow  = await context.app.db.getRepository('workflows').findOne({
+    filter:{
+      key: userJob.workflowKey,
+      current: true
+    }
+  });
 
   // const { forms = {} } = userJob.node.config;
   // const [formKey] = Object.keys(values.result ?? {}).filter((key) => key !== '_');
@@ -45,7 +52,7 @@ export async function submit(context: Context, next) {
     return context.throw(400);
   }
 
-  userJob.execution.workflow = userJob.workflow;
+  userJob.execution.workflow = workflow;
   const processor = plugin.createProcessor(userJob.execution);
   await processor.prepare();
 
@@ -115,7 +122,7 @@ export async function submit(context: Context, next) {
   // }
 
   // await userJob.job.save({ transaction: processor.transaction });
-  await userJob.save({ transaction: (processor as any).transaction });
+  await userJob.save();
 
   await processor.exit();
 

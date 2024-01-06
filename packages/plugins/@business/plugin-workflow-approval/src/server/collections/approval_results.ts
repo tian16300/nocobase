@@ -124,11 +124,31 @@ export default {
       },
       target: 'attachments',
       storage: 'approval',
-      through: 't_9fandryor96',
-      foreignKey: 'f_uvberahle61',
-      otherKey: 'f_kd082hiiydc',
+      through: 'appl',
+      foreignKey: 'approval_result_id',
+      otherKey: 'attachment_id',
       targetKey: 'id',
       sourceKey: 'id',
+    },
+    {
+      name: 'userType',
+      type: 'string',
+      interface: 'select',      
+      uiSchema: {
+        enum: [
+          {
+            value: '1',
+            label: '申请人',
+          },
+          {
+            value: '2',
+            label: '审批人',
+          }
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '用户类型',
+      },
     },
     {
       name: 'userAction',
@@ -168,6 +188,120 @@ export default {
         title: '备注',
       },
     },
+    {
+      name: 'workflowKey',
+      type: 'string',
+      isForeignKey: true,
+      interface: 'input'
+    },
+    {
+      name: 'workflow',
+      type: 'belongsTo',
+      interface: 'obo',
+      foreignKey: 'workflowKey',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'title',
+            value: 'key',
+          }
+        },
+        title: '关联流程',
+      },
+      target: 'workflows',
+      targetKey: 'key',
+    },
+    {
+      name: 'jobId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'jobId',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+     {
+      type: 'belongsTo',
+      name: 'job',
+      target: 'jobs',
+      foreignKey: 'jobId',
+      interface: 'obo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '任务',
+      }
+    },
+    {
+      name: 'nodeId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'nodeId',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+    {
+      type: 'belongsTo',
+      name: 'node',
+      target: 'flow_nodes',
+      foreignKey: 'nodeId',
+      interface: 'obo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '节点',
+      }
+    },
+    {
+      name: 'executionId',
+      type: 'bigInt',
+      interface: 'integer',
+      isForiegnKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'executionId',
+        'x-component': 'InputNumber',
+      },
+    }, 
+    {
+      type: 'belongsTo',
+      name: 'execution',
+      target: 'executions',
+      foreignKey: 'executionId',
+      interface: 'obo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '执行记录',
+      }
+    }, 
     {
       name: 'user',
       type: 'belongsTo',

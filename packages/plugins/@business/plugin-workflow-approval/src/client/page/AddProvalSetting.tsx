@@ -120,7 +120,7 @@ export const AddProvalSetting = (props) => {
             },
           ],
         },
-        mode: 3,
+        mode: 2,
       },
     };
   }, [workflow, flowName, collection]);

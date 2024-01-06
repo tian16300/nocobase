@@ -59,7 +59,6 @@ export default class Processor {
   private makeJobs(jobs: Array<JobModel>) {
     jobs.forEach((job) => {
       this.jobsMap.set(job.id, job);
-
       const node = this.nodesMap.get(job.nodeId);
       this.jobsMapByNodeKey[node.key] = job.result;
     });
@@ -74,12 +73,16 @@ export default class Processor {
     const nodes = await execution.workflow.getNodes();
 
     this.makeNodes(nodes);
+    if(typeof execution?.getJobs == 'function'){
+      const jobs = await execution.getJobs({
+        order: [['id', 'ASC']],
+      });
+  
+      this.makeJobs(jobs||[]);
 
-    const jobs = await execution.getJobs({
-      order: [['id', 'ASC']],
-    });
-
-    this.makeJobs(jobs);
+    }
+     
+   
   }
 
   public async start() {

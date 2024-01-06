@@ -17,7 +17,7 @@ import { uid } from '@formily/shared';
 import { onFormValuesChange } from '@formily/core';
 import { isEmpty } from 'lodash';
 import { flatten, flattenTree } from '@nocobase/utils';
-import { useTreeFormBlockContext } from './Provider';
+import { useBomTreeFormBlockContext as useTreeFormBlockContext } from './Provider';
 export const useTreeFormBlockProps = () => {
   const schema: any = useFieldSchema();
   const collection = schema.properties?.tree?.['x-decorator-props']?.collection;
