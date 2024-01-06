@@ -1,8 +1,7 @@
 import { Cascader } from '@formily/antd-v5';
 import { useField, useForm } from '@formily/react';
-import { Input, Select, Spin, Table, Tag } from 'antd';
-import { last } from 'lodash';
-import { boolean } from 'mathjs';
+import { Cascader, Input, Select, Spin, Table, Tag } from 'antd';
+import { last, omit } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResourceActionContext, useCompile } from '../../../';
@@ -85,9 +84,10 @@ const PreviewCom = (props) => {
             const fieldsData = Object.values(data?.data?.fields)?.map((v: any) => {
               if (v.source) {
                 const option = fields?.data.find((h) => h.name === v.name) || v;
-                return { ...v, uiSchema: option.uiSchema };
+                return { ...v, uiSchema: omit(option.uiSchema, 'rawTitle') };
               } else {
-                return fields?.data.find((h) => h.name === v.name) || v;
+                const option = fields?.data.find((h) => h.name === v.name) || v;
+                return { ...option, uiSchema: omit(option.uiSchema, 'rawTitle') };
               }
             });
             field.value = fieldsData;
@@ -211,7 +211,7 @@ const PreviewCom = (props) => {
             defaultValue={item?.uiSchema?.title || text}
             onChange={(e) =>
               handleFieldChange(
-                { ...item, uiSchema: { ...item?.uiSchema, title: e.target.value, rawTitle: e.target.value } },
+                { ...item, uiSchema: { ...omit(item?.uiSchema, 'rawTitle'), title: e.target.value } },
                 index,
               )
             }
