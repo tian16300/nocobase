@@ -1094,7 +1094,6 @@ export default {
       name: 'stock',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'stock_id',
       onDelete: 'SET NULL',
       uiSchema: {

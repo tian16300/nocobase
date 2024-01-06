@@ -131,12 +131,27 @@ export class PluginProduceManagerServer extends Plugin {
 
   async load() {
     await this.db.import({
-      directory: path.resolve(__dirname, 'collections'),
+      directory: path.resolve(__dirname, 'collections/basic'),
+    });
+    await this.db.import({
+      directory: path.resolve(__dirname, 'collections/bom'),
+    });
+    await this.db.import({
+      directory: path.resolve(__dirname, 'collections/bom_cg'),
     });
     const repo = this.db.getRepository<any>('collections');
     if (repo) {
       await repo.db2cm('wl_category');
       await repo.db2cm('wl_info');
+      await repo.db2cm('data_log_flag');
+      await repo.db2cm('basic_wl_info');
+      await repo.db2cm('basic_cg_detail');
+      await repo.db2cm('bom_wl');
+      await repo.db2cm('bom');
+      await repo.db2cm('bom_count_wl');
+      await repo.db2cm('cg_apply_bom_throught');
+      await repo.db2cm('cg_apply_list');
+      await repo.db2cm('cg_apply');
     }
   }
 
