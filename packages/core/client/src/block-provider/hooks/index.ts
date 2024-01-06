@@ -215,7 +215,7 @@ export const useCreateActionProps = () => {
         setVisible?.(false);
         actionField.data.loading = false;
         actionField.data.data = data;
-        // __parent?.service?.refresh?.();
+        __parent?.service?.refresh?.();
         // treeFormField?.data?.blockCtx?.service?.refresh?.();
         if (!onSuccess?.successMessage) {
           message.success(t('Saved successfully'));
@@ -983,8 +983,8 @@ export const useUpdateActionProps = () => {
         });
         actionField.data.loading = false;
         const service = getFormBlockService(__parent, field.decoratorProps.collection || field.decoratorProps.resource);
-        // actionField.data.pService = service;
-        // service?.refresh?.();
+        actionField.data.pService = service;
+        service?.refresh?.();
         // treeFormField?.data?.blockCtx?.service?.refresh?.();
         // treeFormField?.data?.updateSucessCallback?.({
         //   ...values,

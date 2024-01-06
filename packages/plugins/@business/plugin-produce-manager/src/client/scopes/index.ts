@@ -100,7 +100,7 @@ export const useSaveBomApplyActionProps = (props: any) => {
         await onUpdateClick();
         const record = form.values;
         await addApply(record);
-        // const service = actionField.data.pService;
+        const service = actionField.data.pService;
         service?.refresh?.();
         // actionField.setValue('update');
         // fieldSchema.query('submit').visible(true);

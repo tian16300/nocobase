@@ -68,9 +68,16 @@ export const AddApplyAction = (props) => {
       })
       .then((res) => {
         if (res.status == 200) {
-          message.success('申请成功');
           // ctx?.service?.refresh();
-          next(form);
+          api.resource('approval_apply').update({
+            filterByTk: res.data.data.id,
+            values: {
+              status: '0',
+            },
+          }).then((res) => {
+            message.success('申请成功');
+            next(form);
+          });
         }
       });
   };
@@ -113,7 +120,7 @@ export const AddApplyAction = (props) => {
                     applyUser_id:currentUser.id,
                     applyUser_deptId:currentUser.userId,
                     applyTime:dayjs().toISOString(),
-                    status: '0',
+                    status: null,
                     workflowKey: workflow?.key
                   },
                 });

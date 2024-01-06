@@ -260,6 +260,7 @@ export const useDataBlockSelectorProps = () => {
         message.error('字段关系配置错误, 请联系管理员');
         return;
       }
+      debugger;
       const newRows = [];
       const foreignKey = toField.foreignKey;
       const targetKey = toField.targetKey || 'id';
@@ -280,7 +281,7 @@ export const useDataBlockSelectorProps = () => {
             });
           }
         });
-      } else if (toField && toField?.interface == 'o2m') {
+      } else if (toField && toField?.interface == 'm2m') {
         /* 一对多的关系 */
         if (!groupField) {
           message.error('缺少分组字段配置, 请联系管理员');

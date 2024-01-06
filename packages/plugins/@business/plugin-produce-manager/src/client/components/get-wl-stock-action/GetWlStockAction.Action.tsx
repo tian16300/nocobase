@@ -18,10 +18,21 @@ export const GetWlStockAction = (props) => {
     /* 数据表  获取物料库存字段 wl_stock prj_wl_stock  public_wl_stock 项目库存字段 公共库存字段 */
     setLoading(true);
     const field = form.query(targetField).take();
+
     const prjField = form.query('prj').take();
     const currentRecords = field.value || [];
-    const prj = prjField.value;
-    if (prj) {
+    const prj = prjField?.value;
+    const condition: any = [{
+      stock: {
+        name: '公共库',
+      },
+    }];
+    if (prjField && prj) {
+      condition.push({
+        prjId: prj.id,
+      });
+    }
+    // if (prj) {
       const { data } = await api.resource('wl_stock').list({
         filter: {
           $and: [
@@ -33,16 +44,7 @@ export const GetWlStockAction = (props) => {
               },
             },
             {
-              $or: [
-                {
-                  prjId: prj.id,
-                },
-                {
-                  stock: {
-                    name: '公共库',
-                  },
-                },
-              ],
+              $or: condition
             },
           ],
         },
@@ -51,11 +53,13 @@ export const GetWlStockAction = (props) => {
       const records = data.data || [];
 
       currentRecords.forEach((record) => {
-        const prj_wl_stock = records.filter(({ prjId, wl_id }) => {
-          return prjId == prj.id && wl_id == record.wl_id;
-        })?.[0];
-        record.prj_wl_stock = prj_wl_stock;
-        record.prj_wl_stock_id = prj_wl_stock?.id;
+        if(prjField){
+          const prj_wl_stock = records.filter(({ prjId, wl_id }) => {
+            return prjId == prj.id && wl_id == record.wl_id;
+          })?.[0];
+          record.prj_wl_stock = prj_wl_stock;
+          record.prj_wl_stock_id = prj_wl_stock?.id;
+        }        
         const public_wl_stock = records.filter(({ prjId, wl_id }) => {
           return !prjId && wl_id == record.wl_id;
         })?.[0];
@@ -65,7 +69,7 @@ export const GetWlStockAction = (props) => {
       field.onInput(currentRecords);
       message.success('提取成功');
       setLoading(false);
-    }
+    // }
   };
   return (
     <div className={actionDesignerCss}>
