@@ -1,0 +1,59 @@
+import { Migration } from '@nocobase/server';
+
+export default class extends Migration {
+  async up() {
+    const match = await this.app.version.satisfies('<0.17.0-alpha.4');
+    if (!match) {
+      return;
+    }
+    const { db } = this.context;
+    const repository = db.getRepository<any>('applicationPlugins');
+    const oldPluginNames = [
+      'company-info',
+      'dic-manager',
+      'prj-manager',
+      '@zkjx/plugin-workflow-approval',
+      '@zkjx/plugin-enterprise-integration',
+    ];
+    await repository.destroy({
+      filter: {
+        name: {
+          $in: oldPluginNames
+        },
+      },
+    });
+
+    const PluginModel = db.getModel('applicationPlugins');
+    await db.sequelize.transaction(async (transaction) => {
+      await [        
+        '@domain/plugin-common',
+        '@domain/plugin-dic-manager',
+        '@domain/plugin-enterprise-integration',
+        '@business/plugin-common',  
+        '@business/plugin-company-info',      
+        '@business/plugin-prj-manager',
+        '@business/plugin-workflow-approval',
+        '@business/plugin-produce-manager'
+      ].reduce(
+        (promise, packageName) =>
+          promise.then(async () => {
+            const existed = await PluginModel.findOne({ where: { packageName }, transaction });
+            if (!existed) {
+              await PluginModel.create(
+                {
+                  name: packageName,
+                  packageName,
+                  version: '0.18.0-alpha.2',
+                  enabled: true
+                },
+                { transaction },
+              );
+            }else {
+
+            }
+          }),
+        Promise.resolve(),
+      );
+    });
+  }
+}
