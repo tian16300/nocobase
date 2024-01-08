@@ -30,7 +30,7 @@ export default class extends Migration {
                 {
                   name: packageName,
                   packageName,
-                  version: '0.17.0-alpha.1',
+                  version: '0.18.0-alpha.9',
                   enabled: true,
                   installed: true,
                   builtin: true,
@@ -70,3 +70,4 @@ export default class extends Migration {
     });
   }
 }
+
