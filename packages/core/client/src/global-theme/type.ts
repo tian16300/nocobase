@@ -1,4 +1,4 @@
-import { MappingAlgorithm, OverrideToken } from 'antd/es/theme/interface';
+import type { ThemeConfig as _ThemeConfig } from 'antd';
 import { AliasToken } from 'antd/es/theme/internal';
 
 export interface CustomToken extends AliasToken {
@@ -25,11 +25,7 @@ export interface CustomToken extends AliasToken {
   colorBorderSettingsHover: string;
 }
 
-export interface ThemeConfig {
+export interface ThemeConfig extends _ThemeConfig {
   name?: string;
   token?: Partial<CustomToken>;
-  components?: OverrideToken;
-  algorithm?: MappingAlgorithm | MappingAlgorithm[];
-  hashed?: boolean;
-  inherit?: boolean;
 }

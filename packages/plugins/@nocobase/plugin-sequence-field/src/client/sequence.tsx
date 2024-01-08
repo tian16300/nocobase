@@ -9,6 +9,7 @@ import {
   css,
   interfacesProperties,
   useCompile,
+  useToken,
   Select
 } from '@nocobase/client';
 import { error } from '@nocobase/utils/client';
@@ -296,6 +297,7 @@ export function RuleConfigForm(props) {
   const index = ArrayTable.useIndex();
   const { type, options } = values.patterns[index];
   const ruleType = RuleTypes[type];
+  const { token } = useToken();
   const getCurrentFields = useCallback(()=>{
     const {currentFields} = props;
     return currentFields;
@@ -304,7 +306,8 @@ export function RuleConfigForm(props) {
     <Button
       type="link"
       onClick={() => {
-        FormDrawer(compile(ruleType.title), () => {
+        // fix https://nocobase.height.app/T-2868
+        FormDrawer({ title: compile(ruleType.title), zIndex: token.zIndexPopupBase + 1000 }, () => {
           return (
             <FormLayout layout="vertical">
               <SchemaComponentOptions scope={{...schemaOptions.scope,getCurrentFields}} components={schemaOptions.components}>

@@ -34,7 +34,7 @@ import { getWorkflowDetailPath, getWorkflowExecutionsPath } from './constant';
 import { NAMESPACE } from './locale';
 import { WorkflowCanvas } from './WorkflowCanvas';
 export {WorkflowPane};
-export default class extends Plugin {
+export default class PluginWorkflowClient extends Plugin {
   triggers = new Registry<Trigger>();
   instructions = new Registry<Instruction>();
   getTriggersOptions = () => {
