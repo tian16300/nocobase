@@ -397,6 +397,31 @@ export default {
         'x-read-pretty': true,
       },
     },
+    {      
+      "name": "submitState",
+      "type": "string",
+      "interface": "select",
+      "description": null,
+      "collectionName": "report",    
+      "uiSchema": {
+          "enum": [
+              {
+                  "value": "1",
+                  "label": "未提交",
+                  "color": "warning"
+              },
+              {
+                  "value": "2",
+                  "label": "已提交",
+                  "color": "success"
+              }
+          ],
+          "type": "string",
+          "x-component": "Select",
+          "title": "提交状态"
+      },
+      "defaultValue": "1"
+  }
   ],
   title: '报告',
 };
