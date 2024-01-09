@@ -323,7 +323,7 @@ export default {
         title: '所属节点',
       },
       target: 'bom',
-      through: 't_nbbl36l3m3o',
+      through: 'bom_bomwl',
       targetKey: 'id',
       sourceKey: 'id',
     },

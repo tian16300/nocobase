@@ -1,13 +1,16 @@
 export default {
-  name: 'bom_count_wl',
-  title: 'BOM物料统计明细',
+  name: 'bom_bomcountwl',
+  title: 'BOM和BOM物料统计明细中间表',
   inherit: false,
   hidden: false,
+  description: null,
   fields: [
     {
       name: 'id',
       type: 'bigInt',
       interface: 'id',
+      description: null,
+
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
@@ -19,23 +22,38 @@ export default {
       },
     },
     {
-      name: 'prjId',
+      name: 'bom_count_wl_id',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
 
       isForeignKey: true,
       uiSchema: {
         type: 'number',
-        title: 'prjId',
+        title: 'bom_count_wl_id',
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
-      overriding: true,
+    },
+    {
+      name: 'bom_id',
+      type: 'bigInt',
+      interface: 'integer',
+      description: null,
+
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'bom_id',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
     },
     {
       name: 'createdAt',
       type: 'date',
       interface: 'createdAt',
+      description: null,
 
       field: 'createdAt',
       uiSchema: {
@@ -50,6 +68,7 @@ export default {
       name: 'createdBy',
       type: 'belongsTo',
       interface: 'createdBy',
+      description: null,
 
       target: 'users',
       foreignKey: 'createdById',
@@ -71,6 +90,7 @@ export default {
       name: 'updatedAt',
       type: 'date',
       interface: 'updatedAt',
+      description: null,
 
       field: 'updatedAt',
       uiSchema: {
@@ -85,6 +105,7 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
+      description: null,
 
       target: 'users',
       foreignKey: 'updatedById',
@@ -102,76 +123,8 @@ export default {
       },
       targetKey: 'id',
     },
-    {
-      name: 'bom_wl_list',
-      type: 'hasMany',
-      interface: 'o2m',
-
-      foreignKey: 'bom_wl_count',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: true,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: 'BOM明细',
-      },
-      target: 'bom_wl',
-      targetKey: 'id',
-      sourceKey: 'id',
-    },
-    {
-     
-      "name": "prj",
-      "type": "belongsTo",
-      "interface": "m2o",
-      "foreignKey": "prjId",
-      "onDelete": "SET NULL",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": false,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
-          },
-          "title": "项目"
-      },
-      "target": "prj",
-      "overriding": true,
-      "targetKey": "id"
-  },
-    {
-   
-      "name": "boms",
-      "type": "belongsToMany",
-      "interface": "m2m",      
-      "collectionName": "bom_count_wl",
-      "foreignKey": "bom_count_wl_id",
-      "otherKey": "bom_id",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": true,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
-          },
-          "title": "所属节点"
-      },
-      "target": "bom",
-      "through": "bom_bomcountwl",
-      "overriding": true,
-      "targetKey": "id",
-      "sourceKey": "id"
-  }
   ],
+  category: [],
   logging: true,
   autoGenId: true,
   createdBy: true,
@@ -181,6 +134,5 @@ export default {
   sortable: true,
   template: 'general',
   view: false,
-  inherits: ['bom_wl'],
   schema: 'public',
 };

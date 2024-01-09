@@ -12,82 +12,98 @@ export class PluginProduceManagerServer extends Plugin {
     });
     
     /* BOM物料明细 继承 BOM单  */
-    
-    this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
-      const prj = await this.db.getRepository('prj').findOne({
+    this.app.db.on('bom_wl.beforeSave', async (model, { transaction }) => {
+      const bom = await this.db.getRepository('bom').findOne({
         filter: {
-          code: model.get('prj_code'),
+          id: model.get('bom_id'),
         },
         transaction,
       });
-      // const records = model.dataValues.bom_wl||[];
-      /**
-       * 获取bom_wl
-       */
-      const records = await this.db.getRepository('bom_wl').find({
-        filter: {
-          bom_id: model.get('id'),
-        },
-        transaction,
-      });
-      if(records.length){
-      await Promise.all(
-        records.map(async (record) => {
-          return new Promise(async (resolve, reject) => {
-            const boms = await this.getAllParentIds(model.get('id'), transaction);
-            const res = await this.db.getRepository('bom_wl').update({
-              filterByTk: record.get('id'),
-              updateAssociationValues:['boms'],
-              // targetCollection: 'bom_wl',
-              values: {
-                prjId: prj.get('id'),
-                // bom_id: bomIds,
-                boms: boms
-              },
-              transaction,
-            });
-            resolve(res);
-          });
-        }),
-      );
-    }
-      // await this.db.getRepository('bom_wl').update({
-      //   filter: {
-      //     bom_id: model.get('id'),
-      //   },
-      //   values: {
-      //     prjId: prj.get('id'),
-      //   },
-      //   transaction,
-      // });
-      /* 统计BOM 物料明细 */
-      //  const wl_list = await this.db.getRepository('bom_wl').findOne({
-      //   filter: {
-      //     bom_id: model.get('id'),
-      //     prjId: prj.get('id')
-      //   },
-      //   transaction,
-      //  });
-      //  if(wl_list.length){
-      // const wl_map = {};
-      // const groupByWl = wl_list.reduce((group, record) => {
-      //   const { wl_id } = record;
-      //   group[wl_id] = group[wl_id] ?? [];
-      //   group[wl_id].push(record);
-      //   wl_map[wl_id] = record;
-      //   return group;
-      // }, {});
-
-      //  }
-
-      /* 统计每个BOM 新增明细 */
-      // const wl = await this.db.getRepository('wl').findOne({
-      //   filter: {
-      //     code: model.get('wl_code'),
-      //   },
-      //   transaction,
-      // });
+      if (bom) {
+        model.set('prjId', bom.get('prjId'));
+        // model.set('wl_code', bom.get('wl_code'));
+        // model.set('wl_name', bom.get('wl_name'));
+        // model.set('wl_unit', bom.get('wl_unit'));
+        // model.set('wl_spec', bom.get('wl_spec'));
+        // model.set('wl_type', bom.get('wl_type'));
+        // model.set('wl_category_id', bom.get('wl_category_id'));
+      }
     });
+    // this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
+    //   const prj = await this.db.getRepository('prj').findOne({
+    //     filter: {
+    //       code: model.get('prj_code'),
+    //     },
+    //     transaction,
+    //   });
+    //   // const records = model.dataValues.bom_wl||[];
+    //   /**
+    //    * 获取bom_wl
+    //    */
+    //   const records = await this.db.getRepository('bom_wl').find({
+    //     filter: {
+    //       bom_id: model.get('id'),
+    //     },
+    //     transaction,
+    //   });
+    //   if(records.length){
+    //   await Promise.all(
+    //     records.map(async (record) => {
+    //       return new Promise(async (resolve, reject) => {
+    //         const boms = await this.getAllParentIds(model.get('id'), transaction);
+    //         const res = await this.db.getRepository('bom_wl').update({
+    //           filterByTk: record.get('id'),
+    //           updateAssociationValues:['boms'],
+    //           // targetCollection: 'bom_wl',
+    //           values: {
+    //             prjId: prj.get('id'),
+    //             // bom_id: bomIds,
+    //             boms: boms
+    //           },
+    //           transaction,
+    //         });
+    //         resolve(res);
+    //       });
+    //     }),
+    //   );
+    // }
+    //   // await this.db.getRepository('bom_wl').update({
+    //   //   filter: {
+    //   //     bom_id: model.get('id'),
+    //   //   },
+    //   //   values: {
+    //   //     prjId: prj.get('id'),
+    //   //   },
+    //   //   transaction,
+    //   // });
+    //   /* 统计BOM 物料明细 */
+    //   //  const wl_list = await this.db.getRepository('bom_wl').findOne({
+    //   //   filter: {
+    //   //     bom_id: model.get('id'),
+    //   //     prjId: prj.get('id')
+    //   //   },
+    //   //   transaction,
+    //   //  });
+    //   //  if(wl_list.length){
+    //   // const wl_map = {};
+    //   // const groupByWl = wl_list.reduce((group, record) => {
+    //   //   const { wl_id } = record;
+    //   //   group[wl_id] = group[wl_id] ?? [];
+    //   //   group[wl_id].push(record);
+    //   //   wl_map[wl_id] = record;
+    //   //   return group;
+    //   // }, {});
+
+    //   //  }
+
+    //   /* 统计每个BOM 新增明细 */
+    //   // const wl = await this.db.getRepository('wl').findOne({
+    //   //   filter: {
+    //   //     code: model.get('wl_code'),
+    //   //   },
+    //   //   transaction,
+    //   // });
+    // });
     /* 存储库存 把项目也作更新 */
     this.app.db.on('wl_stock.beforeSave', async (model, { transaction }) => {
       if (model.get('stock_id') && !model.get('prjId')) {
@@ -146,6 +162,8 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('data_log_flag');
       await repo.db2cm('basic_wl_info');
       await repo.db2cm('basic_cg_detail');
+      await repo.db2cm('bom_bomcountwl');
+      await repo.db2cm('bom_bomwl');
       await repo.db2cm('bom_wl');
       await repo.db2cm('bom');
       await repo.db2cm('bom_count_wl');

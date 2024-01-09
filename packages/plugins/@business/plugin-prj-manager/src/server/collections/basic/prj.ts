@@ -1069,7 +1069,7 @@ export default {
       sourceKey: 'id',
     },
     {
-      name: 'bomMaterials',
+      name: 'bom_materias',
       type: 'hasMany',
       interface: 'o2m',
 
