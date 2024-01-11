@@ -62,8 +62,8 @@ export class PluginProduceManagerClient extends Plugin {
       type:'item',
       Component: 'CountTableChangeActionInitializer',
       useVisible(){
-        const fieldSchema = useFieldSchema();
-        return true;
+        const {name } = useCollection();
+        return name === 'bom';
       }
     })
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.bomTreeAddAction',{
@@ -71,15 +71,21 @@ export class PluginProduceManagerClient extends Plugin {
       title:'新增BOM',
       type:'item',
       Component: 'BomTreeAddActionInitializer',
+      useVisible(){
+        const {name } = useCollection();
+        return name === 'bom';
+      }
     })
     this.app.schemaInitializerManager.addItem('RecordFormBlockInitializers','dataBlocks.recordBomFormBlockInitializer',{
       name:'recordBomFormBlockInitializer',
       title:'BOM表单',
       type:'item',
       Component: 'RecordBomFormBlockInitializer',
+      useVisible(){
+        const {name } = useCollection();
+        return name === 'bom';
+      }
     })
-    // this.app.schemaInitializerManager.add('RecordFormBlockInitializers','dataBlocks.formBlockInitializer2',)
-
     // this.app.schemaInitializerManager.add(new );
     /* 增加保存表单 及 提交申请 操作 */
     this.app.schemaInitializerManager.addItem('CreateFormActionInitializers','enableActions.saveBomActionInitializer',{
