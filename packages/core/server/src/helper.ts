@@ -15,8 +15,7 @@ import { db2resource } from './middlewares/db2resource';
 import { i18n } from './middlewares/i18n';
 import { requestLogger } from '@nocobase/logger';
 import { randomUUID } from 'crypto';
-import { createHistogram, RecordableHistogram } from 'perf_hooks';
-
+// import { createHistogram, RecordableHistogram } from 'perf_hooks';
 export function createI18n(options: ApplicationOptions) {
   const instance = i18next.createInstance();
   instance.init({
@@ -132,33 +131,33 @@ export const tsxRerunning = async () => {
 };
 
 export const enablePerfHooks = (app: Application) => {
-  app.context.getPerfHistogram = (name: string) => {
-    if (!app.perfHistograms.has(name)) {
-      app.perfHistograms.set(name, createHistogram());
-    }
-    return app.perfHistograms.get(name);
-  };
+  // app.context.getPerfHistogram = (name: string) => {
+  //   if (!app.perfHistograms.has(name)) {
+  //     app.perfHistograms.set(name, createHistogram());
+  //   }
+  //   return app.perfHistograms.get(name);
+  // };
 
-  app.resourcer.define({
-    name: 'perf',
-    actions: {
-      view: async (ctx, next) => {
-        const result = {};
-        const histograms = ctx.app.perfHistograms as Map<string, RecordableHistogram>;
-        const sortedHistograms = [...histograms.entries()].sort(([i, a], [j, b]) => b.mean - a.mean);
-        sortedHistograms.forEach(([name, histogram]) => {
-          result[name] = histogram;
-        });
-        ctx.body = result;
-        await next();
-      },
-      reset: async (ctx, next) => {
-        const histograms = ctx.app.perfHistograms as Map<string, RecordableHistogram>;
-        histograms.forEach((histogram: RecordableHistogram) => histogram.reset());
-        await next();
-      },
-    },
-  });
+  // app.resourcer.define({
+  //   name: 'perf',
+  //   actions: {
+  //     view: async (ctx, next) => {
+  //       const result = {};
+  //       const histograms = ctx.app.perfHistograms as Map<string, RecordableHistogram>;
+  //       const sortedHistograms = [...histograms.entries()].sort(([i, a], [j, b]) => b.mean - a.mean);
+  //       sortedHistograms.forEach(([name, histogram]) => {
+  //         result[name] = histogram;
+  //       });
+  //       ctx.body = result;
+  //       await next();
+  //     },
+  //     reset: async (ctx, next) => {
+  //       const histograms = ctx.app.perfHistograms as Map<string, RecordableHistogram>;
+  //       histograms.forEach((histogram: RecordableHistogram) => histogram.reset());
+  //       await next();
+  //     },
+  //   },
+  // });
 
   app.acl.allow('perf', '*', 'public');
 };

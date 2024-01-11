@@ -4,7 +4,7 @@ import _ from 'lodash';
 import Middleware, { MiddlewareType } from './middleware';
 import Resource from './resource';
 import { HandlerType } from './resourcer';
-import { RecordableHistogram, performance } from 'perf_hooks';
+// import { RecordableHistogram, performance } from 'perf_hooks';
 
 export type ActionType = string | HandlerType | ActionOptions;
 

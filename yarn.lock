@@ -6946,7 +6946,15 @@
   dependencies:
     "@typescript-eslint/types" "5.62.0"
     "@typescript-eslint/visitor-keys" "5.62.0"
-    
+
+"@typescript-eslint/scope-manager@6.14.0":
+  version "6.14.0"
+  resolved "https://registry.npmmirror.com/@typescript-eslint/scope-manager/-/scope-manager-6.14.0.tgz#53d24363fdb5ee0d1d8cda4ed5e5321272ab3d48"
+  integrity sha512-VT7CFWHbZipPncAZtuALr9y3EuzY1b1t1AEkIq2bTXUPKw+pHoXflGNG5L+Gv6nKul1cz1VH8fz16IThIU0tdg==
+  dependencies:
+    "@typescript-eslint/types" "6.14.0"
+    "@typescript-eslint/visitor-keys" "6.14.0"
+
 "@typescript-eslint/type-utils@5.62.0":
   version "5.62.0"
   resolved "https://registry.npmmirror.com/@typescript-eslint/type-utils/-/type-utils-5.62.0.tgz#286f0389c41681376cdad96b309cedd17d70346a"
@@ -10223,7 +10231,7 @@ content-disposition@0.5.2:
   resolved "https://registry.npmmirror.com/content-disposition/-/content-disposition-0.5.2.tgz#0cf68bb9ddf5f2be7961c3a85178cb85dba78cb4"
   integrity sha512-kRGRZw3bLlFISDBgwTSA1TMBFN6J6GWDeubmDE3AF+3+yXL8hTWv8r5rkLbqYXY4RjPk/EzHnClI3zQf1cFmHA==
 
-content-disposition@~0.5.2:
+content-disposition@^0.5.4, content-disposition@~0.5.2:
   version "0.5.4"
   resolved "https://registry.npmmirror.com/content-disposition/-/content-disposition-0.5.4.tgz#8b82b4efac82512a02bb0b1dcec9d2c5e8eb5bfe"
   integrity sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==

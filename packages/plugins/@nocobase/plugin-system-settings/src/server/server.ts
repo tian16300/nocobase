@@ -41,9 +41,7 @@ export class SystemSettingsPlugin extends Plugin {
   }
 
   async load() {
-    await this.app.db.import({
-      directory: resolve(__dirname, 'collections'),
-    });
+    await this.importCollections(resolve(__dirname, 'collections'));
 
     this.app.acl.addFixedParams('systemSettings', 'destroy', () => {
       return {
