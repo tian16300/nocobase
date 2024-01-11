@@ -183,7 +183,7 @@ export const Initializer = () => {
 
         const groupFields = fields
           .filter((field) => {
-            return 'm2o' == field.interface;
+            return ['m2o','m2m'].includes(field.interface);
           })
           .map((field) => {
             return {
