@@ -4,7 +4,7 @@ export const useStyles = createStyles(({ token }) => {
   return {
     button: {
       // @ts-ignore
-      color: token.colorTextHeaderMenu + ' !important',
+      // color: token.colorTextHeaderMenu + ' !important',
     },
   };
 });

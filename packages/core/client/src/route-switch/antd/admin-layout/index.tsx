@@ -1,8 +1,9 @@
 import { css } from '@emotion/css';
-import {  useSessionStorageState } from 'ahooks';
-import { App, Layout, Row, Space, theme, Col } from 'antd';
+import { useSessionStorageState } from 'ahooks';
+import { App, Layout, Row, Space, theme, Col, ConfigProvider } from 'antd';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useMatch, useNavigate, useParams } from 'react-router-dom';
+import { createGlobalStyle } from 'antd-style';
 import {
   ACLRolesCheckProvider,
   CurrentAppInfoProvider,
@@ -25,10 +26,7 @@ import {
 import { Plugin } from '../../../application/Plugin';
 import { useAppSpin } from '../../../application/hooks/useAppSpin';
 import { useCollectionManager } from '../../../collection-manager';
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined
-} from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { VariablesProvider } from '../../../variables';
 
@@ -357,6 +355,72 @@ const MenuEditor = (props) => {
 //   );
 // };
 
+/**
+ * 鼠标悬浮在顶部“更多”按钮时显示的子菜单的样式
+ */
+const GlobalStyleForAdminLayout = createGlobalStyle`
+  .nb-container-of-header-submenu {
+    .ant-menu.ant-menu-submenu.ant-menu-submenu-popup {
+      .ant-menu.ant-menu-sub.ant-menu-vertical {
+        background-color: ${(p) => {
+          // @ts-ignore
+          return p.theme.colorBgHeader + ' !important';
+        }};
+        color: ${(p) => {
+          // @ts-ignore
+          return p.theme.colorTextHeaderMenu + ' !important';
+        }};
+        .ant-menu-item:hover {
+          color: ${(p) => {
+            // @ts-ignore
+            return p.theme.colorTextHeaderMenuHover + ' !important';
+          }};
+          background-color: ${(p) => {
+            // @ts-ignore
+            return p.theme.colorBgHeaderMenuHover + ' !important';
+          }};
+        }
+        .ant-menu-item.ant-menu-item-selected {
+          color: ${(p) => {
+            // @ts-ignore
+            return p.theme.colorTextHeaderMenuActive + ' !important';
+          }};
+          background-color: ${(p) => {
+            // @ts-ignore
+            return p.theme.colorBgHeaderMenuActive + ' !important';
+          }};
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * 确保顶部菜单的子菜单的主题样式正确
+ * @param param0
+ * @returns
+ */
+const SetThemeOfHeaderSubmenu = ({ children }) => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    containerRef.current = document.createElement('div');
+    containerRef.current.classList.add('nb-container-of-header-submenu');
+    document.body.appendChild(containerRef.current);
+
+    return () => {
+      document.body.removeChild(containerRef.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <GlobalStyleForAdminLayout />
+      <ConfigProvider getPopupContainer={() => containerRef.current}>{children}</ConfigProvider>
+    </>
+  );
+};
+
 export const InternalAdminLayout = (props: any) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -391,22 +455,49 @@ export const InternalAdminLayout = (props: any) => {
           <img height={32} src={result?.data?.data?.logo?.url} />
         </div>
         <div ref={sideMenuRef} style={{ height: 'calc(100% - 51px)' }}>
-          <MenuEditor sideMenuRef={sideMenuRef} />
+          <SetThemeOfHeaderSubmenu>
+            <MenuEditor sideMenuRef={sideMenuRef} />
+          </SetThemeOfHeaderSubmenu>
+          {/* <MenuEditor sideMenuRef={sideMenuRef} /> */}
         </div>
       </Sider>
       <Layout>
+        <GlobalStyleForAdminLayout />
         <Header
           className={css`
             padding: 0 10px;
-            height: 50px;
-            line-height: 50px;
-            background: ${colorBgContainer};
+            // height: 50px;
+            // line-height: 50px;
+            background: ${token.colorBgContainer};
             box-shadow:
               0 1px 2px 0 rgba(0, 0, 0, 0.03),
               0 1px 6px -1px rgba(0, 0, 0, 0.02),
               0 2px 4px 0 rgba(0, 0, 0, 0.02);
             position: relative;
+            height: var(--nb-header-height);
+            line-height: var(--nb-header-height);
             z-index: 2;
+            right: 0;
+            left: 0;
+          
+
+            .ant-menu.ant-menu-dark .ant-menu-item-selected,
+            .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected,
+            .ant-menu-submenu-horizontal.ant-menu-submenu-selected {
+              background-color: ${token.colorBgHeaderMenuActive} !important;
+              color: ${token.colorTextHeaderMenuActive} !important;
+            }
+            .ant-menu-dark.ant-menu-horizontal > .ant-menu-item:hover {
+              background-color: ${token.colorBgHeaderMenuHover} !important;
+              color: ${token.colorTextHeaderMenuHover} !important;
+            }
+            .ant-menu {
+              background-color: transparent;
+            }
+            .ant-menu-item,
+            .ant-menu-submenu-horizontal {
+              color: ${token.colorTextHeaderMenu} !important;
+            }
           `}
         >
           <Row>
@@ -437,24 +528,24 @@ export const InternalAdminLayout = (props: any) => {
         </Header>
         <Content
           className={css`
-                    display: flex;
-                    flex-direction: column;
-                    position: relative;
-                    z-index: 1;
-                    overflow-y: auto;
-                    height: calc(100vh - 50px);
-                    max-height: calc(100vh - 50px);
-                    > div {
-                      position: relative;
-                    }
-                    .ant-layout-footer {
-                      position: absolute;
-                      bottom: 0;
-                      text-align: center;
-                      width: 100%;
-                      z-index: 0;
-                      padding: 0px 50px;
-                    }
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+            height: calc(100vh - 50px);
+            max-height: calc(100vh - 50px);
+            > div {
+              position: relative;
+            }
+            .ant-layout-footer {
+              position: absolute;
+              bottom: 0;
+              text-align: center;
+              width: 100%;
+              z-index: 0;
+              padding: 0px 50px;
+            }
           `}
         >
           {service.contentLoading ? render() : <Outlet />}
