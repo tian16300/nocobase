@@ -11,10 +11,14 @@ export const usePrjTabsProps = () => {
     // contextProps.activeKey =  searchParams.get('tab');
     const onTabChange = useCallback<TabsProps['onChange']>(
         (key) => {
-          setSearchParams({
-            tab: key,
-            id:searchParams.get('id')
-          });
+          const prjId = searchParams.get('id');
+          const params:{ tab:string, id?:string } = {
+            tab: key
+          };
+          if(prjId){
+            params.id = prjId;
+          }
+          setSearchParams(params);
         },
         [setSearchParams],
       );
