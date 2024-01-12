@@ -1,5 +1,6 @@
 import { ArrayField } from '@formily/core';
 import { Schema, useField, useFieldSchema } from '@formily/react';
+import _ from 'lodash';
 import uniq from 'lodash/uniq';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useCollectionManager } from '../collection-manager';
@@ -9,6 +10,7 @@ import { SchemaComponentOptions } from '../schema-component';
 import { BlockProvider, RenderChildrenWithAssociationFilter, useBlockRequestContext } from './BlockProvider';
 import { mergeFilter } from './SharedFilterProvider';
 import { flattenTree } from '@nocobase/utils';
+import { useParsedFilter } from './hooks';
 
 type Params = {
   filter?: any;
@@ -254,6 +256,19 @@ export const TableSelectorProvider = (props: TableSelectorProviderProps) => {
     params = { ...parentParams, ...params };
   } catch (err) {
     console.error(err);
+  }
+
+  const { filter: parsedFilter } = useParsedFilter({
+    filterOption: params?.filter,
+    currentRecord: { __parent: record, __collectionName: props.collection },
+  });
+
+  if (!_.isEmpty(params?.filter) && _.isEmpty(parsedFilter)) {
+    return null;
+  }
+
+  if (params?.filter) {
+    params.filter = parsedFilter;
   }
 
   return (
