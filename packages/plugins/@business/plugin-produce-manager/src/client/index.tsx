@@ -52,9 +52,7 @@ export class PluginProduceManagerClient extends Plugin {
             })
           }
         }
-      },
-
-
+      }
     })
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.countTableChangeAction',{
       name:'countTableChangeAction',
@@ -64,6 +62,17 @@ export class PluginProduceManagerClient extends Plugin {
       useVisible(){
         const {name } = useCollection();
         return name === 'bom';
+      }
+    })
+
+    this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.initBomApplyAction',{
+      name:'initBomApplyAction',
+      title:'一键创建单据',
+      type:'item',
+      Component: 'InitBomApplyActionInitializer',
+      useVisible(){
+        const {name } = useCollection();
+        return name === 'bom_apply';
       }
     })
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.bomTreeAddAction',{

@@ -1,8 +1,8 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
+import { initCreateMany } from './actions/initCreateMany';
 export class PluginProduceManagerServer extends Plugin {
   afterAdd() {}
-
   beforeLoad() {
     this.db.addMigrations({
       directory: path.resolve(__dirname, 'migrations'),
@@ -10,99 +10,18 @@ export class PluginProduceManagerServer extends Plugin {
         plugin: this,
       },
     });
-    
+
     /* BOM物料明细 继承 BOM单  */
-    this.app.db.on('bom_wl.beforeSave', async (model, { transaction }) => {
-      const bom = await this.db.getRepository('bom').findOne({
-        filter: {
-          id: model.get('bom_id'),
-        },
-        transaction,
-      });
-      if (bom) {
-        model.set('prjId', bom.get('prjId'));
-        // model.set('wl_code', bom.get('wl_code'));
-        // model.set('wl_name', bom.get('wl_name'));
-        // model.set('wl_unit', bom.get('wl_unit'));
-        // model.set('wl_spec', bom.get('wl_spec'));
-        // model.set('wl_type', bom.get('wl_type'));
-        // model.set('wl_category_id', bom.get('wl_category_id'));
-      }
-    });
-    // this.app.db.on('bom.afterSaveWithAssociations', async (model, { transaction }) => {
-    //   const prj = await this.db.getRepository('prj').findOne({
+    // this.app.db.on('bom_wl.beforeSave', async (model, { transaction }) => {
+    //   const bom = await this.db.getRepository('bom').findOne({
     //     filter: {
-    //       code: model.get('prj_code'),
+    //       id: model.get('bom_id'),
     //     },
     //     transaction,
     //   });
-    //   // const records = model.dataValues.bom_wl||[];
-    //   /**
-    //    * 获取bom_wl
-    //    */
-    //   const records = await this.db.getRepository('bom_wl').find({
-    //     filter: {
-    //       bom_id: model.get('id'),
-    //     },
-    //     transaction,
-    //   });
-    //   if(records.length){
-    //   await Promise.all(
-    //     records.map(async (record) => {
-    //       return new Promise(async (resolve, reject) => {
-    //         const boms = await this.getAllParentIds(model.get('id'), transaction);
-    //         const res = await this.db.getRepository('bom_wl').update({
-    //           filterByTk: record.get('id'),
-    //           updateAssociationValues:['boms'],
-    //           // targetCollection: 'bom_wl',
-    //           values: {
-    //             prjId: prj.get('id'),
-    //             // bom_id: bomIds,
-    //             boms: boms
-    //           },
-    //           transaction,
-    //         });
-    //         resolve(res);
-    //       });
-    //     }),
-    //   );
-    // }
-    //   // await this.db.getRepository('bom_wl').update({
-    //   //   filter: {
-    //   //     bom_id: model.get('id'),
-    //   //   },
-    //   //   values: {
-    //   //     prjId: prj.get('id'),
-    //   //   },
-    //   //   transaction,
-    //   // });
-    //   /* 统计BOM 物料明细 */
-    //   //  const wl_list = await this.db.getRepository('bom_wl').findOne({
-    //   //   filter: {
-    //   //     bom_id: model.get('id'),
-    //   //     prjId: prj.get('id')
-    //   //   },
-    //   //   transaction,
-    //   //  });
-    //   //  if(wl_list.length){
-    //   // const wl_map = {};
-    //   // const groupByWl = wl_list.reduce((group, record) => {
-    //   //   const { wl_id } = record;
-    //   //   group[wl_id] = group[wl_id] ?? [];
-    //   //   group[wl_id].push(record);
-    //   //   wl_map[wl_id] = record;
-    //   //   return group;
-    //   // }, {});
-
-    //   //  }
-
-    //   /* 统计每个BOM 新增明细 */
-    //   // const wl = await this.db.getRepository('wl').findOne({
-    //   //   filter: {
-    //   //     code: model.get('wl_code'),
-    //   //   },
-    //   //   transaction,
-    //   // });
+    //   if (bom) {
+    //     model.set('prjId', bom.get('prjId'));
+    //   }
     // });
     /* 存储库存 把项目也作更新 */
     this.app.db.on('wl_stock.beforeSave', async (model, { transaction }) => {
@@ -128,13 +47,47 @@ export class PluginProduceManagerServer extends Plugin {
         }
       }
     });
+    /*创建bom_applys 计算累计补单次数 */
+    this.app.db.on('bom_apply.afterCreate', async (model, { transaction }) => {
+      const typeIsBd = !model.get('orderType') || model.get('orderType') == '2';
+      if (typeIsBd) {
+        const sdModel = await this.db.getRepository('bom_apply').findOne({
+          filter: {
+            bomType_dicId: model.get('bomType_dicId'),
+            prjId: model.get('prjId'),
+            orderType: '1'
+          },
+          transaction
+        });
+        if (sdModel) {
+          const [bdModels, bdCount] = await this.db.getRepository('bom_apply').findAndCount({
+            filter: {
+              bomType_dicId: model.get('bomType_dicId'),
+              prjId: model.get('prjId'),
+              orderType: '2'
+            },
+            transaction
+          });
+          //更新补单次数
+          await this.db.getRepository('bom_apply').update({
+            filterByTk: sdModel.get('id'),
+            values: {
+              bd_count: bdCount,
+              link_bom_applys: bdModels
+            },
+            updateAssociationValues: ['link_bom_applys'],
+            transaction
+          });
+        }
+      }
+    });
   }
-  async  getAllParentIds(bomId: number, transaction: any): Promise<number[]> {
+  async getAllParentIds(bomId: number, transaction: any): Promise<number[]> {
     const bom = await this.db.getRepository('bom').findOne({
       filter: {
-        id: bomId,
+        id: bomId
       },
-      transaction,
+      transaction
     });
 
     if (bom && bom.get('parentId')) {
@@ -171,6 +124,7 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('cg_apply_list');
       await repo.db2cm('cg_apply');
     }
+    this.app.resourcer.registerActionHandler('bom_apply:initCreateMany', initCreateMany);
   }
 
   async install(options?: InstallOptions) {}

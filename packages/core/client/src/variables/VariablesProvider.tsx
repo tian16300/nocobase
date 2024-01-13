@@ -138,9 +138,6 @@ const VariablesProvider = ({ children }) => {
           collectionName = associationField.target;
         }
       }
-
-      console.log('getValue useCallback 变化');
-
       return compile(_.isFunction(current) ? current() : current);
     },
     [getCollectionJoinField]
@@ -154,7 +151,6 @@ const VariablesProvider = ({ children }) => {
       if (!isVariable(`{{${variableOption.name}}}`)) {
         throw new Error(`VariablesProvider: ${variableOption.name} is not a valid name`);
       }
-
       setCtx((prev) => {
         return {
           ...prev,

@@ -7,11 +7,15 @@ import {
   useCurrentUserContext,
   useFilterByTk,
   useFormBlockContext,
+  useRecord,
+  useRequest,
+  useTableBlockContext,
   useUpdateActionProps,
 } from '@nocobase/client';
 import { useBomTreeFormBlockContext } from '../components/bom-tree-form/Provider';
 import { useFieldSchema, useField } from '@formily/react';
 import { dayjs } from '@nocobase/utils';
+import { message } from 'antd';
 export const useSaveBomActionProps = (props: any) => {
   const { viewType } = useBomTreeFormBlockContext();
 
@@ -107,4 +111,25 @@ export const useSaveBomApplyActionProps = (props: any) => {
       },
     };
   }
+};
+
+export const useInitBomApplyActionProps = (props: any) => {
+  /* 获取数据字典类型单据 */
+  const record = useRecord();
+  const api = useAPIClient();
+  const ctx = useTableBlockContext();
+  return {
+    async onClick() {
+      const res = await api.resource('bom_apply').initCreateMany({
+        prjId: record.id,
+      });
+      if (res.status == 200) {
+        ctx?.service?.refresh();
+        message.success('创建成功');
+     
+      } else {
+        message.error(res.data);
+      }
+    },
+  };
 };
