@@ -3,6 +3,8 @@ import * as comps from './components';
 import * as items from './initializers/components';
 import * as scopes from './scopes';
 import { ISchema, useField, useFieldSchema } from '@formily/react';
+import * as providers  from './providers';
+import { UseSubTableActionBarComponentProps } from './initializers/use-component-props';
 export class PluginProduceManagerClient extends Plugin {
   async afterAdd() {
     // await this.app.pm.add()
@@ -17,42 +19,21 @@ export class PluginProduceManagerClient extends Plugin {
   async load() {
     this.app.addComponents({
       ...comps,
-      ...items as any
+      ...items as any,
+      ...providers as any
     });
-    this.app.addScopes(scopes)
+    this.app.addScopes(scopes);
+    // this.app.addProviders();
     // this.app.addProvider()
     // this.app.addProviders()
     // this.app.router.add()
     this.addSchemaInitializers()
   }
   addSchemaInitializers(){
-    this.app.schemaInitializerManager.addItem('FormItemInitializers','getWlStockAction',{
+    this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.getWlStockAction',{
       type:'item',
-      useComponentProps(){
-        const { insert } = useSchemaInitializer();
-        return {
-          title:'提取库存',
-          onClick: ()=>{
-            insert({
-              type:'void',
-              'x-decorator': 'FormItem',
-              'x-designer': 'GetWlStock.Design',
-              title:'提取库存',
-              'x-component':'Action',
-              'x-component-props':{
-                component: 'GetWlStock.Action',
-                type:'primary',
-                useAction: () => {
-                  return {
-                    run() {},
-                  };
-                },
-
-              }
-            })
-          }
-        }
-      }
+      title:'提取库存',
+      Component: 'GetWlStockActionInitializer'
     })
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.countTableChangeAction',{
       name:'countTableChangeAction',
@@ -117,7 +98,24 @@ export class PluginProduceManagerClient extends Plugin {
           const {name} = useCollection();
           return name === 'bom';  
         }
+      });
+      this.app.schemaInitializerManager.addItem('FormItemInitializers', 'subTableActionBar',{
+        name:'subTableActionBar',
+        title:'子表操作栏',
+        type:'item',
+        useComponentProps: UseSubTableActionBarComponentProps
+      });
+      this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.emptyAction',{
+        type:'item',
+        title:'清空',
+        Component: 'EmptyActionInitializer'
       })
+      this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.fullScreenAction',{
+        type:'item',
+        title:'全屏',
+        Component: 'FullScreenActionInitializer'
+      })
+     
   }
 }
 

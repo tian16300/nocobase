@@ -17,14 +17,11 @@ import { Button, Select, Space, message } from 'antd';
 import { RecordPickerDrawer, useFieldNames } from '../record-picker';
 import { unionBy } from 'lodash';
 import {
-  WithoutFormFieldResource,
-  useAssociation,
   useFormBlockContext,
-  useFormBlockType,
-  useTableBlockContext,
+  useFormBlockType
 } from '../../../block-provider';
-import { SchemaInitializer, useSchemaInitializerItem } from '../../../application';
-import { ActionInitializer, BlockInitializer } from '../../../schema-initializer';
+import { useSchemaInitializerItem } from '../../../application';
+import { BlockInitializer } from '../../../schema-initializer';
 
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
@@ -260,7 +257,6 @@ export const useDataBlockSelectorProps = () => {
         message.error('字段关系配置错误, 请联系管理员');
         return;
       }
-      debugger;
       const newRows = [];
       const foreignKey = toField.foreignKey;
       const targetKey = toField.targetKey || 'id';

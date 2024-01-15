@@ -117,7 +117,7 @@ export default {
       },
     },
   },
-  SubTable: {
+  SubTable: {    
     type: 'void',
     'x-component': 'AssociationField.SubTable',
     'x-initializer': 'TableColumnInitializers',
@@ -126,6 +126,6 @@ export default {
     },
     properties: {
       
-    },
-  },
+    }
+  }
 };

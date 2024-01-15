@@ -939,6 +939,14 @@ export const formItemSettings = new SchemaSettings({
         return fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
       },
     },
+    {
+      name: 'subTableImportXlsActionField',
+      Component: EditDataBlockSelectorAction,
+      useVisible() {
+        const fieldSchema = useFieldSchema();
+        return fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
+      },
+    },
 
     {
       name: 'remove',
@@ -955,8 +963,8 @@ export const formItemSettings = new SchemaSettings({
             'x-component': 'Grid',
           },
         };
-      },
-    },
+      }
+    }
   ],
 });
 

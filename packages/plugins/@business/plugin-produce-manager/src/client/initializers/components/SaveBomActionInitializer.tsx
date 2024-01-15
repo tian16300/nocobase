@@ -16,5 +16,5 @@ export const SaveBomActionInitializer = () => {
       triggerWorkflows: [],
     },
   };
-  return <ActionInitializer schema={schema} i/>;
+  return <ActionInitializer schema={schema} />;
 };

@@ -24,6 +24,7 @@ export class ExportPlugin extends Plugin {
     const tableActionInitializers = this.app.schemaInitializerManager.get('TableActionInitializers');
     tableActionInitializers?.add('enableActions.export', initializerData);
     this.app.schemaInitializerManager.addItem('GanttActionInitializers', 'enableActions.export', initializerData);
+    this.app.schemaInitializerManager.addItem('SubTableActionInitializers', 'enableActions.export', initializerData);
   }
 }
 

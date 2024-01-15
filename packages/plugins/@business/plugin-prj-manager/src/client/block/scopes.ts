@@ -3,12 +3,8 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { TabsProps } from 'antd';
 import { css } from '@nocobase/client';
-// import { useTabsContext } from '@nocobase/client';
 export const usePrjTabsProps = () => {
-    // const contextProps = useTabsContext();
-    const [searchParams, setSearchParams] = useSearchParams();
-    // console.log('contextProps', contextProps);
-    // contextProps.activeKey =  searchParams.get('tab');
+    const [searchParams, setSearchParams] = useSearchParams();   
     const onTabChange = useCallback<TabsProps['onChange']>(
         (key) => {
           const prjId = searchParams.get('id');
@@ -22,10 +18,9 @@ export const usePrjTabsProps = () => {
         },
         [setSearchParams],
       );
-  
-    //   contextProps.activeKey = searchParams.get('tab');
+    const activeKey = searchParams.get('tab');
   return {
-    activeKey : searchParams.get('tab'),
+    ...activeKey?{activeKey}:{},
     onChange: onTabChange,
     className: css`
      .nb-block-item.ant-nb-card-item > .ant-card > .ant-card-body{

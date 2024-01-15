@@ -22,6 +22,7 @@ export class PrintPlugin extends Plugin {
       initializerData,
     );
     this.app.schemaInitializerManager.addItem('CalendarFormActionInitializers', 'enableActions.print', initializerData);
+    this.app.schemaInitializerManager.addItem('SubTableActionInitializers', 'enableActions.print', initializerData);
   }
 }
 

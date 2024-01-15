@@ -118,7 +118,6 @@ export const InternalSubTableAction = observer(
       const { multiple, selectedRows, onChange, options, collectionField } = useContext(RecordPickerContext);
       return {
         onClick() {
-          debugger;
           if (multiple) {
             onChange(unionBy(selectedRows, options, collectionField?.targetKey || 'id'));
           } else {
