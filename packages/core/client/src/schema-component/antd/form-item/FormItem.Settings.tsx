@@ -431,19 +431,19 @@ export const formItemSettings = new SchemaSettings({
               type: 'boolean',
               title: '允许新增',
               'x-decorator': 'FormItem',
-              'x-component': 'Switch',
+              'x-component': 'Checkbox',
             },
             showMove: {
               type: 'boolean',
               title: '允许移动',
               'x-decorator': 'FormItem',
-              'x-component': 'Switch',
+              'x-component': 'Checkbox',
             },
             showDel: {
               type: 'boolean',
               title: '允许删除',
               'x-decorator': 'FormItem',
-              'x-component': 'Switch',
+              'x-component': 'Checkbox',
             },
             removeActionName: {
               type: 'string',
@@ -502,7 +502,7 @@ export const formItemSettings = new SchemaSettings({
               schema,
             });
             dn.refresh();
-          },
+          }
         };
       },
       useVisible() {
@@ -1005,15 +1005,6 @@ export const formItemSettings = new SchemaSettings({
         return fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
       },
     },
-    {
-      name: 'subTableImportXlsActionField',
-      Component: EditDataBlockSelectorAction,
-      useVisible() {
-        const fieldSchema = useFieldSchema();
-        return fieldSchema?.['x-component'] === 'DataBlockSelectorAction';
-      },
-    },
-
     {
       name: 'remove',
       type: 'remove',

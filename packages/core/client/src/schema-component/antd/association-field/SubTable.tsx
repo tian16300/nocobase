@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { ArrayField } from '@formily/core';
 import { exchangeArrayState } from '@formily/core/esm/shared/internals';
-import { RecursionField, observer, RecursionField, useFieldSchema } from '@formily/react';
+import { RecursionField, observer,  useFieldSchema } from '@formily/react';
 import { action } from '@formily/reactive';
 import { isArr } from '@formily/shared';
 import { Button } from 'antd';
@@ -167,43 +167,41 @@ export const SubTable: any = observer(
               scrollY={scrollY}
               footer={() =>
                 field.editable &&
-                showAdd && (
-                  <>
-                    {field.componentProps?.allowAddnew !== false && (
-                      <Button
-                        type={'text'}
-                        block
-                        className={css`
-                          display: block;
-                          border-radius: 0px;
-                          border-right: 1px solid rgba(0, 0, 0, 0.06);
-                        `}
-                        onClick={() => {
-                          field.value = field.value || [];
-                          field.value.push({});
-                          field.onInput(field.value);
-                        }}
-                      >
-                        {t('Add new')}
-                      </Button>
-                    )}
-                    {field.componentProps?.allowSelectExistingRecord && (
-                      <Button
-                        type={'text'}
-                        block
-                        className={css`
-                          display: block;
-                          border-radius: 0px;
-                        `}
-                        onClick={() => {
-                          setVisibleSelector(true);
-                        }}
-                      >
-                        {t('Select')}
-                      </Button>
-                    )}
-                  </>
-                )
+                <>
+                {field.componentProps?.allowAddnew !== false && (
+                  <Button
+                    type={'text'}
+                    block
+                    className={css`
+                      display: block;
+                      border-radius: 0px;
+                      border-right: 1px solid rgba(0, 0, 0, 0.06);
+                    `}
+                    onClick={() => {
+                      field.value = field.value || [];
+                      field.value.push({});
+                      field.onInput(field.value);
+                    }}
+                  >
+                    {t('Add new')}
+                  </Button>
+                )}
+                {field.componentProps?.allowSelectExistingRecord && (
+                  <Button
+                    type={'text'}
+                    block
+                    className={css`
+                      display: block;
+                      border-radius: 0px;
+                    `}
+                    onClick={() => {
+                      setVisibleSelector(true);
+                    }}
+                  >
+                    {t('Select')}
+                  </Button>
+                )}
+              </>
               }
               isSubTable={true}
             />

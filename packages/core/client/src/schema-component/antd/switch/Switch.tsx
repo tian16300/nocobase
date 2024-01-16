@@ -35,6 +35,4 @@ export const Switch: ComposedCheckbox = connect(
 );
 
 Switch.ReadPretty = ReadPretty;
-
-
 export default Switch;
