@@ -1154,6 +1154,30 @@ export default {
       targetKey: 'id',
       sourceKey: 'id',
     },
+    {
+     
+      "name": "bom_applys",
+      "type": "hasMany",
+      "interface": "o2m",
+      "description": null,
+      "collectionName": "prj",
+      "foreignKey": "prjId",
+      "onDelete": "SET NULL",
+      "uiSchema": {
+          "x-component": "AssociationField",
+          "x-component-props": {
+              "multiple": true,
+              "fieldNames": {
+                  "label": "id",
+                  "value": "id"
+              }
+          },
+          "title": "BOM申请"
+      },
+      "target": "bom_apply",
+      "targetKey": "id",
+      "sourceKey": "id"
+  }
   ],
   title: '项目',
 };
