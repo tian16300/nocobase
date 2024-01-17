@@ -2,7 +2,15 @@ import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
 import _ from 'lodash';
 import { initCreateMany } from './actions/initCreateMany';
-import axios from 'axios';
+
+
+const  countWlAmount = function (models, isWs = false){
+  return models.reduce((prev: any, cur: any) => {
+    const rate = isWs?(1+cur.rate):1;
+    return prev + cur.price/rate * (cur.num - cur.tc_num - cur.tk_num);
+  },0)
+
+}
 export class PluginProduceManagerServer extends Plugin {
   afterAdd() {}
   beforeLoad() {
@@ -194,10 +202,139 @@ export class PluginProduceManagerServer extends Plugin {
     });
     //物料BOM新增 或者修改 生成项目BOM Tree结构
     this.app.db.on('bom_wl.beforeSave', this.updatePrjBomTree.bind(this));
-    //物料BOM新增 或者修改 生成项目BOM Tree结构
-    // this.app.db.on('bom_wl.beforeDestroy', async (model, { transaction }) => {
-    //   //将项目BOM Tree结构 保存到 bom 表里
-    // });
+    //中间表关联同步 cg_apply_bom_throught cg_apply_id
+    this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
+      const cg_wl_id = model.get('cg_wl_id');
+      //查找 cg_apply_list 明细 cg_apply_id
+      const record = await this.app.db.getRepository('cg_apply_list').findOne({
+        filterByTk: cg_wl_id,
+        transaction,
+      });
+      model.set('cg_apply_id', record.get('cg_apply_id'));
+    });
+    //采购申请单 统计项目物料成本
+    // 步骤 查找所有的BOM 明细  按照 项目分组  统计审批通过的总物料BOM 本次新增物料BOM 历史审批的项目物料BOM
+    this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
+      /* 查找BOM 明细 */
+      const cg_apply_id = model.get('id');
+      const currentTime = model.get('updatedAt') || model.get('createdAt') ;
+      //删除采购申请单的所有项目物料成本
+      await this.app.db.getRepository('prj_wl_cb').destroy({
+        filter: {
+          cg_apply_id,
+        },
+        transaction,
+      });
+      const [models, count] = await this.app.db.getRepository('bom_wl').findAndCount({
+        filter: {
+          $and: [
+            {
+              cg_apply_list: {
+                id: {
+                  $in: [cg_apply_id],
+                },
+              },
+            },
+            {
+              bom_apply: {
+                approvalStatus: {
+                  jobIsEnd: true,
+                },
+              },
+            },
+            {
+              prj: {
+                id: {
+                  $not: null,
+                },
+              },
+            },
+          ],
+        },
+        transaction,
+      });
+      // 创建新的项目物料成本  新增的物料
+      const groups = _.groupBy(models, function (n) {
+        return n.prjId;
+      });
+      const prjs = Object.keys(groups),
+        rows = [];
+      
+      await Promise.all(
+        prjs.map(async (prjId: any) => {
+          const row: any = {};
+          row.prjId = prjId;
+          row.cg_apply_id = cg_apply_id;
+          // 本次总物料BOM bom_wl_list 本次新增物料BOM add_wl_list 历史审批的项目物料BOM history_wl_list
+          const add_wl_list = groups[prjId];
+          const bom_wl_list = (await this.app.db.getRepository('bom_wl').find({
+            filter: {
+              $and: [
+                {
+                  bom_apply: {
+                    approvalStatus: {
+                      jobIsEnd: true,
+                    },
+                  },
+                },
+                {
+                  prj: {
+                    id: prjId,
+                  },
+                },
+              ],
+            },
+            transaction,
+          })||[]);
+          //查找历史审批的项目物料BOM
+          const history_wl_list = (await this.app.db.getRepository('bom_wl').find({
+            filter: {
+              $and: [
+                {
+                  cg_apply_list: {
+                    approvalStatus: {
+                      jobIsEnd: true,
+                    },
+                  },
+                },
+                {
+                  cg_apply_list: {
+                    updatedAt: {
+                      $dateBefore: currentTime
+                    },
+                  },
+                },                
+                {
+                  prj: {
+                    id: prjId,
+                  },
+                },
+              ],
+            },
+            transaction,
+          })||[]);
+          row.bom_wl_list = bom_wl_list.map((item: any) => item.get('id'));
+          row.add_wl_list = add_wl_list.map((item: any) => item.get('id'));
+          row.history_wl_list = history_wl_list.map((item: any) => item.get('id'));
+          row.add_cb = countWlAmount(add_wl_list);
+          row.add_ws_cb = countWlAmount(add_wl_list, true);
+          row.total_cb = countWlAmount(bom_wl_list);
+          row.total_ws_cb = countWlAmount(bom_wl_list, true);
+          row.history_cb = countWlAmount(history_wl_list);
+          row.history_ws_cb = countWlAmount(history_wl_list, true);
+          /**
+           * history_cb history_ws_cb
+           */
+          const res = await this.app.db.getRepository('prj_wl_cb').create({
+            values: row,
+            transaction
+          });  
+                  
+        }),
+      );
+
+      // models.forEach(async (item: any) => {});
+    });
   }
   async updatePrjBomTree(model: any, { transaction }) {
     // 查找所有 prj bom 生成 分组  全部   工站  单元   未关联
@@ -256,7 +393,6 @@ export class PluginProduceManagerServer extends Plugin {
         //   },
         //   transaction,
         // });
-
       }
     }
     // if (treeModel) {

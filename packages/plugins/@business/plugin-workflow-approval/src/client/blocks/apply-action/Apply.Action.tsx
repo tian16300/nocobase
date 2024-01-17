@@ -38,7 +38,7 @@ const CancelApplyAction = (props) => {
   const handleCancleApply = async () => {
     const res = await api.resource('approval_apply').update({
       filterByTk: apply.id,
-      values:  {
+      values: {
         status: '3',
         // result: {
         //   _: apply,
@@ -88,7 +88,6 @@ const useSubmitAction = () => {
         ...applyValues,
         relatedCollection: collection.name,
         related_data_id: record.id,
-        status: '0',
         workflowKey: workflow?.key,
       };
       if (!workflow) {
@@ -103,13 +102,29 @@ const useSubmitAction = () => {
             })
             .then((res) => {
               if (res.status == 200) {
-                message.success('提交申请成功');
-                setVisible(false);
-                api.service(serviceUid)?.refresh();
+                const filterByTk = res.data.data.id;
+                api
+                  .resource('approval_apply')
+                  .update({
+                    filterByTk,
+                    values: {
+                      status: '0',
+                      jobIsEnd: false,
+                      workflowKey: workflow?.key || apply?.workflowKey,
+                    },
+                  })
+                  .then((res) => {
+                    message.success('提交申请成功');
+                    setVisible(false);
+                    api.service(serviceUid)?.refresh();
+                    service?.refresh();
+                  });
               }
             });
         } else {
-            api.resource('approval_apply').update({
+          api
+            .resource('approval_apply')
+            .update({
               filterByTk: apply.id,
               values: {
                 ...form.values,
@@ -118,12 +133,12 @@ const useSubmitAction = () => {
                 workflowKey: workflow?.key || apply?.workflowKey,
               },
             })
-          .then((res) => {
-            message.success('提交申请成功');
-            setVisible(false);
-            api.service(serviceUid)?.refresh();
-            service?.refresh();
-          });
+            .then((res) => {
+              message.success('提交申请成功');
+              setVisible(false);
+              api.service(serviceUid)?.refresh();
+              service?.refresh();
+            });
         }
       }
     },

@@ -120,7 +120,8 @@ export const AddProvalSetting = (props) => {
             },
           ],
         },
-        mode: 3,
+        //更新数据后触发
+        mode: 2
       },
     };
   }, [workflow, flowName, collection]);
