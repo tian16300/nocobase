@@ -337,8 +337,8 @@ export default class Processor {
     } else if (rule == '3') {
       const [users]  = await repository.findAndCount({ 
         filter:{
-          dept:{
-            id:{
+          roles:{
+            name:{
               $in:assigneeRoles
             }
           }

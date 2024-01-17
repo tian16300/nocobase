@@ -1,4 +1,4 @@
-import { ArrayCollapse, FormLayout } from '@formily/antd-v5';
+import { ArrayCollapse, ArrayItems, FormLayout } from '@formily/antd-v5';
 import { Field } from '@formily/core';
 import { ISchema, Schema, useField, useFieldSchema, useForm } from '@formily/react';
 import { uid } from '@formily/shared';
@@ -621,11 +621,11 @@ export const EditDataBlockSelectorAction = () => {
   const field = useField();
   const { dn } = useDesignable();
   const { name, title } = useCollection();
-  const { getCollectionFields } = useCollectionManager();
+  const { getCollectionFields, getCollectionField } = useCollectionManager();
   const fields = getCollectionFields(name);
   const addToFields = fields
     .filter((field) => {
-      return ['o2m','m2m'].includes(field?.interface);
+      return ['o2m', 'm2m'].includes(field?.interface);
     })
     .map((item) => {
       return { label: item?.uiSchema?.title, value: item.name };
@@ -633,104 +633,219 @@ export const EditDataBlockSelectorAction = () => {
   const initialValues = fieldSchema?.['x-component-props'];
   return (
     <>
-      <SchemaSettingsButtonEditor />    
-        <SchemaSettingsModalItem
-          title="批量选择"
-          schema={{
-            type: 'object',
-            properties: {
-              collection: {
-                type: 'string',
-                title: '选择数据表',
-                'x-decorator': 'FormItem',
-                'x-component': 'CollectionSelect',
+      <SchemaSettingsButtonEditor />
+      <SchemaSettingsModalItem
+        title="批量选择"
+        components={{ ArrayItems }}
+        schema={{
+          type: 'object',
+          properties: {
+            collection: {
+              type: 'string',
+              title: '选择数据表',
+              'x-decorator': 'FormItem',
+              'x-component': 'CollectionSelect',
+            },
+            addTo: {
+              type: 'string',
+              title: '添加到',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              enum: addToFields,
+            },
+            groupBy: {
+              type: 'string',
+              title: '分组字段',
+              'x-decorator': 'FormItem',
+              'x-component': 'AppendsTreeSelect',
+              'x-component-props': {
+                multiple: false,
+                useCollection() {
+                  const { values } = useForm();
+                  return values?.collection;
+                },
               },
-              addTo: {
-                type: 'string',
-                title: '添加到',
-                'x-decorator': 'FormItem',
-                'x-component': 'Select',
-                enum: addToFields,
-              },
-              groupBy: {
-                type: 'string',
-                title: '分组字段',
-                'x-decorator': 'FormItem',
-                'x-component': 'AppendsTreeSelect',
-                'x-component-props': {
-                  multiple: false,
-                  useCollection() {
-                    const { values } = useForm();
-                    return values?.collection;
+              'x-reactions': [
+                {
+                  dependencies: ['.collection'],
+                  fulfill: {
+                    state: {
+                      visible: '{{ !!$deps[0] }}',
+                    },
                   },
                 },
-                'x-reactions': [
-                  {
-                    dependencies: ['.collection'],
-                    fulfill: {
-                      state: {
-                        visible: '{{ !!$deps[0] }}',
+              ],
+            },
+            sumFields: {
+              type: 'array',
+              title: '统计字段',
+              'x-decorator': 'FormItem',
+              'x-component': 'Select',
+              'x-component-props': {
+                useProps: () => {
+                  const field = useField();
+                  const fields = getCollectionFields(field.data) || [];
+                  // const {t} = useTranslation();
+                  return {
+                    options: fields
+                      .filter((field) => {
+                        return field.uiSchema?.type == 'number';
+                      })
+                      .map((field) => {
+                        return {
+                          label: field.uiSchema?.title,
+                          value: field.name,
+                        };
+                      }),
+                    mode: 'multiple',
+                  };
+                },
+              },
+              'x-reactions': [
+                {
+                  dependencies: ['.collection'],
+                  fulfill: {
+                    state: {
+                      visible: '{{ !!$deps[0] }}',
+                      data: '{{$deps[0]}}',
+                    },
+                  },
+                },
+              ],
+            },
+            fieldMaps: {
+              type: 'array',
+              'x-decorator': 'FormItem',
+              'x-component': 'ArrayItems',
+              title: '字段映射',
+              items: {
+                type: 'object',
+                properties: {
+                  space: {
+                    type: 'void',
+                    'x-component': 'Space',
+                    properties: {
+                      sort: {
+                        type: 'void',
+                        'x-decorator': 'FormItem',
+                        'x-component': 'ArrayItems.SortHandle',
+                      },
+                      field: {
+                        type: 'string',
+                        title: '字段',
+                        'x-decorator': 'FormItem',
+                        'x-component': 'Select',
+                        'x-component-props': {
+                          useProps: () => {
+                            const field = useField();
+                            const fields = getCollectionFields(field.data) || [];
+                            // const {t} = useTranslation();
+                            return {
+                              options: fields
+                                .filter((field) => {
+                                  return !['obo', 'm2m', 'o2m', 'dic'].includes(field?.inerface);
+                                })
+                                .map((field) => {
+                                  return {
+                                    label: field.uiSchema?.title,
+                                    value: field.name,
+                                  };
+                                }),
+                              style: {
+                                width: 160,
+                              },
+                            };
+                          },
+                        },
+                        'x-reactions': [
+                          {
+                            dependencies: ['collection'],
+                            fulfill: {
+                              state: {
+                                visible: '{{ !!$deps[0] }}',
+                                data: '{{$deps[0]}}',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                      mapField: {
+                        type: 'string',
+                        title: '映射字段',
+                        'x-decorator': 'FormItem',
+                        'x-component': 'Select',
+                        'x-component-props': {
+                          useProps: () => {
+                            const field = useField();
+                            const cField = getCollectionField([name, field.data].join('.'));
+                            const fields = getCollectionFields(cField?.target) || [];
+                            return {
+                              options: fields
+                                .filter((field) => {
+                                  return !['obo', 'm2m', 'o2m', 'dic'].includes(field?.inerface);
+                                })
+                                .map((field) => {
+                                  return {
+                                    label: field.uiSchema?.title,
+                                    value: field.name,
+                                  };
+                                }),
+                              style: {
+                                width: 160,
+                              },
+                            };
+                          },
+                        },
+                        'x-reactions': [
+                          {
+                            dependencies: ['addTo'],
+                            fulfill: {
+                              state: {
+                                visible: '{{ !!$deps[0] }}',
+                                data: '{{$deps[0]}}',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                      remove: {
+                        type: 'void',
+                        'x-decorator': 'FormItem',
+                        'x-component': 'ArrayItems.Remove',
                       },
                     },
                   },
-                ],
-              },
-              sumFields:{
-                type: 'array', 
-                title: '统计字段',
-                'x-decorator': 'FormItem',
-                'x-component': 'Select',
-                'x-component-props': {
-                  useProps: ()=>{
-                    const field = useField();
-                    const fields = getCollectionFields(field.data)||[];
-                    // const {t} = useTranslation();
-                    return {
-                      options: fields.filter((field)=>{
-                        return field.uiSchema?.type == 'number';
-                      }).map((field)=>{
-                        return {
-                          label: field.uiSchema?.title,
-                          value: field.name
-                        }
-                      }),
-                      mode:'multiple'
-
-                    }
-                  }
                 },
-                'x-reactions': [{
-                  dependencies:['.collection'],
-                  fulfill:{
-                    state:{
-                      visible: '{{ !!$deps[0] }}',
-                      data: '{{$deps[0]}}'
-                    }
-                  }
-                }],
+              },
+              properties: {
+                add: {
+                  type: 'void',
+                  title: '添加条目',
+                  'x-component': 'ArrayItems.Addition',
+                },
               },
             },
-          }}
-          initialValues={initialValues}
-          onSubmit={(values) => {
-            field.componentProps = {
-              ...field.componentProps,
-              ...values,
-            };
-            fieldSchema['x-component-props'] = {
-              ...initialValues,
-              ...values,
-            };
-            dn.emit('patch', {
-              schema: {
-                ['x-uid']: fieldSchema['x-uid'],
-                'x-component-props': fieldSchema['x-component-props'],
-              },
-            });
-            dn.refresh();
-          }}
-        />
-      
+          },
+        }}
+        initialValues={initialValues}
+        onSubmit={(values) => {
+          field.componentProps = {
+            ...field.componentProps,
+            ...values,
+          };
+          fieldSchema['x-component-props'] = {
+            ...initialValues,
+            ...values,
+          };
+          dn.emit('patch', {
+            schema: {
+              ['x-uid']: fieldSchema['x-uid'],
+              'x-component-props': fieldSchema['x-component-props'],
+            },
+          });
+          dn.refresh();
+        }}
+      />
     </>
   );
 };

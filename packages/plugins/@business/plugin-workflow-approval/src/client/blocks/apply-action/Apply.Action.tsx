@@ -124,30 +124,6 @@ const useSubmitAction = () => {
             api.service(serviceUid)?.refresh();
             service?.refresh();
           });
-          // Promise.all([
-          //   api.resource('approval_results').create({
-          //     values: {
-          //       apply_id: apply.id,
-          //       user: currentUser,
-          //       userAction: JOB_STATUS.PENDING,
-          //       remark: form.values?.applyReason,
-          //       files: form.values?.files,
-          //       actionTime: dayjs().toISOString(),
-          //     },
-          //   }),
-          //   api.resource('approval_apply').update({
-          //     filterByTk: apply.id,
-          //     values: {
-          //       status: '0',
-          //       jobIsEnd: false,
-          //       workflowKey: workflow?.key || apply?.workflowKey,
-          //     },
-          //   }),
-          // ]).then(([res, res1]) => {
-          //   message.success('提交申请成功');
-          //   setVisible(false);
-          //   api.service(serviceUid)?.refresh();
-          // });
         }
       }
     },

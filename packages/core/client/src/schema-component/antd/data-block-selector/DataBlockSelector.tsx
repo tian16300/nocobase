@@ -16,16 +16,13 @@ import { actionDesignerCss } from '../../../schema-initializer/components';
 import { Button, Select, Space, message } from 'antd';
 import { RecordPickerDrawer, useFieldNames } from '../record-picker';
 import { unionBy } from 'lodash';
-import {
-  useFormBlockContext,
-  useFormBlockType
-} from '../../../block-provider';
+import { useFormBlockContext, useFormBlockType } from '../../../block-provider';
 import { useSchemaInitializerItem } from '../../../application';
 import { BlockInitializer } from '../../../schema-initializer';
 
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
-  const { value, collection: tName, multiple = true, addTo, sumFields, groupBy, onChange, ...buttonProps } = props;
+  const { value, collection: tName, multiple = true, addTo, sumFields, groupBy, fieldMaps =[], onChange, ...buttonProps } = props;
   const fieldNames = useFieldNames(props);
   const [visible, setVisible] = useState(false);
   const fieldSchema = useFieldSchema();
@@ -106,7 +103,8 @@ export const DataBlockSelectorAction: any = (props: any) => {
           toField,
           addTo,
           groupField,
-          sumFields
+          sumFields,
+          fieldMaps
         }}
       >
         <Space>
@@ -245,7 +243,7 @@ const useDataBlockSelectorActionContext = () => {
 export const useDataBlockSelectorProps = () => {
   const { setVisible } = useActionContext();
   const { form } = useFormBlockContext();
-  const { selectedRows, toField, addTo, groupField, sumFields } = useDataBlockSelectorActionContext();
+  const { selectedRows, toField, addTo, groupField, sumFields, fieldMaps } = useDataBlockSelectorActionContext();
   const { type } = useFormBlockType();
   return {
     async onClick() {
@@ -283,50 +281,65 @@ export const useDataBlockSelectorProps = () => {
           message.error('缺少分组字段配置, 请联系管理员');
           return;
         }
-        /* 根据分组字段进行调整 */
-        const rowMap = {};
+        /* 根据分组字段进行调整 分组字段不包含值时 */
+        const rowMap = {},
+          otherRows = [];
         const groupRecords = rows.reduce((group, record) => {
           const category = record[groupField.foreignKey];
-          rowMap[category] = record[groupField.name]
-          group[category] = group[category] ?? [];
-          group[category].push(record);        
+          if (category) {
+            rowMap[category] = record[groupField.name];
+            group[category] = group[category] ?? [];
+            group[category].push(record);
+          } else {
+            const  {id, ...others}= record; 
+            otherRows.push({
+              ...others,
+              [toField.name]: [record],
+              [toField.otherKey]:id
+            });
+          }
           return group;
-        },{});
-        const addRows = Object.values(rowMap).map(({id, ...others})=>{
+        }, {});
+        const addGroupRows = Object.values(rowMap).map(({ id, ...others }) => {
           let item = {
-             ...others,
-            [groupField.name]:{id, ...others},
+            ...others,
+            [groupField.name]: { id, ...others },
             [groupField.foreignKey]: id,
             [toField.name]: groupRecords[id],
-          }
-          if(sumFields){
-             sumFields?.map((name)=>{
-               const sum = groupRecords[id].reduce((prev,cur)=>{
-                return prev + (typeof cur[name] == 'number'?cur[name]:0)
-              },0);
+          };
+          if (sumFields) {
+            sumFields?.map((name) => {
+              const sum = groupRecords[id].reduce((prev, cur) => {
+                return prev + (typeof cur[name] == 'number' ? cur[name] : 0);
+              }, 0);
               item[name] = sum;
-             })
+            });
           }
-
-          return item
-        })
+          return item;
+        });
+        const addRows = [...addGroupRows, ...otherRows];
         addRows.map((row) => {
           const index = currentRecords.findIndex((item) => {
             return item[foreignKey] === row[foreignKey];
           });
+        
+          if(fieldMaps.length>0){
+            fieldMaps.map(({field, mapField})=>{
+              row[mapField] = row[field];
+            });
+          }
           if (index == -1) {
             /* 一对一的关系 */
             newRows.push({
-              ...row
+              ...row,
             });
-          }else{
+          } else {
             currentRecords[index] = {
               ...currentRecords[index],
-              ...row
+              ...row,
             };
           }
         });
-
       }
       const newBomWl = [...currentRecords, ...newRows];
 

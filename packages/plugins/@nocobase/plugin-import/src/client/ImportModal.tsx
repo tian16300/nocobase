@@ -32,6 +32,7 @@ export const ImportModal = (props: any) => {
       open={importModalVisible}
       footer={null}
       closable={importStatus === ImportStatus.IMPORTED}
+      zIndex={1002}
       onCancel={doneHandler}
     >
       <div
