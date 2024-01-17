@@ -3,3 +3,4 @@ export * from './useApprovalViewActionProps';
 export * from './useAgreeActionProps';
 export * from './useRejectActionProps';
 export * from './useApproveFormBlockProps';
+export * from './useApprovalAction';

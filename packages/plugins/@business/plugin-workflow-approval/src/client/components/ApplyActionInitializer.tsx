@@ -3,21 +3,20 @@ import React from 'react';
 
 export const ApplyActionInitializer = (props) => {
   const schema = {
-    title:'提交申请',
-    name:'approvalApply',
+    title: '提交审核',
+    name: 'approvalApply',
     'x-action': 'approval_apply:create',
     'x-designer': 'Action.Designer',
-    'x-component': 'Action',
+    'x-component': 'Apply.Action',
     'x-acl-action-props': {
-        skipScopeCheck: true,
-      },
+      skipScopeCheck: true,
+    },
     'x-component-props': {
-      component: 'Apply.Action',
-      useAction: () => {
-        return {
-          run() {},
-        };
+      confirm: {
+        title: 'Perform the {{title}}',
+        content: 'Are you sure you want to perform the {{title}} action?',
       },
+      useAction: "{{ useApprovalAction }}"
     },
   };
   return <ActionInitializer {...props} schema={schema} />;
