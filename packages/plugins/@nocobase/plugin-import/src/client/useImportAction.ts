@@ -83,12 +83,12 @@ export const useDownloadXlsxTemplateAction = () => {
 };
 
 export const useImportStartAction = () => {
-  const { service, resource } = useBlockRequestContext();
+  const { service, block, __parent } = useBlockRequestContext();
   const apiClient = useAPIClient();
   const actionSchema = useFieldSchema();
   const compile = useCompile();
   const { getCollectionJoinField, getCollectionField } = useCollectionManager();
-  const { name, title, getField } = useCollection();
+  const { name} = useCollection();
   const { t } = useTranslation(NAMESPACE);
   const { schema: importSchema } = useImportSchema(actionSchema);
   const form = useForm();
@@ -132,8 +132,13 @@ export const useImportStartAction = () => {
           timeout: 10 * 60 * 1000,
         });
         setImportResult(data);
-        form.reset();
-        await service?.refresh?.();
+        /* 子表导入操作兼容 */
+        if(block == 'SubTableActionField'){
+          await __parent?.service?.refresh?.();
+        }else{
+          form.reset();
+          await service?.refresh?.();
+        }      
         setImportStatus(ImportStatus.IMPORTED);
       } catch (error) {
         setImportModalVisible(false);

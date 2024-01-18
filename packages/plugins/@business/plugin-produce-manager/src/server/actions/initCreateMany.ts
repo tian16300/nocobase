@@ -36,7 +36,7 @@ export const initCreateMany = async (ctx, next) => {
       }
     }),
   );
-  rows.reduce(async (promise, row) => {
+  await rows.reduce(async (promise, row) => {
     await promise;
     const bomAppy = await ctx.app.db.getRepository(ctx.action.resourceName);
     const res = await bomAppy.create({
@@ -46,13 +46,13 @@ export const initCreateMany = async (ctx, next) => {
     return res;
   }, Promise.resolve());
   if (resRows.length) {
-    ctx.state.status = 200;
+    // ctx.state.status = 200;
     ctx.body = {
         data: resRows,
         message: '创建成功'
     };
   } else {
-    ctx.state.status = 400;
+    // ctx.state.status = 400;
     ctx.body = '单据已经存在,可以选择补单';
   }
   next();

@@ -3,6 +3,7 @@ import {
   useAPIClient,
   useApplyBlockContext,
   useBlockRequestContext,
+  useCollection,
   useCreateActionProps,
   useCurrentUserContext,
   useFilterByTk,
@@ -117,14 +118,15 @@ export const useInitBomApplyActionProps = (props: any) => {
   /* 获取数据字典类型单据 */
   const record = useRecord();
   const api = useAPIClient();
-  const ctx = useTableBlockContext();
+  const {service} = useBlockRequestContext();
+  const {name} = useCollection();
   return {
     async onClick() {
-      const res = await api.resource('bom_apply').initCreateMany({
+      const res = await api.resource(name).initCreateMany({
         prjId: record.id,
       });
       if (res.status == 200) {
-        ctx?.service?.refresh();
+        service?.refresh();
         message.success('创建成功');
      
       } else {
