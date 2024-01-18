@@ -4,6 +4,8 @@ import { merge } from '@formily/shared';
 import {
   SchemaInitializerSwitch,
   css,
+  useBlockAssociationContext,
+  useBlockRequestContext,
   useCollection,
   useDesignable,
   useSchemaInitializer,
@@ -44,29 +46,22 @@ export const EmptyActionInitializer = () => {
   const itemConfig = useSchemaInitializerItem();
   const { insert } = useSchemaInitializer();
   const { exists, remove } = useCurrentSchema('emptyValue', 'x-action', itemConfig.find, itemConfig.remove);
-  const { name } = useCollection();
+  // const { association } = useBlockAssociationContext();
+
   // const fields = useFields(name);
   const schema: ISchema = {
-    type:'void',
-    'x-designer': 'GetWlStock.Design',
-    title:'提取库存',
-    'x-action': 'getWlStock',
-    'x-action-settings': {
-      
+    type: 'void',
+    'x-designer': 'Action.Designer',
+    title: '清空',
+    'x-action': 'emptyValue',
+    'x-action-settings': {},
+    'x-component': 'Action',
+    'x-component-props': {
+      type: 'primary',
+      // association,
+      useProps: '{{ useEmptyCollectionFieldActionProps }}',
     },
-    'x-component':'Action',
-    'x-component-props':{
-      component: 'GetWlStock.Action',
-      type:'primary',
-      collectionField: '',
-      useAction: () => {
-        return {
-          run() {},
-        };
-      },
-
-    }
-   };
+  };
   return (
     <SchemaInitializerSwitch
       {...itemConfig}

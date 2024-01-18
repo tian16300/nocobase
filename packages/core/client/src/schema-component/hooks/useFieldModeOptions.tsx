@@ -44,6 +44,7 @@ export const useFieldModeOptions = (props?) => {
             { label: t('Select'), value: 'Select' },
             { label: t('Record picker'), value: 'Picker' },
             ['m2m', 'o2m'].includes(collectionField.interface) && { label: t('Sub-table'), value: 'SubTable' },
+            ['m2m', 'o2m'].includes(collectionField.interface) && { label: t('子表格+操作栏'), value: 'SubTableWithActionBar' },
             { label: t('Cascade Select'), value: 'CascadeSelect' },
             !isSubTableField && { label: t('Sub-form'), value: 'Nester' },
             { label: t('Sub-form(Popover)'), value: 'PopoverNester' },
@@ -56,6 +57,7 @@ export const useFieldModeOptions = (props?) => {
               { label: t('Title'), value: 'Select' },
               { label: t('Tag'), value: 'Tag' },
               { label: t('Sub-table'), value: 'SubTable' },
+              { label: t('子表格+操作栏'), value: 'SubTableWithActionBar' },
               { label: t('Sub-details'), value: 'Nester' },
             ]
           : [
@@ -64,6 +66,7 @@ export const useFieldModeOptions = (props?) => {
               !isSubTableField && { label: t('Sub-form'), value: 'Nester' },
               { label: t('Sub-form(Popover)'), value: 'PopoverNester' },
               !isSubTableField && { label: t('Sub-table'), value: 'SubTable' },
+              !isSubTableField && { label: t('子表格+操作栏'), value: 'SubTableWithActionBar' },
             ];
       case 'm2m':
         return isReadPretty
@@ -72,11 +75,13 @@ export const useFieldModeOptions = (props?) => {
               { label: t('Tag'), value: 'Tag' },
               { label: t('Sub-details'), value: 'Nester' },
               { label: t('Sub-table'), value: 'SubTable' },
+              { label: t('子表格+操作栏'), value: 'SubTableWithActionBar' },
             ]
           : [
               { label: t('Select'), value: 'Select' },
               { label: t('Record picker'), value: 'Picker' },
               !isSubTableField && { label: t('Sub-table'), value: 'SubTable' },
+              !isSubTableField && { label: t('子表格+操作栏'), value: 'SubTableWithActionBar' },
               !isSubTableField && { label: t('Sub-form'), value: 'Nester' },
               { label: t('Sub-form(Popover)'), value: 'PopoverNester' },
             ];

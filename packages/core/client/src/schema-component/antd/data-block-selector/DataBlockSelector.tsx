@@ -19,16 +19,23 @@ import { unionBy } from 'lodash';
 import { useFormBlockContext, useFormBlockType } from '../../../block-provider';
 import { useSchemaInitializerItem } from '../../../application';
 import { BlockInitializer } from '../../../schema-initializer';
-
+import { spliceArrayState } from '@formily/core/esm/shared/internals';
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
-  const { value, collection: tName, multiple = true, addTo, sumFields, groupBy, fieldMaps =[], onChange, ...buttonProps } = props;
+  const {
+    value,
+    collection: tName,
+    multiple = true,
+    addTo,
+    sumFields,
+    groupBy,
+    fieldMaps = [],
+    onChange,
+    ...buttonProps
+  } = props;
   const fieldNames = useFieldNames(props);
   const [visible, setVisible] = useState(false);
   const fieldSchema = useFieldSchema();
-  // const collectionField = {
-  //   target: tName,
-  // };
   const collection = useCollection();
   const { getCollectionField, getCollectionFields } = useCollectionManager();
   // const compile = useCompile();
@@ -36,8 +43,8 @@ export const DataBlockSelectorAction: any = (props: any) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [options, setOptions] = useState([]);
   const field = useField();
-  const toFieldRef = useRef(null);
-  const [toField, setToField] = useState({});
+  const [toField, setToField] = useState<any>({});
+  const [toCollectionName, setToCollectionName] = useState<any>(null);
   const [groupField, setGroupField] = useState({});
   const { form } = useFormBlockContext();
   useEffect(() => {
@@ -47,6 +54,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
         const temp = getCollectionFields(target).find((item) => item.target === tName);
         if (temp) {
           setToField(temp);
+          setToCollectionName(target);
         }
       }
     }
@@ -57,42 +65,16 @@ export const DataBlockSelectorAction: any = (props: any) => {
       setGroupField(groupField);
     }
   }, []);
-
-  // useEffect(() => {
-  //   if (value) {
-  //     const opts = (Array.isArray(value) ? value : value ? [value] : []).map((option) => {
-  //       const label = option[fieldNames.label];
-  //       return {
-  //         ...option,
-  //         [fieldNames.label]: getLabelFormatValue(labelUiSchema, compile(label)),
-  //       };
-  //     });
-  //     setOptions(opts);
-  //   }
-  // }, [value, fieldNames?.label]);
-
-  const getValue = () => {
-    // if (multiple == null) return null;
-
-    return Array.isArray(value) ? value?.map((v) => v[fieldNames.value]) : value?.[fieldNames.value];
-  };
-
-  const handleSelect = () => {
-    setVisible(true);
-    setSelectedRows([]);
-  };
-
-  const handleRemove = (file) => {
-    const newOptions = options.filter((option) => option.id !== file.id);
-    setOptions(newOptions);
-    if (newOptions.length === 0) {
-      return onChange(null);
-    }
-    onChange(newOptions);
-  };
   const handleEmpty = () => {
     const field = form.query(addTo).take();
-    field.onInput([]);
+    const len = field.value?.length;
+    spliceArrayState(field as any, {
+      startIndex: 0,
+      deleteCount: field.value?.length,
+    });
+    field.value.splice(0, len);
+    field.initialValue?.splice(0, len);
+    field.onInput(field.value);
   };
 
   return (
@@ -104,7 +86,11 @@ export const DataBlockSelectorAction: any = (props: any) => {
           addTo,
           groupField,
           sumFields,
-          fieldMaps
+          fieldMaps,
+          source: {
+            from: tName,
+            to: toCollectionName,
+          },
         }}
       >
         <Space>
@@ -151,91 +137,6 @@ DataBlockSelectorAction.Initializer = () => {
 
   return <BlockInitializer {...itemConfig} schema={schema} item={itemConfig} />;
 };
-
-// export const EditDataBlockSelectorAction = () => {
-//   const fieldSchema = useFieldSchema();
-//   const field = useField();
-//   const { dn } = useDesignable();
-//   const { name, title } = useCollection();
-//   const { getCollectionFields } = useCollectionManager();
-//   const fields = getCollectionFields(name);
-//   const addToFields = fields
-//     .filter(({ type }) => {
-//       return type == 'hasMany';
-//     })
-//     .map((item) => {
-//       return { label: item?.uiSchema?.title, value: item.name };
-//     });
-//   const initialValues = fieldSchema?.['x-component-props'];
-//   return (
-//     <>
-//       <SchemaSettingsButtonEditor />
-//         <SchemaSettingsModalItem
-//           title="批量选择"
-//           schema={{
-//             type: 'object',
-//             properties: {
-//               collection: {
-//                 type: 'string',
-//                 title: '选择数据表',
-//                 'x-decorator': 'FormItem',
-//                 'x-component': 'CollectionSelect',
-//               },
-//               addTo: {
-//                 type: 'string',
-//                 title: '添加到',
-//                 'x-decorator': 'FormItem',
-//                 'x-component': 'Select',
-//                 enum: addToFields,
-//               },
-//               groupBy: {
-//                 type: 'string',
-//                 title: '分组字段',
-//                 'x-decorator': 'FormItem',
-//                 'x-component': 'AppendsTreeSelect',
-//                 'x-component-props': {
-//                   multiple: false,
-//                   useCollection() {
-//                     const { values } = useForm();
-//                     return values?.collection;
-//                   },
-//                 },
-//                 'x-reactions': [
-//                   {
-//                     dependencies: ['.collection'],
-//                     fulfill: {
-//                       state: {
-//                         visible: '{{ !!$deps[0] }}',
-//                       },
-//                     },
-//                   },
-//                 ],
-//               }
-//             },
-//           }}
-//           initialValues={initialValues}
-//           onSubmit={(values) => {
-//             field.componentProps = {
-//               ...field.componentProps,
-//               ...values,
-//             };
-//             fieldSchema['x-component-props'] = {
-//               ...initialValues,
-//               ...values,
-//             };
-//             dn.emit('patch', {
-//               schema: {
-//                 ['x-uid']: fieldSchema['x-uid'],
-//                 'x-component-props': fieldSchema['x-component-props'],
-//               },
-//             });
-//             dn.refresh();
-//           }}
-//         />
-
-//     </>
-//   );
-// };
 const useDataBlockSelectorActionContext = () => {
   return useContext(DataBlockSelectorActionContext);
 };
@@ -243,8 +144,21 @@ const useDataBlockSelectorActionContext = () => {
 export const useDataBlockSelectorProps = () => {
   const { setVisible } = useActionContext();
   const { form } = useFormBlockContext();
-  const { selectedRows, toField, addTo, groupField, sumFields, fieldMaps } = useDataBlockSelectorActionContext();
-  const { type } = useFormBlockType();
+  const { selectedRows, toField, addTo, groupField, sumFields, fieldMaps, source } =
+    useDataBlockSelectorActionContext();
+  const { getCollectionField } = useCollectionManager();
+  /* 设置映射值 */
+  const setFieldMap = (row, targetFieldName, fieldName, source) => {
+    const { from, to } = source;
+    const targetField = getCollectionField(`${to}.${targetFieldName}`);
+    const field = getCollectionField(`${from}.${fieldName}`);
+    if (row) {
+      row[targetFieldName] = row[fieldName];
+      if (targetField?.foreignKey) {
+        row[targetField.foreignKey] = row[field.foreignKey];
+      }
+    }
+  };
   return {
     async onClick() {
       const rows = selectedRows;
@@ -291,11 +205,11 @@ export const useDataBlockSelectorProps = () => {
             group[category] = group[category] ?? [];
             group[category].push(record);
           } else {
-            const  {id, ...others}= record; 
+            const { id, ...others } = record;
             otherRows.push({
               ...others,
               [toField.name]: [record],
-              [toField.otherKey]:id
+              [toField.otherKey]: id,
             });
           }
           return group;
@@ -322,10 +236,10 @@ export const useDataBlockSelectorProps = () => {
           const index = currentRecords.findIndex((item) => {
             return item[foreignKey] === row[foreignKey];
           });
-        
-          if(fieldMaps.length>0){
-            fieldMaps.map(({field, mapField})=>{
-              row[mapField] = row[field];
+
+          if (fieldMaps.length > 0) {
+            fieldMaps.map(({ field, mapField }) => {
+              setFieldMap(row, mapField, field, source);
             });
           }
           if (index == -1) {

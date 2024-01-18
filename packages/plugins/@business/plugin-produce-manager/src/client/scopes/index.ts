@@ -135,3 +135,24 @@ export const useInitBomApplyActionProps = (props: any) => {
     },
   };
 };
+
+
+
+export const useEmptyCollectionFieldActionProps = (props: any) => {
+  return {
+    async onClick() {
+      const { service } = useBlockRequestContext();
+      const { name } = useCollection();
+      const record = useRecord();
+      const res = await service?.api?.resource(name).emptySubField({
+        prjId: record.id,
+      });
+      if (res.status == 200) {
+        service?.refresh();
+        message.success('清空成功');
+      } else {
+        message.error(res.data);
+      }
+    },
+  }
+};

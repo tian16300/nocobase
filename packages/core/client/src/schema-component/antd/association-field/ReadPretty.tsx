@@ -7,6 +7,7 @@ import { InternalNester } from './InternalNester';
 import { InternalSubTable } from './InternalSubTable';
 import { ReadPrettyInternalTag } from './InternalTag';
 import { ReadPrettyInternalViewer } from './InternalViewer';
+import { InternalSubTableWithActionBar } from './InternalSubTableWithActionBar';
 
 const ReadPrettyAssociationField = observer(
   (props: any) => {
@@ -18,6 +19,7 @@ const ReadPrettyAssociationField = observer(
         {currentMode === 'Tag' && <ReadPrettyInternalTag {...props} />}
         {currentMode === 'Nester' && <InternalNester {...props} />}
         {currentMode === 'SubTable' && <InternalSubTable {...props} />}
+        {currentMode === 'SubTableWithActionBar' && <InternalSubTableWithActionBar {...props} />}
         {currentMode === 'FileManager' && <FileManageReadPretty {...props} />}
       </>
     );

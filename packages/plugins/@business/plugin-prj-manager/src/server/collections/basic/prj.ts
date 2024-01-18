@@ -523,6 +523,8 @@ export default {
       name: 'id',
       type: 'bigInt',
       interface: 'id',
+      description: null,
+      collectionName: 'prj',
 
       autoIncrement: true,
       primaryKey: true,
@@ -535,14 +537,16 @@ export default {
       },
     },
     {
-      name: 'stock_id',
+      name: 'prj_cost_id',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       isForeignKey: true,
       uiSchema: {
         type: 'number',
-        title: 'stock_id',
+        title: 'prj_cost_id',
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
@@ -551,6 +555,8 @@ export default {
       name: 'activeIndex',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'number',
@@ -568,6 +574,8 @@ export default {
       name: 'users',
       type: 'belongsToMany',
       interface: 'm2m',
+      description: null,
+      collectionName: 'prj',
 
       target: 'users',
       foreignKey: 'prjId',
@@ -590,9 +598,26 @@ export default {
       },
     },
     {
+      name: 'stock_id',
+      type: 'bigInt',
+      interface: 'integer',
+      description: null,
+      collectionName: 'prj',
+
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'stock_id',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+    {
       name: 'createdAt',
       type: 'date',
       interface: 'createdAt',
+      description: null,
+      collectionName: 'prj',
 
       field: 'createdAt',
       uiSchema: {
@@ -607,6 +632,8 @@ export default {
       name: 'plans',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       reverseKey: 'seac97tln4i',
       foreignKey: 'prjId',
@@ -630,6 +657,8 @@ export default {
       name: 'start',
       type: 'date',
       interface: 'datetime',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         icon: 'calendaroutlined',
@@ -647,6 +676,8 @@ export default {
       name: 'updatedAt',
       type: 'date',
       interface: 'updatedAt',
+      description: null,
+      collectionName: 'prj',
 
       field: 'updatedAt',
       uiSchema: {
@@ -661,6 +692,8 @@ export default {
       name: 'managerId',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       isForeignKey: true,
       uiSchema: {
@@ -674,6 +707,8 @@ export default {
       name: 'end',
       type: 'date',
       interface: 'datetime',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         icon: 'carryoutoutlined',
@@ -691,6 +726,8 @@ export default {
       name: 'manager',
       type: 'belongsTo',
       interface: 'obo',
+      description: null,
+      collectionName: 'prj',
 
       target: 'users',
       foreignKey: 'managerId',
@@ -712,6 +749,8 @@ export default {
       name: 'customerComp',
       type: 'text',
       interface: 'textarea',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'string',
@@ -720,9 +759,24 @@ export default {
       },
     },
     {
+      name: 'customer',
+      type: 'string',
+      interface: 'input',
+      description: null,
+      collectionName: 'prj',
+
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        title: '客户代表',
+      },
+    },
+    {
       name: 'type_dicId',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       isForeignKey: true,
       uiSchema: {
@@ -733,20 +787,11 @@ export default {
       },
     },
     {
-      name: 'customer',
-      type: 'string',
-      interface: 'input',
-
-      uiSchema: {
-        type: 'string',
-        'x-component': 'Input',
-        title: '客户代表',
-      },
-    },
-    {
       name: 'type',
       type: 'belongsTo',
       interface: 'dic',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'object',
@@ -785,6 +830,8 @@ export default {
       name: 'status_dicId',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       isForeignKey: true,
       uiSchema: {
@@ -798,6 +845,8 @@ export default {
       name: 'status',
       type: 'belongsTo',
       interface: 'dic',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'object',
@@ -836,6 +885,8 @@ export default {
       name: 'title',
       type: 'string',
       interface: 'input',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'string',
@@ -847,6 +898,8 @@ export default {
       name: 'code',
       type: 'string',
       interface: 'input',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'string',
@@ -859,6 +912,8 @@ export default {
       name: 'description',
       type: 'text',
       interface: 'textarea',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'string',
@@ -870,6 +925,8 @@ export default {
       name: 'files',
       type: 'belongsToMany',
       interface: 'attachment',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         'x-component-props': {
@@ -893,6 +950,8 @@ export default {
       name: 'remark',
       type: 'text',
       interface: 'textarea',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'string',
@@ -904,6 +963,8 @@ export default {
       name: 'task',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'prjId',
       onDelete: 'SET NULL',
@@ -926,6 +987,8 @@ export default {
       name: 'enable',
       type: 'boolean',
       interface: 'checkbox',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'boolean',
@@ -938,6 +1001,8 @@ export default {
       name: 'weekReport',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'belongsPrjKey',
       onDelete: 'SET NULL',
@@ -960,6 +1025,8 @@ export default {
       name: 'plan_version',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'prjId',
       onDelete: 'CASCADE',
@@ -982,6 +1049,8 @@ export default {
       name: 'real_start',
       type: 'date',
       interface: 'datetime',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         'x-component-props': {
@@ -999,6 +1068,8 @@ export default {
       name: 'real_end',
       type: 'date',
       interface: 'datetime',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         'x-component-props': {
@@ -1016,6 +1087,8 @@ export default {
       name: 'plan_days',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'number',
@@ -1033,6 +1106,8 @@ export default {
       name: 'real_days',
       type: 'bigInt',
       interface: 'integer',
+      description: null,
+      collectionName: 'prj',
 
       uiSchema: {
         type: 'number',
@@ -1047,9 +1122,34 @@ export default {
       overriding: true,
     },
     {
+      name: 'stock',
+      type: 'belongsTo',
+      interface: 'obo',
+      description: null,
+      collectionName: 'prj',
+
+      foreignKey: 'stock_id',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '仓库',
+      },
+      target: 'ware_house',
+      targetKey: 'id',
+    },
+    {
       name: 'boms',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'prjId',
       onDelete: 'SET NULL',
@@ -1069,51 +1169,11 @@ export default {
       sourceKey: 'id',
     },
     {
-      name: 'bom_materias',
-      type: 'hasMany',
-      interface: 'o2m',
-
-      foreignKey: 'prjId',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: true,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: 'BOM物料',
-      },
-      target: 'bom_wl',
-      targetKey: 'id',
-      sourceKey: 'id',
-    },
-    {
-      name: 'stock',
-      type: 'belongsTo',
-      interface: 'obo',
-      foreignKey: 'stock_id',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: '仓库',
-      },
-      target: 'ware_house',
-      targetKey: 'id',
-    },
-    {
       name: 'stock_wl',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'prjId',
       onDelete: 'SET NULL',
@@ -1133,9 +1193,11 @@ export default {
       sourceKey: 'id',
     },
     {
-      name: 'bom_wl_count',
+      name: 'bom_materias',
       type: 'hasMany',
       interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
 
       foreignKey: 'prjId',
       onDelete: 'SET NULL',
@@ -1148,36 +1210,60 @@ export default {
             value: 'id',
           },
         },
-        title: '项目物料统计',
+        title: 'BOM物料明细',
+      },
+      target: 'bom_wl',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
+    {
+      name: 'bom_wl_count',
+      type: 'hasMany',
+      interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
+
+      foreignKey: 'prjId',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: 'BOM物料统计明细',
       },
       target: 'bom_count_wl',
       targetKey: 'id',
       sourceKey: 'id',
     },
     {
-     
-      "name": "bom_applys",
-      "type": "hasMany",
-      "interface": "o2m",
-      "description": null,
-      "collectionName": "prj",
-      "foreignKey": "prjId",
-      "onDelete": "SET NULL",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": true,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
+      name: 'bom_applys',
+      type: 'hasMany',
+      interface: 'o2m',
+      description: null,
+      collectionName: 'prj',
+
+      foreignKey: 'prjId',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
           },
-          "title": "BOM申请"
+        },
+        title: 'BOM',
       },
-      "target": "bom_apply",
-      "targetKey": "id",
-      "sourceKey": "id"
-  }
+      target: 'bom_apply',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
   ],
   title: '项目',
 };

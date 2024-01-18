@@ -9,16 +9,16 @@ import Select from '../select/Select';
 import { useAssociationFieldContext, useInsertSchema } from './hooks';
 import schema from './schema';
 
-export const InternalSubTable = observer(
+export const InternalSubTableWithActionBar = observer(
   () => {
     const field: any = useField();
     const fieldSchema = useFieldSchema();
-    const insert = useInsertSchema('SubTable');
+    const insert = useInsertSchema('SubTableWithActionBar');
     const insertSelector = useInsertSchema('Selector');
     const { options } = useAssociationFieldContext();
     const { actionName } = useACLActionParamsContext();
     useEffect(() => {
-      insert(schema.SubTable);
+      insert(schema.SubTableWithActionBar);
       field.required = fieldSchema['required'];
     }, []);
     useEffect(() => {
@@ -66,7 +66,7 @@ export const InternalSubTable = observer(
                   basePath={field.address}
                   schema={fieldSchema}
                   filterProperties={(s) => {
-                    return s['x-component'] === 'AssociationField.SubTable';
+                    return s['x-component'] === 'AssociationField.SubTableWithActionBar';
                   }}
                 />
               </SchemaOptionsContext.Provider>
@@ -76,5 +76,5 @@ export const InternalSubTable = observer(
       </>
     );
   },
-  { displayName: 'InternalSubTable' },
+  { displayName: 'InternalSubTableWithActionBar' },
 );

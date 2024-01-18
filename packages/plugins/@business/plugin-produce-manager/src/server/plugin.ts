@@ -478,7 +478,8 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('bom');
       await repo.db2cm('bom_count_wl');
       await repo.db2cm('cg_apply_bom_throught');
-      await repo.db2cm('cg_apply_list');
+      await repo.db2cm('prjWlCb_bomWl_mid');
+      await repo.db2cm('cg_wl_list');
       await repo.db2cm('cg_apply');
     }
     this.app.resourcer.registerActionHandler('bom_apply:initCreateMany', initCreateMany);

@@ -112,5 +112,5 @@ export function isShowFilePicker(labelUiSchema) {
  * 当前字段的模式是否是 `子表格` 或者 `子表单`
  */
 export function isSubMode(fieldSchema: Schema) {
-  return ['Nester', 'SubTable', 'PopoverNester'].includes(fieldSchema['x-component-props']?.mode);
+  return ['Nester', 'SubTable', 'SubTableWithActionBar', 'PopoverNester'].includes(fieldSchema['x-component-props']?.mode);
 }

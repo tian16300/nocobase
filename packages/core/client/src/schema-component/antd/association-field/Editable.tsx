@@ -14,6 +14,7 @@ import { InternalCascadeSelect } from './InternalCascadeSelect';
 import { CreateRecordAction } from './components/CreateRecordAction';
 import { useAssociationFieldContext } from './hooks';
 import { useCollection } from '../../../collection-manager';
+import { InternalSubTableWithActionBar } from './InternalSubTableWithActionBar';
 
 const EditableAssociationField = observer(
   (props: any) => {
@@ -55,6 +56,7 @@ const EditableAssociationField = observer(
         {currentMode === 'PopoverNester' && <InternaPopoverNester {...props} />}
         {currentMode === 'Select' && <AssociationSelect {...props} />}
         {currentMode === 'SubTable' && <InternalSubTable {...props} />}
+        {currentMode === 'SubTableWithActionBar' && <InternalSubTableWithActionBar {...props} />}
         {currentMode === 'FileManager' && <InternalFileManager {...props} />}
         {currentMode === 'CascadeSelect' && <InternalCascadeSelect {...props} />}
       </SchemaComponentOptions>

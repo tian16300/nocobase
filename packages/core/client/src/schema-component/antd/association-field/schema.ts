@@ -117,15 +117,44 @@ export default {
       },
     },
   },
-  SubTable: {    
+  SubTable: {
     type: 'void',
     'x-component': 'AssociationField.SubTable',
     'x-initializer': 'TableColumnInitializers',
     'x-initializer-props': {
       action: false,
     },
+  },
+  SubTableWithActionBar: {
+    type: 'void',
+    'x-component': 'AssociationField.SubTableWithActionBar',
     properties: {
-      
-    }
-  }
+      actions: {
+        type: 'void',
+        'x-component': 'ActionBar',
+        'x-component-props': {
+          className: 'nb-subtable-actionbar',
+          style: {
+            marginBottom: 'var(--nb-spacing)',
+          },
+        },
+        'x-initializer': 'SubTableActionInitializers',
+        properties: {
+          title: {
+            type: 'string',
+            'x-component': 'AssociationField.SubTableWithActionBar.title',
+            'x-align': 'left',
+          },
+        },
+      },
+      table: {
+        type: 'void',
+        'x-component': 'AssociationField.SubTable',
+        'x-initializer': 'TableColumnInitializers',
+        'x-initializer-props': {
+          action: false,
+        },
+      },
+    },
+  },
 };

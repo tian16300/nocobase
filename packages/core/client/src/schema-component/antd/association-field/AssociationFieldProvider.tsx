@@ -44,7 +44,7 @@ export const AssociationFieldProvider = observer(
         return;
       }
       // 如果是表单模板数据，使用子表单和子表格组件时，过滤掉关系 ID
-      if (field.value && field.form['__template'] && ['Nester', 'SubTable', 'PopoverNester'].includes(currentMode)) {
+      if (field.value && field.form['__template'] && ['Nester', 'SubTable', 'SubTableWithActionBar', 'PopoverNester'].includes(currentMode)) {
         if (['belongsTo', 'hasOne'].includes(collectionField.type)) {
           if (field.value?.[collectionField.targetKey]) {
             delete field.value[collectionField.targetKey];

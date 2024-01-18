@@ -267,8 +267,10 @@ export class PluginACL extends Plugin {
       const resource = await model.getResource({
         transaction,
       });
-
-      await this.writeResourceToACL(resource, transaction);
+      if(resource){
+        await this.writeResourceToACL(resource, transaction);
+      }
+      
     });
 
     this.app.db.on('rolesResources.afterDestroy', async (model, options) => {

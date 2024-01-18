@@ -100,7 +100,7 @@ export const TableSelectorDesigner = () => {
                 getAllCollectionsInheritChain,
               })}
               currentFormCollectionName={currentFormCollection}
-              currentIterationCollectionName={collectionField.collectionName}
+              currentIterationCollectionName={collectionField?.collectionName}
             />
           );
         }}

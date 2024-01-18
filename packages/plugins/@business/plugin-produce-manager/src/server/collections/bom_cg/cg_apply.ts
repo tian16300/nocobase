@@ -9,7 +9,8 @@ export default {
       type: 'bigInt',
       interface: 'id',
 
-      autoIncrement: true,
+      collectionName: 'cg_apply',
+
       primaryKey: true,
       allowNull: false,
       uiSchema: {
@@ -20,22 +21,11 @@ export default {
       },
     },
     {
-      name: 'channel_plstform_dicId',
-      type: 'bigInt',
-      interface: 'integer',
-
-      isForeignKey: true,
-      uiSchema: {
-        type: 'number',
-        title: 'channel_plstform_dicId',
-        'x-component': 'InputNumber',
-        'x-read-pretty': true,
-      },
-    },
-    {
       name: 'channel_dicId',
       type: 'bigInt',
       interface: 'integer',
+
+      collectionName: 'cg_apply',
 
       isForeignKey: true,
       uiSchema: {
@@ -50,6 +40,8 @@ export default {
       type: 'bigInt',
       interface: 'integer',
 
+      collectionName: 'cg_apply',
+
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -63,6 +55,8 @@ export default {
       type: 'bigInt',
       interface: 'integer',
 
+      collectionName: 'cg_apply',
+
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -70,12 +64,28 @@ export default {
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
-      target: 'cg_apply',
+    },
+    {
+      name: 'channel_plstform_dicId',
+      type: 'bigInt',
+      interface: 'integer',
+
+      collectionName: 'cg_apply',
+
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'channel_plstform_dicId',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
     },
     {
       name: 'provider_id',
       type: 'bigInt',
       interface: 'integer',
+
+      collectionName: 'cg_apply',
 
       isForeignKey: true,
       uiSchema: {
@@ -89,6 +99,8 @@ export default {
       name: 'parent',
       type: 'belongsTo',
       interface: 'm2o',
+
+      collectionName: 'cg_apply',
 
       foreignKey: 'parentId',
       treeParent: true,
@@ -112,6 +124,8 @@ export default {
       type: 'hasMany',
       interface: 'o2m',
 
+      collectionName: 'cg_apply',
+
       foreignKey: 'parentId',
       treeChildren: true,
       onDelete: 'CASCADE',
@@ -131,9 +145,25 @@ export default {
       sourceKey: 'id',
     },
     {
+      name: 'level',
+      type: 'level',
+      interface: 'level',
+
+      collectionName: 'cg_apply',
+
+      uiSchema: {
+        type: 'number',
+        title: '层级',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+    {
       name: 'createdAt',
       type: 'date',
       interface: 'createdAt',
+
+      collectionName: 'cg_apply',
 
       field: 'createdAt',
       uiSchema: {
@@ -148,6 +178,8 @@ export default {
       name: 'createdBy',
       type: 'belongsTo',
       interface: 'createdBy',
+
+      collectionName: 'cg_apply',
 
       target: 'users',
       foreignKey: 'createdById',
@@ -170,6 +202,8 @@ export default {
       type: 'date',
       interface: 'updatedAt',
 
+      collectionName: 'cg_apply',
+
       field: 'updatedAt',
       uiSchema: {
         type: 'string',
@@ -183,6 +217,8 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
+
+      collectionName: 'cg_apply',
 
       target: 'users',
       foreignKey: 'updatedById',
@@ -205,9 +241,11 @@ export default {
       type: 'boolean',
       interface: 'checkbox',
 
+      collectionName: 'cg_apply',
+
       uiSchema: {
-        type: 'boolean',
         'x-component': 'Checkbox',
+        type: 'boolean',
         title: '是否分组',
       },
     },
@@ -215,6 +253,8 @@ export default {
       name: 'remark',
       type: 'text',
       interface: 'textarea',
+
+      collectionName: 'cg_apply',
 
       uiSchema: {
         type: 'string',
@@ -226,6 +266,8 @@ export default {
       name: 'channel_plstform',
       type: 'belongsTo',
       interface: 'dic',
+
+      collectionName: 'cg_apply',
 
       uiSchema: {
         'x-component-props': {
@@ -265,6 +307,8 @@ export default {
       type: 'belongsTo',
       interface: 'dic',
 
+      collectionName: 'cg_apply',
+
       uiSchema: {
         'x-component-props': {
           service: {
@@ -296,13 +340,15 @@ export default {
       foreignKey: 'channel_dicId',
       target: 'dicItem',
       dicCode: 'source_channel',
-      targetKey: 'id',
       defaultId: 94,
+      targetKey: 'id',
     },
     {
       name: 'apply_date',
       type: 'date',
       interface: 'datetime',
+
+      collectionName: 'cg_apply',
 
       uiSchema: {
         'x-component-props': {
@@ -317,56 +363,11 @@ export default {
       },
     },
     {
-      name: 'tax',
-      type: 'double',
-      interface: 'number',
-
-      uiSchema: {
-        'x-component-props': {
-          step: '0.01',
-          stringMode: true,
-        },
-        type: 'number',
-        'x-component': 'InputNumber',
-        title: '税额',
-      },
-    },
-    {
-      name: 'total_price',
-      type: 'double',
-      interface: 'number',
-
-      uiSchema: {
-        'x-component-props': {
-          step: '0.00001',
-          stringMode: true,
-        },
-        type: 'number',
-        'x-component': 'InputNumber',
-        title: '金额',
-      },
-    },
-    {
-      name: 'rate',
-      type: 'float',
-      interface: 'percent',
-
-      uiSchema: {
-        'x-component-props': {
-          step: '0.00001',
-          stringMode: true,
-          addonAfter: '%',
-        },
-        type: 'string',
-        'x-component': 'Percent',
-        title: '税率',
-      },
-      defaultValue: 0.13,
-    },
-    {
       name: 'code',
       type: 'sequence',
       interface: 'sequence',
+
+      collectionName: 'cg_apply',
 
       patterns: [
         {
@@ -393,7 +394,7 @@ export default {
             digits: 3,
             start: 1,
             cycle: '0 0 * * *',
-            key: 65246,
+            key: 4118,
           },
         },
       ],
@@ -408,6 +409,8 @@ export default {
       name: 'provider',
       type: 'belongsTo',
       interface: 'obo',
+
+      collectionName: 'cg_apply',
 
       foreignKey: 'provider_id',
       onDelete: 'SET NULL',
@@ -426,31 +429,11 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'cg_wl_list',
-      type: 'hasMany',
-      interface: 'o2m',
-
-      foreignKey: 'cg_apply_id',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: true,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: '物料明细',
-      },
-      target: 'cg_apply_list',
-      targetKey: 'id',
-      sourceKey: 'id',
-    },
-    {
       name: 'approvalStatus',
       type: 'belongsTo',
       interface: 'obo',
+
+      collectionName: 'cg_apply',
 
       foreignKey: 'currentApproval_id',
       onDelete: 'SET NULL',
@@ -467,6 +450,114 @@ export default {
       },
       target: 'approval_apply',
       targetKey: 'id',
+    },
+    {
+      name: 'prjs',
+      type: 'belongsToMany',
+      interface: 'm2m',
+
+      collectionName: 'cg_apply',
+
+      foreignKey: 'cgApply_id',
+      otherKey: 'prjId',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '项目',
+      },
+      target: 'prj',
+      through: 'cgApply_prjs',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
+    {
+      name: 'prj_wl_cb_list',
+      type: 'hasMany',
+      interface: 'o2m',
+
+      collectionName: 'cg_apply',
+
+      foreignKey: 'cg_apply_id',
+      onDelete: 'CASCADE',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '项目物料成本',
+      },
+      target: 'prj_wl_cb',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
+    {
+      name: 'cg_wl_list',
+      type: 'hasMany',
+      interface: 'o2m',
+
+      collectionName: 'cg_apply',
+
+      reverseKey: 'bfjtgobk6eq',
+      uiSchema: {
+        title: '采购物料明细',
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+      },
+      target: 'cg_wl_list',
+      onDelete: 'CASCADE',
+      sourceKey: 'id',
+      foreignKey: 'cg_apply_id',
+      targetKey: 'id',
+    },
+    {
+      name: 'total_amount',
+      type: 'double',
+      interface: 'number',
+
+      collectionName: 'cg_apply',
+
+      uiSchema: {
+        'x-component-props': {
+          step: '0.00001',
+          stringMode: true,
+        },
+        type: 'number',
+        'x-component': 'InputNumber',
+        title: '含税金额',
+      },
+    },
+    {
+      name: 'total_ws_amount',
+      type: 'double',
+      interface: 'number',
+
+      collectionName: 'cg_apply',
+
+      uiSchema: {
+        'x-component-props': {
+          step: '0.00001',
+          stringMode: true,
+        },
+        type: 'number',
+        'x-component': 'InputNumber',
+        title: '未税金额',
+      },
     },
   ],
   logging: true,
