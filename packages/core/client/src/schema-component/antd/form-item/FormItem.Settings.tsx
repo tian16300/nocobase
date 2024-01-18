@@ -420,9 +420,17 @@ export const formItemSettings = new SchemaSettings({
       useComponentProps() {
         const { t } = useTranslation();
         const field = useField<Field>();
-        const fieldSchema = useFieldSchema();
+        const _fieldSchema = useFieldSchema();
         const { dn } = useDesignable();
-
+        let fieldSchema = _fieldSchema;
+        if (_fieldSchema['x-component-props']?.mode == 'SubTableWithActionBar') {
+          fieldSchema = _fieldSchema.reduceProperties((buf, schema) => {
+            if (schema['x-component'] === 'AssociationField.SubTable') {
+              return schema;
+            }
+            return buf;
+          }, null);
+        }
         const schema = {
           type: 'object',
           title: '子表格设置',
@@ -502,13 +510,15 @@ export const formItemSettings = new SchemaSettings({
               schema,
             });
             dn.refresh();
-          }
+          },
         };
       },
       useVisible() {
         const showFieldMode = useShowFieldMode();
         const fieldSchema = useFieldSchema();
-        const isSubTableFieldMode = fieldSchema['x-component-props']?.mode === 'SubTable';
+        const isSubTableFieldMode = ['SubTable', 'SubTableWithActionBar'].includes(
+          fieldSchema['x-component-props']?.mode,
+        );
         const showModeItem = showFieldMode && isSubTableFieldMode;
         return showModeItem;
       },
@@ -862,7 +872,7 @@ export const formItemSettings = new SchemaSettings({
         const options = useOptions();
         const isAssociationField = useIsAssociationField();
         const fieldMode = useFieldMode();
-        return options.length > 0 && isAssociationField && ['SubTable','SubTableWithActionBar'].includes(fieldMode);
+        return options.length > 0 && isAssociationField && ['SubTable', 'SubTableWithActionBar'].includes(fieldMode);
       },
       useComponentProps() {
         const { t } = useTranslation();
@@ -1020,8 +1030,8 @@ export const formItemSettings = new SchemaSettings({
             'x-component': 'Grid',
           },
         };
-      }
-    }
+      },
+    },
   ],
 });
 
