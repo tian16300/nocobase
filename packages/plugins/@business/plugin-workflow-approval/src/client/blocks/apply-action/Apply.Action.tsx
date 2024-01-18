@@ -27,7 +27,8 @@ export const ApplyAction = (props: any) => {
       /* 审批结束 */
       return '撤销申请';
     }
-  }, [JSON.stringify(apply)]);
+  }, [apply?.id, apply?.jobIsEnd]);
+  debugger;
   const { children, title, ...btnProps } = props;
   return (
     <ApplyActionContext.Provider value={{ formActionType, record, setApply, ...others }}>

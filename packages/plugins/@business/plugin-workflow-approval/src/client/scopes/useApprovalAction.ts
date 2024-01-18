@@ -90,6 +90,8 @@ export const useApprovalAction = (props: any) => {
               service?.run();
             }
           });
+        }else{
+          message.error('其它操作目前还未支持');
         }
       }
     },

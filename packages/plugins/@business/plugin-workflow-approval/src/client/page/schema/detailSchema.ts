@@ -1,4 +1,4 @@
-import { createDetailsBlockSchema, createFormBlockSchema } from '@nocobase/client';
+import { createFormBlockSchema, css } from '@nocobase/client';
 import { uid } from '@nocobase/utils';
 
 export const createDetailSchema = (options: any = {}) => {
@@ -17,7 +17,7 @@ export const createDetailSchema = (options: any = {}) => {
             type: 'void',
             'x-component': 'Grid.Col',
             'x-component-props': {
-              width
+              width,
             },
             properties: {
               code: {
@@ -25,7 +25,7 @@ export const createDetailSchema = (options: any = {}) => {
                 'x-designer': 'FormItem.Designer',
                 'x-component': 'CollectionField',
                 'x-decorator': 'FormItem',
-                'x-collection-field': 'approval_apply.code'
+                'x-collection-field': 'approval_apply.code',
               },
             },
             'x-uid': uid(),
@@ -34,7 +34,7 @@ export const createDetailSchema = (options: any = {}) => {
             type: 'void',
             'x-component': 'Grid.Col',
             'x-component-props': {
-              width
+              width,
             },
             properties: {
               applyUser: {
@@ -57,7 +57,7 @@ export const createDetailSchema = (options: any = {}) => {
             type: 'void',
             'x-component': 'Grid.Col',
             'x-component-props': {
-              width
+              width,
             },
             'x-uid': uid(),
             properties: {
@@ -77,44 +77,50 @@ export const createDetailSchema = (options: any = {}) => {
             },
           },
           [`col_${uid()}`]: {
+            type: 'void',
             'x-component': 'Grid.Col',
             'x-component-props': {
-              width
+              width,
             },
             'x-uid': uid(),
-            type: 'void',
             properties: {
-              createdAt: {
+              currentApprovalUsers: {
                 type: 'string',
+                name: 'currentApprovalUsers',
                 'x-designer': 'FormItem.Designer',
                 'x-component': 'CollectionField',
                 'x-decorator': 'FormItem',
-                'x-collection-field': 'approval_apply.createdAt',
-                'x-component-props': {},
-                'x-read-pretty': true,
+                'x-collection-field': 'approval_apply.currentApprovalUsers',
+                'x-component-props': {
+                  fieldNames: {
+                    label: 'nickname',
+                    value: 'id',
+                  },
+                },
                 'x-uid': uid(),
               },
             },
           },
-        },
-      },
-      [uid()]: {
-        'x-component': 'Grid.Row',
-        'x-uid': uid(),
-        type: 'void',
-        properties: {
           [`col_${uid()}`]: {
             'x-component': 'Grid.Col',
+            'x-component-props': {
+              width,
+            },
             'x-uid': uid(),
             type: 'void',
             properties: {
-              applyReason: {
+              updatedAt: {
                 type: 'string',
                 'x-designer': 'FormItem.Designer',
                 'x-component': 'CollectionField',
                 'x-decorator': 'FormItem',
-                'x-collection-field': 'approval_apply.applyReason',
-                'x-component-props': {},
+                'x-collection-field': 'approval_apply.updatedAt',
+                'x-component-props': {
+                  dateFormat: 'YYYY-MM-DD',
+                  showTime: true,
+                  timeFormat: 'HH:mm:ss',
+                },
+                'x-read-pretty': true,
                 'x-uid': uid(),
               },
             },
@@ -130,12 +136,22 @@ export const createDetailSchema = (options: any = {}) => {
       formItemInitializers: 'ReadPrettyFormItemInitializers',
       collection: 'approval_apply',
       readPretty: true,
-      action:'get',
+      action: 'get',
       params: {
-        filterByTk: options.id
+        filterByTk: options.id,
       },
       layout: 'horizontal',
-      template
+      template,
+      cardStyle: {
+        className: [
+          'card',
+          css`
+            .nb-action-bar {
+                display: none!important;
+              }
+          `,
+        ],
+      },
     }),
   };
 };
