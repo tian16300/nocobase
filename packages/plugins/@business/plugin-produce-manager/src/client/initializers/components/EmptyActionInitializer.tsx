@@ -46,9 +46,6 @@ export const EmptyActionInitializer = () => {
   const itemConfig = useSchemaInitializerItem();
   const { insert } = useSchemaInitializer();
   const { exists, remove } = useCurrentSchema('emptyValue', 'x-action', itemConfig.find, itemConfig.remove);
-  // const { association } = useBlockAssociationContext();
-
-  // const fields = useFields(name);
   const schema: ISchema = {
     type: 'void',
     'x-designer': 'Action.Designer',
@@ -57,9 +54,12 @@ export const EmptyActionInitializer = () => {
     'x-action-settings': {},
     'x-component': 'Action',
     'x-component-props': {
-      type: 'primary',
-      // association,
-      useProps: '{{ useEmptyCollectionFieldActionProps }}',
+      type: 'default',
+      confirm: {
+        title: 'Perform the {{title}}',
+        content: 'Are you sure you want to perform the {{title}} action?',
+      },
+      useAction: '{{ useEmptyCollectionFieldAction }}',
     },
   };
   return (
@@ -71,7 +71,6 @@ export const EmptyActionInitializer = () => {
         if (exists) {
           return remove();
         }
-        // schema['x-action-settings']['importSettings'] = initImportSettings(fields);
         const s = merge(schema || {}, itemConfig.schema || {});
         itemConfig?.schemaInitialize?.(s);
         insert(s);

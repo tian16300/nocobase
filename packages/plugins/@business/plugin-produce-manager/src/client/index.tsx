@@ -99,12 +99,12 @@ export class PluginProduceManagerClient extends Plugin {
           return name === 'bom';  
         }
       });
-      this.app.schemaInitializerManager.addItem('FormItemInitializers', 'subTableActionBar',{
-        name:'subTableActionBar',
-        title:'子表操作栏',
-        type:'item',
-        useComponentProps: UseSubTableActionBarComponentProps
-      });
+      // this.app.schemaInitializerManager.addItem('FormItemInitializers', 'subTableActionBar',{
+      //   name:'subTableActionBar',
+      //   title:'子表操作栏',
+      //   type:'item',
+      //   useComponentProps: UseSubTableActionBarComponentProps
+      // });
       this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.emptyAction',{
         type:'item',
         title:'清空',
