@@ -424,12 +424,20 @@ export const formItemSettings = new SchemaSettings({
         const { dn } = useDesignable();
         let fieldSchema = _fieldSchema;
         if (_fieldSchema['x-component-props']?.mode == 'SubTableWithActionBar') {
-          fieldSchema = _fieldSchema.reduceProperties((buf, schema) => {
-            if (schema['x-component'] === 'AssociationField.SubTable') {
-              return schema;
-            }
-            return buf;
-          }, null);
+          fieldSchema =
+            _fieldSchema.reduceProperties((buf, schema) => {
+              if (schema['x-component'] === 'AssociationField.SubTable') {
+                return schema;
+              } else if (schema['x-component'] === 'AssociationField.SubTableWithActionBar') {
+                return schema.reduceProperties((buf, schema) => {
+                  if (schema['x-component'] === 'AssociationField.SubTable') {
+                    return schema;
+                  }
+                  return buf;
+                }, null);
+              }
+              return buf;
+            }, null) || _fieldSchema;
         }
         const schema = {
           type: 'object',

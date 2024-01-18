@@ -5,6 +5,7 @@ import * as comps from './component';
 import * as scopes from './scopes';
 export * from './component';
 export * from './scopes';
+import * as items from './initializers/components';
 // import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
   async afterAdd() {
@@ -18,13 +19,13 @@ export class PluginCommonClient extends Plugin {
     // 增加分组table 链接
     this.addScopes();
     this.addComponents();
-    // this.app.addProvider()
-    // this.app.addProviders()
-    // this.app.router.add()
     this.addSchemaInitials();
   }
   addComponents(){
-    this.app.addComponents(comps)
+    this.app.addComponents({
+      ...comps,
+      ...items as any,
+    })
   }
   addScopes(){
     this.app.addScopes(scopes)
@@ -58,6 +59,15 @@ export class PluginCommonClient extends Plugin {
     }));
     // const tableActionInitializers = this.app.schemaInitializerManager.get('TableActionInitializers');
     // tableActionInitializers?.add('enableActions.addNew', initializerData);
+
+    
+    this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.fullScreenAction',{
+      type:'item',
+      title:'全屏',
+      Component: 'FullScreenActionInitializer'
+    })
+
+
 
 
   }

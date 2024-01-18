@@ -3,8 +3,6 @@ import { Schema, useFieldSchema } from '@formily/react';
 import { merge } from '@formily/shared';
 import {
   SchemaInitializerSwitch,
-  css,
-  useCollection,
   useDesignable,
   useSchemaInitializer,
   useSchemaInitializerItem,
@@ -43,30 +41,24 @@ const useCurrentSchema = (action: string, key: string, find = findSchema, rm = r
 export const FullScreenActionInitializer = () => {
   const itemConfig = useSchemaInitializerItem();
   const { insert } = useSchemaInitializer();
-  const { exists, remove } = useCurrentSchema('emptyValue', 'x-action', itemConfig.find, itemConfig.remove);
-  const { name } = useCollection();
-  // const fields = useFields(name);
+  const { exists, remove } = useCurrentSchema('fullScreen', 'x-action', itemConfig.find, itemConfig.remove);
   const schema: ISchema = {
-    type:'void',
-    'x-designer': 'GetWlStock.Design',
-    title:'提取库存',
-    'x-action': 'getWlStock',
-    'x-action-settings': {
-      
-    },
-    'x-component':'Action',
-    'x-component-props':{
-      component: 'GetWlStock.Action',
-      type:'primary',
-      collectionField: '',
+    'x-action': 'fullScreen',
+    'x-component': 'Action',
+    'x-designer': 'FullScreen.Action.Design',
+    'x-component-props': {
+      titleFullScreen: "{{t('全屏')}}",
+      titleNormal: "{{t('取消全屏')}}",
+      iconFullScreen: 'FullscreenOutlined',
+      iconNormal: 'FullscreenExitOutlined',
+      component: 'FullScreen.Action',
       useAction: () => {
         return {
           run() {},
         };
       },
-
-    }
-   };
+    },
+  };
   return (
     <SchemaInitializerSwitch
       {...itemConfig}
@@ -76,7 +68,6 @@ export const FullScreenActionInitializer = () => {
         if (exists) {
           return remove();
         }
-        // schema['x-action-settings']['importSettings'] = initImportSettings(fields);
         const s = merge(schema || {}, itemConfig.schema || {});
         itemConfig?.schemaInitialize?.(s);
         insert(s);

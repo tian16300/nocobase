@@ -1,14 +1,14 @@
 import { css } from '@emotion/css';
 import { ArrayField } from '@formily/core';
 import { exchangeArrayState } from '@formily/core/esm/shared/internals';
-import { RecursionField, observer,  useFieldSchema } from '@formily/react';
+import { RecursionField, observer, useFieldSchema } from '@formily/react';
 import { action } from '@formily/reactive';
 import { isArr } from '@formily/shared';
 import { Button } from 'antd';
 import { omit, unionBy, uniqBy } from 'lodash';
 import React, { useState, useMemo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormActiveFieldsProvider } from '../../../block-provider';
+import { FormActiveFieldsProvider, useViewBlockContext } from '../../../block-provider';
 import { FlagProvider } from '../../../flag-provider';
 import { Table } from '../table-v2/Table';
 import { useAssociationFieldContext, useFieldNames } from './hooks';
@@ -140,7 +140,7 @@ export const SubTable: any = observer(
         `}
       >
         <FlagProvider isInSubTable>
-          <FormActiveFieldsProvider name="nester">           
+          <FormActiveFieldsProvider name="nester">
             <Table
               className={css`
                 .ant-formily-item.ant-formily-item-feedback-layout-loose {
@@ -166,42 +166,43 @@ export const SubTable: any = observer(
               rowSelection={{ type: 'none', hideSelectAll: true }}
               scrollY={scrollY}
               footer={() =>
-                field.editable &&
-                <>
-                {field.componentProps?.allowAddnew !== false && (
-                  <Button
-                    type={'text'}
-                    block
-                    className={css`
-                      display: block;
-                      border-radius: 0px;
-                      border-right: 1px solid rgba(0, 0, 0, 0.06);
-                    `}
-                    onClick={() => {
-                      field.value = field.value || [];
-                      field.value.push({});
-                      field.onInput(field.value);
-                    }}
-                  >
-                    {t('Add new')}
-                  </Button>
-                )}
-                {field.componentProps?.allowSelectExistingRecord && (
-                  <Button
-                    type={'text'}
-                    block
-                    className={css`
-                      display: block;
-                      border-radius: 0px;
-                    `}
-                    onClick={() => {
-                      setVisibleSelector(true);
-                    }}
-                  >
-                    {t('Select')}
-                  </Button>
-                )}
-              </>
+                field.editable && (
+                  <>
+                    {field.componentProps?.allowAddnew !== false && (
+                      <Button
+                        type={'text'}
+                        block
+                        className={css`
+                          display: block;
+                          border-radius: 0px;
+                          border-right: 1px solid rgba(0, 0, 0, 0.06);
+                        `}
+                        onClick={() => {
+                          field.value = field.value || [];
+                          field.value.push({});
+                          field.onInput(field.value);
+                        }}
+                      >
+                        {t('Add new')}
+                      </Button>
+                    )}
+                    {field.componentProps?.allowSelectExistingRecord && (
+                      <Button
+                        type={'text'}
+                        block
+                        className={css`
+                          display: block;
+                          border-radius: 0px;
+                        `}
+                        onClick={() => {
+                          setVisibleSelector(true);
+                        }}
+                      >
+                        {t('Select')}
+                      </Button>
+                    )}
+                  </>
+                )
               }
               isSubTable={true}
             />
@@ -212,7 +213,7 @@ export const SubTable: any = observer(
             openSize,
             openMode: 'drawer',
             visible: visibleSelector,
-            setVisible: setVisibleSelector,
+            setVisible: setVisibleSelector
           }}
         >
           <RecordPickerProvider {...pickerProps}>

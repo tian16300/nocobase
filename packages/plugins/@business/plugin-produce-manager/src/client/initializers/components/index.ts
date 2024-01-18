@@ -6,6 +6,3 @@ export * from './InitBomApplyActionInitializer';
 export * from './SubTableImportXlsActionInitializer';
 export * from './GetWlStockActionInitializer';
 export * from './EmptyActionInitializer';
-export * from './FullScreenActionInitializer';
-// export * from './SubTableExportActionInitializer';
-// export * from './SubTablePrintActionInitializer';

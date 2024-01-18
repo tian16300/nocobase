@@ -110,11 +110,6 @@ export class PluginProduceManagerClient extends Plugin {
         title:'清空',
         Component: 'EmptyActionInitializer'
       })
-      this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.fullScreenAction',{
-        type:'item',
-        title:'全屏',
-        Component: 'FullScreenActionInitializer'
-      })
      
   }
 }

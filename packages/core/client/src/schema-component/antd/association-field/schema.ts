@@ -128,19 +128,20 @@ export default {
   SubTableWithActionBar: {
     type: 'void',
     'x-component': 'AssociationField.SubTableWithActionBar',
-    'x-component-props':{},
+    'x-component-props': {},
     properties: {
       actions: {
         type: 'void',
         'x-component': 'ActionBar',
         'x-component-props': {
-          className: 'nb-subtable-actionBar'
+          className: 'nb-subTable-actionBar',
         },
         'x-initializer': 'SubTableActionInitializers',
         properties: {
           title: {
             type: 'string',
             'x-component': 'AssociationField.SubTableWithActionBar.title',
+            'x-component-props': {},
             'x-align': 'left',
           },
         },
@@ -148,7 +149,7 @@ export default {
       table: {
         type: 'void',
         'x-component': 'AssociationField.SubTable',
-        'x-component-props':{},
+        'x-component-props': {},
         'x-initializer': 'TableColumnInitializers',
         'x-initializer-props': {
           action: false,
