@@ -256,7 +256,7 @@ export const RecordPickerDrawer: React.FunctionComponent<{
   fieldSchema,
   options,
   collection,
-  openSize = true
+  openSize
 
 }) => {
   const getFilter = () => {
