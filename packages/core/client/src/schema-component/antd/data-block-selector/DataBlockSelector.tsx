@@ -525,14 +525,6 @@ export const useDataBlockSelectorProps = () => {
         });
       }
       const newBomWl = [...currentRecords, ...newRows];
-      const len = field.value?.length;
-      // spliceArrayState(field as any, {
-      //   startIndex: 0,
-      //   deleteCount: field.value?.length,
-      // });
-      // field.value.splice(0, len);
-      // field.initialValue = newBomWl;
-      debugger;
       field.onInput(newBomWl);
       setVisible(false);
     },
