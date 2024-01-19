@@ -13,7 +13,7 @@ import {
   useAPIClient,
   useActionContext,
   useDesignable,
-  useRecord,
+  useRecord
 } from '../';
 import { ACLCollectionProvider } from '../acl/ACLProvider';
 import { CollectionProvider, IField, useCollection, useCollectionManager } from '../collection-manager';
@@ -22,7 +22,7 @@ import { useRecordIndex } from '../record-provider';
 import { SharedFilterProvider } from './SharedFilterProvider';
 import { useTemplateBlockContext } from './TemplateBlockProvider';
 import { useAssociationNames } from './hooks';
-
+export const WithoutCollectionFieldFieldResource = createContext(null);
 export const BlockResourceContext = createContext(null);
 export const BlockAssociationContext = createContext(null);
 export const BlockRequestContext = createContext<{

@@ -28,7 +28,6 @@ export const ApplyAction = (props: any) => {
       return '撤销申请';
     }
   }, [apply?.id, apply?.jobIsEnd]);
-  debugger;
   const { children, title, ...btnProps } = props;
   return (
     <ApplyActionContext.Provider value={{ formActionType, record, setApply, ...others }}>

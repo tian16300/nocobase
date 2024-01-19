@@ -8,6 +8,7 @@
   "peerDependencies": {
     "@nocobase/client": "0.x",
     "@nocobase/server": "0.x",
-    "@nocobase/test": "0.x"
+    "@nocobase/test": "0.x",
+    "@domain/plugin-common": "0.x"
   }
 }

@@ -7,10 +7,11 @@ import { useCollectionManager } from '../collection-manager';
 import { isInFilterFormBlock } from '../filter-provider';
 import { RecordProvider, useRecord } from '../record-provider';
 import { SchemaComponentOptions } from '../schema-component';
-import { BlockProvider, RenderChildrenWithAssociationFilter, useBlockRequestContext } from './BlockProvider';
+import { BlockProvider, RenderChildrenWithAssociationFilter, WithoutCollectionFieldFieldResource, useBlockRequestContext } from './BlockProvider';
 import { mergeFilter } from './SharedFilterProvider';
 import { flattenTree } from '@nocobase/utils';
 import { useParsedFilter } from './hooks';
+import { WithoutTableFieldResource } from './TableFieldProvider';
 
 type Params = {
   filter?: any;
@@ -166,6 +167,7 @@ export const TableSelectorProvider = (props: TableSelectorProviderProps) => {
   const { treeTable } = fieldSchema?.['x-decorator-props'] || {};
   const collectionFieldSchema = recursiveParent(fieldSchema, 'CollectionField');
   const collectionField = getCollectionJoinField(collectionFieldSchema?.['x-collection-field']);
+ 
   const appends = useAssociationNames(props.collection);
   let params = { ...props.params };
   if (props.dragSort) {
@@ -185,8 +187,9 @@ export const TableSelectorProvider = (props: TableSelectorProviderProps) => {
   if (!Object.keys(params).includes('appends')) {
     params['appends'] = appends;
   }
+  const withoutCollectionFieldFieldResource = useContext(WithoutCollectionFieldFieldResource);
   let extraFilter;
-  if (collectionField) {
+  if (collectionField && !withoutCollectionFieldFieldResource) {
     if (['oho', 'o2m'].includes(collectionField.interface) && !isInFilterFormBlock(fieldSchema)) {
       if (record?.[collectionField.sourceKey]) {
         extraFilter = {

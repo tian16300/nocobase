@@ -63,7 +63,7 @@ export const useTableSelectorProps = () => {
 
 export const InternalPicker = observer(
   (props: any) => {
-    const { value, multiple, openSize, getContainer, onChange, quickUpload, selectFile, shouldMountElement, ...others } = props;
+    const { value, multiple, openSize, drawerProps, onChange, quickUpload, selectFile, shouldMountElement, ...others } = props;
     const field: any = useField();
     const fieldNames = useFieldNames(props);
     const [visibleSelector, setVisibleSelector] = useState(false);
@@ -190,7 +190,7 @@ export const InternalPicker = observer(
             openMode: 'drawer',
             visible: visibleSelector,
             setVisible: setVisibleSelector,
-            drawerProps:{getContainer}
+            drawerProps
           }}
         >
           <RecordPickerProvider {...pickerProps}>

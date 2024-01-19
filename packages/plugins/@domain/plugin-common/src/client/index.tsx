@@ -5,6 +5,7 @@ import * as comps from './component';
 import * as scopes from './scopes';
 export * from './component';
 export * from './scopes';
+export * from './hooks';
 import * as items from './initializers/components';
 // import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
@@ -65,6 +66,12 @@ export class PluginCommonClient extends Plugin {
       type:'item',
       title:'全屏',
       Component: 'FullScreenActionInitializer'
+    })
+
+    this.app.schemaInitializerManager.addItem('SubTableActionInitializers','enableActions.selectFromSourceAction',{
+      type:'item',
+      title:'选择来源',
+      Component: 'SelectFromSourceActionInitializer'
     })
 
 

@@ -11,18 +11,26 @@ export const FullScreenAction = (props) => {
   const { size } = { ...others, ...others1 } as any;
   const schema = useFieldSchema();
   const { titleFullScreen, titleNormal, iconFullScreen, iconNormal } = schema['x-component-props'] || {};
-  const { containerRef, setIsFullScreen, toolTipProps } = useViewBlockContext();
-  const [isFullScreen, { toggleFullscreen }] = useFullscreen(containerRef, {});
+  const { containerRef, isFullScreen: _isFullScreen, setIsFullScreen, toolTipProps } = useViewBlockContext();
+  const [isFullScreen, { toggleFullscreen }] = useFullscreen(containerRef, {
+    onExit: () => {
+      setIsFullScreen(false);
+    },
+    onEnter: () => {
+      setIsFullScreen(true);
+    },
+  });
 
   const compile = useCompile();
   const _handleActionClick = () => {
-    setIsFullScreen(!isFullScreen);
     toggleFullscreen();
   };
-  const getPopupContainer = isFullScreen?()=>{
-    return containerRef.current;
-  }: null;
-  
+  const getPopupContainer = isFullScreen
+    ? () => {
+        return containerRef.current;
+      }
+    : null;
+
   return (
     <div className={actionDesignerCss}>
       {

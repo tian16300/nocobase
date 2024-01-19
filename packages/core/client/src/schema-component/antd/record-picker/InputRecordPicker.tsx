@@ -258,10 +258,15 @@ export const RecordPickerDrawer: React.FunctionComponent<{
 
 }) => {
   const getFilter = () => {
-    const targetKey = collectionField?.targetKey || 'id';
-    const list = options.map((option) => option[targetKey]).filter(Boolean);
-    const filter = list.length ? { $and: [{ [`${targetKey}.$ne`]: list }] } : {};
-    return filter;
+    if(collectionField){
+      const targetKey = collectionField?.targetKey || 'id';
+      const list = options.map((option) => option[targetKey]).filter(Boolean);
+      const filter = list.length ? { $and: [{ [`${targetKey}.$ne`]: list }] } : {};
+      return filter;
+    }else{
+      return {}
+    }
+  
   };
   const recordPickerProps = {
     multiple,
