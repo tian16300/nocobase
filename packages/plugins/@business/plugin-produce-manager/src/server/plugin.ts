@@ -127,7 +127,7 @@ export class PluginProduceManagerServer extends Plugin {
     //采购申请单  保存BOM物料明细价格
     this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
       //查找 cg_apply_list 明细 bom_wl_list
-      const models = await this.app.db.getRepository('cg_apply_list').find({
+      const models = await this.app.db.getRepository('cg_wl_list').find({
         filter: {
           cg_apply_id: model.get('id'),
         },
@@ -166,11 +166,11 @@ export class PluginProduceManagerServer extends Plugin {
         }),
       );
     });
-    this.app.db.on('cg_apply_list.afterSave', async (model, { transaction }) => {
+    this.app.db.on('cg_wl_list.afterSave', async (model, { transaction }) => {
       const cg_apply_id = model.get('cg_apply_id');
       const bom_wl_list = model.get('bom_wl_list');
       //查找 cg_apply_list 明细 bom_wl_list
-      const models = await this.app.db.getRepository('cg_apply_list').find({
+      const models = await this.app.db.getRepository('cg_wl_list').find({
         filterByTk: model.get('id'),
         appends: ['bom_wl_list', 'bom_wl_list.prj'],
       });
@@ -206,7 +206,7 @@ export class PluginProduceManagerServer extends Plugin {
     this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
       const cg_wl_id = model.get('cg_wl_id');
       //查找 cg_apply_list 明细 cg_apply_id
-      const record = await this.app.db.getRepository('cg_apply_list').findOne({
+      const record = await this.app.db.getRepository('cg_wl_list').findOne({
         filterByTk: cg_wl_id,
         transaction,
       });

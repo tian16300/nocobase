@@ -31,6 +31,8 @@ import { useSchemaInitializerItem } from '../../../application';
 import { BlockInitializer } from '../../../schema-initializer';
 
 import { FormLayout, ArrayItems } from '@formily/antd-v5';
+
+import { spliceArrayState } from '@formily/core/esm/shared/internals';
 const DataBlockSelectorActionContext = createContext(null);
 export const DataBlockSelectorAction: any = (props: any) => {
   const {
@@ -83,8 +85,8 @@ export const DataBlockSelectorAction: any = (props: any) => {
   return (
     <div className={actionDesignerCss}>
       <WithoutCollectionFieldFieldResource.Provider value={true}>
-      <BlockRequestContext.Provider value={{resource:tName}} >
-        {/* <BlockProvider name="table-field" block={'TableField'} resource={tName}> */}
+        <BlockRequestContext.Provider value={{ resource: tName }}>
+          {/* <BlockProvider name="table-field" block={'TableField'} resource={tName}> */}
           <DataBlockSelectorActionContext.Provider
             value={{
               selectedRows,
@@ -119,10 +121,10 @@ export const DataBlockSelectorAction: any = (props: any) => {
               options,
               collectionField: null,
               collection: tName,
-              openSize
+              openSize,
             })}
           </DataBlockSelectorActionContext.Provider>
-        {/* </BlockProvider> */}
+          {/* </BlockProvider> */}
         </BlockRequestContext.Provider>
       </WithoutCollectionFieldFieldResource.Provider>
     </div>
@@ -501,7 +503,7 @@ export const useDataBlockSelectorProps = () => {
         const addRows = [...addGroupRows, ...otherRows];
         addRows.map((row) => {
           const index = currentRecords.findIndex((item) => {
-            return item[foreignKey] === row[foreignKey];
+            return row[foreignKey] && item[foreignKey] === row[foreignKey];
           });
 
           if (fieldMaps.length > 0) {
@@ -523,7 +525,14 @@ export const useDataBlockSelectorProps = () => {
         });
       }
       const newBomWl = [...currentRecords, ...newRows];
-
+      const len = field.value?.length;
+      // spliceArrayState(field as any, {
+      //   startIndex: 0,
+      //   deleteCount: field.value?.length,
+      // });
+      // field.value.splice(0, len);
+      // field.initialValue = newBomWl;
+      debugger;
       field.onInput(newBomWl);
       setVisible(false);
     },
