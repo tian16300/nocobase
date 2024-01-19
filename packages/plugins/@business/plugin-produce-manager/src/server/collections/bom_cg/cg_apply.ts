@@ -506,8 +506,6 @@ export default {
       interface: 'o2m',
 
       collectionName: 'cg_apply',
-
-      reverseKey: 'bfjtgobk6eq',
       uiSchema: {
         title: '采购物料明细',
         'x-component': 'AssociationField',
