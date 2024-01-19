@@ -22,14 +22,10 @@ export const usePrjTabsProps = () => {
     ...(activeKey ? { activeKey } : {}),
     onChange: onTabChange,
     className: css`
-      .ant-tabs-tabpane
-        > .nb-grid
-        > .nb-grid-row
-        > .nb-grid-col
-        > .nb-block-item.ant-nb-card-item
-        > .ant-card
-        > .ant-card-body {
-        padding: 0;
+      .ant-tabs-tabpane > .nb-grid > .nb-grid-row > .nb-grid-col, .ant-tabs-tabpane > .nb-grid > .nb-grid-row > .nb-grid-col > div{
+        > .nb-block-item.ant-nb-card-item > .ant-card > .ant-card-body {
+          padding: 0;
+        }
       }
     `,
   };
