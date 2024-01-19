@@ -244,6 +244,7 @@ export const RecordPickerDrawer: React.FunctionComponent<{
   fieldSchema;
   options: any[];
   collection?: string;
+  openSize?: 'small' | 'middle' | 'large'
 }> = ({
   multiple,
   onChange,
@@ -254,7 +255,8 @@ export const RecordPickerDrawer: React.FunctionComponent<{
   setVisible,
   fieldSchema,
   options,
-  collection
+  collection,
+  openSize = true
 
 }) => {
   const getFilter = () => {
@@ -280,7 +282,7 @@ export const RecordPickerDrawer: React.FunctionComponent<{
   return (
     <RecordPickerProvider {...recordPickerProps}>
       <CollectionProvider allowNull name={collectionField?.target || collection}>
-        <ActionContextProvider openMode="drawer" visible={visible} setVisible={setVisible}>
+        <ActionContextProvider openMode="drawer" visible={visible} setVisible={setVisible} openSize={openSize}>
           <FormProvider>
             <TableSelectorParamsProvider params={{ filter: getFilter() }}>
               <SchemaComponentOptions scope={{ useTableSelectorProps, usePickActionProps, useDataBlockSelectorProps }}>

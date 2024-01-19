@@ -41,6 +41,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
     groupBy,
     fieldMaps = [],
     onChange,
+    openSize = 'large',
     ...buttonProps
   } = props;
 
@@ -118,6 +119,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
               options,
               collectionField: null,
               collection: tName,
+              openSize
             })}
           </DataBlockSelectorActionContext.Provider>
         {/* </BlockProvider> */}
