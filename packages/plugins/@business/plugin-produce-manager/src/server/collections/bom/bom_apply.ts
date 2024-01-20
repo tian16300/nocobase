@@ -346,7 +346,7 @@ export default {
             value: 'id',
           },
         },
-        title: '关联审批',
+        title: 'BOM补单',
       },
       target: 'bom_apply',
       targetKey: 'id',
