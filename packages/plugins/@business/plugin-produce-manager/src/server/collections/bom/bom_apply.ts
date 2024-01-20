@@ -294,7 +294,7 @@ export default {
       },
     },
     {
-      name: 'approval_apply',
+      name: 'approvalStaus',
       type: 'belongsTo',
       interface: 'obo',
       description: null,
@@ -305,11 +305,11 @@ export default {
         'x-component-props': {
           multiple: false,
           fieldNames: {
-            label: 'id',
+            label: 'status',
             value: 'id',
           },
         },
-        title: '关联审批',
+        title: '审批状态',
       },
       target: 'approval_apply',
       targetKey: 'id',
