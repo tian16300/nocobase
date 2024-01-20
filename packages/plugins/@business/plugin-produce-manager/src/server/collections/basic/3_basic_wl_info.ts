@@ -367,6 +367,21 @@ export default {
       target: 'wl_stock',
       targetKey: 'id',
     },
+    {
+      "name": "num",
+      "type": "bigInt",
+      "uiSchema": {
+          "type": "number",
+          "x-component": "InputNumber",
+          "x-component-props": {
+              "stringMode": true,
+              "step": "1"
+          },
+          "x-validator": "integer",
+          "title": "需求数量"
+      },
+      "interface": "integer"
+  }
   ],
   logging: true,
   autoGenId: true,

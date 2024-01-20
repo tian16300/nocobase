@@ -20,19 +20,6 @@ export class PluginProduceManagerServer extends Plugin {
         plugin: this,
       },
     });
-
-    /* BOM物料明细 继承 BOM单  */
-    // this.app.db.on('bom_wl.beforeSave', async (model, { transaction }) => {
-    //   const bom = await this.db.getRepository('bom').findOne({
-    //     filter: {
-    //       id: model.get('bom_id'),
-    //     },
-    //     transaction,
-    //   });
-    //   if (bom) {
-    //     model.set('prjId', bom.get('prjId'));
-    //   }
-    // });
     /* 存储库存 把项目也作更新 */
     this.app.db.on('wl_stock.beforeSave', async (model, { transaction }) => {
       if (model.get('stock_id') && !model.get('prjId')) {
@@ -124,8 +111,52 @@ export class PluginProduceManagerServer extends Plugin {
         }
       }
     });
-    //采购申请单  保存BOM物料明细价格
-    this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
+   
+   
+    //物料BOM新增 或者修改 生成项目BOM Tree结构
+    // this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
+
+    this.addCgApplyEvents();
+  
+    
+  }
+  async addCgApplyEvents(){
+    this.app.db.on('cg_wl_list.afterSave', async (model, { transaction }) => {
+      const cg_apply_id = model.get('cg_apply_id');
+      const bom_wl_list = model.get('bom_wl_list');
+      //查找 cg_apply_list 明细 bom_wl_list
+      const models = await this.app.db.getRepository('cg_wl_list').find({
+        filterByTk: model.get('id'),
+        appends: ['bom_wl_list', 'bom_wl_list.prj'],
+      });
+      // const bom_wl_lists = models.reduce((prev: any, cur: any) => {
+      //   return [...prev, ...cur.bom_wl_list];
+      // },[]);
+      await Promise.all(
+        models.map(async (item: any) => {
+          const rate = item.get('rate');
+          const price = item.get('price');
+          await Promise.all(
+            item.bom_wl_list.map(async (bom_wl: any) => {
+              const wl = bom_wl.get('wl');
+              if (!wl) {
+                // 更新 bom明细价格
+                await this.app.db.getRepository('bom_wl_list').update({
+                  filterByTk: bom_wl.get('id'),
+                  values: {
+                    price,
+                    rate,
+                  },
+                  transaction,
+                });
+              }
+            }),
+          );
+        }),
+      );
+    });
+     //采购申请单  保存BOM物料明细价格
+     this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
       //查找 cg_apply_list 明细 bom_wl_list
       const models = await this.app.db.getRepository('cg_wl_list').find({
         filter: {
@@ -166,43 +197,9 @@ export class PluginProduceManagerServer extends Plugin {
         }),
       );
     });
-    this.app.db.on('cg_wl_list.afterSave', async (model, { transaction }) => {
-      const cg_apply_id = model.get('cg_apply_id');
-      const bom_wl_list = model.get('bom_wl_list');
-      //查找 cg_apply_list 明细 bom_wl_list
-      const models = await this.app.db.getRepository('cg_wl_list').find({
-        filterByTk: model.get('id'),
-        appends: ['bom_wl_list', 'bom_wl_list.prj'],
-      });
-      // const bom_wl_lists = models.reduce((prev: any, cur: any) => {
-      //   return [...prev, ...cur.bom_wl_list];
-      // },[]);
-      await Promise.all(
-        models.map(async (item: any) => {
-          const rate = item.get('rate');
-          const price = item.get('price');
-          await Promise.all(
-            item.bom_wl_list.map(async (bom_wl: any) => {
-              const wl = bom_wl.get('wl');
-              if (!wl) {
-                // 更新 bom明细价格
-                await this.app.db.getRepository('bom_wl_list').update({
-                  filterByTk: bom_wl.get('id'),
-                  values: {
-                    price,
-                    rate,
-                  },
-                  transaction,
-                });
-              }
-            }),
-          );
-        }),
-      );
-    });
-    //物料BOM新增 或者修改 生成项目BOM Tree结构
-    // this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
-    //中间表关联同步 cg_apply_bom_throught cg_apply_id
+
+
+      //中间表关联同步 cg_apply_bom_throught cg_apply_id
     this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
       const cg_wl_id = model.get('cg_wl_id');
       //查找 cg_apply_list 明细 cg_apply_id
@@ -212,6 +209,8 @@ export class PluginProduceManagerServer extends Plugin {
       });
       model.set('cg_apply_id', record.get('cg_apply_id'));
     });
+
+
     //采购申请单 统计项目物料成本
     // 步骤 查找所有的BOM 明细  按照 项目分组  统计审批通过的总物料BOM 本次新增物料BOM 历史审批的项目物料BOM
     this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
@@ -335,6 +334,7 @@ export class PluginProduceManagerServer extends Plugin {
 
       // models.forEach(async (item: any) => {});
     });
+
   }
   async updatePrjBomTree(model: any, { transaction }) {
     // 查找所有 prj bom 生成 分组  全部   工站  单元   未关联
@@ -473,7 +473,8 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('data_log_flag');      
       await repo.db2cm('cg_apply_bom_throught');
       await repo.db2cm('prjWlCb_bomWl_mid');
-      await repo.db2cm('fj_info_mid');      
+      await repo.db2cm('fj_info_mid');  
+      await repo.db2cm('cgApply_prjs');    
       await repo.db2cm('basic_wl_info');
       await repo.db2cm('basic_cg_detail');
       await repo.db2cm('basic_bom_wl');      
@@ -487,6 +488,7 @@ export class PluginProduceManagerServer extends Plugin {
     this.app.acl.allow('fj_info_mid', '*', 'public');
     this.app.acl.allow('cg_apply_bom_throught', '*', 'public');
     this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');
+    this.app.acl.allow('cgApply_prjs', '*', 'public');
     
   }
 
