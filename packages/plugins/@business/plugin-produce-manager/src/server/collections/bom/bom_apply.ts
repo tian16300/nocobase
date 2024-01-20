@@ -314,6 +314,44 @@ export default {
       target: 'approval_apply',
       targetKey: 'id',
     },
+    {
+      name: 'bd_count',
+      type: 'bigInt',
+      interface: 'integer',
+      description: null,
+      uiSchema: {
+        type: 'number',
+        'x-component': 'InputNumber',
+        'x-component-props': {
+          stringMode: true,
+          step: '1',
+        },
+        'x-validator': 'integer',
+        title: '补单次数',
+      },
+    },
+    {
+      name: 'link_bom_applys',
+      type: 'hasMany',
+      interface: 'o2m',
+      description: null,
+      foreignKey: 'main_bom_apply_id',
+      onDelete: 'CASCADE',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '关联审批',
+      },
+      target: 'bom_apply',
+      targetKey: 'id',
+    },
+    
   ],
   category: [],
   logging: true,

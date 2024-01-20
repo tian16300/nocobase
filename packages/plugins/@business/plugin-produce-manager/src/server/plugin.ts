@@ -201,7 +201,7 @@ export class PluginProduceManagerServer extends Plugin {
       );
     });
     //物料BOM新增 或者修改 生成项目BOM Tree结构
-    this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
+    // this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
     //中间表关联同步 cg_apply_bom_throught cg_apply_id
     this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
       const cg_wl_id = model.get('cg_wl_id');
