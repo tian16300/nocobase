@@ -141,7 +141,7 @@ export class PluginProduceManagerServer extends Plugin {
           await Promise.all(
             item.bom_wl_list.map(async (bom_wl: any) => {
               // 更新 bom明细价格
-              await this.app.db.getRepository('bom_wl').update({
+              await this.app.db.getRepository('bom_wl_list').update({
                 filterByTk: bom_wl.get('id'),
                 values: {
                   price,
@@ -186,7 +186,7 @@ export class PluginProduceManagerServer extends Plugin {
               const wl = bom_wl.get('wl');
               if (!wl) {
                 // 更新 bom明细价格
-                await this.app.db.getRepository('bom_wl').update({
+                await this.app.db.getRepository('bom_wl_list').update({
                   filterByTk: bom_wl.get('id'),
                   values: {
                     price,
@@ -201,7 +201,7 @@ export class PluginProduceManagerServer extends Plugin {
       );
     });
     //物料BOM新增 或者修改 生成项目BOM Tree结构
-    this.app.db.on('bom_wl.beforeSave', this.updatePrjBomTree.bind(this));
+    this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
     //中间表关联同步 cg_apply_bom_throught cg_apply_id
     this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
       const cg_wl_id = model.get('cg_wl_id');
@@ -225,7 +225,7 @@ export class PluginProduceManagerServer extends Plugin {
         },
         transaction,
       });
-      const [models, count] = await this.app.db.getRepository('bom_wl').findAndCount({
+      const [models, count] = await this.app.db.getRepository('bom_wl_list').findAndCount({
         filter: {
           $and: [
             {
@@ -267,7 +267,7 @@ export class PluginProduceManagerServer extends Plugin {
           row.cg_apply_id = cg_apply_id;
           // 本次总物料BOM bom_wl_list 本次新增物料BOM add_wl_list 历史审批的项目物料BOM history_wl_list
           const add_wl_list = groups[prjId];
-          const bom_wl_list = (await this.app.db.getRepository('bom_wl').find({
+          const bom_wl_list = (await this.app.db.getRepository('bom_wl_list').find({
             filter: {
               $and: [
                 {
@@ -287,7 +287,7 @@ export class PluginProduceManagerServer extends Plugin {
             transaction,
           })||[]);
           //查找历史审批的项目物料BOM
-          const history_wl_list = (await this.app.db.getRepository('bom_wl').find({
+          const history_wl_list = (await this.app.db.getRepository('bom_wl_list').find({
             filter: {
               $and: [
                 {
@@ -466,23 +466,28 @@ export class PluginProduceManagerServer extends Plugin {
       directory: path.resolve(__dirname, 'collections/bom_cg'),
     });
     const repo = this.db.getRepository<any>('collections');
+   
     if (repo) {
       await repo.db2cm('wl_category');
       await repo.db2cm('wl_info');
-      await repo.db2cm('data_log_flag');
-      await repo.db2cm('basic_wl_info');
-      await repo.db2cm('basic_cg_detail');
-      await repo.db2cm('bom_bomcountwl');
-      await repo.db2cm('bom_bomwl');
-      await repo.db2cm('bom_wl');
-      await repo.db2cm('bom');
-      await repo.db2cm('bom_count_wl');
+      await repo.db2cm('data_log_flag');      
       await repo.db2cm('cg_apply_bom_throught');
       await repo.db2cm('prjWlCb_bomWl_mid');
+      await repo.db2cm('fj_info_mid');      
+      await repo.db2cm('basic_wl_info');
+      await repo.db2cm('basic_cg_detail');
+      await repo.db2cm('basic_bom_wl');      
+      await repo.db2cm('bom_wl_list');
+      await repo.db2cm('bom_apply');
+      await repo.db2cm('prj_wl_cb');
       await repo.db2cm('cg_wl_list');
       await repo.db2cm('cg_apply');
     }
     this.app.resourcer.registerActionHandler('bom_apply:initCreateMany', initCreateMany);
+    this.app.acl.allow('fj_info_mid', '*', 'public');
+    this.app.acl.allow('cg_apply_bom_throught', '*', 'public');
+    this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');
+    
   }
 
   async install(options?: InstallOptions) {}

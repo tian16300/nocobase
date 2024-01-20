@@ -1,15 +1,15 @@
 export default {
-  name: 'bom_wl',
-  title: 'BOM物料明细',
+  name: 'bom_apply',
+  title: 'BOM申请',
   inherit: false,
   hidden: false,
+  description: null,
   fields: [
     {
       name: 'id',
       type: 'bigInt',
       interface: 'id',
-
-      collectionName: 'bom_wl',
+      description: null,
 
       autoIncrement: true,
       primaryKey: true,
@@ -22,12 +22,23 @@ export default {
       },
     },
     {
+      name: 'approval_apply_id',
+      type: 'bigInt',
+      interface: 'integer',
+      description: null,
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'approval_apply_id',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
+    },
+    {
       name: 'prjId',
       type: 'bigInt',
       interface: 'integer',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -37,46 +48,14 @@ export default {
       },
     },
     {
-      name: 'cg_apply_wl_id',
+      name: 'bomType_dicId',
       type: 'bigInt',
       interface: 'integer',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       isForeignKey: true,
       uiSchema: {
         type: 'number',
-        title: 'cg_apply_wl_id',
-        'x-component': 'InputNumber',
-        'x-read-pretty': true,
-      },
-    },
-    {
-      name: 'bom_id',
-      type: 'bigInt',
-      interface: 'integer',
-
-      collectionName: 'bom_wl',
-
-      isForeignKey: true,
-      uiSchema: {
-        type: 'number',
-        title: 'bom_id',
-        'x-component': 'InputNumber',
-        'x-read-pretty': true,
-      },
-    },
-    {
-      name: 'bom_wl_count',
-      type: 'bigInt',
-      interface: 'integer',
-
-      collectionName: 'bom_wl',
-
-      isForeignKey: true,
-      uiSchema: {
-        type: 'number',
-        title: 'bom_wl_count',
+        title: 'bomType_dicId',
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
@@ -85,9 +64,7 @@ export default {
       name: 'createdAt',
       type: 'date',
       interface: 'createdAt',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       field: 'createdAt',
       uiSchema: {
         type: 'datetime',
@@ -101,9 +78,7 @@ export default {
       name: 'createdBy',
       type: 'belongsTo',
       interface: 'createdBy',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       target: 'users',
       foreignKey: 'createdById',
       uiSchema: {
@@ -124,9 +99,7 @@ export default {
       name: 'updatedAt',
       type: 'date',
       interface: 'updatedAt',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       field: 'updatedAt',
       uiSchema: {
         type: 'string',
@@ -140,9 +113,7 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
-
-      collectionName: 'bom_wl',
-
+      description: null,
       target: 'users',
       foreignKey: 'updatedById',
       uiSchema: {
@@ -160,30 +131,54 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'expect_arrival_time',
-      type: 'date',
-      interface: 'datetime',
-
-      collectionName: 'bom_wl',
-
-      uiSchema: {
-        'x-component-props': {
-          dateFormat: 'YYYY-MM-DD',
-          gmt: false,
-          showTime: false,
+      name: 'bom_apply_code',
+      type: 'sequence',
+      interface: 'sequence',
+      description: null,
+      patterns: [
+        {
+          type: 'string',
+          options: {
+            value: 'BOMJH-',
+          },
         },
+        {
+          type: 'date',
+          options: {
+            format: 'YYMMDD',
+          },
+        },
+        {
+          type: 'string',
+          options: {
+            value: '-',
+          },
+        },
+        {
+          type: 'integer',
+          options: {
+            digits: 4,
+            start: 1,
+            cycle: '0 0 * * *',
+            key: 65485,
+          },
+        },
+      ],
+      uiSchema: {
         type: 'string',
-        'x-component': 'DatePicker',
-        title: '期望到货日期',
+        'x-component': 'Input',
+        'x-component-props': {},
+        title: 'BOM编码',
       },
     },
     {
       name: 'prj',
       type: 'belongsTo',
-      interface: 'm2o',
+      interface: 'obo',
+      description: null,
 
-      collectionName: 'bom_wl',
-
+      parentKey: null,
+      reverseKey: null,
       foreignKey: 'prjId',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -201,49 +196,12 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'progress',
-      type: 'string',
-      interface: 'select',
-
-      collectionName: 'bom_wl',
-
-      uiSchema: {
-        enum: [
-          {
-            value: '1',
-            label: '申请中',
-          },
-          {
-            value: '2',
-            label: '下单中',
-          },
-          {
-            value: '3',
-            label: '已入库',
-          },
-          {
-            value: '4',
-            label: '已领料',
-          },
-          {
-            value: '5',
-            label: '已退料',
-          },
-        ],
-        type: 'string',
-        'x-component': 'Select',
-        title: '进度',
-      },
-    },
-    {
-      name: 'cg_wl_list',
-      type: 'belongsToMany',
-      interface: 'm2m',
-
-      collectionName: 'bom_wl',
-
-      foreignKey: 'bom_wl_id',
-      otherKey: 'cg_wl_id',
+      name: 'bom_wl_list',
+      type: 'hasMany',
+      interface: 'o2m',
+      description: null,
+      foreignKey: 'bom_apply_id',
+      onDelete: 'CASCADE',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
@@ -253,40 +211,94 @@ export default {
             value: 'id',
           },
         },
-        title: '采购物料明细',
+        title: 'BOM明细',
       },
-      target: 'basic_cg_detail',
-      through: 'cg_apply_bom_throught',
+      target: 'bom_wl_list',
       targetKey: 'id',
       sourceKey: 'id',
     },
     {
-      name: 'num',
-      type: 'bigInt',
-      interface: 'integer',
-      description: '需求数量',
-      collectionName: 'bom_wl',
-
+      name: 'bomType',
+      type: 'belongsTo',
+      interface: 'dic',
+      description: null,
       uiSchema: {
-        type: 'number',
-        'x-component': 'InputNumber',
         'x-component-props': {
-          stringMode: true,
-          step: '1',
+          service: {
+            params: {
+              filter: {
+                $and: [
+                  {
+                    dicCode: {
+                      $eq: 'bom_apply_type',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          multiple: false,
+          fieldNames: {
+            label: 'label',
+            value: 'id',
+            icon: 'icon',
+            color: 'color',
+          },
         },
-        'x-validator': 'integer',
-        title: '数量',
+        type: 'object',
+        'x-component': 'AssociationField',
+        'x-read-pretty': true,
+        title: 'BOM类型',
       },
-      overriding: true,
+      foreignKey: 'bomType_dicId',
+      target: 'dicItem',
+      dicCode: 'bom_apply_type',
+      targetKey: 'id',
     },
     {
-      name: 'bom',
+      name: 'orderType',
+      type: 'string',
+      interface: 'select',
+      description: null,
+
+      parentKey: null,
+      reverseKey: null,
+      uiSchema: {
+        enum: [
+          {
+            value: '1',
+            label: '首单',
+          },
+          {
+            value: '2',
+            label: '补单',
+          },
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '单据类型',
+      },
+    },
+    {
+      name: 'remark',
+      type: 'text',
+      interface: 'textarea',
+      description: null,
+
+      parentKey: null,
+      reverseKey: null,
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input.TextArea',
+        title: '备注',
+      },
+    },
+    {
+      name: 'approval_apply',
       type: 'belongsTo',
-      interface: 'm2o',
-
-      collectionName: 'bom_wl',
-
-      foreignKey: 'bom_id',
+      interface: 'obo',
+      description: null,
+      foreignKey: 'approval_apply_id',
       onDelete: 'SET NULL',
       uiSchema: {
         'x-component': 'AssociationField',
@@ -297,37 +309,13 @@ export default {
             value: 'id',
           },
         },
-        title: 'BOM',
+        title: '关联审批',
       },
-      target: 'bom',
+      target: 'approval_apply',
       targetKey: 'id',
-    },
-    {
-      name: 'boms',
-      type: 'belongsToMany',
-      interface: 'm2m',
-
-      collectionName: 'bom_wl',
-
-      foreignKey: 'bom_wl_id',
-      otherKey: 'bom_id',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: true,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: '所属节点',
-      },
-      target: 'bom',
-      through: 'bom_bomwl',
-      targetKey: 'id',
-      sourceKey: 'id',
     },
   ],
+  category: [],
   logging: true,
   autoGenId: true,
   createdBy: true,
@@ -337,6 +325,6 @@ export default {
   sortable: true,
   template: 'general',
   view: false,
-  inherits: ['basic_wl_info', 'data_log_flag'],
   schema: 'public',
+  titleField: 'bom_apply_code',
 };

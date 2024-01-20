@@ -9,10 +9,6 @@ export default {
       name: 'id',
       type: 'bigInt',
       interface: 'id',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
@@ -24,13 +20,51 @@ export default {
       },
     },
     {
+      name: 'cg_wl_code',
+      type: 'sequence',
+      interface: 'sequence',
+      description: '采购物料编码',
+      patterns: [
+        {
+          type: 'string',
+          options: {
+            value: 'CGWL-',
+          },
+        },
+        {
+          type: 'date',
+          options: {
+            format: 'YYMMDD',
+          },
+        },
+        {
+          type: 'string',
+          options: {
+            value: '-',
+          },
+        },
+        {
+          type: 'integer',
+          options: {
+            digits: 4,
+            start: 1,
+            cycle: '0 0 * * *',
+            key: 60851,
+          },
+        },
+      ],
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        'x-component-props': {},
+        title: '采购物料编码',
+      },
+      unique: false,
+    },
+    {
       name: 'cgUnit_id',
       type: 'bigInt',
       interface: 'integer',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -43,10 +77,6 @@ export default {
       name: 'createdAt',
       type: 'date',
       interface: 'createdAt',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       field: 'createdAt',
       uiSchema: {
         type: 'datetime',
@@ -60,10 +90,6 @@ export default {
       name: 'createdBy',
       type: 'belongsTo',
       interface: 'createdBy',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       target: 'users',
       foreignKey: 'createdById',
       uiSchema: {
@@ -84,10 +110,6 @@ export default {
       name: 'updatedAt',
       type: 'date',
       interface: 'updatedAt',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       field: 'updatedAt',
       uiSchema: {
         type: 'string',
@@ -101,10 +123,6 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       target: 'users',
       foreignKey: 'updatedById',
       uiSchema: {
@@ -144,10 +162,6 @@ export default {
       name: 'cgUnit',
       type: 'belongsTo',
       interface: 'obo',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       foreignKey: 'cgUnit_id',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -168,10 +182,7 @@ export default {
       name: 'rate',
       type: 'float',
       interface: 'percent',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
+      description: '我国现行增值税属于比例税率，根据应税行为一共分为13%，9%，6%三档税率及5%，3%两档征收率',
       uiSchema: {
         'x-component-props': {
           step: '1',
@@ -180,7 +191,7 @@ export default {
         },
         type: 'string',
         'x-component': 'Percent',
-        title: ' 增值税税率(%)',
+        title: '税率（%）',
       },
       defaultValue: 0.13,
     },
@@ -199,17 +210,13 @@ export default {
         },
         type: 'number',
         'x-component': 'InputNumber',
-        title: '含税单价',
+        title: '含税价格(CNY)',
       },
     },
     {
-      name: 'base_price',
+      name: 'ws_price',
       type: 'formula',
       interface: 'formula',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       dataType: 'double',
       uiSchema: {
         'x-component-props': {
@@ -219,41 +226,17 @@ export default {
         type: 'string',
         'x-component': 'Formula.Result',
         'x-read-pretty': true,
-        title: '参考单价',
+        title: '未税价格(CNY)',
       },
       engine: 'formula.js',
       expression: '{{price}}/(1+{{rate}})',
     },
     {
-      name: 'total_price',
+      name: 'amount',
       type: 'formula',
       interface: 'formula',
       description: null,
 
-      parentKey: null,
-      reverseKey: null,
-      dataType: 'double',
-      uiSchema: {
-        'x-component-props': {
-          step: '1',
-          stringMode: true,
-        },
-        type: 'string',
-        'x-component': 'Formula.Result',
-        'x-read-pretty': true,
-        title: '金额',
-      },
-      engine: 'formula.js',
-      expression: '{{price}}*{{cgNum}}',
-    },
-    {
-      name: 'taxi',
-      type: 'formula',
-      interface: 'formula',
-      description: null,
-
-      parentKey: null,
-      reverseKey: null,
       dataType: 'double',
       uiSchema: {
         'x-component-props': {
@@ -263,11 +246,64 @@ export default {
         type: 'string',
         'x-component': 'Formula.Result',
         'x-read-pretty': true,
-        title: '税额',
+        title: '含税金额(CNY)',
       },
       engine: 'formula.js',
-      expression: '{{cgNum}}*({{price}}*{{rate}}/(1+{{rate}}))',
+      expression: '{{price}}*{{cgNum}}',
     },
+    {
+      name: 'ws_amount',
+      type: 'formula',
+      interface: 'formula',
+      description: null,
+
+      dataType: 'double',
+      uiSchema: {
+        'x-component-props': {
+          step: '0.00001',
+          stringMode: true,
+        },
+        type: 'string',
+        'x-component': 'Formula.Result',
+        'x-read-pretty': true,
+        title: '未税金额(CNY)',
+      },
+      engine: 'formula.js',
+      expression: '{{price}}*{{cgNum}}/(1+{{rate}})',
+    },
+    {
+      name: 'status',
+      type: 'string',
+      interface: 'select',
+      uiSchema: {
+        enum: [
+          {
+            value: '申请中',
+            label: '申请中',
+          },
+          {
+            value: '采购中',
+            label: '采购中',
+          },
+          {
+            value: '已下单',
+            label: '已下单',
+          },
+          {
+            value: '已到货',
+            label: '已到货',
+          },
+          {
+            value: '已入库',
+            label: '已入库',
+          },
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '状态',
+      },
+    },
+
     {
       name: 'link',
       type: 'text',

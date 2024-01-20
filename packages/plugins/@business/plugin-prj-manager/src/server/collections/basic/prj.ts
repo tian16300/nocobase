@@ -1241,29 +1241,49 @@ export default {
       sourceKey: 'id',
     },
     {
-      name: 'bom_applys',
-      type: 'hasMany',
-      interface: 'o2m',
-      description: null,
-      collectionName: 'prj',
-
-      foreignKey: 'prjId',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: true,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
+      "name": "bom_applys",
+      "type": "hasMany",
+      "interface": "o2m",
+      "collectionName": "prj",
+      "foreignKey": "prjId",
+      "onDelete": "SET NULL",
+      "uiSchema": {
+          "x-component": "AssociationField",
+          "x-component-props": {
+              "multiple": true,
+              "fieldNames": {
+                  "label": "id",
+                  "value": "id"
+              }
           },
-        },
-        title: 'BOM',
+          "title": "BOM申请"
       },
-      target: 'bom_apply',
-      targetKey: 'id',
-      sourceKey: 'id',
+      "target": "bom_apply",
+      "targetKey": "id",
+      "sourceKey": "id"
+  },
+  {
+    name: 'bom_wl_list',
+    type: 'hasMany',
+    interface: 'o2m',
+    collectionName: 'prj',
+    foreignKey: 'prjId',
+    onDelete: 'SET NULL',
+    uiSchema: {
+      'x-component': 'AssociationField',
+      'x-component-props': {
+        multiple: true,
+        fieldNames: {
+          label: 'id',
+          value: 'id',
+        },
+      },
+      title: 'BOM明细',
     },
+    target: 'bom_wl_list',
+    targetKey: 'id',
+    sourceKey: 'id',
+  }
   ],
   title: '项目',
 };

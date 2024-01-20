@@ -142,7 +142,7 @@ export default {
         },
         title: 'BOM明细',
       },
-      target: 'bom_wl',
+      target: 'bom_wl_list',
       through: 'cg_apply_bom_throught',
       targetKey: 'id',
       sourceKey: 'id',

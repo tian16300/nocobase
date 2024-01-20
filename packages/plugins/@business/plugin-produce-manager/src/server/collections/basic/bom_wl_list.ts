@@ -1,6 +1,6 @@
 export default {
-  name: 'bom_count_wl',
-  title: 'BOM物料统计明细',
+  name: 'bom_wl_list',
+  title: 'BOM物料明细',
   inherit: false,
   hidden: false,
   fields: [
@@ -22,7 +22,6 @@ export default {
       name: 'prjId',
       type: 'bigInt',
       interface: 'integer',
-
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -30,7 +29,18 @@ export default {
         'x-component': 'InputNumber',
         'x-read-pretty': true,
       },
-      overriding: true,
+    },
+    {
+      name: 'cg_apply_wl_id',
+      type: 'bigInt',
+      interface: 'integer',
+      isForeignKey: true,
+      uiSchema: {
+        type: 'number',
+        title: 'cg_apply_wl_id',
+        'x-component': 'InputNumber',
+        'x-read-pretty': true,
+      },
     },
     {
       name: 'createdAt',
@@ -85,7 +95,6 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
-
       target: 'users',
       foreignKey: 'updatedById',
       uiSchema: {
@@ -103,12 +112,31 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'bom_wl_list',
-      type: 'hasMany',
-      interface: 'o2m',
-
-      foreignKey: 'bom_wl_count',
+      name: 'prj',
+      type: 'belongsTo',
+      interface: 'm2o',
+      foreignKey: 'prjId',
       onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '项目',
+      },
+      target: 'prj',
+      targetKey: 'id',
+    },
+    {
+      name: 'cg_wl_list',
+      type: 'belongsToMany',
+      interface: 'm2m',
+      foreignKey: 'bom_wl_id',
+      otherKey: 'cg_wl_id',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
@@ -118,59 +146,37 @@ export default {
             value: 'id',
           },
         },
-        title: 'BOM明细',
+        title: '采购物料明细',
       },
-      target: 'bom_wl',
+      target: 'cg_wl_list',
+      through: 'cg_apply_bom_throught',
       targetKey: 'id',
       sourceKey: 'id',
     },
     {
-     
-      "name": "prj",
-      "type": "belongsTo",
-      "interface": "m2o",
-      "foreignKey": "prjId",
-      "onDelete": "SET NULL",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": false,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
+      name: 'cg_apply',
+      type: 'belongsTo',
+      interface: 'obo',
+      collectionName: 'bom_wl',
+      description: null,
+      parentKey: null,
+      reverseKey: null,
+      foreignKey: 'cg_apply_id',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
           },
-          "title": "项目"
+        },
+        title: '采购申请',
       },
-      "target": "prj",
-      "overriding": true,
-      "targetKey": "id"
-  },
-    {
-   
-      "name": "boms",
-      "type": "belongsToMany",
-      "interface": "m2m",      
-      "collectionName": "bom_count_wl",
-      "foreignKey": "bom_count_wl_id",
-      "otherKey": "bom_id",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": true,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
-          },
-          "title": "所属节点"
-      },
-      "target": "bom",
-      "through": "bom_bomcountwl",
-      "overriding": true,
-      "targetKey": "id",
-      "sourceKey": "id"
-  }
+      target: 'cg_apply',
+      targetKey: 'id',
+    },
   ],
   logging: true,
   autoGenId: true,
@@ -181,6 +187,6 @@ export default {
   sortable: true,
   template: 'general',
   view: false,
-  inherits: ['bom_wl'],
+  inherits: ['basic_bom_wl', 'basic_wl_info'],
   schema: 'public',
 };

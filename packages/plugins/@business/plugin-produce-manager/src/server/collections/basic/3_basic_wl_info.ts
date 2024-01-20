@@ -8,7 +8,6 @@ export default {
       name: 'id',
       type: 'bigInt',
       interface: 'id',
-
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
@@ -49,7 +48,6 @@ export default {
       name: 'prj_wl_stock_id',
       type: 'bigInt',
       interface: 'integer',
-
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -62,7 +60,6 @@ export default {
       name: 'public_wl_stock_id',
       type: 'bigInt',
       interface: 'integer',
-
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -72,23 +69,9 @@ export default {
       },
     },
     {
-      name: 'cg_unit_id',
-      type: 'bigInt',
-      interface: 'integer',
-
-      isForeignKey: true,
-      uiSchema: {
-        type: 'number',
-        title: 'cg_unit_id',
-        'x-component': 'InputNumber',
-        'x-read-pretty': true,
-      },
-    },
-    {
       name: 'provider_id',
       type: 'bigInt',
       interface: 'integer',
-
       isForeignKey: true,
       uiSchema: {
         type: 'number',
@@ -150,7 +133,6 @@ export default {
       name: 'updatedBy',
       type: 'belongsTo',
       interface: 'updatedBy',
-
       target: 'users',
       foreignKey: 'updatedById',
       uiSchema: {
@@ -171,7 +153,6 @@ export default {
       name: 'wl',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'wl_id',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -189,27 +170,45 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'num',
-      type: 'bigInt',
-      interface: 'integer',
-      description: '需求数量',
-
+      name: 'type',
+      type: 'string',
+      interface: 'select',
       uiSchema: {
-        type: 'number',
-        'x-component': 'InputNumber',
-        'x-component-props': {
-          stringMode: true,
-          step: '1',
-        },
-        'x-validator': 'integer',
-        title: '需求数量',
+        enum: [
+          {
+            value: '采购件',
+            label: '采购件',
+          },
+          {
+            value: '机加类',
+            label: '机加类',
+          },
+          {
+            value: '焊接类',
+            label: '焊接类',
+          },
+          {
+            value: '大板类',
+            label: '大板类',
+          },
+          {
+            value: '钣金类',
+            label: '钣金类',
+          },
+          {
+            value: '型材类',
+            label: '型材类',
+          },
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '类型',
       },
     },
     {
       name: 'name',
       type: 'string',
       interface: 'input',
-
       uiSchema: {
         type: 'string',
         'x-component': 'Input',
@@ -220,7 +219,6 @@ export default {
       name: 'code',
       type: 'string',
       interface: 'input',
-
       uiSchema: {
         type: 'string',
         'x-component': 'Input',
@@ -242,29 +240,26 @@ export default {
       name: 'model',
       type: 'string',
       interface: 'input',
-
       uiSchema: {
         type: 'string',
         'x-component': 'Input',
-        title: '规格型号',
+        title: '规格/型号/图号',
       },
     },
     {
       name: 'material',
       type: 'string',
       interface: 'input',
-
       uiSchema: {
         type: 'string',
         'x-component': 'Input',
-        title: '材质',
+        title: '品牌/材质',
       },
     },
     {
       name: 'fj_info',
       type: 'belongsToMany',
       interface: 'attachment',
-
       uiSchema: {
         'x-component-props': {
           accept: 'image/*',
@@ -275,9 +270,9 @@ export default {
         title: '图片附件',
       },
       target: 'attachments',
-      through: 't_bbjc0ahxan3',
-      foreignKey: 'f_w7jq0gz52zc',
-      otherKey: 'f_4awjcbombjo',
+      through: 'fj_info_mid',
+      foreignKey: 'basic_wl_id',
+      otherKey: 'fj_info_id',
       targetKey: 'id',
       sourceKey: 'id',
       storage: 'wl',
@@ -286,7 +281,6 @@ export default {
       name: 'remark',
       type: 'text',
       interface: 'textarea',
-
       uiSchema: {
         type: 'string',
         'x-component': 'Input.TextArea',
@@ -297,7 +291,6 @@ export default {
       name: 'base_unit',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'base_unit_id',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -318,7 +311,6 @@ export default {
       name: 'provider',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'provider_id',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -336,31 +328,9 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'cg_unit',
-      type: 'belongsTo',
-      interface: 'obo',
-
-      foreignKey: 'cg_unit_id',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'id',
-            value: 'id',
-          },
-        },
-        title: '采购单位',
-      },
-      target: 'base_units',
-      targetKey: 'id',
-    },
-    {
       name: 'prj_wl_stock',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'prj_wl_stock_id',
       onDelete: 'SET NULL',
       uiSchema: {
@@ -381,7 +351,6 @@ export default {
       name: 'public_wl_stock',
       type: 'belongsTo',
       interface: 'obo',
-
       foreignKey: 'public_wl_stock_id',
       onDelete: 'SET NULL',
       uiSchema: {
