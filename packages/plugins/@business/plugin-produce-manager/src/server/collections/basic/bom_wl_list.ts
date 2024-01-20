@@ -199,6 +199,28 @@ export default {
       targetKey: 'id',
     },
     {
+      name: 'cg_apply_list',
+      type: 'belongsToMany',
+      interface: 'm2m',
+      foreignKey: 'bom_wl_id',
+      otherKey: 'cg_apply_id',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '采购物料明细',
+      },
+      target: 'cg_apply',
+      through: 'cg_apply_bom_throught',
+      targetKey: 'id',
+      sourceKey: 'id',
+    },
+    {
       name: 'label_gz',
       interface: 'input',
       type: 'string',

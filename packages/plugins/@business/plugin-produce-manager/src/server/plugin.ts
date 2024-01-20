@@ -312,9 +312,9 @@ export class PluginProduceManagerServer extends Plugin {
             },
             transaction,
           })||[]);
-          row.bom_wl_list = bom_wl_list.map((item: any) => item.get('id'));
-          row.add_wl_list = add_wl_list.map((item: any) => item.get('id'));
-          row.history_wl_list = history_wl_list.map((item: any) => item.get('id'));
+          row.bom_wl_list = bom_wl_list;
+          row.add_wl_list = add_wl_list;
+          row.history_wl_list = history_wl_list;
           row.add_cb = countWlAmount(add_wl_list);
           row.add_ws_cb = countWlAmount(add_wl_list, true);
           row.total_cb = countWlAmount(bom_wl_list);
@@ -326,6 +326,7 @@ export class PluginProduceManagerServer extends Plugin {
            */
           const res = await this.app.db.getRepository('prj_wl_cb').create({
             values: row,
+            updateAssociationValues:['bom_wl_list','add_wl_list','history_wl_list'],
             transaction
           });  
                   
