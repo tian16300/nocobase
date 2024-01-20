@@ -83,7 +83,6 @@ export const SubTableWithActionBar = (props) => {
   }, [isFullScreen]);
   useEffect(() => {
     const arr = flatTreeSchema(fieldSchema, isFullScreen,[]);
-    console.log('全屏小屏切换', arr);
   }, [isFullScreen]);
 
   return (

@@ -154,6 +154,27 @@ export default {
       sourceKey: 'id',
     },
     {
+      name: 'bom_apply',
+      type: 'belongsTo',
+      interface: 'm2o',
+      collectionName: 'bom_wl_list',
+      foreignKey: 'bom_apply_id',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: 'BOM申请',
+      },
+      target: 'bom_apply',
+      targetKey: 'id',
+    },
+    {
       name: 'cg_apply',
       type: 'belongsTo',
       interface: 'obo',
@@ -177,6 +198,51 @@ export default {
       target: 'cg_apply',
       targetKey: 'id',
     },
+    {
+      name: 'label_gz',
+      interface: 'input',
+      type: 'string',
+      collectionName: 'bom_wl_list',
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        title: '工站',
+      },
+    },
+    {
+      name: 'label_unit',
+      interface: 'input',
+      type: 'string',
+      collectionName: 'bom_wl_list',
+      uiSchema: {
+        type: 'string',
+        'x-component': 'Input',
+        title: '单元',
+      },
+    },
+    {
+     
+      "name": "base_unit",
+      "type": "belongsTo",
+      "interface": "obo",
+      "collectionName": "bom_wl_list",
+      "foreignKey": "base_unit_id",
+      "onDelete": "SET NULL",
+      "uiSchema": {
+          "x-component": "AssociationField",
+          "x-component-props": {
+              "multiple": false,
+              "fieldNames": {
+                  "label": "id",
+                  "value": "id"
+              }
+          },
+          "title": "计量单位"
+      },
+      "target": "base_units",
+      "overriding": true,
+      "targetKey": "id"
+  }
   ],
   logging: true,
   autoGenId: true,

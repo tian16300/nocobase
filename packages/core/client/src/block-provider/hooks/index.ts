@@ -1392,7 +1392,7 @@ export const useAssociationNames = () => {
         } else {
           appends.add(path);
         }
-        if (['Nester', 'SubTable', 'PopoverNester'].includes(s['x-component-props']?.mode)) {
+        if (['Nester', 'SubTable', 'PopoverNester', 'SubTableWithActionBar'].includes(s['x-component-props']?.mode)) {
           updateAssociationValues.add(path);
           const bufPrefix = prefix && prefix !== '' ? prefix + '.' + s.name : s.name;
           _getAssociationAppends(s, bufPrefix);
