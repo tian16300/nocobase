@@ -1,9 +1,16 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
-
+import path from 'path';
 export class PluginCommonServer extends Plugin {
   afterAdd() {}
 
-  beforeLoad() {}
+  beforeLoad() {
+    this.db.addMigrations({
+      directory: path.resolve(__dirname, 'migrations'),
+      context: {
+        plugin: this,
+      },
+    });
+  }
 
   async load() {}
 
