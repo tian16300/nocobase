@@ -880,7 +880,7 @@ export const formItemSettings = new SchemaSettings({
         const options = useOptions();
         const isAssociationField = useIsAssociationField();
         const fieldMode = useFieldMode();
-        return options.length > 0 && isAssociationField && ['SubTable', 'SubTableWithActionBar'].includes(fieldMode);
+        return options.length > 0 && isAssociationField && !['SubTable', 'SubTableWithActionBar'].includes(fieldMode);
       },
       useComponentProps() {
         const { t } = useTranslation();
