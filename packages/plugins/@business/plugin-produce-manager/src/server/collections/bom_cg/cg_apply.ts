@@ -429,27 +429,23 @@ export default {
       targetKey: 'id',
     },
     {
-      name: 'approvalStatus',
-      type: 'belongsTo',
-      interface: 'obo',
-
-      collectionName: 'cg_apply',
-
       foreignKey: 'currentApproval_id',
       onDelete: 'SET NULL',
+      name: 'approvalStatus',
+      type: 'belongsTo',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
           multiple: false,
           fieldNames: {
-            label: 'status',
+            label: 'id',
             value: 'id',
           },
         },
         title: '审批状态',
       },
+      interface: 'obo',
       target: 'approval_apply',
-      targetKey: 'id',
     },
     {
       name: 'prjs',

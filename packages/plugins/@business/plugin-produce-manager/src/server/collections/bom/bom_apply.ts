@@ -294,27 +294,6 @@ export default {
       },
     },
     {
-      name: 'approvalStaus',
-      type: 'belongsTo',
-      interface: 'obo',
-      description: null,
-      foreignKey: 'approval_apply_id',
-      onDelete: 'SET NULL',
-      uiSchema: {
-        'x-component': 'AssociationField',
-        'x-component-props': {
-          multiple: false,
-          fieldNames: {
-            label: 'status',
-            value: 'id',
-          },
-        },
-        title: '审批状态',
-      },
-      target: 'approval_apply',
-      targetKey: 'id',
-    },
-    {
       name: 'bd_count',
       type: 'bigInt',
       interface: 'integer',
@@ -329,6 +308,25 @@ export default {
         'x-validator': 'integer',
         title: '补单次数',
       },
+    },
+    {
+      foreignKey: 'currentApproval_id',
+      onDelete: 'SET NULL',
+      name: 'approvalStatus',
+      type: 'belongsTo',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '审批状态',
+      },
+      interface: 'obo',
+      target: 'approval_apply',
     },
     {
       name: 'link_bom_applys',
