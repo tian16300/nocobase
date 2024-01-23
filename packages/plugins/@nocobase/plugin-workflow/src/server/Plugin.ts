@@ -192,7 +192,7 @@ export default class PluginWorkflowServer extends Plugin {
 
     this.app.acl.allow('approval_apply', ['list', 'get', 'submit'], 'loggedIn');
     this.app.acl.allow('approval_results', ['list', 'get'], 'loggedIn');
-    this.app.acl.allow('workflows', ['trigger'], 'loggedIn');
+    this.app.acl.allow('workflows', ['list','trigger'], 'loggedIn');
 
     await this.importCollections(path.resolve(__dirname, 'collections'));
 
