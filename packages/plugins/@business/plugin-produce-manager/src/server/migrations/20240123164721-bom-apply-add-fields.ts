@@ -46,25 +46,7 @@ export default class extends Migration {
           key: createdBy.get('key')
         },
         values:{
-          name: 'createdBy',
-          type: 'belongsTo',
-          collectionName: 'bom_apply',
-          interface: 'createdBy',
-          target: 'users',
-          foreignKey: 'createdById',
-          uiSchema: {
-            type: 'object',
-            title: '{{t("Created by")}}',
-            'x-component': 'AssociationField',
-            'x-component-props': {
-              fieldNames: {
-                value: 'id',
-                label: 'nickname',
-              },
-            },
-            'x-read-pretty': true,
-          },
-          targetKey: 'id'
+          interface: 'createdBy'
         }
       });
      }
@@ -104,25 +86,7 @@ export default class extends Migration {
           key: updatedBy.get('key')
         },
         values:{
-          name: 'updatedBy',
-          type: 'belongsTo',
-          interface: 'updatedBy',
-          collectionName: 'bom_apply',
-          target: 'users',
-          foreignKey: 'updatedById',
-          uiSchema: {
-            type: 'object',
-            title: '{{t("Last updated by")}}',
-            'x-component': 'AssociationField',
-            'x-component-props': {
-              fieldNames: {
-                value: 'id',
-                label: 'nickname',
-              },
-            },
-            'x-read-pretty': true,
-          },
-          targetKey: 'id',
+          interface: 'updatedBy'
         }
       });
     }
