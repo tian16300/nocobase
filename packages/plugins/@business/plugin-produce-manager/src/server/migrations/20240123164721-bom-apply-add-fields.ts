@@ -46,7 +46,12 @@ export default class extends Migration {
           key: createdBy.get('key')
         },
         values:{
+          name: 'createdBy',
+          type: 'belongsTo',
+          collectionName: 'bom_apply',
           interface: 'createdBy',
+          target: 'users',
+          foreignKey: 'createdById',
           uiSchema: {
             type: 'object',
             title: '{{t("Created by")}}',
@@ -58,7 +63,8 @@ export default class extends Migration {
               },
             },
             'x-read-pretty': true,
-          }
+          },
+          targetKey: 'id'
         }
       });
      }
@@ -98,7 +104,12 @@ export default class extends Migration {
           key: updatedBy.get('key')
         },
         values:{
+          name: 'updatedBy',
+          type: 'belongsTo',
           interface: 'updatedBy',
+          collectionName: 'bom_apply',
+          target: 'users',
+          foreignKey: 'updatedById',
           uiSchema: {
             type: 'object',
             title: '{{t("Last updated by")}}',
@@ -110,7 +121,8 @@ export default class extends Migration {
               },
             },
             'x-read-pretty': true,
-          }
+          },
+          targetKey: 'id',
         }
       });
     }

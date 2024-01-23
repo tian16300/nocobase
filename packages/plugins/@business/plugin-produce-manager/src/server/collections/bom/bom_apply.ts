@@ -93,7 +93,7 @@ export default {
         },
         'x-read-pretty': true,
       },
-      targetKey: 'id',
+      targetKey: 'id'
     },
     {
       name: 'updatedAt',
