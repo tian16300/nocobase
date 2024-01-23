@@ -2,7 +2,7 @@ import { Migration } from '@nocobase/server';
 
 export default class extends Migration {
   on = 'afterLoad'; // 'beforeLoad' or 'afterLoad'
-  appVersion = '<=0.19.0-alpha.4';
+  appVersion = '<0.19.0-alpha.4';
 
   async up() {
     // coding
