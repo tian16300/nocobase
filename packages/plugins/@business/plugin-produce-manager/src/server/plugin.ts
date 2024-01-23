@@ -491,8 +491,10 @@ export class PluginProduceManagerServer extends Plugin {
     this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');
     this.app.acl.allow('cgApply_prjs', '*', 'public');
     this.app.acl.allow('bom_apply','*', 'loggedIn');
+    this.app.acl.allow('bom_wl_list','*', 'loggedIn');
     this.app.acl.allow('cg_apply','*', 'loggedIn');
     this.app.acl.allow('cg_wl_list','*', 'loggedIn');
+     this.app.acl.allow('prj_wl_cb','*', 'loggedIn');
     
   }
 
