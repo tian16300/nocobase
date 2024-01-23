@@ -34,46 +34,44 @@ export const InternalSubTable = observer(
       'Checkbox.Group': (props) => <Select multiple={true} mode="multiple" {...props} />,
     };
     return (
-      <>
-        <CollectionProvider name={options.target}>
-          <ACLCollectionProvider actionPath={`${options.target}:${actionName}`}>
-            <FormLayout
-              className={css`
-                .ant-formily-item-bordered-none {
-                  .ant-input-number-group-addon {
-                    border: none !important;
-                    background: none;
-                  }
-                  .ant-checkbox-wrapper {
-                    margin-left: 8px;
-                  }
-                  .ant-table {
-                    margin: 0px !important;
-                  }
+      <CollectionProvider name={options.target}>
+        <ACLCollectionProvider actionPath={`${options.target}:${actionName || 'view'}`}>
+          <FormLayout
+            className={css`
+              .ant-formily-item-bordered-none {
+                .ant-input-number-group-addon {
+                  border: none !important;
+                  background: none;
                 }
-              `}
-              layout={'vertical'}
-              bordered={false}
+                .ant-checkbox-wrapper {
+                  margin-left: 8px;
+                }
+                .ant-table {
+                  margin: 0px !important;
+                }
+              }
+            `}
+            layout={'vertical'}
+            bordered={false}
+          >
+            <SchemaOptionsContext.Provider
+              value={{
+                scope: option.scope,
+                components,
+              }}
             >
-              <SchemaOptionsContext.Provider
-                value={{
-                  scope: option.scope,
-                  components,
+              <RecursionField
+                onlyRenderProperties
+                basePath={field.address}
+                schema={fieldSchema}
+                filterProperties={(s) => {
+                  return s['x-component'] === 'AssociationField.SubTable';
                 }}
-              >
-                <RecursionField
-                  onlyRenderProperties
-                  basePath={field.address}
-                  schema={fieldSchema}
-                  filterProperties={(s) => {
-                    return s['x-component'] === 'AssociationField.SubTable';
-                  }}
-                />
-              </SchemaOptionsContext.Provider>
-            </FormLayout>
-          </ACLCollectionProvider>
-        </CollectionProvider>
-      </>
+              />
+            </SchemaOptionsContext.Provider>
+          </FormLayout>
+        </ACLCollectionProvider>
+      </CollectionProvider>
     );
   },
   { displayName: 'InternalSubTable' },
