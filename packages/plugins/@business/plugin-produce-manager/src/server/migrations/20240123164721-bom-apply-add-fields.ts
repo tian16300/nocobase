@@ -40,6 +40,15 @@ export default class extends Migration {
           targetKey: 'id',
         }
        });
+     }else if(!createdBy.get('interface')){
+      await createdBy.update({
+        filter:{
+          key: createdBy.get('key')
+        },
+        values:{
+          interface: 'createdBy'
+        }
+      });
      }
      const updatedBy = await repo.findOne({
       filter: {
@@ -69,6 +78,15 @@ export default class extends Migration {
             'x-read-pretty': true,
           },
           targetKey: 'id',
+        }
+      });
+    }else if(!updatedBy.get('interface')){
+      await updatedBy.update({
+        filter:{
+          key: updatedBy.get('key')
+        },
+        values:{
+          interface: 'updatedBy'
         }
       });
     }
