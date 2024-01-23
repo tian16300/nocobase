@@ -46,7 +46,19 @@ export default class extends Migration {
           key: createdBy.get('key')
         },
         values:{
-          interface: 'createdBy'
+          interface: 'createdBy',
+          uiSchema: {
+            type: 'object',
+            title: '{{t("Created by")}}',
+            'x-component': 'AssociationField',
+            'x-component-props': {
+              fieldNames: {
+                value: 'id',
+                label: 'nickname',
+              },
+            },
+            'x-read-pretty': true,
+          }
         }
       });
      }
@@ -86,7 +98,19 @@ export default class extends Migration {
           key: updatedBy.get('key')
         },
         values:{
-          interface: 'updatedBy'
+          interface: 'updatedBy',
+          uiSchema: {
+            type: 'object',
+            title: '{{t("Last updated by")}}',
+            'x-component': 'AssociationField',
+            'x-component-props': {
+              fieldNames: {
+                value: 'id',
+                label: 'nickname',
+              },
+            },
+            'x-read-pretty': true,
+          }
         }
       });
     }
