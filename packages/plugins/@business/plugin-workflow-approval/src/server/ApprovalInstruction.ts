@@ -137,7 +137,9 @@ export default class extends Instruction {
     // const transaction = (processor as any).transaction;
     const workflowModel = await processor.execution.getWorkflow();
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
-    const currentUser = prevJob.result?.currentUser || prevJob.result?.data?.applyUser;
+    const currentUser = prevJob.result?.currentUser || approvalModel.applyUser;
+    // const currentUser = prevJob.result?.currentUser || prevJob.result?.data?.applyUser;
+
     const users = await processor.getUsersByRule(node.config, node.id, currentUser);
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
@@ -209,19 +211,24 @@ export default class extends Instruction {
       upstreamId: prevJob?.id ?? null,
     });
     const registry = this.workflow.app.db.getRepository('approval_apply');
-    await registry.update({
-      filterByTk: approvalModel.id,
+    const res = await registry.update({
+      filter: {
+        relatedCollection: relatedCollection,
+        related_data_id: related_data_id,
+        executionId: job.executionId
+      },
       updateAssociationValues:['currentApprovalUsers'],
       values: {
-        jobId: job.id,
-        nodeId: node.id,
-        executionId: job.executionId,
+        // jobId: job.id,
+        // nodeId: node.id,
+        // executionId: job.executionId,
         workflowKey: workflowModel.key,
         currentApprovalUsers: users,
         // result: relatedData,
       },
       // transaction,
     });
+    console.log('res', res);
     return job;
   }
 

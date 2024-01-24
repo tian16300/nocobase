@@ -36,7 +36,7 @@ export const InternalSubTableWithActionBar = observer(
     return (
       <>
         <CollectionProvider name={options.target}>
-          <ACLCollectionProvider actionPath={`${options.target}:${actionName}`}>
+          <ACLCollectionProvider actionPath={`${options.target}:${actionName|| 'view'}`}>
             <FormLayout
               className={css`
                 .ant-formily-item-bordered-none {

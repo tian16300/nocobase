@@ -107,6 +107,7 @@ export default class extends Instruction {
     const workflowModel = await processor.execution.getWorkflow();
     const users = await processor.getUsersByRule(node.config, node.id);
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
+    const currentUser = prevJob.result?.currentUser || approvalModel.applyUser;
    
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
@@ -160,7 +161,7 @@ export default class extends Instruction {
         text,
         result: message
       },
-      currentUser: prevJob.result?.currentUser,
+      currentUser: currentUser
     };
      /**
      * 如果是抄送节点 是最后一个节点 并且上个节点是通过状态 则更新 jobIsEnd

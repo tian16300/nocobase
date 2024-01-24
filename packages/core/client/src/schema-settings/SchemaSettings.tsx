@@ -458,7 +458,7 @@ export interface SchemaSettingsItemProps extends Omit<MenuItemProps, 'title'> {
 export const SchemaSettingsItem: FC<SchemaSettingsItemProps> = (props) => {
   const { pushMenuItem } = useCollectMenuItems();
   const { collectMenuItem } = useCollectMenuItem();
-  const { eventKey, title } = props;
+  const { eventKey, title = '无标题' } = props;
   const { name } = useSchemaSettingsItem();
 
   if (process.env.NODE_ENV !== 'production' && !title) {

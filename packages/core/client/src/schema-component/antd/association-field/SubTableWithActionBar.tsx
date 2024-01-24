@@ -7,7 +7,7 @@ import { Card } from 'antd';
 import { useCollectionManager } from '../../../collection-manager';
 import { SchemaComponent, SchemaComponentProvider } from '../../core';
 import { useDesignable, useSchemaComponentContext } from '../..';
-export const SubTableWithActionBar = (props) => {
+export const SubTableWithActionBar = observer((props) => {
   const { children = [], ...others } = props;
   const containerRef = useRef();
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -63,9 +63,6 @@ export const SubTableWithActionBar = (props) => {
       return prev;
     }, prev);
   };
-  // const arr = flatTreeSchema(fieldSchema, isFullScreen,[]);
-  const { components, scope } = useSchemaComponentContext();
-  const { designable } = useDesignable();
   const cardBlockClassName = useMemo(() => {
     return (
       (isFullScreen ? 'view-full-screen ' : 'view-normal ') +
@@ -102,4 +99,6 @@ export const SubTableWithActionBar = (props) => {
       </Card>
     </ViewBlockContext.Provider>
   );
-};
+},{
+  displayName: 'SubTableWithActionBar'
+});

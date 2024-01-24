@@ -76,7 +76,7 @@ export const AssociationFieldProvider = observer(
           field.value = [{}];
         }
       }
-      if (currentMode === 'SubTable') {
+      if (['SubTable','SubTableWithActionBar'].includes(currentMode)) {
         field.value = [];
       }
       setLoading(false);
