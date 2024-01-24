@@ -41,7 +41,7 @@ export const formItemSettings = new SchemaSettings({
         const readPretty = useIsFieldReadPretty();
         const isAssociationField = useIsAssociationField();
         const fieldMode = useFieldMode();
-        return !readPretty && isAssociationField && ['SubTable'].includes(fieldMode);
+        return !readPretty && isAssociationField && ['SubTable', 'SubTableWithActionBar'].includes(fieldMode);
       },
       useComponentProps() {
         const { t } = useTranslation();
@@ -74,7 +74,7 @@ export const formItemSettings = new SchemaSettings({
         const readPretty = useIsFieldReadPretty();
         const isAssociationField = useIsAssociationField();
         const fieldMode = useFieldMode();
-        return !readPretty && isAssociationField && ['SubTable'].includes(fieldMode);
+        return !readPretty && isAssociationField && ['SubTable', 'SubTableWithActionBar'].includes(fieldMode);
       },
       useComponentProps() {
         const { t } = useTranslation();
@@ -420,25 +420,8 @@ export const formItemSettings = new SchemaSettings({
       useComponentProps() {
         const { t } = useTranslation();
         const field = useField<Field>();
-        const _fieldSchema = useFieldSchema();
+        const fieldSchema = useFieldSchema();
         const { dn } = useDesignable();
-        let fieldSchema = _fieldSchema;
-        if (_fieldSchema['x-component-props']?.mode == 'SubTableWithActionBar') {
-          fieldSchema =
-            _fieldSchema.reduceProperties((buf, schema) => {
-              if (schema['x-component'] === 'AssociationField.SubTable') {
-                return schema;
-              } else if (schema['x-component'] === 'AssociationField.SubTableWithActionBar') {
-                return schema.reduceProperties((buf, schema) => {
-                  if (schema['x-component'] === 'AssociationField.SubTable') {
-                    return schema;
-                  }
-                  return buf;
-                }, null);
-              }
-              return buf;
-            }, null) || _fieldSchema;
-        }
         const schema = {
           type: 'object',
           title: '子表格设置',

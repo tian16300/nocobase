@@ -2,26 +2,31 @@ import { useA, useAPIClient, useCollection, useRecord, useRequest } from '@nocob
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import React from 'react';
 import { useWorkflowContext } from './WorkflowBlockProvider';
-import { use } from 'i18next';
 const ApplyBlockContext = createContext<any>({ collection: null });
 export const ApplyBlockProvider =  (props) => {
-  const collection = useCollection();
   const { workflow } = useWorkflowContext();
   const record = useRecord();
   const api = useAPIClient();
   let [apply, setApply] = useState<any>({});
-  if (record && record.currentApproval_id) {
-    api.resource('approval_apply').get({
+  const params = useMemo(() => {
+    return {
       filterByTk: record.currentApproval_id,
-      appends: ['execution'],
-    }).then((res) => {
-      if(res.status === 200){
-        setApply(res.data.data);
-      }
-    });
-  }
+      appends: ['execution']
+    };
+  }, []);
+  const service = useRequest<any>({
+    resource: 'approval_apply',
+    action: 'get',
+    params: params
+  }); 
+  const { data, loading } = service;
+  useEffect(() => {
+    if(!loading && record.currentApproval_id && data?.data){
+      setApply(data.data);
+    }
+  }, [loading, record?.currentApproval_id]);
   return (
-    <InnerApplyBlockProvider {...props} apply={apply} setApply={setApply} workflow={workflow}></InnerApplyBlockProvider>
+    <InnerApplyBlockProvider {...props} apply={apply} setApply={setApply} service={service}  workflow={workflow}></InnerApplyBlockProvider>
   );
 };
 

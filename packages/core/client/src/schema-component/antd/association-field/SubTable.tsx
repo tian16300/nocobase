@@ -55,11 +55,12 @@ export const SubTable: any = observer(
       });
     };
     field.move = move;
-    const showMove = field?.componentProps?.showMove && field.editable;
-    const showDel = field?.componentProps?.showDel && field.editable;
-    const removeActionName = field?.componentProps?.removeActionName;
-    const showAdd = field?.componentProps?.showAdd && field.editable;
-    const scrollY = field?.componentProps?.scrollY || 500;
+    const showMove = field.componentProps?.showMove && field.editable;
+    const showDel = field.componentProps?.showDel && field.editable;
+    const removeActionName = field.componentProps?.removeActionName;
+    const showAdd = field.componentProps?.showAdd && field.editable;
+    const scrollY = field.componentProps?.scrollY || 500;
+  
 
     const options = useMemo(() => {
       if (field.value && Object.keys(field.value).length > 0) {

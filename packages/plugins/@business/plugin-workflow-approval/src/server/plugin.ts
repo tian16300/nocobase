@@ -122,9 +122,11 @@ export default class extends Plugin {
     });
     const repo = this.db.getRepository<any>('collections');
     if (repo) {
+      await repo.db2cm('approval_users_mid');
       await repo.db2cm('approval_apply');
       await repo.db2cm('approval_results');
     }
+    this.app.acl.allow('approval_users_mid','*','public');
 
     const workflowPlugin = this.app.getPlugin<WorkflowPlugin>(WorkflowPlugin);
     this.workflow = workflowPlugin;

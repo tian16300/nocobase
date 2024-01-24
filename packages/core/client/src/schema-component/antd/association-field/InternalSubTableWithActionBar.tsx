@@ -9,8 +9,9 @@ import Select from '../select/Select';
 import { useAssociationFieldContext, useInsertSchema } from './hooks';
 import schema from './schema';
 
+
 export const InternalSubTableWithActionBar = observer(
-  () => {
+  (props) => {
     const field: any = useField();
     const fieldSchema = useFieldSchema();
     const insert = useInsertSchema('SubTableWithActionBar');
@@ -36,7 +37,7 @@ export const InternalSubTableWithActionBar = observer(
     return (
       <>
         <CollectionProvider name={options.target}>
-          <ACLCollectionProvider actionPath={`${options.target}:${actionName|| 'view'}`}>
+          <ACLCollectionProvider actionPath={`${options.target}:${actionName || 'view'}`}>
             <FormLayout
               className={css`
                 .ant-formily-item-bordered-none {

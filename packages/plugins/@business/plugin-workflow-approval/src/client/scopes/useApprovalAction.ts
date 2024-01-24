@@ -3,25 +3,14 @@ import { useApplyActionContext } from '../blocks/apply-action/Apply.Action';
 import { useActionContext, useAPIClient, useBlockRequestContext, useCurrentUserContext } from '@nocobase/client';
 import { message } from 'antd';
 import { dayjs } from '@nocobase/utils';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 export const useApprovalAction = (props: any) => {
-  const { workflow, collection, apply, record, setApply } = useApplyActionContext();
+  const { workflow, collection, apply, setApply, formActionType, record } = useApplyActionContext();
   const api = useAPIClient();
   const data = useCurrentUserContext();
   const currentUser = data?.data?.data;
   const { service } = useBlockRequestContext();
-  const formActionType = useMemo(() => {
-    if (!apply?.id) {
-      /* 用户可操作提交申请  */
-      return 1;
-    } else if (apply && apply.jobIsEnd) {
-      /* 审批结束 */
-      return 3;
-    } else if (apply && !apply.jobIsEnd) {
-      /* 审批结束 */
-      return 2;
-    }
-  }, [apply?.id, apply?.jobIsEnd]);
+ 
 
   return {
     async run() {

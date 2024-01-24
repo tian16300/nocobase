@@ -211,24 +211,19 @@ export default class extends Instruction {
       upstreamId: prevJob?.id ?? null,
     });
     const registry = this.workflow.app.db.getRepository('approval_apply');
-    const res = await registry.update({
-      filter: {
-        relatedCollection: relatedCollection,
-        related_data_id: related_data_id,
-        executionId: job.executionId
-      },
+    await registry.update({
+      filterByTk: approvalModel.id,
       updateAssociationValues:['currentApprovalUsers'],
       values: {
-        // jobId: job.id,
-        // nodeId: node.id,
-        // executionId: job.executionId,
+        jobId: job.id,
+        nodeId: node.id,
+        executionId: job.executionId,
         workflowKey: workflowModel.key,
         currentApprovalUsers: users,
         // result: relatedData,
       },
       // transaction,
     });
-    console.log('res', res);
     return job;
   }
 

@@ -239,11 +239,10 @@ export default {
       targetKey: 'id',
     },
     {
+      foreignKey: 'approval_apply_id',
+      otherKey: 'approval_user_id',
       name: 'currentApprovalUsers',
-      type: 'hasMany',
-      interface: 'o2m',
-      foreignKey: 'currentApprovalUsers_id',
-      onDelete: 'SET NULL',
+      type: 'belongsToMany',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {
@@ -255,53 +254,52 @@ export default {
         },
         title: '当前审批人',
       },
-      target: 'users',
-      targetKey: 'id',
-      sourceKey: 'id',
+      interface: 'm2m',
+      through: 'approval_users_mid',
+      target: 'users'
     },
     {
-    
-      "name": "status",
-      "type": "string",
-      "interface": "select",
-      "uiSchema": {
-          "enum": [
-              {
-                  "value": "-1",
-                  "label": "待提交"
-              },
-              {
-                  "value": "0",
-                  "label": "审批中"
-              },
-              {
-                  "value": "1",
-                  "label": "已通过"
-              },
-              {
-                  "value": "2",
-                  "label": "已拒绝"
-              },
-              {
-                  "value": "3",
-                  "label": "已撤销"
-              },
-              {
-                  "value": "4",
-                  "label": "审批完成"
-              }
-          ],
-          "type": "string",
-          "x-component": "Select",
-          "title": "审批状态"
+      name: 'status',
+      type: 'string',
+      interface: 'select',
+      uiSchema: {
+        enum: [
+          {
+            value: '-1',
+            label: '待提交',
+          },
+          {
+            value: '0',
+            label: '审批中',
+          },
+          {
+            value: '1',
+            label: '已通过',
+          },
+          {
+            value: '2',
+            label: '已拒绝',
+          },
+          {
+            value: '3',
+            label: '已撤销',
+          },
+          {
+            value: '4',
+            label: '审批完成',
+          },
+        ],
+        type: 'string',
+        'x-component': 'Select',
+        title: '审批状态',
       },
-      "defaultValue": "-1"
-  },
+      defaultValue: '-1',
+    },
     {
       name: 'workflowKey',
       type: 'string',
       isForeignKey: true,
-      interface: 'input'
+      interface: 'input',
     },
     {
       name: 'workflow',
@@ -315,7 +313,7 @@ export default {
           fieldNames: {
             label: 'title',
             value: 'key',
-          }
+          },
         },
         title: '关联流程',
       },
@@ -334,7 +332,7 @@ export default {
         'x-read-pretty': true,
       },
     },
-     {
+    {
       type: 'belongsTo',
       name: 'job',
       target: 'jobs',
@@ -350,7 +348,7 @@ export default {
           },
         },
         title: '任务',
-      }
+      },
     },
     {
       name: 'nodeId',
@@ -380,7 +378,7 @@ export default {
           },
         },
         title: '节点',
-      }
+      },
     },
     {
       name: 'executionId',
@@ -392,7 +390,7 @@ export default {
         title: 'executionId',
         'x-component': 'InputNumber',
       },
-    }, 
+    },
     {
       type: 'belongsTo',
       name: 'execution',
@@ -409,8 +407,8 @@ export default {
           },
         },
         title: '执行记录',
-      }
-    },   
+      },
+    },
     {
       name: 'applyResults',
       type: 'hasMany',
