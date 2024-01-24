@@ -25,6 +25,7 @@ import { useA } from './hooks';
 import { useGetAriaLabelOfAction } from './hooks/useGetAriaLabelOfAction';
 import { ComposedAction } from './types';
 import { linkageAction } from './utils';
+import { useACLActionParamsContext } from '../../../acl';
 import { RecordLink } from '@nocobase/client';
 
 export const Action: any = observer(
@@ -48,6 +49,7 @@ export const Action: any = observer(
       initialValuesScopeBind,
       ...others
     } = useProps(props);
+    const aclCtx = useACLActionParamsContext();
     const { wrapSSR, componentCls, hashId } = useStyles();
     const { t } = useTranslation();
     const [visible, setVisible] = useState(false);
@@ -104,7 +106,7 @@ export const Action: any = observer(
         e.preventDefault();
         e.stopPropagation();
 
-        if (!disabled) {
+        if (!disabled && aclCtx) {
           const onOk = () => {
             onClick?.(e);
             setVisible(true);
@@ -127,12 +129,12 @@ export const Action: any = observer(
     const buttonStyle = useMemo(() => {
       return {
         ...style,
-        opacity: designable && field?.data?.hidden && 0.1,
+        opacity: designable && (field?.data?.hidden || !aclCtx) && 0.1,
       };
     }, [designable, field?.data?.hidden, style]);
 
     const renderButton = () => {
-      if (!designable && field?.data?.hidden) {
+      if (!designable && (field?.data?.hidden || !aclCtx)) {
         return null;
       }
     return component !== 'RecordLink' ? (
