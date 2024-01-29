@@ -102,6 +102,11 @@ export default function () {
         },
       },
       {
+        type: 'boolean',
+        name: 'sync',
+        defaultValue: false,
+      },
+      {
         type: 'hasMany',
         name: 'revisions',
         target: 'workflows',

@@ -18,11 +18,11 @@ interface AddButtonProps {
 
 export function AddButton(props: AddButtonProps) {
   const { upstream, branchIndex = null } = props;
-  const { instructions } = usePlugin(WorkflowPlugin);
+  const engine = usePlugin(WorkflowPlugin);
   const compile = useCompile();
   const api = useAPIClient();
   const { workflow, refresh, triggerTypes, exceptTypes = [] } = useFlowContext() ?? {};
-  const _instructionList = Array.from(instructions.getValues()) as Instruction[];
+  const _instructionList = Array.from(engine.instructions.getValues()) as Instruction[];
   const { styles } = useStyles();
 
   const groups = useMemo(() => {
@@ -34,12 +34,11 @@ export function AddButton(props: AddButtonProps) {
         { key: 'manual', label: `{{t("Manual", { ns: "${NAMESPACE}" })}}` },
         { key: 'extended', label: `{{t("Extended types", { ns: "${NAMESPACE}" })}}` },
       ]
-        .filter((group) => instructionList.filter((item) => item.group === group.key).length)
-        .map((group) => {
+          .map((group) => {
           const groupInstructions = instructionList.filter(
             (item) =>
               item.group === group.key &&
-              (item.isAvailable ? item.isAvailable({ workflow, upstream, branchIndex }) : true),
+              (item.isAvailable ? item.isAvailable({ engine, workflow, upstream, branchIndex }) : true),
           );
 
           return {
@@ -61,7 +60,8 @@ export function AddButton(props: AddButtonProps) {
                 : null,
             })),
           };
-        });
+        })
+      .filter((group) => group.children.length);
     } else {
       return instructionList
         .filter(
@@ -78,26 +78,21 @@ export function AddButton(props: AddButtonProps) {
           };
         });
     }
-  }, [branchIndex, _instructionList, upstream, workflow, triggerTypes, exceptTypes]);
-  const resource = useMemo(() => {
-    if (!workflow) {
-      return null;
-    }
-    return api.resource('workflows.nodes', workflow.id);
-  }, [workflow?.id]);
+  }, [branchIndex, engine, _instructionList, upstream, workflow, triggerTypes, exceptTypes]);
+
   const onCreate = useCallback(
     async ({ keyPath }) => {
       const type = keyPath.pop();
       const config = {};
       const [optionKey] = keyPath;
-      const instruction = instructions.get(type);
+      const instruction = engine.instructions.get(type);
       if (optionKey) {
         const { value } = instruction.options?.find((item) => item.key === optionKey) ?? {};
         Object.assign(config, typeof value === 'function' ? value() : value);
       }
 
-      if (resource) {
-        await resource.create({
+      if (workflow) {
+        await api.resource('workflows.nodes', workflow.id).create({
           values: {
             type,
             upstreamId: upstream?.id ?? null,
@@ -109,7 +104,7 @@ export function AddButton(props: AddButtonProps) {
         refresh();
       }
     },
-    [branchIndex, resource?.create, upstream?.id],
+    [api, branchIndex, engine.instructions, refresh, upstream?.id, workflow],
   );
 
   const menu = useMemo<MenuProps>(() => {
