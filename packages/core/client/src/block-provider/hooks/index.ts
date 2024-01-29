@@ -994,7 +994,7 @@ export const useUpdateActionProps = () => {
         //   ...assignedValues,
         // });
 
-        // __parent?.service?.refresh?.();
+        __parent?.service?.refresh?.();
         setVisible?.(false);
         if (!onSuccess?.successMessage) {
           return;

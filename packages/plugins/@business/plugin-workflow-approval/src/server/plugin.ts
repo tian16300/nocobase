@@ -1,5 +1,5 @@
 import { InstallOptions, Plugin } from '@nocobase/server';
-import WorkflowPlugin, { JOB_STATUS } from '@nocobase/plugin-workflow';
+import WorkflowPlugin, { EXECUTION_STATUS, JOB_STATUS } from '@nocobase/plugin-workflow';
 
 import { getNodeUsers, submit } from './actions';
 
@@ -38,20 +38,20 @@ export default class extends Plugin {
       /**
        * 添加申请记录
        */
-    //   if( ['0'].includes(model.get('status'))){
-    //   await this.app.db.getRepository('approval_results').create({
-    //     values:{
-    //       userId: model.get('updatedBy') || model.get('createdBy'),
-    //       userAction:'0',
-    //       remark: model.get('remark'),
-    //       files: model.dataValues?.files,
-    //       actionTime: new Date().toISOString(),
-    //       apply_id: model.get('id'),
-          
-    //     },
-    //     transaction
-    //   })
-    // }
+      //   if( ['0'].includes(model.get('status'))){
+      //   await this.app.db.getRepository('approval_results').create({
+      //     values:{
+      //       userId: model.get('updatedBy') || model.get('createdBy'),
+      //       userAction:'0',
+      //       remark: model.get('remark'),
+      //       files: model.dataValues?.files,
+      //       actionTime: new Date().toISOString(),
+      //       apply_id: model.get('id'),
+
+      //     },
+      //     transaction
+      //   })
+      // }
     });
     /**
      * 审批结果  同步更新 approval_apply
@@ -95,7 +95,7 @@ export default class extends Plugin {
     //         },
     //         sort:['-id'],
     //         transaction
-    //       }); 
+    //       });
     //       if(execution){
     //         const job = await this.app.db.getRepository('jobs').findOne({
     //           filter:{
@@ -107,13 +107,50 @@ export default class extends Plugin {
     //         if(job){
     //           console.log(job);
     //         }
-            
-    //       }
 
+    //       }
 
     //    }
     // });
-  
+    /**
+     * 撤销审批
+     */
+    this.db.on('approval_apply.afterSave', async (model, { transaction }) => {
+      const changed = Array.from(model._changed);
+      const status = model.get('status');
+      const filterByTk = model.get('executionId');
+
+      if (changed.includes('status') && status == '3' && filterByTk) {
+        /* 取消流程  */
+        const ExecutionRepo = this.db.getRepository('executions');
+        const JobRepo = this.db.getRepository('jobs');
+        const execution = await ExecutionRepo.findOne({
+          filterByTk,
+          appends: ['jobs'],
+        });
+        if (execution) {
+          const res = await execution.update(
+            {
+              status: EXECUTION_STATUS.CANCELED,
+            },
+            { transaction },
+          );
+
+          const pendingJobs = execution.jobs.filter((job) => job.status === JOB_STATUS.PENDING);
+          await JobRepo.update({
+            values: {
+              status: JOB_STATUS.CANCELED,
+            },
+            filter: {
+              id: pendingJobs.map((job) => job.id),
+            },
+            individualHooks: false,
+            transaction,
+          });
+          this.app.logger.info('cancel', res);
+        }
+      }
+    });
   }
   async load() {
     /* 导入审批相关的表 */
@@ -126,7 +163,7 @@ export default class extends Plugin {
       await repo.db2cm('approval_apply');
       await repo.db2cm('approval_results');
     }
-    this.app.acl.allow('approval_users_mid','*','public');
+    this.app.acl.allow('approval_users_mid', '*', 'public');
 
     const workflowPlugin = this.app.getPlugin<WorkflowPlugin>(WorkflowPlugin);
     this.workflow = workflowPlugin;

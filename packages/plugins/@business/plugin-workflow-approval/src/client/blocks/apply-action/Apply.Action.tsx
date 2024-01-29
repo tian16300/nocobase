@@ -2,11 +2,13 @@ import { Action, CollectionProvider, useApplyBlockContext, useRecord } from '@no
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 const ApplyActionContext = createContext<any>({});
 /**
- * 未提交申请 撤销  隐藏
+ * 判断是否可以提交申请  
  * @param props 将 status 修改 5
  * @returns
  */
-
+const isEnableSubmitApproval = (apply) => {
+  return !apply?.id || (apply && !apply.jobIsEnd && apply.status === '3');
+}
 export const ApplyAction = (props: any) => {
   const { apply: applyRecord, ...others } = useApplyBlockContext();
   const record = useRecord();
@@ -15,9 +17,10 @@ export const ApplyAction = (props: any) => {
     if (applyRecord?.id) {
       setApply(applyRecord);
     }
-  }, [applyRecord?.id, applyRecord?.jobIsEnd]);
+  }, [applyRecord?.id, applyRecord?.status, applyRecord?.jobIsEnd]);
+
   const btnTitle = useMemo(() => {
-    if (!apply?.id) {
+    if (isEnableSubmitApproval(apply)){
       /* 用户可操作提交申请  */
       return '提交审核';
     } else if (apply && apply.jobIsEnd) {
@@ -29,7 +32,7 @@ export const ApplyAction = (props: any) => {
     }
   }, [JSON.stringify(apply)]);
   const formActionType = useMemo(() => {
-    if (!apply?.id) {
+    if (isEnableSubmitApproval(apply)) {
       /* 用户可操作提交申请  */
       return 1;
     } else if (apply && apply.jobIsEnd) {
