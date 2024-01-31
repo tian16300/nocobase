@@ -111,11 +111,11 @@ export default class extends Instruction {
    
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
-    const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
-    const relatedData = await relatedModel.findOne({
-      filterByTk: related_data_id,
-      transaction,
-    });
+    // const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
+    // const relatedData = await relatedModel.findOne({
+    //   filterByTk: related_data_id,
+    //   transaction,
+    // });
     const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
     const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
     const dingUsers = users.filter(({ dingUserId }) => {
@@ -135,7 +135,7 @@ export default class extends Instruction {
         },
       }
     };
-    const dingTalkService = (processor.options.plugin.app.getPlugin('@domain/plugin-enterprise-integration') as any)
+    const dingTalkService = (processor.options.plugin.pm.get('@domain/plugin-enterprise-integration') as any)
       .dingTalkService;
     const message = await dingTalkService.sendMsgToUserByDingAction(data);    
     const status = message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.ERROR;
@@ -166,23 +166,19 @@ export default class extends Instruction {
      /**
      * 如果是抄送节点 是最后一个节点 并且上个节点是通过状态 则更新 jobIsEnd
      */
-    // if(prevJob && !nextNode){
-    //   jobIsEnd = true;
-    // }
     /* 拒绝 或者取消 */
     if(prevJob && prevJob.latestUserJobResult && ['-4','-5'].includes(prevJob.latestUserJobResult.useAction)){
       jobModel = {
         status: status == JOB_STATUS.RESOLVED?JOB_STATUS.REJECTED: status,
         result: jobModelResult
       }
-      jobIsEnd = true;
     }else {
       jobModel = {
         status: status, 
         result: jobModelResult
       };
     }
-    if(prevJob && prevJob.latestUserJobResult && ['0','1'].includes(prevJob.latestUserJobResult.useAction) && !nextNode){
+    if(!nextNode){
       jobIsEnd = true;
     }
      const job = await processor.saveJob({
@@ -198,7 +194,6 @@ export default class extends Instruction {
         nodeId: node.id,
         executionId: job.executionId,
         workflowKey: workflowModel.key,
-        // result: relatedData,
         jobIsEnd
       },
       transaction,

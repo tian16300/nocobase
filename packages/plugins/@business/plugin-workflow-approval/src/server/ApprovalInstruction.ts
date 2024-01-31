@@ -174,7 +174,7 @@ export default class extends Instruction {
         },
       };
 
-      const dingTalkService = (this.workflow.app.getPlugin('@domain/plugin-enterprise-integration') as any)
+      const dingTalkService = (this.workflow.app.pm.get('@domain/plugin-enterprise-integration') as any)
         .dingTalkService;
       message = await dingTalkService.sendMsgToUserByDingAction(data);
     }
