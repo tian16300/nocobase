@@ -88,8 +88,10 @@ export async function revision(context: Context, next) {
           typeof trigger.duplicateConfig === 'function'
             ? await trigger.duplicateConfig(origin, { transaction })
             : origin.config,
+        uiTemplateKey: origin.uiTemplateKey,
+        bussinessCollectionName: origin.bussinessCollectionName
       },
-      transaction,
+      transaction
     });
 
     const originalNodesMap = new Map();
