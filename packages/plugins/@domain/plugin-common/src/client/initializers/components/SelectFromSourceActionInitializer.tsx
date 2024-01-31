@@ -114,6 +114,29 @@ export const SelectFromSourceActionInitializer = () => {
                             },
                           ],
                         },
+                        unitField: {
+                          type: 'string',
+                          title: '单位字段',
+                          'x-decorator': 'FormItem',
+                          'x-component': 'AppendsTreeSelect',
+                          'x-component-props': {
+                            multiple: false,
+                            useCollection() {
+                              const { values } = useForm();
+                              return values?.collection;
+                            },
+                          },
+                          'x-reactions': [
+                            {
+                              dependencies: ['.collection'],
+                              fulfill: {
+                                state: {
+                                  visible: '{{ !!$deps[0] }}',
+                                },
+                              },
+                            },
+                          ],
+                        },
                         sumFields: {
                           type: 'array',
                           title: '统计字段',

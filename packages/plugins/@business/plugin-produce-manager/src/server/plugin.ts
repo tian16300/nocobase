@@ -3,14 +3,12 @@ import path from 'path';
 import _ from 'lodash';
 import { initCreateMany } from './actions/initCreateMany';
 
-
-const  countWlAmount = function (models, isWs = false){
+const countWlAmount = function (models, isWs = false) {
   return models.reduce((prev: any, cur: any) => {
-    const rate = isWs?(1+cur.rate):1;
-    return prev + cur.price/rate * (cur.num - cur.tc_num - cur.tk_num);
-  },0)
-
-}
+    const rate = isWs ? 1 + cur.rate : 1;
+    return prev + (cur.price / rate) * (cur.num - cur.tc_num - cur.tk_num);
+  }, 0);
+};
 export class PluginProduceManagerServer extends Plugin {
   afterAdd() {}
   beforeLoad() {
@@ -111,16 +109,21 @@ export class PluginProduceManagerServer extends Plugin {
         }
       }
     });
-   
-   
-    //物料BOM新增 或者修改 生成项目BOM Tree结构
-    // this.app.db.on('bom_wl_list.beforeSave', this.updatePrjBomTree.bind(this));
+
+    //物料BOM 保存时 如果无项目 则更新项目
+    this.app.db.on('bom_wl_list.beforeSave', async (model, { transaction }) => {
+      if (model.get('bom_apply_id')) {
+        const bom_apply_model = await this.app.db.getRepository('bom_apply').findOne({
+          filterByTk: model.get('bom_apply_id'),
+          transaction,
+        });
+        model.set('prjId', bom_apply_model.get('prjId'));
+      }
+    });
 
     this.addCgApplyEvents();
-  
-    
   }
-  async addCgApplyEvents(){
+  async addCgApplyEvents() {
     this.app.db.on('cg_wl_list.afterSave', async (model, { transaction }) => {
       const cg_apply_id = model.get('cg_apply_id');
       const bom_wl_list = model.get('bom_wl_list');
@@ -155,8 +158,8 @@ export class PluginProduceManagerServer extends Plugin {
         }),
       );
     });
-     //采购申请单  保存BOM物料明细价格
-     this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
+    //采购申请单  保存BOM物料明细价格
+    this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
       //查找 cg_apply_list 明细 bom_wl_list
       const models = await this.app.db.getRepository('cg_wl_list').find({
         filter: {
@@ -198,8 +201,7 @@ export class PluginProduceManagerServer extends Plugin {
       );
     });
 
-
-      //中间表关联同步 cg_apply_bom_throught cg_apply_id
+    //中间表关联同步 cg_apply_bom_throught cg_apply_id
     this.app.db.on('cg_apply_bom_throught.beforeSave', async (model, { transaction }) => {
       const cg_wl_id = model.get('cg_wl_id');
       //查找 cg_apply_list 明细 cg_apply_id
@@ -210,13 +212,12 @@ export class PluginProduceManagerServer extends Plugin {
       model.set('cg_apply_id', record.get('cg_apply_id'));
     });
 
-
     //采购申请单 统计项目物料成本
     // 步骤 查找所有的BOM 明细  按照 项目分组  统计审批通过的总物料BOM 本次新增物料BOM 历史审批的项目物料BOM
     this.app.db.on('cg_apply.afterSaveWithAssociations', async (model, { transaction }) => {
       /* 查找BOM 明细 */
       const cg_apply_id = model.get('id');
-      const currentTime = model.get('updatedAt') || model.get('createdAt') ;
+      const currentTime = model.get('updatedAt') || model.get('createdAt');
       //删除采购申请单的所有项目物料成本
       await this.app.db.getRepository('prj_wl_cb').destroy({
         filter: {
@@ -258,7 +259,7 @@ export class PluginProduceManagerServer extends Plugin {
       });
       const prjs = Object.keys(groups),
         rows = [];
-      
+
       await Promise.all(
         prjs.map(async (prjId: any) => {
           const row: any = {};
@@ -266,52 +267,54 @@ export class PluginProduceManagerServer extends Plugin {
           row.cg_apply_id = cg_apply_id;
           // 本次总物料BOM bom_wl_list 本次新增物料BOM add_wl_list 历史审批的项目物料BOM history_wl_list
           const add_wl_list = groups[prjId];
-          const bom_wl_list = (await this.app.db.getRepository('bom_wl_list').find({
-            filter: {
-              $and: [
-                {
-                  bom_apply: {
-                    approvalStatus: {
-                      jobIsEnd: true,
+          const bom_wl_list =
+            (await this.app.db.getRepository('bom_wl_list').find({
+              filter: {
+                $and: [
+                  {
+                    bom_apply: {
+                      approvalStatus: {
+                        jobIsEnd: true,
+                      },
                     },
                   },
-                },
-                {
-                  prj: {
-                    id: prjId,
+                  {
+                    prj: {
+                      id: prjId,
+                    },
                   },
-                },
-              ],
-            },
-            transaction,
-          })||[]);
+                ],
+              },
+              transaction,
+            })) || [];
           //查找历史审批的项目物料BOM
-          const history_wl_list = (await this.app.db.getRepository('bom_wl_list').find({
-            filter: {
-              $and: [
-                {
-                  cg_apply_list: {
-                    approvalStatus: {
-                      jobIsEnd: true,
+          const history_wl_list =
+            (await this.app.db.getRepository('bom_wl_list').find({
+              filter: {
+                $and: [
+                  {
+                    cg_apply_list: {
+                      approvalStatus: {
+                        jobIsEnd: true,
+                      },
                     },
                   },
-                },
-                {
-                  cg_apply_list: {
-                    updatedAt: {
-                      $dateBefore: currentTime
+                  {
+                    cg_apply_list: {
+                      updatedAt: {
+                        $dateBefore: currentTime,
+                      },
                     },
                   },
-                },                
-                {
-                  prj: {
-                    id: prjId,
+                  {
+                    prj: {
+                      id: prjId,
+                    },
                   },
-                },
-              ],
-            },
-            transaction,
-          })||[]);
+                ],
+              },
+              transaction,
+            })) || [];
           row.bom_wl_list = bom_wl_list;
           row.add_wl_list = add_wl_list;
           row.history_wl_list = history_wl_list;
@@ -326,16 +329,14 @@ export class PluginProduceManagerServer extends Plugin {
            */
           const res = await this.app.db.getRepository('prj_wl_cb').create({
             values: row,
-            updateAssociationValues:['bom_wl_list','add_wl_list','history_wl_list'],
-            transaction
-          });  
-                  
+            updateAssociationValues: ['bom_wl_list', 'add_wl_list', 'history_wl_list'],
+            transaction,
+          });
         }),
       );
 
       // models.forEach(async (item: any) => {});
     });
-
   }
   async updatePrjBomTree(model: any, { transaction }) {
     // 查找所有 prj bom 生成 分组  全部   工站  单元   未关联
@@ -467,18 +468,18 @@ export class PluginProduceManagerServer extends Plugin {
       directory: path.resolve(__dirname, 'collections/bom_cg'),
     });
     const repo = this.db.getRepository<any>('collections');
-   
+
     if (repo) {
       await repo.db2cm('wl_category');
       await repo.db2cm('wl_info');
-      await repo.db2cm('data_log_flag');      
+      await repo.db2cm('data_log_flag');
       await repo.db2cm('cg_apply_bom_throught');
       await repo.db2cm('prjWlCb_bomWl_mid');
-      await repo.db2cm('fj_info_mid');  
-      await repo.db2cm('cgApply_prjs');    
+      await repo.db2cm('fj_info_mid');
+      await repo.db2cm('cgApply_prjs');
       await repo.db2cm('basic_wl_info');
       await repo.db2cm('basic_cg_detail');
-      await repo.db2cm('basic_bom_wl');      
+      await repo.db2cm('basic_bom_wl');
       await repo.db2cm('bom_wl_list');
       await repo.db2cm('bom_apply');
       await repo.db2cm('prj_wl_cb');
@@ -490,12 +491,11 @@ export class PluginProduceManagerServer extends Plugin {
     this.app.acl.allow('cg_apply_bom_throught', '*', 'public');
     this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');
     this.app.acl.allow('cgApply_prjs', '*', 'public');
-    this.app.acl.allow('bom_apply','*', 'loggedIn');
-    this.app.acl.allow('bom_wl_list','*', 'loggedIn');
-    this.app.acl.allow('cg_apply','*', 'loggedIn');
-    this.app.acl.allow('cg_wl_list','*', 'loggedIn');
-     this.app.acl.allow('prj_wl_cb','*', 'loggedIn');
-    
+    this.app.acl.allow('bom_apply', '*', 'loggedIn');
+    this.app.acl.allow('bom_wl_list', '*', 'loggedIn');
+    this.app.acl.allow('cg_apply', '*', 'loggedIn');
+    this.app.acl.allow('cg_wl_list', '*', 'loggedIn');
+    this.app.acl.allow('prj_wl_cb', '*', 'loggedIn');
   }
 
   async install(options?: InstallOptions) {}

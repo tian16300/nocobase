@@ -41,6 +41,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
     multiple = true,
     sumFields,
     groupBy,
+    unitField: _unitField,
     fieldMaps = [],
     onChange,
     openSize = 'large',
@@ -61,6 +62,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
   const [toField, setToField] = useState<any>({});
   const [toCollectionName, setToCollectionName] = useState<any>(null);
   const [groupField, setGroupField] = useState({});
+  const [unitField, setUnitField] = useState({});
   const { form } = useFormBlockContext();
   const actionTitle = field.title;
   useEffect(() => {
@@ -81,6 +83,12 @@ export const DataBlockSelectorAction: any = (props: any) => {
       setGroupField(groupField);
     }
   }, []);
+  useEffect(() => {
+    if (_unitField) {
+      const unitField = getCollectionField(`${tName}.${_unitField}`);
+      setUnitField(unitField);
+    }
+  }, []);
 
   return (
     <div className={actionDesignerCss}>
@@ -93,6 +101,7 @@ export const DataBlockSelectorAction: any = (props: any) => {
               toField,
               addToField,
               groupField,
+              unitField,
               sumFields,
               fieldMaps,
               source: {
@@ -157,7 +166,7 @@ DataBlockSelectorAction.Designer = (props) => {
   const fieldSchema = getParentFieldSchema(_fieldSchema);
   const collectionField = fieldSchema?.['x-collection-field'];
   const { getCollectionField, getCollectionFields } = useCollectionManager();
-  const { collection, groupBy, sumFields, fieldMaps } = _fieldSchema['x-component-props'] || {};
+  const { collection, groupBy, unitField, sumFields, fieldMaps } = _fieldSchema['x-component-props'] || {};
   return (
     <GeneralSchemaDesigner {...props} disableInitializer>
       <SchemaSettingsButtonEditor />
@@ -188,6 +197,30 @@ DataBlockSelectorAction.Designer = (props) => {
                   },
                 },
                 default: groupBy,
+                'x-reactions': [
+                  {
+                    dependencies: ['.collection'],
+                    fulfill: {
+                      state: {
+                        visible: '{{ !!$deps[0] }}',
+                      },
+                    },
+                  },
+                ],
+              },
+              unitField: {
+                type: 'string',
+                title: '单位字段',
+                'x-decorator': 'FormItem',
+                'x-component': 'AppendsTreeSelect',
+                'x-component-props': {
+                  multiple: false,
+                  useCollection() {
+                    const { values } = useForm();
+                    return values?.collection;
+                  },
+                },
+                default: unitField,
                 'x-reactions': [
                   {
                     dependencies: ['.collection'],
@@ -333,7 +366,6 @@ DataBlockSelectorAction.Designer = (props) => {
                           'x-component-props': {
                             useProps: () => {
                               const cField = getCollectionField(collectionField);
-                              debugger;
                               const fields = getCollectionFields(cField?.target) || [];
                               return {
                                 options: fields
@@ -374,14 +406,15 @@ DataBlockSelectorAction.Designer = (props) => {
             },
           } as ISchema
         }
-        initialValues={{ collection, groupBy, sumFields, fieldMaps }}
-        onSubmit={({ collection, groupBy, sumFields, fieldMaps }) => {
+        initialValues={fieldSchema['x-component-props']||{}}
+        onSubmit={({ collection, groupBy, unitField, sumFields, fieldMaps }) => {
           fieldSchema['x-component-props'] = {
             ...(fieldSchema['x-component-props'] || {}),
             collection,
             groupBy,
+            unitField,
             sumFields,
-            fieldMaps,
+            fieldMaps
           };
           dn.emit('patch', {
             schema: {
@@ -413,18 +446,18 @@ const useDataBlockSelectorActionContext = () => {
 export const useDataBlockSelectorProps = () => {
   const { setVisible } = useActionContext();
   const { form } = useFormBlockContext();
-  const { selectedRows, toField, addToField, groupField, sumFields, fieldMaps, source } =
+  const { selectedRows, toField, addToField, groupField, unitField, sumFields, fieldMaps, source } =
     useDataBlockSelectorActionContext();
   const { getCollectionField } = useCollectionManager();
   /* 设置映射值 */
-  const setFieldMap = (row, targetFieldName, fieldName, source) => {
+  const setFieldMap = (row, sourceFieldName, targetFieldName, source) => {
     const { from, to } = source;
     const targetField = getCollectionField(`${to}.${targetFieldName}`);
-    const field = getCollectionField(`${from}.${fieldName}`);
+    const sourceField = getCollectionField(`${from}.${sourceFieldName}`);
     if (row) {
-      row[targetFieldName] = row[fieldName];
+      row[targetFieldName] = row[sourceFieldName];
       if (targetField?.foreignKey) {
-        row[targetField.foreignKey] = row[field.foreignKey];
+        row[targetField.foreignKey] = row[sourceField.foreignKey];
       }
     }
   };
@@ -470,6 +503,9 @@ export const useDataBlockSelectorProps = () => {
         const groupRecords = rows.reduce((group, record) => {
           const category = record[groupField.foreignKey];
           if (category) {
+            const row = {
+              ...record[groupField.name]
+            };
             rowMap[category] = record[groupField.name];
             group[category] = group[category] ?? [];
             group[category].push(record);
@@ -484,11 +520,14 @@ export const useDataBlockSelectorProps = () => {
           return group;
         }, {});
         const addGroupRows = Object.values(rowMap).map(({ id, ...others }) => {
+          const startRecord = groupRecords[id][0];
           let item = {
             ...others,
             [groupField.name]: { id, ...others },
             [groupField.foreignKey]: id,
             [toField.name]: groupRecords[id],
+            [unitField.name]: startRecord[unitField.name],
+            [unitField.foreignKey]: startRecord[unitField.foreignKey]
           };
           if (sumFields) {
             sumFields?.map((name) => {
@@ -498,6 +537,7 @@ export const useDataBlockSelectorProps = () => {
               item[name] = sum;
             });
           }
+
           return item;
         });
         const addRows = [...addGroupRows, ...otherRows];
@@ -507,8 +547,8 @@ export const useDataBlockSelectorProps = () => {
           });
 
           if (fieldMaps.length > 0) {
-            fieldMaps.map(({ field, mapField }) => {
-              setFieldMap(row, mapField, field, source);
+            fieldMaps.map(({ sourceField, targetField }) => {
+              setFieldMap(row, sourceField, targetField, source);
             });
           }
           if (index == -1) {
