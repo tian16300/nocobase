@@ -6,3 +6,4 @@ export * from './InitBomApplyActionInitializer';
 export * from './SubTableImportXlsActionInitializer';
 export * from './GetWlStockActionInitializer';
 export * from './EmptyActionInitializer';
+export * from './InitBomModuleCountInitializer';

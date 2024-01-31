@@ -46,6 +46,19 @@ export class PluginProduceManagerClient extends Plugin {
       }
     })
 
+    this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.initBomModuleCountAction',{
+      name:'initBomModuleCountAction',
+      title:'模块统计',
+      type:'item',
+      Component: 'InitBomModuleCountInitializer',
+      useVisible(){
+        const {name } = useCollection();
+        return name === 'bom_wl_list';
+      }
+    });
+    /**
+     * 模块统计
+     */
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.initBomApplyAction',{
       name:'initBomApplyAction',
       title:'一键创建单据',
@@ -55,7 +68,8 @@ export class PluginProduceManagerClient extends Plugin {
         const {name } = useCollection();
         return name === 'bom_apply';
       }
-    })
+    });
+
     this.app.schemaInitializerManager.addItem('TableActionInitializers','enableActions.bomTreeAddAction',{
       name:'bomTreeAddAction',
       title:'新增BOM',

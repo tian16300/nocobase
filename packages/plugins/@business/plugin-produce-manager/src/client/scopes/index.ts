@@ -140,3 +140,4 @@ export const useInitBomApplyActionProps = (props: any) => {
 
 
 export * from './useEmptyCollectionFieldAction';
+export * from './useInitBomModuleCountAction';
