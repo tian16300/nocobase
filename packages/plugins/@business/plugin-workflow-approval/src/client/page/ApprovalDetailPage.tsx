@@ -81,17 +81,16 @@ export const ApprovalDetailPage = () => {
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
   useEffect(() => {
-    let visible = apply && !apply.jobIsEnd && apply.status == '0';
+    let visible = apply && !apply?.jobIsEnd && apply.status == '0';
     if (apply?.currentApprovalUsers?.length) {
       const hasCurrentUser =
         apply?.currentApprovalUsers?.find(({ id }) => {
           return id == currentUser?.id;
-        }).length > 0;
+        });
       visible = visible && hasCurrentUser;
     }
-
     setFormIsVisible(visible);
-  }, [apply?.jobIsEnd, apply?.status]);
+  }, [JSON.stringify(apply)]);
 
   return (
     <ApprovalContext.Provider
