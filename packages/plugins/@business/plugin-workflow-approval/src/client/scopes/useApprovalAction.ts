@@ -149,6 +149,7 @@ export const useApprovalAction = (props: any) => {
                                 status: '0',
                                 jobIsEnd: false,
                                 workflowKey: workflow?.key || apply?.workflowKey,
+                                updatedBy: currentUser.id,
                               },
                             })
                             .then((res) => {
@@ -180,7 +181,8 @@ export const useApprovalAction = (props: any) => {
                       values: {
                         status: '3',
                         jobIsEnd: false,
-                        workflowKey: workflow?.key || apply?.workflowKey,
+                        workflowKey: workflow?.key || apply?.workflowKey,                        
+                        updatedBy: currentUser.id
                       },
                     })
                     .then((res) => {

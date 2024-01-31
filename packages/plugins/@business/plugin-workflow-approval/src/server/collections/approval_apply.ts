@@ -414,7 +414,7 @@ export default {
       type: 'hasMany',
       interface: 'o2m',
       foreignKey: 'apply_id',
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
       uiSchema: {
         'x-component': 'AssociationField',
         'x-component-props': {

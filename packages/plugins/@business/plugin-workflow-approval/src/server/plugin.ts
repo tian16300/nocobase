@@ -119,23 +119,31 @@ export default class extends Plugin {
       const changed = Array.from(model._changed);
       const status = model.get('status');
       const filterByTk = model.get('executionId');
-
-      if (changed.includes('status') && status == '3' && filterByTk) {
-        /* 取消流程  */
-        const ExecutionRepo = this.db.getRepository('executions');
-        const JobRepo = this.db.getRepository('jobs');
-        const execution = await ExecutionRepo.findOne({
-          filterByTk,
-          appends: ['jobs'],
-        });
-        if (execution) {
+      const ExecutionRepo = this.db.getRepository('executions');
+      const updatedAt = model.get('updatedAt');
+      const relatedCollection = model.get('relatedCollection');
+      const related_data_id = model.get('related_data_id');
+      //具体数据
+      const dataModel = await this.db.getRepository(relatedCollection).findOne({
+        filterByTk: related_data_id,
+        appends: ['updatedBy']
+      });
+      //具体数据
+      const execution = await ExecutionRepo.findOne({
+        filterByTk,
+        appends: ['jobs'],
+      });
+      if (execution && changed.includes('status')) {
+        // 撤销申请
+        if (status == '3') {
+          /* 取消流程  */
+          const JobRepo = this.db.getRepository('jobs');
           const res = await execution.update(
             {
               status: EXECUTION_STATUS.CANCELED,
             },
             { transaction },
           );
-
           const pendingJobs = execution.jobs.filter((job) => job.status === JOB_STATUS.PENDING);
           await JobRepo.update({
             values: {
@@ -148,6 +156,34 @@ export default class extends Plugin {
             transaction,
           });
           this.app.logger.info('cancel', res);
+        }
+        //存储 审批结果
+        /**
+         * 用户 申请人  申请、撤销申请
+         * 审批人 通过、拒绝
+         */
+        if (['0', '1', '2', '3'].includes(status)) {
+          const logModel: any = {
+            apply_id: model.get('id'),
+            executionId: execution.id,
+          };
+          logModel.userAction = status;
+          if (['0', '3'].includes(status)) {
+            logModel.userType = '1';
+            logModel.remark = dataModel.get('remark');
+          } else if (['1', '2'].includes(status)) {
+            logModel.userType = '2';
+            logModel.remark = model.get('remark');
+          }
+          logModel.user = dataModel.get('updatedBy');
+          logModel.createdBy = dataModel.get('updatedBy');
+          logModel.createdAt = updatedAt;
+          logModel.actionTime = updatedAt;
+          await this.app.db.getRepository('approval_results').create({
+            values: logModel,
+            updateAssociationValues:['user','createdBy'],
+            transaction
+          });
         }
       }
     });
@@ -164,8 +200,7 @@ export default class extends Plugin {
       await repo.db2cm('approval_results');
     }
     this.app.acl.allow('approval_users_mid', '*', 'public');
-
-    const workflowPlugin = this.app.getPlugin<WorkflowPlugin>(WorkflowPlugin);
+    const workflowPlugin = this.app.pm.get(WorkflowPlugin) as WorkflowPlugin;
     this.workflow = workflowPlugin;
     workflowPlugin.registerInstruction('approval', ApprovalInstruction);
     workflowPlugin.registerInstruction('copyTo', CopyToInstruction);

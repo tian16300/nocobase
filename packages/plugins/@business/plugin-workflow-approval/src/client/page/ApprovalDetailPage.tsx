@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { useSearchParams, useNavigate  } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { DingdingOutlined } from '@ant-design/icons';
 import { PageContainer, ProCard, ProForm, FooterToolbar } from '@ant-design/pro-components';
 import { Descriptions, Input, Card, Typography, Button, Steps, Row, Col, Spin, Tag, Space, Timeline } from 'antd';
@@ -12,6 +12,7 @@ import {
   css,
   useAPIClient,
   useCollectionManager,
+  useCurrentUserContext,
   useDesignable,
   useFormBlockContext,
   useRequest,
@@ -36,6 +37,8 @@ export const ApprovalDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [applyRelationData, setApplyRelationData] = useState<any>(null);
   const [formIsVisible, setFormIsVisible] = useState<any>(false);
+  const userContext = useCurrentUserContext();
+  const currentUser = userContext?.data?.data;
   const { data } = useRequest<any>({
     resource: 'approval_apply',
     action: 'get',
@@ -77,10 +80,18 @@ export const ApprovalDetailPage = () => {
     }
   }, [apply?.workflowKey, apply?.relatedCollection, apply?.related_data_id]);
 
-  useEffect(() => {  
-    const visible = !apply?.jobIsEnd || apply.status == '0';
-    setFormIsVisible(visible );
-  }, [apply?.jobIsEnd]);
+  useEffect(() => {
+    let visible = apply && !apply.jobIsEnd && apply.status == '0';
+    if (apply?.currentApprovalUsers?.length) {
+      const hasCurrentUser =
+        apply?.currentApprovalUsers?.find(({ id }) => {
+          return id == currentUser?.id;
+        }).length > 0;
+      visible = visible && hasCurrentUser;
+    }
+
+    setFormIsVisible(visible);
+  }, [apply?.jobIsEnd, apply?.status]);
 
   return (
     <ApprovalContext.Provider
@@ -158,96 +169,100 @@ const View = (props: any) => {
 
   return (
     <PageContainer
-    fixedHeader
-    header={{
-      // title: '审批编号: ' + data?.code,
-      breadcrumb: {
-        items: [
-          {
-            path: '',
-            title: '返回',
-            onClick(){
-              navigate(-1);
-            }
-          },
-          {
-            path: '',
-            title: '审批详情',
-          },
-        ],
-      },
-    }}
-    className={css`
-      height: 100%;
-      .ant-pro-page-container-children-container,
-      .ant-page-header-heading {
-        padding-inline-start: 20px;
-        padding-inline-end: 20px;
-      }
-      .ant-pro-page-container-warp-page-header {
-        padding-inline-start: 0;
-        padding-inline-end: 0;
-        padding-block-start: 0;
-        .ant-breadcrumb {
-          padding: 0.5rem 20px;
-          background: #ffffff;
-          border-bottom: 1px solid #e0e0e0;
+      fixedHeader
+      header={{
+        // title: '审批编号: ' + data?.code,
+        breadcrumb: {
+          items: [
+            {
+              path: '',
+              title: '返回',
+              onClick() {
+                navigate(-1);
+              },
+            },
+            {
+              path: '',
+              title: '审批详情',
+            },
+          ],
+        },
+      }}
+      className={css`
+        height: 100%;
+        .ant-pro-page-container-children-container,
+        .ant-page-header-heading {
+          padding-inline-start: 20px;
+          padding-inline-end: 20px;
         }
-      }
-      .ant-pro-grid-content{
-        height: calc(100% - 55px);
-        overflow: auto;
-      }
-    `}
-  >
-    {loading ? (
-      <Spin></Spin>
-    ) : (
-      <>
-        <SchemaComponent
-          schema={createDetailSchema({
-            id: apply?.id,
-          })}
-          components={components}
-          scope={scope}
-        />
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            {apply.id?<RecordProvider record={apply}>
-              <ApprovalFlowNodeDetail></ApprovalFlowNodeDetail>
-            </RecordProvider>:<></>}
-          </Col>
-          <Col span={24}>
-            <Card
-              size="small"
-              bordered={false}
-              activeTabKey={tab}
-              onTabChange={setTab}
-              tabList={[
-                {
-                  tab: '审批记录',
-                  key: 'tab1',
-                },
-                {
-                  tab: '操作日志',
-                  key: 'tab2',
-                },
-              ]}
-            >
-              <div className={css``}>{contentList[tab]}</div>
-            </Card>
-          </Col>
-          {formIsVisible ? (
+        .ant-pro-page-container-warp-page-header {
+          padding-inline-start: 0;
+          padding-inline-end: 0;
+          padding-block-start: 0;
+          .ant-breadcrumb {
+            padding: 0.5rem 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+          }
+        }
+        .ant-pro-grid-content {
+          height: calc(100% - 55px);
+          overflow: auto;
+        }
+      `}
+    >
+      {loading ? (
+        <Spin></Spin>
+      ) : (
+        <>
+          <SchemaComponent
+            schema={createDetailSchema({
+              id: apply?.id,
+            })}
+            components={components}
+            scope={scope}
+          />
+          <Row gutter={[16, 16]}>
             <Col span={24}>
-            <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
-          </Col>
-          ) : (
-           <></>
-          )}
-        </Row>
-      </>
-    )}
-  </PageContainer>
+              {apply.id ? (
+                <RecordProvider record={apply}>
+                  <ApprovalFlowNodeDetail></ApprovalFlowNodeDetail>
+                </RecordProvider>
+              ) : (
+                <></>
+              )}
+            </Col>
+            <Col span={24}>
+              <Card
+                size="small"
+                bordered={false}
+                activeTabKey={tab}
+                onTabChange={setTab}
+                tabList={[
+                  {
+                    tab: '审批记录',
+                    key: 'tab1',
+                  },
+                  {
+                    tab: '操作日志',
+                    key: 'tab2',
+                  },
+                ]}
+              >
+                <div className={css``}>{contentList[tab]}</div>
+              </Card>
+            </Col>
+            {formIsVisible ? (
+              <Col span={24}>
+                <SchemaComponent schema={createApproveSchema()} components={components} scope={scope} />
+              </Col>
+            ) : (
+              <></>
+            )}
+          </Row>
+        </>
+      )}
+    </PageContainer>
   );
 };
 
@@ -440,9 +455,9 @@ const ApprovalFlowNodeDetail = () => {
           // resourceOf: apply?.related_data_id,
           action: 'get',
           // useParams: '{{ useParamsFromRecord }}',
-          params:{
+          params: {
             filterByTk: apply?.related_data_id,
-          }
+          },
         },
         properties: {
           form: {

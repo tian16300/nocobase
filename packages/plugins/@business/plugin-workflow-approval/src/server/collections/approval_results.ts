@@ -157,27 +157,28 @@ export default {
       uiSchema: {
         enum: [
           {
-            value: '0',
-            label: '申请',
+              "value": "0",
+              "label": "申请"
           },
           {
-            value: '-4',
-            label: '撤销',
+              "value": "1",
+              "label": "同意"
           },
           {
-            value: '1',
-            label: '同意',
+              "value": "2",
+              "label": "拒绝"
           },
           {
-            value: '-5',
-            label: '拒绝',
-          },
-        ],
+              "value": "3",
+              "label": "撤销"
+          }
+      ],
         type: 'string',
         'x-component': 'Select',
         title: '操作类型',
       },
     },
+    
     {
       name: 'remark',
       type: 'text',
