@@ -19,7 +19,6 @@ import { ACLCollectionProvider } from '../acl/ACLProvider';
 import { CollectionProvider, IField, useCollection, useCollectionManager } from '../collection-manager';
 import { FilterBlockRecord } from '../filter-provider/FilterProvider';
 import { useRecordIndex } from '../record-provider';
-import { SharedFilterProvider } from './SharedFilterProvider';
 import { useTemplateBlockContext } from './TemplateBlockProvider';
 import { useAssociationNames } from './hooks';
 export const WithoutCollectionFieldFieldResource = createContext(null);
@@ -345,11 +344,9 @@ export const BlockProvider = (props: BlockProviderProps) => {
         <BlockAssociationContext.Provider value={association}>
           <BlockResourceContext.Provider value={resource}>
             <BlockRequestProvider {...props} updateAssociationValues={updateAssociationValues} params={params}>
-              <SharedFilterProvider {...props} params={params}>
-                <FilterBlockRecord {...props} params={params}>
-                  {props.children}
-                </FilterBlockRecord>
-              </SharedFilterProvider>
+              <FilterBlockRecord {...props} params={params}>
+                {props.children}
+              </FilterBlockRecord>
             </BlockRequestProvider>
           </BlockResourceContext.Provider>
         </BlockAssociationContext.Provider>

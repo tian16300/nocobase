@@ -308,14 +308,21 @@ export function TextArea(props) {
     if (ev.key === 'Enter') {
       ev.preventDefault();
     }
-    setIME(ev.keyCode === 229 && ![' ', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Enter'].includes(ev.key));
-    // if (ev.key === 'Control') {
-    //   console.debug(getSelection().getRangeAt(0));
-    // }
-    // if (ev.key === 'Alt') {
-    //   console.debug(getCurrentRange(ev.currentTarget));
-    // }
   }, []);
+
+  const onCompositionStart = useCallback(function () {
+    setIME(true);
+  }, []);
+
+  const onCompositionEnd = useCallback(
+    ({ currentTarget }) => {
+      setIME(false);
+      setChanged(true);
+      setRange(getCurrentRange(currentTarget));
+      onChange(getValue(currentTarget));
+    },
+    [onChange],
+  );
 
   const onPaste = useCallback(
     function (ev) {
@@ -385,6 +392,8 @@ export function TextArea(props) {
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={onCompositionEnd}
         className={cx(
           hashId,
           'ant-input',
