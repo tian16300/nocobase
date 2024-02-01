@@ -243,28 +243,47 @@ export default {
       },
     },
     {
-     
-      "name": "base_unit",
-      "type": "belongsTo",
-      "interface": "obo",
-      "collectionName": "bom_wl_list",
-      "foreignKey": "base_unit_id",
-      "onDelete": "SET NULL",
-      "uiSchema": {
-          "x-component": "AssociationField",
-          "x-component-props": {
-              "multiple": false,
-              "fieldNames": {
-                  "label": "id",
-                  "value": "id"
-              }
+      name: 'base_unit',
+      type: 'belongsTo',
+      interface: 'obo',
+      collectionName: 'bom_wl_list',
+      foreignKey: 'base_unit_id',
+      onDelete: 'SET NULL',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: false,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
           },
-          "title": "计量单位"
+        },
+        title: '计量单位',
       },
-      "target": "base_units",
-      "overriding": true,
-      "targetKey": "id"
-  }
+      target: 'base_units',
+      overriding: true,
+      targetKey: 'id',
+    },
+    {
+      foreignKey: 'bom_wl_id',
+      otherKey: 'bom_module_id',
+      name: 'modules',
+      type: 'belongsToMany',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '所属模块',
+      },
+      interface: 'm2m',
+      through: 'bom_module_mid',
+      target: 'prj_bom_module',
+    },
   ],
   logging: true,
   autoGenId: true,

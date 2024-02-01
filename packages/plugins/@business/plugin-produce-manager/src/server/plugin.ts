@@ -2,6 +2,7 @@ import { InstallOptions, Plugin } from '@nocobase/server';
 import path from 'path';
 import _ from 'lodash';
 import { initCreateMany } from './actions/initCreateMany';
+import { getPrjModules } from './actions/getPrjModules';
 
 const countWlAmount = function (models, isWs = false) {
   return models.reduce((prev: any, cur: any) => {
@@ -480,6 +481,8 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('basic_wl_info');
       await repo.db2cm('basic_cg_detail');
       await repo.db2cm('basic_bom_wl');
+      await repo.db2cm('bom_module_mid');
+      await repo.db2cm('prj_bom_module');
       await repo.db2cm('bom_wl_list');
       await repo.db2cm('bom_apply');
       await repo.db2cm('prj_wl_cb');
@@ -487,15 +490,18 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('cg_apply');
     }
     this.app.resourcer.registerActionHandler('bom_apply:initCreateMany', initCreateMany);
+    this.app.resourcer.registerActionHandler('prj:getPrjModules', getPrjModules);
     this.app.acl.allow('fj_info_mid', '*', 'public');
     this.app.acl.allow('cg_apply_bom_throught', '*', 'public');
     this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');
+    this.app.acl.allow('bom_module_mid', '*', 'public');
     this.app.acl.allow('cgApply_prjs', '*', 'public');
     this.app.acl.allow('bom_apply', '*', 'loggedIn');
     this.app.acl.allow('bom_wl_list', '*', 'loggedIn');
     this.app.acl.allow('cg_apply', '*', 'loggedIn');
     this.app.acl.allow('cg_wl_list', '*', 'loggedIn');
     this.app.acl.allow('prj_wl_cb', '*', 'loggedIn');
+    this.app.acl.allow('prj_bom_module', '*', 'loggedIn');
   }
 
   async install(options?: InstallOptions) {}
