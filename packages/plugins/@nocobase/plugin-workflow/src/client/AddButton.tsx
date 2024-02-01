@@ -67,7 +67,7 @@ export function AddButton(props: AddButtonProps) {
         .filter(
           (item) =>
             triggerTypes.includes(item.type) &&
-            (item.isAvailable ? item.isAvailable({ workflow, upstream, branchIndex }) : true),
+            (item.isAvailable ? item.isAvailable({engine, workflow, upstream, branchIndex }) : true),
         )
         .map((item) => {
           return {
