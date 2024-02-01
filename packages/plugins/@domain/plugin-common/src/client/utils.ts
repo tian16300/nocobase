@@ -12,7 +12,7 @@ export const createGroupTableSchema = (decoratorProps) => {
     blockType,
     pageSize = 20,
     groupCollection,
-    grouResource,
+    groupResource,
     tableResource,
     ...others
   } = decoratorProps;
@@ -45,7 +45,7 @@ export const createGroupTableSchema = (decoratorProps) => {
                 paginate: false
               },
               fixedBlock:false,
-              ...grouResource
+              ...groupResource
             },
             'x-designer':'GroupTable.GroupTreeDesigner',
             properties: {

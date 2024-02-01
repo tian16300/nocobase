@@ -71,7 +71,7 @@ export const GroupTree = (props: any) => {
   field.loading = service.loading;
   const fieldSchema = useFieldSchema();
   const { getCollection } = useCollectionManager();
-  const collection = getCollection(field.decoratorProps.resource);
+  const collection = getCollection(field.decoratorProps.collection);
   const fieldNames = {
     key: 'id',
     title: collection?.titleField || 'title',

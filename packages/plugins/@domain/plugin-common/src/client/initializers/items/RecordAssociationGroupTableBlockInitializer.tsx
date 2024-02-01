@@ -100,7 +100,6 @@ export const RecordAssociationGroupTableBlockInitializer = () => {
           const groupAssociation = getCollectionFields(field.collectionName).filter((field) => {
             return field?.target === groupCollection
           })?.[0];
-          debugger;
           const _groupResource = `${field.collectionName}.${groupAssociation?.name}`;
           insert(
             createGroupTableSchema({
