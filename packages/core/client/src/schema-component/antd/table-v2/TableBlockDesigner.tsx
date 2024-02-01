@@ -147,7 +147,7 @@ export const TableBlockDesigner = () => {
               }
               field.decoratorProps.dragSort = dragSort;
               fieldSchema['x-decorator-props'].dragSort = dragSort;
-              service.run({ ...service.params?.[0], sort: fieldSchema['x-decorator-props'].dragSortBy });
+              service?.run({ ...service.params?.[0], sort: fieldSchema['x-decorator-props'].dragSortBy });
               dn.emit('patch', {
                 schema: {
                   ['x-uid']: fieldSchema['x-uid'],

@@ -16,10 +16,10 @@ import {
   useCompile,
   useDesignable,
   useFilterBlock,
+  useGroupTableBlockResource,
 } from '@nocobase/client';
 import { RecursionField, useFieldSchema, observer, useField } from '@formily/react';
 import { TreeView } from '../..';
-import { useGroupTableBlockResource } from '../GroupTable.Decorator';
 function buildTree(
   arr,
   parentKey?: React.Key,
@@ -60,10 +60,13 @@ export const GroupTree = (props: any) => {
   const field: IField = useField();
   const { field: zField } = useGroupTableBlockResource();
   const { service } = useBlockRequestContext();
-  zField.data = zField.data || {};
-  zField.data.group = {
-    service
-  };
+  if (zField) {
+    zField.data = zField?.data || {};
+    zField.data.group = {
+      service,
+    };
+  }
+
   // const [dataSource, setDataSource] = useState([]);
   field.loading = service.loading;
   const fieldSchema = useFieldSchema();
