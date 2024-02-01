@@ -42,7 +42,7 @@ export const GroupTable: any = (props) => {
         orientation="vertical"
         className={css`
           border: 1px solid ${token.colorBorder};
-          height: ${blockHeight}px;
+          height: ${blockHeight}px!important;
           .pane-container {
             height: 100%;
             > div,
