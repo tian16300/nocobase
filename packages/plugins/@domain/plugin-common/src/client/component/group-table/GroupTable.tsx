@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Initializer } from './GoupTable.Initializer';
-import { Provider } from './GroupTable.Decorator';
 import { ReflexContainer, ReflexSplitter, ReflexElement } from 'react-reflex';
 import 'react-reflex/styles.css';
 import { css } from '@emotion/css';
@@ -11,8 +10,8 @@ import { GroupTreeDesigner } from './GroupTable.GroupTreeDesigner';
 import {
   CardItem,
   FixedBlockWrapper,
+  GroupTableProvider,
   TableBlockDesigner,
-  useFixedBlock,
   useFixedBlockWrapper,
   useToken,
 } from '@nocobase/client';
@@ -108,7 +107,7 @@ GroupTable.Wrap = (props) => {
     </CardItem>
   );
 };
-GroupTable.Decorator = Provider;
+GroupTable.Decorator = GroupTableProvider;
 GroupTable.Designer = TableBlockDesigner;
 GroupTable.Initializer = Initializer;
 GroupTable.GroupRecordActionBar = GroupTableGroupRecordActionBar;

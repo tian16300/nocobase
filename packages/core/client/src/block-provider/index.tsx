@@ -12,4 +12,5 @@ export * from './DetailsBlockProvider';
 export * from './ApplyBlockProvider';
 export * from './ViewBlockProvider';
 export * from './PageBlockProvider';
+export * from './GroupTableProvider';
 export * from './hooks';
