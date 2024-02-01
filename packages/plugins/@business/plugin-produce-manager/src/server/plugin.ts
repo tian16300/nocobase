@@ -490,7 +490,7 @@ export class PluginProduceManagerServer extends Plugin {
       await repo.db2cm('cg_apply');
     }
     this.app.resourcer.registerActionHandler('bom_apply:initCreateMany', initCreateMany);
-    this.app.resourcer.registerActionHandler('prj:getPrjModules', getPrjModules);
+    this.app.resourcer.registerActionHandler('bom_wl_list:getPrjModules', getPrjModules);
     this.app.acl.allow('fj_info_mid', '*', 'public');
     this.app.acl.allow('cg_apply_bom_throught', '*', 'public');
     this.app.acl.allow('prjWlCb_bomWl_mid', '*', 'public');

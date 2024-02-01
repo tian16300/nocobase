@@ -24,8 +24,8 @@ export const getPrjModules = async (ctx, next) => {
    */
   const models = await ctx.app.db.getRepository('bom_wl_list').find({
     filter: {
-      prjId: prjId,
-    },
+      prjId: Number(prjId).valueOf()
+    }
   });
   /**
    * 获取项目下的所有模块 字段 label_gz   单元 label_unit

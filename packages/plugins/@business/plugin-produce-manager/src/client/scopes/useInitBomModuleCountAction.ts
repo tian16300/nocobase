@@ -1,15 +1,17 @@
-import { useAPIClient, useRecord } from "@nocobase/client";
-
+import { useAPIClient, useRecord } from '@nocobase/client';
+import { message } from 'antd';
 export const useInitBomModuleCountAction = (props: any) => {
   const api = useAPIClient();
   const record = useRecord();
   const prjId = record.id;
   return {
     async run() {
-      const res = await api.resource('prj').getPrjModules({
-        prjId: prjId
+      const res = await api.resource('bom_wl_list').getPrjModules({
+        prjId: prjId,
       });
-      alert('项目模块');
-    }
+      if (res.status === 200) {
+        message.success('操作成功');
+      }
+    },
   };
 };
