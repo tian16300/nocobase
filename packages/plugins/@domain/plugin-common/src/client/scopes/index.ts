@@ -1,4 +1,4 @@
-import { useGroupTableBlockProps, useGroupTableProps } from '../component/group-table/GroupTable.Decorator';
+import { useGroupTableBlockProps, useGroupTableProps, useGroupTableBlockResource } from '../component/group-table/GroupTable.Decorator';
 import {
   useTreeFormAddChildActionProps,
   useTreeFormBlockProps,
@@ -28,5 +28,6 @@ export {
   useTreeFormSaveAsNewVersionProps,
   useTreeFormShowForm,
   useTreeFormFormBlockProps,
-  useTreeFormCreateInitialValues
+  useTreeFormCreateInitialValues,
+  useGroupTableBlockResource
 };

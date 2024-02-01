@@ -1,9 +1,8 @@
 import { useCollectionManager, useFormBlockContext } from '@nocobase/client';
 import { useFieldSchema } from '@formily/react';
-import { getParentFieldSchema } from '../hooks/useSpecialCase';
-
 import { spliceArrayState } from '@formily/core/esm/shared/internals';
 import { message } from 'antd';
+import { getParentFieldSchema } from '../hooks/useSpecialCase';
 export const useEmptyCollectionFieldAction = (props: any) => {
   /* 获取字段类型 */
   const fieldSchema = useFieldSchema();
