@@ -12,6 +12,8 @@ export const createGroupTableSchema = (decoratorProps) => {
     blockType,
     pageSize = 20,
     groupCollection,
+    grouResource,
+    tableResource,
     ...others
   } = decoratorProps;
   return {
@@ -42,10 +44,10 @@ export const createGroupTableSchema = (decoratorProps) => {
               params: {
                 paginate: false
               },
-              fixedBlock:false
+              fixedBlock:false,
+              ...grouResource
             },
             'x-designer':'GroupTable.GroupTreeDesigner',
-            'x-collection-field': `${collection}.${group}`,
             properties: {
               actions: {
                 type: 'void',
@@ -97,7 +99,7 @@ export const createGroupTableSchema = (decoratorProps) => {
               disableTemplate: disableTemplate ?? false,
               blockType,
               fixedBlock:false,
-              ...others
+              ...tableResource
             },
             'x-designer': TableBlockDesigner ?? 'TableBlockDesigner',
             'x-component': 'CardItem',

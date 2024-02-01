@@ -8,6 +8,7 @@ export * from './scopes';
 export * from './hooks';
 import * as items from './initializers/components';
 import * as initialItems from './initializers/items';
+import { useGroupTableBlockResource } from './component/group-table/GroupTable.Decorator';
 // import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
   async afterAdd() {
@@ -83,4 +84,5 @@ export class PluginCommonClient extends Plugin {
   
 }
 
+export {useGroupTableBlockResource}
 export default PluginCommonClient;

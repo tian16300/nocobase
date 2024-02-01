@@ -24,9 +24,9 @@ export const RecordAssociationGroupTableBlockInitializer = () => {
   const { getTemplateSchemaByMode } = useSchemaTemplateManager();
   const { getCollection, getCollectionFields, getCollectionField } = useCollectionManager();
   const field = itemConfig.field;
-  const collection = field.target;
+  const collection = getCollection(field.target);
   const resource = `${field.collectionName}.${field.name}`;
-  const fields = getCollectionFields(collection);
+  const fields = getCollectionFields(collection.name);
   const { t } = useTranslation();
   const options = useContext(SchemaOptionsContext);
   const { theme } = useGlobalTheme();
@@ -41,6 +41,7 @@ export const RecordAssociationGroupTableBlockInitializer = () => {
         value: field.name,
       };
     });
+    
   return (
     <SchemaInitializerItem
       icon={<TableOutlined />}
@@ -95,11 +96,28 @@ export const RecordAssociationGroupTableBlockInitializer = () => {
               group: '',
             },
           });
+          const groupCollection = getCollectionField(`${collection.name}.${values.group}`)?.target;
+          const groupAssociation = getCollectionFields(field.collectionName).filter((field) => {
+            return field?.target === groupCollection
+          })?.[0];
+          debugger;
+          const _groupResource = `${field.collectionName}.${groupAssociation?.name}`;
           insert(
             createGroupTableSchema({
-              collection,
-              groupCollection: getCollectionField(`${collection}.${values.group}`)?.target,
-              ...values,
+              collection: field.target,
+              groupCollection,
+              ...values,   
+              groupResource:{
+                collection: groupCollection,
+                resource: _groupResource,
+                association: _groupResource
+              },
+              tableResource:{
+                rowKey: collection.filterTargetKey,
+                collection: field.target,
+                resource,
+                association: resource
+              }
             }),
           );
         }

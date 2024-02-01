@@ -6,7 +6,7 @@ import 'react-reflex/styles.css';
 import { css } from '@emotion/css';
 import { GroupTableGroupRecordActionBar } from './GroupTable.GroupRecordActionBar';
 import { GroupTableGroupRecordActionDesigner } from './GroupTable.GroupRecordActionDesigner';
-import { RecursionField, useFieldSchema } from '@formily/react';
+import { RecursionField, useFieldSchema, useField } from '@formily/react';
 import { GroupTreeDesigner } from './GroupTable.GroupTreeDesigner';
 import {
   CardItem,
@@ -17,7 +17,7 @@ import {
   useToken,
 } from '@nocobase/client';
 import { GroupTree } from './components';
-import { useSize } from 'ahooks';
+
 export const GroupTable: any = (props) => {
   const { token } = useToken();
   const { useProps } = props;
