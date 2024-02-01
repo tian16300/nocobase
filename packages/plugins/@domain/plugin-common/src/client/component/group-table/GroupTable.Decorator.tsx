@@ -15,8 +15,8 @@ export const Provider = (props) => {
 
   return (
     <GroupTableBlockResourceContext.Provider value={{ ...others, groupSelectedKeys, setGroupSelectedKeys }}>
-    {children}
-  </GroupTableBlockResourceContext.Provider>
+      {children}
+    </GroupTableBlockResourceContext.Provider>
   );
 };
 

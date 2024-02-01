@@ -6,6 +6,7 @@ import { useRecord } from '../../../record-provider';
 import { useDesignable } from '../../hooks';
 import { useIsBlockInPage } from './hooks/useIsBlockInPage';
 import { SchemaSettingsSwitchItem, SchemaSettingsActionModalItem } from '../../../schema-settings';
+import { useSize } from 'ahooks';
 
 const FixedBlockContext = React.createContext<{
   setFixedBlock: (value: string | false) => void;
@@ -20,6 +21,7 @@ const FixedBlockContext = React.createContext<{
   fixedBlockUIDRef: { current: false },
   inFixedBlock: false,
 });
+const FixedBlockWrapperContext = React.createContext<any>({});
 
 export const useFixedSchema = () => {
   const field = useField();
@@ -40,38 +42,91 @@ export const useFixedSchema = () => {
 export const useFixedBlock = () => {
   return useContext(FixedBlockContext);
 };
+export const useFixedBlockWrapper = () => {
+  return useContext(FixedBlockWrapperContext);
+};
 
-export const FixedBlockWrapper: React.FC = (props) => {
+export const FixedBlockWrapper: React.FC<{ fixedBlock?: boolean; name?: string; height?: null }> = (props: any) => {
   const field = useField();
-  const fixedBlock = useFixedSchema();
-  const { height, fixedBlockUID } = useFixedBlock();
-  const record = useRecord();
-  const isPopup = Object.keys(record).length;
-  if (isPopup) {
-    return <>{props.children}</>;
-  }
+  // const fixedBlock = useFixedSchema();
+  // const { height, fixedBlockUID } = useFixedBlock();
+  const __parent = useFixedBlockWrapper();
+
+  const [height, setHeight] = useState(props?.height);
+  const fixedBlock = props?.fixedBlock || field?.decoratorProps?.fixedBlock;
+
+  // const record = useRecord();
+  // const isPopup = Object.keys(record).length;
+  const ref = useRef<HTMLDivElement>(null);
+  // if (isPopup) {
+  //   return <>{props.children}</>;
+  // }
+  // const size = useSize(ref?.current?.closest('.ant-tabs-tabpane'));
+  useEffect(() => {
+    if (props?.height) {
+      setHeight(props.height);
+    } else if (!__parent || !__parent?.height) {
+      //在tab 面板中
+      // 容器
+      const pageDom: any = ref?.current?.closest('.ant-tabs-tabpane') || ref?.current?.closest('.nb-page-wrapper');
+      if (pageDom) {
+        let style = window.getComputedStyle(pageDom);
+        let paddingTop = parseFloat(style.paddingTop);
+        let paddingBottom = parseFloat(style.paddingBottom);
+        const rectHeight = pageDom?.getBoundingClientRect().height - paddingTop - paddingBottom;
+        if (rectHeight > 0) setHeight(rectHeight);
+      }
+    } else {
+      setHeight(__parent?.height);
+    }
+  }, [__parent, __parent?.height, ref?.current, props?.height]);
+
+  // debugger;
   /**
    * The fixedBlockUID of false means that the page has no fixed blocks
    * isPopup means that the FixedBlock is in the popup mode
    */
-  if (!fixedBlock && fixedBlockUID) return null;
-  const otherHeight = field?.decoratorProps?.otherHeight;
-  const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+  // if (!fixedBlock && fixedBlockUID) return null;
+  // const otherHeight = field?.decoratorProps?.otherHeight;
+  // const vHeight = otherHeight ? `calc(100vh - ${height} - ${otherHeight})` : `calc(100vh - ${height})`;
+  // debugger;
 
   return (
     <div
-      className="nb-fixed-block"
+      ref={ref}
+      className={[
+        'nb-fixed-block',
+        props?.name ? `nb-fixed-block-${props?.name || 'normal'}` : '',
+
+        fixedBlock
+          ? css`
+              & > .nb-block-item {
+                height: 100%;
+                > .ant-card {
+                  height: 100%;
+                  > .ant-card-body {
+                    height: 100%;
+                  }
+                }
+              }
+            `
+          : '',
+      ].join(' ')}
       style={{
-        height: fixedBlockUID ? vHeight : undefined,
+        height: fixedBlock && height ? height : undefined,
       }}
     >
-      {props.children}
+      <FixedBlockWrapperContext.Provider
+        value={{
+          // __parent,
+          height,
+        }}
+      >
+        {props.children}
+      </FixedBlockWrapperContext.Provider>
     </div>
   );
 };
-
-
-
 
 export const FixedBlockDesignerItem = () => {
   const field = useField();
@@ -85,10 +140,10 @@ export const FixedBlockDesignerItem = () => {
     return null;
   }
 
-  const onFixedBlockPropsSubmit = async ({otherHeight}) => {
+  const onFixedBlockPropsSubmit = async ({ otherHeight }) => {
     const decoratorProps = {
       ...fieldSchema['x-decorator-props'],
-      otherHeight
+      otherHeight,
     };
     await dn.emit('patch', {
       schema: {
@@ -107,7 +162,7 @@ export const FixedBlockDesignerItem = () => {
         'x-decorator': 'FormItem',
         'x-component': 'Input',
         default: fieldSchema['x-decorator-props']?.otherHeight,
-        required: true
+        required: true,
       },
     },
   };

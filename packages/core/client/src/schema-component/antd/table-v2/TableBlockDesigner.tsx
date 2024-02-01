@@ -160,11 +160,11 @@ export const TableBlockDesigner = () => {
         {/* <FixedBlockDesignerItem /> */}
         <SchemaSettingsSwitchItem
           title={t('固定尺寸')}
-          checked={fieldSchema['x-decorator-props']?.fixedSize}
-          onChange={async (fixedSize) => {
+          checked={fieldSchema['x-decorator-props']?.fixedBlock}
+          onChange={async (fixedBlock) => {
             const decoratorProps = {
               ...fieldSchema['x-decorator-props'],
-              fixedSize,
+              fixedBlock
             };
             await dn.emit('patch', {
               schema: {

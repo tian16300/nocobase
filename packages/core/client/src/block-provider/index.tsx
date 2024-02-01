@@ -11,4 +11,5 @@ export * from './DetailsBlockProvider';
 // export * from './GanttBlockProvider';
 export * from './ApplyBlockProvider';
 export * from './ViewBlockProvider';
+export * from './PageBlockProvider';
 export * from './hooks';

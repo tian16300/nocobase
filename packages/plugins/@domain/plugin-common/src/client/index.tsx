@@ -7,6 +7,7 @@ export * from './component';
 export * from './scopes';
 export * from './hooks';
 import * as items from './initializers/components';
+import * as initialItems from './initializers/items';
 // import { treeFormActionInitializers } from './component';
 export class PluginCommonClient extends Plugin {
   async afterAdd() {
@@ -26,6 +27,7 @@ export class PluginCommonClient extends Plugin {
     this.app.addComponents({
       ...comps,
       ...items as any,
+      ...initialItems as any
     })
   }
   addScopes(){

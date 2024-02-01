@@ -49,14 +49,7 @@ const useRelationFields = () => {
               title: '{{t("Details")}}',
               field,
               Component: 'RecordReadPrettyAssociationFormBlockInitializer',
-            },
-            // {
-            //   name: `${field.name}_form`,
-            //   type: 'item',
-            //   title: '{{t("Form")}}',
-            //   field,
-            //   component: 'RecordAssociationFormBlockInitializer',
-            // },
+            }
           ],
         };
       }
@@ -69,6 +62,13 @@ const useRelationFields = () => {
             title: '{{t("Table")}}',
             field,
             Component: 'RecordAssociationBlockInitializer',
+          },
+          {
+            name: `${field.name}_group_table`,
+            type: 'item',
+            title: '{{t("Group Table")}}',
+            field,
+            Component: 'RecordAssociationGroupTableBlockInitializer',
           },
           {
             name: `${field.name}_details`,
