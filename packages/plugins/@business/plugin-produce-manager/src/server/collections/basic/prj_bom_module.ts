@@ -10,6 +10,7 @@ export default {
   template: 'tree',
   view: false,
   tree: 'adjacencyList',
+  titleField: "name",
   fields: [
     {
       interface: 'integer',
