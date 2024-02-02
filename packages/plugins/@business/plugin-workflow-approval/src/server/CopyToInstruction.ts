@@ -98,7 +98,6 @@ export default class extends Instruction {
   }
 
   async run(node, prevJob, processor: Processor) {
-   
     /**
      * 查找人
      */
@@ -108,7 +107,7 @@ export default class extends Instruction {
     const users = await processor.getUsersByRule(node.config, node.id);
     const approvalModel = processor.getParsedValue(`{{$context.data}}`, node.id);
     const currentUser = prevJob.result?.currentUser || approvalModel.applyUser;
-   
+
     const { relatedCollection, related_data_id } = approvalModel;
     // 获取关联数据
     // const relatedModel = processor.options.plugin.app.db.getRepository(relatedCollection);
@@ -116,77 +115,79 @@ export default class extends Instruction {
     //   filterByTk: related_data_id,
     //   transaction,
     // });
-    const statusField =  processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
-    const statusText = statusField.options.uiSchema.enum.find(({value})=>{return value == approvalModel.status}).label;
+    const statusField = processor.options.plugin.app.db.getCollection('approval_apply').getField('status');
+    const statusText = statusField.options.uiSchema.enum.find(({ value }) => {
+      return value == approvalModel.status;
+    }).label;
     const dingUsers = users.filter(({ dingUserId }) => {
       return dingUserId && dingUserId !== '';
     });
-    const text =  `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${statusText},请知悉!`;
+    const text = `${approvalModel.applyUser.nickname}发起了${workflowModel.title}申请${statusText},请知悉!`;
     const data = {
       userIds: dingUsers
         .map(({ dingUserId }) => {
           return dingUserId;
         })
         .join(','),
-      msg:{
+      msg: {
         msgtype: 'text',
         text: {
           content: text,
         },
-      }
+      },
     };
     const dingTalkService = (processor.options.plugin.pm.get('@domain/plugin-enterprise-integration') as any)
       .dingTalkService;
-    const message = await dingTalkService.sendMsgToUserByDingAction(data);    
+    const message = await dingTalkService.sendMsgToUserByDingAction(data);
     const status = message.errmsg === 'ok' ? JOB_STATUS.RESOLVED : JOB_STATUS.ERROR;
     /* 更新审批流完成状态 */
-   
+
     let jobIsEnd = false;
     let jobModel = null;
-    let jobModelResult ={
+    let jobModelResult = {
       type: 'copyTo',
-      relatedData:{
+      relatedData: {
         relatedCollection,
-        related_data_id
+        related_data_id,
       },
-      users: users.map(({id, nickname, dingUserId})=>{
+      users: users.map(({ id, nickname, dingUserId }) => {
         return {
           id,
           nickname,
-          dingUserId
-        }
+          dingUserId,
+        };
       }),
       // dingUsers,
-      message:{
+      message: {
         text,
-        result: message
+        result: message,
       },
-      currentUser: currentUser
+      currentUser: currentUser,
     };
-     /**
+    /**
      * 如果是抄送节点 是最后一个节点 并且上个节点是通过状态 则更新 jobIsEnd
      */
     /* 拒绝 或者取消 */
-    if(prevJob && prevJob.latestUserJobResult && ['-4','-5'].includes(prevJob.latestUserJobResult.useAction)){
+    if (prevJob && prevJob.latestUserJobResult && ['-4', '-5'].includes(prevJob.latestUserJobResult.useAction)) {
       jobModel = {
-        status: status == JOB_STATUS.RESOLVED?JOB_STATUS.REJECTED: status,
-        result: jobModelResult
-      }
-    }else {
+        status: status == JOB_STATUS.RESOLVED ? JOB_STATUS.REJECTED : status,
+        result: jobModelResult,
+      };
+    } else {
       jobModel = {
-        status: status, 
-        result: jobModelResult
+        status: status,
+        result: jobModelResult,
       };
     }
-    if(!nextNode){
+    if (!nextNode) {
       jobIsEnd = true;
     }
-     const job = await processor.saveJob({
+    const job = await processor.saveJob({
       ...jobModel,
       nodeId: node.id,
       upstreamId: prevJob?.id ?? null,
     });
-   
+
     const upRes = await processor.options.plugin.app.db.getRepository('approval_apply').update({
       filterByTk: approvalModel.id,
       values: {
@@ -194,13 +195,22 @@ export default class extends Instruction {
         nodeId: node.id,
         executionId: job.executionId,
         workflowKey: workflowModel.key,
-        jobIsEnd
+        jobIsEnd,
+        copyToUsers: (approvalModel?.copyToUsers || [])
+          .map(({ id }) => {
+            return id;
+          })
+          .concat(
+            users.map(({ id }) => {
+              return id;
+            }),
+          ),
       },
+      updateAssociationValues: ['copyToUsers'],
       transaction,
     });
     processor.options.plugin.log.info(`approval_apply update jobId: ${job.id}`, upRes);
     return job;
-
   }
 
   // async resume(node, job, processor: Processor) {

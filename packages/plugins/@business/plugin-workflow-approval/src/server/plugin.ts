@@ -160,21 +160,16 @@ export default class extends Plugin {
         //存储 审批结果
         /**
          * 用户 申请人  申请、撤销申请
-         * 审批人 通过、拒绝
+         * 审批人 通过、拒绝 在审批详情里已创建
          */
-        if (['0', '1', '2', '3'].includes(status)) {
+        if (['-1', '3'].includes(status)) {
           const logModel: any = {
             apply_id: model.get('id'),
             executionId: execution.id,
           };
           logModel.userAction = status;
-          if (['0', '3'].includes(status)) {
-            logModel.userType = '1';
-            logModel.remark = dataModel.get('remark');
-          } else if (['1', '2'].includes(status)) {
-            logModel.userType = '2';
-            logModel.remark = model.get('remark');
-          }
+          logModel.userType = '1';
+          logModel.remark = dataModel.get('remark');
           logModel.user = dataModel.get('updatedBy');
           logModel.createdBy = dataModel.get('updatedBy');
           logModel.createdAt = updatedAt;
@@ -195,10 +190,12 @@ export default class extends Plugin {
     });
     const repo = this.db.getRepository<any>('collections');
     if (repo) {
+      await repo.db2cm('approval_copy_users_mid');
       await repo.db2cm('approval_users_mid');
       await repo.db2cm('approval_apply');
       await repo.db2cm('approval_results');
     }
+    this.app.acl.allow('approval_copy_users_mid', '*', 'public');
     this.app.acl.allow('approval_users_mid', '*', 'public');
     const workflowPlugin = this.app.pm.get(WorkflowPlugin) as WorkflowPlugin;
     this.workflow = workflowPlugin;

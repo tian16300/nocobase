@@ -115,7 +115,7 @@ export const AddProvalSetting = (props) => {
             },
             {
               status: {
-                $eq: '0',
+                $eq: '-1',
               },
             },
           ],

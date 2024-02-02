@@ -146,7 +146,7 @@ export const useApprovalAction = (props: any) => {
                             .update({
                               filterByTk,
                               values: {
-                                status: '0',
+                                status: '-1',
                                 jobIsEnd: false,
                                 workflowKey: workflow?.key || apply?.workflowKey,
                                 updatedBy: currentUser.id,
@@ -163,7 +163,7 @@ export const useApprovalAction = (props: any) => {
                       .update({
                         filterByTk: apply.id,
                         values: {
-                          status: '0',
+                          status: '-1',
                           jobIsEnd: false,
                           workflowKey: workflow?.key || apply?.workflowKey,
                         },

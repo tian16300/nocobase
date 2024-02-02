@@ -259,6 +259,26 @@ export default {
       target: 'users'
     },
     {
+      foreignKey: 'approval_apply_id',
+      otherKey: 'copy_user_id',
+      name: 'copyToUsers',
+      type: 'belongsToMany',
+      uiSchema: {
+        'x-component': 'AssociationField',
+        'x-component-props': {
+          multiple: true,
+          fieldNames: {
+            label: 'id',
+            value: 'id',
+          },
+        },
+        title: '抄送人',
+      },
+      interface: 'm2m',
+      through: 'approval_copy_users_mid',
+      target: 'users'
+    },
+    {
       name: 'status',
       type: 'string',
       interface: 'select',
@@ -266,7 +286,7 @@ export default {
         enum: [
           {
             value: '-1',
-            label: '待提交',
+            label: '已提交',
           },
           {
             value: '0',
@@ -292,8 +312,7 @@ export default {
         type: 'string',
         'x-component': 'Select',
         title: '审批状态',
-      },
-      defaultValue: '-1',
+      }
     },
     {
       name: 'workflowKey',
