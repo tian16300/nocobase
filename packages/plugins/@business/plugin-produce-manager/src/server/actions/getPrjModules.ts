@@ -104,6 +104,7 @@ export const getPrjModules = async (ctx, next) => {
               name: record.name,
               type: record.type,
               prjId: prjId,
+              parentId: dbGzModel.get('id')
             },
           });
           if (!dbUnitModel) {
