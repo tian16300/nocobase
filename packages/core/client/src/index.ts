@@ -21,7 +21,8 @@ export const getWorkDays = (start: string | Date, end: string | Date, holidays =
    * 求 这一段时间内包含的节假日表
    */
   return functions['NETWORKDAYS'](start, end, holidays);
-};
+};import './global.less';
+
 export * from '@emotion/css';
 export * from './acl';
 export * from './antd-config-provider';
