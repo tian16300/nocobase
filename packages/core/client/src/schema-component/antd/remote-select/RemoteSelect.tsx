@@ -140,7 +140,9 @@ const InternalRemoteSelect = connect(
       },
       [targetField?.uiSchema, fieldNames],
     );
-    const { data , run, loading } = useRequest(
+    const { data , run, loading } = useRequest<{
+      data: any[];
+    }>(
       {
         action: 'list',
         ...service,
@@ -208,7 +210,7 @@ const InternalRemoteSelect = connect(
       }
       const valueOptions =
         (v != null && (Array.isArray(v) ? v : [{ ...v, [fieldNames.value]: v[fieldNames.value] || v }])) || [];
-      const filtered = typeof optionFilter === 'function' ? data.data.filter(optionFilter) : data.data;
+      const filtered = typeof optionFilter === 'function' ? data?.data.filter(optionFilter) : data?.data;
       return uniqBy(filtered.concat(valueOptions ?? []), fieldNames.value);
     }, [value, defaultValue, data?.data, fieldNames.value, optionFilter]);
     const onDropdownVisibleChange = (visible) => {
