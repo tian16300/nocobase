@@ -5,8 +5,11 @@ Object.assign(functions, {
   dayjs: dayjs,
 });
 
+import { evaluate } from '.';
+
 const fnNames = Object.keys(functions).filter((key) => key !== 'default');
 const fns = fnNames.map((key) => functions[key]);
+
 export default function (expression: string, scope = {}) {
   const fn = new Function(...fnNames, ...Object.keys(scope), `return ${expression}`);
   const result = fn(...fns, ...Object.values(scope));
@@ -19,4 +22,3 @@ export default function (expression: string, scope = {}) {
   console.log('formulajs 打印结果', result);
   return result;
 }
-export { functions };

@@ -1,7 +1,7 @@
 import { SchemaExpressionScopeContext, useField, useFieldSchema, useForm } from '@formily/react';
 import { isURL, parse, uid } from '@nocobase/utils/client';
 import { App, message } from 'antd';
-import _, { cloneDeep } from 'lodash';
+import _ from 'lodash';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import { ChangeEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -219,14 +219,14 @@ export const useCreateActionProps = () => {
         // treeFormField?.data?.blockCtx?.service?.refresh?.();
         if (!onSuccess?.successMessage) {
           message.success(t('Saved successfully'));
-          await form.reset();
+          await form.reset(undefined, { forceClear: true });
           return;
         }
         if (onSuccess?.manualClose) {
           modal.success({
             title: compile(onSuccess?.successMessage),
             onOk: async () => {
-              await form.reset();
+              await form.reset(undefined, { forceClear: true });
               if (onSuccess?.redirecting && onSuccess?.redirectTo) {
                 if (isURL(onSuccess.redirectTo)) {
                   window.location.href = onSuccess.redirectTo;
@@ -238,7 +238,7 @@ export const useCreateActionProps = () => {
           });
         } else {
           message.success(compile(onSuccess?.successMessage));
-          await form.reset();
+          await form.reset(undefined, { forceClear: true });
           if (onSuccess?.redirecting && onSuccess?.redirectTo) {
             if (isURL(onSuccess.redirectTo)) {
               window.location.href = onSuccess.redirectTo;
@@ -1039,6 +1039,7 @@ export const useDetailsPaginationProps = () => {
     current: ctx.service?.data?.meta?.page || 1,
     total: count,
     pageSize: 1,
+    showSizeChanger: false,
     async onChange(page) {
       const params = ctx.service?.params?.[0];
       ctx.service.run({ ...params, page });
@@ -1276,12 +1277,15 @@ export const useAssociationNames = () => {
 
       // 根据联动规则中条件的字段获取一些 appends
       if (s['x-linkage-rules']) {
-        const rules = s['x-linkage-rules'];
-        rules.forEach(({ condition }) => {
-          const type = Object.keys(condition)[0] || '$and';
-          const list = condition[type];
+        const collectAppends = (obj) => {
+          const type = Object.keys(obj)[0] || '$and';
+          const list = obj[type];
 
           list.forEach((item) => {
+            if ('$and' in item || '$or' in item) {
+              return collectAppends(item);
+            }
+
             const fieldNames = getTargetField(item);
 
             // 只应该收集关系字段，只有大于 1 的时候才是关系字段
@@ -1289,6 +1293,11 @@ export const useAssociationNames = () => {
               appends.add(fieldNames.join('.'));
             }
           });
+        };
+
+        const rules = s['x-linkage-rules'];
+        rules.forEach(({ condition }) => {
+          collectAppends(condition);
         });
       }
 
