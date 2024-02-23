@@ -7,8 +7,8 @@
   "license": "AGPL-3.0",
   "displayName": "Mobile client",
   "displayName.zh-CN": "移动端",
-  "description": "Provides the ability to configure mobile pages",
-  "description.zh-CN": "提供移动端页面配置的能力",
+  "description": "Provides the ability to configure mobile pages.",
+  "description.zh-CN": "提供移动端页面配置的能力。",
   "devDependencies": {
     "@types/react": "17.x",
     "@types/react-dom": "17.x",

@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { useSessionStorageState } from 'ahooks';
-import { App, Layout, Row, Space, theme, Col, ConfigProvider } from 'antd';
+import { App, ConfigProvider, Divider, Layout } from 'antd';
+import { createGlobalStyle } from 'antd-style';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Outlet, useMatch, useNavigate, useParams } from 'react-router-dom';
 import { createGlobalStyle } from 'antd-style';
@@ -28,6 +29,7 @@ import { useAppSpin } from '../../../application/hooks/useAppSpin';
 import { useCollectionManager } from '../../../collection-manager';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
+import { Help } from '../../../user/Help';
 import { VariablesProvider } from '../../../variables';
 
 const { Header, Sider, Content } = Layout;
@@ -524,6 +526,16 @@ export const InternalAdminLayout = (props: any) => {
             >
               <Space>
                 <PinnedPluginList />
+            <ConfigProvider
+              theme={{
+                token: {
+                  colorSplit: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              <Divider type="vertical" />
+            </ConfigProvider>
+            <Help />
                 <CurrentUser />
               </Space>
             </Col>
