@@ -7,6 +7,7 @@ import { useDesignable } from '../../hooks';
 import { useIsBlockInPage } from './hooks/useIsBlockInPage';
 import { SchemaSettingsSwitchItem, SchemaSettingsActionModalItem } from '../../../schema-settings';
 import { useSize } from 'ahooks';
+import { useBlockRequestContext } from '../../../block-provider/BlockProvider';
 
 const FixedBlockContext = React.createContext<{
   setFixedBlock: (value: string | false) => void;
@@ -135,6 +136,7 @@ export const FixedBlockDesignerItem = () => {
   const { dn } = useDesignable();
   const { inFixedBlock } = useFixedBlock();
   const { isBlockInPage } = useIsBlockInPage();
+  const { service } = useBlockRequestContext();
 
   if (!isBlockInPage() || !inFixedBlock) {
     return null;
@@ -183,7 +185,8 @@ export const FixedBlockDesignerItem = () => {
             },
           });
           field.decoratorProps = fieldSchema['x-decorator-props'] = decoratorProps;
-        }}
+          service?.refresh?.();
+      }}
       />
       {fieldSchema['x-decorator-props']?.fixedBlock ? (
         <SchemaSettingsActionModalItem
